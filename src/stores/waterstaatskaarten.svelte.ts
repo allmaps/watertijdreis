@@ -2,6 +2,21 @@ import { WarpedMapLayer } from '@allmaps/maplibre';
 import { WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
 import { mapStore } from './mapStore.svelte'
 import { timelineStore } from './timelineStore.svelte';
+import maplibre from 'maplibre-gl';
+import {type WSKMap} from '../types';
+
+
+const IIIF_MANIFEST_URLS = [
+	'iiif-manifests/modified_01-1874-389916.json',
+	'iiif-manifests/modified_02-1874-456650.json',
+	'iiif-manifests/modified_03-1874-455650.json',
+	'iiif-manifests/modified_04-1874-456550.json',
+	'iiif-manifests/modified_05-1874-456551.json',
+	'iiif-manifests/modified_06-1874-456552.json',
+	'iiif-manifests/modified_07-1874-456588.json',
+	'iiif-manifests/modified_08-1874-456553.json',
+	'iiif-manifests/modified_09-1874-456827.json'
+]
 
 
 export const WATERSTAATSKAART_EDITIES = Array(9)
@@ -11,16 +26,18 @@ export const WATERSTAATSKAART_EDITIES = Array(9)
 // export const WATERSTAATSKAART_URLS = WATERSTAATSKAART_EDITIES
     // .map(i => `https://raw.githubusercontent.com/bmmeijers/iiif-annotations/refs/heads/develop/series/waterstaatskaart/uu/${i}/latest.json`)
 
+const WATERSTAATSKAART_BASE_URL = 'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations'
+
 export const WATERSTAATSKAART_URLS = [
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/01-1874-389916-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/02-1874-456650-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/03-1874-455650-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/04-1874-456550-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/05-1874-456551-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/06-1874-456552-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/07-1874-456588-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/08-1874-456553-georef.json',
-    'https://raw.githubusercontent.com/tu-delft-heritage/watertijdreis-data/refs/heads/main/content/annotations/09-1874-456827-georef.json',
+    `${WATERSTAATSKAART_BASE_URL}/01-1874-389916-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/02-1874-456650-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/03-1874-455650-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/04-1874-456550-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/05-1874-456551-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/06-1874-456552-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/07-1874-456588-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/08-1874-456553-georef.json`,
+    `${WATERSTAATSKAART_BASE_URL}/09-1874-456827-georef.json`,
 
 ]
 
@@ -33,10 +50,17 @@ export const MANIFEST_FILEPATHS = [
     'metadata-editie_5.json',
 ]
 
+
 export class WSK {
-    constructor(maplibreInstance) {
+
+		layer: WarpedMapLayer;
+		loaded: boolean;
+		loadingProgress: number;
+		maps: WSKMap[];
+
+		constructor(maplibreInstance: maplibre.Map) {
         this.layer = new WarpedMapLayer('waterstaatskaarten');
-        maplibreInstance.addLayer(this.layer);
+        maplibreInstance.addLayer(this.layer as any as maplibre.AddLayerObject);
 
         this.maps = [];
 
@@ -49,22 +73,28 @@ export class WSK {
             .then(response => response.json())
             .then(i => console.log(i));
 
-        const getOrCreateMap = id => this.getMapByID(id) || 
-            (this.maps.push({ id: id }) && this.maps[this.maps.length - 1]);
+        const getOrCreateMap = (id: string) => {
+					const map = this.getMapByID(id);
+					if(map) return map;
+					this.maps.push({ id: id });
+					return this.maps[this.maps.length - 1];
+				}
 
         const warpedMapsById = this.layer.renderer?.warpedMapList.warpedMapsById;
         const tileCache = this.layer.renderer?.tileCache;
 
-        this.layer.renderer.warpedMapList.addEventListener(
+        this.layer.renderer?.warpedMapList.addEventListener(
             WarpedMapEventType.WARPEDMAPADDED,
-            event => {
-                const map = getOrCreateMap(event.data);
-                const warpedMap = warpedMapsById.get(event.data);
+					(event: WarpedMapEvent) => {
+                const map = getOrCreateMap(event?.data as string);
+                const warpedMap = warpedMapsById?.get(event?.data as string);
                 map.warpedMap = warpedMap;
                 map.mask = warpedMap?.geoMask;
-                map.maskBbox = warpedMap?.geoMaskBbox;
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+							map.maskBbox = warpedMap?.geoMaskBbox;
 
-                if(warpedMapsById.size >= this.maps.length) { // TODO: werkt dit altijd?
+                if((warpedMapsById?.size || 0) >= this.maps.length) { // TODO: werkt dit altijd?
                     mapStore.loaded = true;
                     setInterval(() => {
                         this.updateVisibleMaps();
@@ -77,26 +107,21 @@ export class WSK {
             }
         )
 
-        tileCache.addEventListener(
+        tileCache?.addEventListener(
             WarpedMapEventType.MAPTILELOADED,
-            event => {
-                const map = warpedMapsById.get(event.data.mapId);
-                this.loadingProgress = 1 - (tileCache.tilesFetchingCount / warpedMapsById.size);
+					() => {
+                // const map = warpedMapsById?.get(event?.data?.mapId);
+                this.loadingProgress = 1 - (tileCache?.tilesFetchingCount / warpedMapsById?.size);
                 // console.log(this.loadingProgress * 100, tileCache.tilesFetchingCount);
             }
         )
 
-        this.layer.renderer?.tileCache.addEventListener(
-            WarpedMapEventType.ALLREQUESTEDTILESLOADED,
-            event => {
-                this.loaded = true;
-            }
-        )
+        this.layer.renderer?.tileCache.addEventListener(WarpedMapEventType.ALLREQUESTEDTILESLOADED, () => {this.loaded = true;})
 
         loadMetadata2()
             .then(metadata => {
-                metadata.forEach((data, edition) => {
-                    edition = WATERSTAATSKAART_EDITIES[edition];
+                metadata.forEach((data, index) => {
+                    const edition = WATERSTAATSKAART_EDITIES[index];
 
                     console.log(edition, data.items.length);
 
@@ -169,14 +194,14 @@ export class WSK {
     }
 
     updateVisibleMaps() {
-        const inRange = map => 
-            map.year && map.year >= timelineStore.startYear && map.year <= timelineStore.endYear;
+        const inRange = (map: WSKMap) =>
+					!!(map.year && map.year >= timelineStore.startYear && map.year <= timelineStore.endYear);
         
         const mapsInRange = this.maps
             .filter(inRange)
             .sort((a, b) => b.year - a.year);
 
-        this.maps.forEach(map => map.warpedMap.visible = inRange(map));
+        this.maps.forEach(map => {if (map && map.warpedMap) map.warpedMap.visible = inRange(map)});
 
         for (const map of mapsInRange) {
             const rtree = this.layer.renderer.warpedMapList.rtree;
@@ -247,21 +272,21 @@ export class WSK {
     //     console.log(this.maps.filter(map => map.warpedMap.visible));
     // }
 
-    getMapByID(id) {
+    getMapByID(id: string) {
         return this.maps.find(m => m.id === id);
     }
 
-    getMapsByEdition(edition) {
+    getMapsByEdition(edition: string) {
         return this.maps.filter(m => m.edition === edition);
     }
 
-    getMapsByGeoPosition(lon, lat) {
+    getMapsByGeoPosition(longitude: number, latitude: number) {
         const warpedMapList = this.layer.renderer?.warpedMapList;
         if (!warpedMapList) return [];
-        const results = warpedMapList.rtree.searchFromPoint([lon, lat], true);
+        const results = warpedMapList.rtree?.searchFromPoint([longitude, latitude], true);
         return results
-            .filter(i => warpedMapList.warpedMapsById.get(i).visible)
-            .map(i => this.getMapByID(i));
+            ?.filter(i => warpedMapList.warpedMapsById.get(i)?.visible)
+            ?.map(i => this.getMapByID(i));
     }
 
     // getMapsByScreenPosition(x, y) {
@@ -273,7 +298,7 @@ export class WSK {
 } 
 
 export async function loadAnnotations() {
-    const annotationList = await Promise.all(
+    return  Promise.all(
         WATERSTAATSKAART_URLS.map(async (url) => {
             const response = await fetch(url);
             if (!response.ok) {
@@ -282,23 +307,10 @@ export async function loadAnnotations() {
             return await response.json();
         })
     );
-    return annotationList;
 }
 
-const IIIF_MANIFEST_URLS = [
-    'iiif-manifests/modified_01-1874-389916.json',
-    'iiif-manifests/modified_02-1874-456650.json',
-    'iiif-manifests/modified_03-1874-455650.json',
-    'iiif-manifests/modified_04-1874-456550.json',
-    'iiif-manifests/modified_05-1874-456551.json', 
-    'iiif-manifests/modified_06-1874-456552.json',
-    'iiif-manifests/modified_07-1874-456588.json',
-    'iiif-manifests/modified_08-1874-456553.json',
-    'iiif-manifests/modified_09-1874-456827.json'
-]
-
 export async function loadMetadata2() {
-    const metadataAll = await Promise.all(
+    return Promise.all(
         IIIF_MANIFEST_URLS.map(async (path) => {
             const response = await fetch(path);
             if (!response.ok) 
@@ -307,11 +319,10 @@ export async function loadMetadata2() {
             return await response.json();
         })
     );
-    return metadataAll;
 }
 
 export async function loadMetadata() {
-    const metadataList = await Promise.all(
+    return  Promise.all(
         MANIFEST_FILEPATHS.map(async (path) => {
             const response = await fetch(path);
             if (!response.ok) {
@@ -320,10 +331,5 @@ export async function loadMetadata() {
             return await response.json();
         })
     );
-    return metadataList;
 }
-
-// export async function() {
-
-// }
 
