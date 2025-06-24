@@ -147,7 +147,7 @@
 </div>
 
 {#if showAboutPage}
-	<AboutPage on:close={toggleAboutPage} />
+	<AboutPage closeModal={toggleAboutPage} />
 {/if}
 
 

@@ -1,19 +1,17 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import feather from 'feather-icons';
-
-	const dispatch = createEventDispatcher();
-
-	function closeModal() {
-		dispatch('close');
-	}
 
 	onMount(() => {
 		feather.replace();
 	});
+
+	const { closeModal } = $props();
+
+
 </script>
 
-<div class="modal-overlay" on:click="{closeModal}">
+<div class="modal-overlay" role="button" tabindex="0" on:click="{closeModal}" on:keydown={closeModal}>
 	<div class="modal" on:click|stopPropagation>
 		<button class="close-button" on:click={closeModal} aria-label="Sluiten">
 			<i data-feather="x" class="icon"></i>
