@@ -28,6 +28,7 @@
 			};
 		});
 	}
+
 	let layers = [
 		{
 			id: 'waterstaatskaarten',
@@ -156,7 +157,7 @@
 		if (!map || typeof map.getLayer !== 'function') return;
 
 		const layerIds = layers.flatMap(layer => layer.id.split(',').map(id => id.trim())).reverse();
-		
+
 		for (let i = 0; i < layerIds.length; i++) {
 			const layerId = layerIds[i];
 			const nextLayerId = layerIds[i + 1] || undefined;
@@ -190,160 +191,163 @@
 				/>
 				<i class="icon">{i + 1}</i>
 				<span class="description">{layer.label}</span>
-				<span class="drag-handle absolute right-3"><DotsSixVertical size={18}/></span>
+				<span class="drag-handle absolute right-3"><DotsSixVertical size={18} /></span>
 			</label>
 		{/each}
 
-		
+
 	</div>
 </div>
 
 <style>
-	.layerspanel {
-		position: absolute;
-		top: 130px;
-		left: 0;
-		margin: 10px;
-		padding: 15px;
-		outline: 2px solid #00000000;
-		outline-offset: 4px;
-		border-radius: 4px;
-		z-index: 1000;
-		font-family: 'ivypresto-display', serif;
-		font-weight: 300;
-		font-style: normal;
-		transition: all 0.3s;
-	}
-	.layerspanel:hover {
-		background: #fff;
-		margin-left: 20px;
-		outline: 2px solid #00000022;
-		outline-offset: 0px;
-	}
-	.layerspanel::before {
-		position: absolute;
-		content: '';
-		top: 0;
-		left: -20px;
-		width: 20px;
-		bottom: 0;
-		transition: all 0.2s;
-	}
+    .layerspanel {
+        position: absolute;
+        top: 130px;
+        left: 0;
+        margin: 10px;
+        padding: 15px;
+        outline: 2px solid #00000000;
+        outline-offset: 4px;
+        border-radius: 4px;
+        z-index: 1000;
+        font-family: 'ivypresto-display', serif;
+        font-weight: 300;
+        font-style: normal;
+        transition: all 0.3s;
+    }
 
-	.layerspanel h2 {
-		font-family: 'Inter';
-		font-weight: 400;
-		font-size: 11px;
-		text-align: center;
-		color: #22224477;
-		opacity: 0;
-		transition: opacity 0.3s;
-	}
-	.layerspanel:hover h2 {
-		opacity: 1;
-	}
+    .layerspanel:hover {
+        background: #fff;
+        margin-left: 20px;
+        outline: 2px solid #00000022;
+        outline-offset: 0px;
+    }
 
-	.layerspanel button {
-		opacity: 0;
-		transition: opacity 0.3s;
-		font-family: 'Inter';
-		font-size: 14px;
-	}
+    .layerspanel::before {
+        position: absolute;
+        content: '';
+        top: 0;
+        left: -20px;
+        width: 20px;
+        bottom: 0;
+        transition: all 0.2s;
+    }
 
-	.layerspanel:hover button {
-		opacity: 1;
-	}
+    .layerspanel h2 {
+        font-family: 'Inter';
+        font-weight: 400;
+        font-size: 11px;
+        text-align: center;
+        color: #22224477;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
 
-	.layerspanel .description {
-		position: relative;
-		left: -10px;
-		opacity: 0;
-		transition: all 0.3s;
-		padding-right: 15px;
-	}
+    .layerspanel:hover h2 {
+        opacity: 1;
+    }
 
-	.layerspanel:hover .description {
-		opacity: 1;
-		left: 0;
-		/* display: flex; */
-	}
+    .layerspanel button {
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-family: 'Inter';
+        font-size: 14px;
+    }
 
-	.layerspanel hr {
-		opacity: 0;
-		margin: 5px;
-		border: 0.5px solid #eee;
-	}
+    .layerspanel:hover button {
+        opacity: 1;
+    }
 
-	.layerspanel:hover hr {
-		opacity: 1;
-	}
+    .layerspanel .description {
+        position: relative;
+        left: -10px;
+        opacity: 0;
+        transition: all 0.3s;
+        padding-right: 15px;
+    }
 
-	.layerspanel label {
-		padding: 3px;
-		display: block;
-	}
+    .layerspanel:hover .description {
+        opacity: 1;
+        left: 0;
+        /* display: flex; */
+    }
 
-	.layerspanel .icon {
-		position: relative;
-		left: -20px;
-		top: -3px;
-		font-size: 11px;
-		opacity: 0.2;
-		display: inline;
-	}
+    .layerspanel hr {
+        opacity: 0;
+        margin: 5px;
+        border: 0.5px solid #eee;
+    }
 
-	.layerspanel input[type='checkbox']:checked + .icon {
-		color: white;
-		opacity: 1;
-	}
+    .layerspanel:hover hr {
+        opacity: 1;
+    }
 
-	.layerspanel input[type='checkbox'] {
-		/* appearance: none; */
-		background-color: transparent;
-		appearance: none;
-		width: 18px;
-		height: 18px;
-		background: #fff;
-		border: 1px solid #00000022;
-		border-radius: 4px;
-		cursor: pointer;
-		position: relative;
-		top: 2px;
-		left: -5px;
-	}
-	.layerspanel input[type='checkbox']:checked {
-		background-color: #000;
-		border: 1px solid #fff;
-	}
+    .layerspanel label {
+        padding: 3px;
+        display: block;
+    }
 
-	.drag-handle {
-		margin-left: auto;
-		right: 0;
-		display: inline-block;
-		justify-content: flex-end;
-		cursor: grab;
-		user-select: none;
-		opacity: 0;
-		transition:
-			opacity 0.3s,
-			transform 0.2s;
-		padding-right: 5px;
-	}
+    .layerspanel .icon {
+        position: relative;
+        left: -20px;
+        top: -3px;
+        font-size: 11px;
+        opacity: 0.2;
+        display: inline;
+    }
 
-	.layerspanel:hover .drag-handle {
-		opacity: 0.5;
-	}
+    .layerspanel input[type='checkbox']:checked + .icon {
+        color: white;
+        opacity: 1;
+    }
 
-	.drag-handle:hover {
-		transform: scale(1.2);
-		opacity: 1;
-	}
+    .layerspanel input[type='checkbox'] {
+        /* appearance: none; */
+        background-color: transparent;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border: 1px solid #00000022;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        top: 2px;
+        left: -5px;
+    }
 
-	.draggable-layer {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		padding: 6px;
-		transition: background 0.2s;
-	}
+    .layerspanel input[type='checkbox']:checked {
+        background-color: #000;
+        border: 1px solid #fff;
+    }
+
+    .drag-handle {
+        margin-left: auto;
+        right: 0;
+        display: inline-block;
+        justify-content: flex-end;
+        cursor: grab;
+        user-select: none;
+        opacity: 0;
+        transition: opacity 0.3s,
+        transform 0.2s;
+        padding-right: 5px;
+    }
+
+    .layerspanel:hover .drag-handle {
+        opacity: 0.5;
+    }
+
+    .drag-handle:hover {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    .draggable-layer {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px;
+        transition: background 0.2s;
+    }
 </style>
