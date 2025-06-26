@@ -126,6 +126,7 @@ export class WSK {
                 })
             })
             .then(() => {
+                console.log(this.maps);
                 loadAnnotations()
                     .then(annotations => {
                         annotations.forEach((ann, i) => {

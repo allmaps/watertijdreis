@@ -64,7 +64,7 @@
     resizeCanvas();
 
     if(!timelineStore.loaded && mapStore.loaded) {
-      setTimeout(initTimeline, 200); // TODO: check if all warped maps are loaded instead
+      setTimeout(initTimeline, 200); // TODO: synchroon met de kaarten binnen warpedmapLayer laden
     }
   });
 
@@ -178,8 +178,6 @@
 
       this.rotation = mapThumbnailRotation * (Math.random() - 0.5);
 
-      // find out which edition this map belongs
-      // TODO: this should be easier
       this.edition = map.edition;
       this.year = map.year;
 
@@ -365,9 +363,11 @@
 
     setInterval(() => { // TODO: netter! 
 
-      const mapsInViewport = mapStore.waterStaatsKaarten.maps.filter(map => {
+      let mapsInViewport = mapStore.waterStaatsKaarten.maps.filter(map => {
         return mapStore.waterStaatsKaarten.layer.renderer.mapsInViewport.has(map.id)
       })
+
+      mapsInViewport = mapsInViewport.filter(i => i.warpedMap.visible);
       
 
       const newMapThumbnails = new Map();
