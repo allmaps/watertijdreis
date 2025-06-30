@@ -176,6 +176,7 @@
       this.image.onerror = err => console.error(`Failed to load image: ${this.imageUrl}`, err);
       this.image.onload = () => this.imageLoaded = true;
 
+      this.opacity = 1;
       this.rotation = mapThumbnailRotation * (Math.random() - 0.5);
 
       this.edition = map.edition;
@@ -245,7 +246,11 @@
       ctx.rotate(this.animating.rotation ? this.animating.rotation.getValue() : this.rotation);
       ctx.translate(-this.thumbnailCenterX, -this.thumbnailCenterY);
 
+      if(!this.warpedMap.visible) this.opacity = .2;
+      else this.opacity = 1;
+      if(this.opacity < 1) ctx.globalAlpha = this.opacity;
       if(this.imageLoaded) ctx.drawImage(this.image, ...this.thumbnailBB);
+      if(this.opacity < 1) ctx.globalAlpha = 1;
 
       if(this.hovering) {
         ctx.save();
@@ -367,7 +372,7 @@
         return mapStore.waterStaatsKaarten.layer.renderer.mapsInViewport.has(map.id)
       })
 
-      mapsInViewport = mapsInViewport.filter(i => i.warpedMap.visible);
+      // mapsInViewport = mapsInViewport.filter(i => i.warpedMap.visible);
       
 
       const newMapThumbnails = new Map();
