@@ -6,10 +6,15 @@
 	import ArrowElbowDownLeft from 'phosphor-svelte/lib/ArrowElbowDownLeft';
 
 	import Geocoder from './Geocoder.svelte';
-	import { mapStore } from '../../stores/mapStore.svelte.js';
+	import { mapStore } from '../../stores/mapStore.svelte';
 	import LanguageToggle from '$lib/components/LanguageToggle.svelte';
 	import { t } from '../../stores/i18n/i18n.svelte';
-	import { ABOUT_BUTTON_TEXT, SEARCH_BAR_PLACEHOLDER_TEXT, SHARE_BUTTON_TEXT } from '../../stores/i18n/translations';
+	import {
+		ABOUT_BUTTON_TEXT,
+		SEARCH_BAR_PLACEHOLDER_TEXT,
+		SHARE_BUTTON_TEXT,
+		SHARE_MESSAGE
+	} from '../../stores/i18n/translations';
 
 	let searchQuery = $state('');
 	let searchAutofill = $state('');
@@ -17,7 +22,7 @@
 	let showAboutPage = false;
 
 	function share() {
-		alert('Deelknop ingedrukt!');
+		alert(t(SHARE_MESSAGE));
 	}
 
 	function toggleAboutPage() {

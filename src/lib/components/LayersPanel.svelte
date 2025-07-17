@@ -5,6 +5,14 @@
 	import MapTrifold from 'phosphor-svelte/lib/MapTrifold';
 	import DropSimple from 'phosphor-svelte/lib/DropSimple';
 	import DotsSixVertical from 'phosphor-svelte/lib/DotsSixVertical';
+	import {
+		AHN_MAP_LAYER, ARIAL_PHOTO_MAP_LAYER,
+		BACKGROUND_MAP_LAYER,
+		HYDRAULIC_ENGINEERING_MAP_LAYER,
+		LAYERS, OSM_MAP_LAYER,
+		PLACE_NAMES_MAP_LAYER, PROVINCIAL_BORDERS_MAP_LAYER, WATER_BOARD_BOUNDARIES_LAYER, WATERWAYS_MAP_LAYER
+	} from '../../stores/i18n/translations';
+	import { t } from '../../stores/i18n/i18n.svelte';
 
 	const editions = [1, 2, 3, 4, 5].map((i) => `editie_${i}`);
 	for (let ed of editions) mapStore.visibleLayers[ed] = false;
@@ -32,7 +40,7 @@
 	let layers = [
 		{
 			id: 'waterstaatskaarten',
-			label: 'Waterstaatskaarten',
+			label: HYDRAULIC_ENGINEERING_MAP_LAYER,
 			get checked() {
 				return mapStore.showWSK;
 			},
@@ -42,7 +50,7 @@
 		},
 		{
 			id: 'background,landcover,park_national_park,park_nature_reserve,landuse_residential,landuse,waterway,boundary_county,boundary_state,water,water_shadow,aeroway-runway,aeroway-taxiway,waterway_label,tunnel_service_case,tunnel_minor_case,tunnel_sec_case,tunnel_pri_case,tunnel_trunk_case,tunnel_mot_case,tunnel_path,tunnel_service_fill,tunnel_minor_fill,tunnel_sec_fill,tunnel_pri_fill,tunnel_trunk_fill,tunnel_mot_fill,tunnel_rail,tunnel_rail_dash,road_service_case,road_minor_case,road_pri_case_ramp,road_trunk_case_ramp,road_mot_case_ramp,road_sec_case_noramp,road_pri_case_noramp,road_trunk_case_noramp,road_mot_case_noramp,road_path,road_service_fill,road_minor_fill,road_pri_fill_ramp,road_trunk_fill_ramp,road_mot_fill_ramp,road_sec_fill_noramp,road_pri_fill_noramp,road_trunk_fill_noramp,road_mot_fill_noramp,rail,rail_dash,bridge_service_case,bridge_minor_case,bridge_sec_case,bridge_pri_case,bridge_trunk_case,bridge_mot_case,bridge_path,bridge_service_fill,bridge_minor_fill,bridge_sec_fill,bridge_pri_fill,bridge_trunk_fill,bridge_mot_fill,building,building-top,boundary_country_outline,boundary_country_inner,watername_ocean,watername_sea,watername_lake,watername_lake_line,place_hamlet,place_suburbs,place_villages,place_town,place_country_2,place_country_1,place_state,place_continent,place_city_r6,place_city_r5,place_city_dot_r7,place_city_dot_r4,place_city_dot_r2,place_city_dot_z7,place_capital_dot_z7,poi_stadium,poi_park,roadname_minor,roadname_sec,roadname_pri,roadname_major,housenumber',
-			label: 'Achtergrondkaart',
+			label: BACKGROUND_MAP_LAYER,
 			get checked() {
 				return mapStore.showBaseMap;
 			},
@@ -52,7 +60,7 @@
 		},
 		{
 			id: 'watername_ocean,watername_sea,watername_lake,watername_lake_line,place_hamlet,place_suburbs,place_villages,place_town,place_country_2,place_country_1,place_state,place_continent,place_city_r6,place_city_r5,place_city_dot_r7,place_city_dot_r4,place_city_dot_r2,place_city_dot_z7,place_capital_dot_z7,poi_stadium,poi_park,roadname_minor,roadname_sec,roadname_pri,roadname_major,housenumber',
-			label: 'Plaatsnamen',
+			label: PLACE_NAMES_MAP_LAYER,
 			get checked() {
 				return mapStore.showLabels;
 			},
@@ -62,7 +70,7 @@
 		},
 		{
 			id: 'custom-water-layer',
-			label: 'Waterwegen',
+			label: WATERWAYS_MAP_LAYER,
 			get checked() {
 				return mapStore.showWater;
 			},
@@ -73,7 +81,7 @@
 
 		{
 			id: 'dsm-05-layer',
-			label: 'AHN',
+			label: AHN_MAP_LAYER,
 			get checked() {
 				return mapStore.showAHN;
 			},
@@ -84,7 +92,7 @@
 
 		{
 			id: 'osm-base',
-			label: 'OSM',
+			label: OSM_MAP_LAYER,
 			get checked() {
 				return mapStore.showOSM;
 			},
@@ -95,7 +103,7 @@
 
 		{
 			id: 'Provinciegebied',
-			label: 'Provinciegrenzen',
+			label: PROVINCIAL_BORDERS_MAP_LAYER,
 			get checked() {
 				return mapStore.showProv;
 			},
@@ -106,7 +114,7 @@
 
 		{
 			id: 'luchtfoto-layer',
-			label: 'Luchtfoto',
+			label: ARIAL_PHOTO_MAP_LAYER,
 			get checked() {
 				return mapStore.showLucht;
 			},
@@ -117,7 +125,7 @@
 
 		{
 			id: 'waterschapsgrenzen',
-			label: 'Waterschapsgrenzen',
+			label: WATER_BOARD_BOUNDARIES_LAYER,
 			get checked() {
 				return mapStore.showWTSc;
 			},
@@ -174,7 +182,7 @@
 <svelte:window {onkeydown} />
 
 <div class="layerspanel">
-	<h2>LAGEN</h2>
+	<h2>{t(LAYERS)}</h2>
 	<div class="layers-checkboxes">
 		{#each layers as layer, i (layer.id)}
 			<label
@@ -190,7 +198,7 @@
 					on:change={() => (layer.checked = !layer.checked)}
 				/>
 				<i class="icon">{i + 1}</i>
-				<span class="description">{layer.label}</span>
+				<span class="description">{t(layer.label)}</span>
 				<span class="drag-handle absolute right-3"><DotsSixVertical size={18} /></span>
 			</label>
 		{/each}
@@ -215,6 +223,10 @@
         font-style: normal;
         transition: all 0.3s;
     }
+
+		h2{
+				text-transform:  uppercase;
+		}
 
     .layerspanel:hover {
         background: #fff;
