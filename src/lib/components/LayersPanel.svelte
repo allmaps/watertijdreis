@@ -1,10 +1,18 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
 
 	import StackPlus from 'phosphor-svelte/lib/StackPlus';
 	import MapTrifold from 'phosphor-svelte/lib/MapTrifold';
 	import DropSimple from 'phosphor-svelte/lib/DropSimple';
 	import DotsSixVertical from 'phosphor-svelte/lib/DotsSixVertical';
+	import {
+		AHN_MAP_LAYER, ARIAL_PHOTO_MAP_LAYER,
+		BACKGROUND_MAP_LAYER,
+		HYDRAULIC_ENGINEERING_MAP_LAYER,
+		LAYERS, OSM_MAP_LAYER,
+		PLACE_NAMES_MAP_LAYER, PROVINCIAL_BORDERS_MAP_LAYER, WATER_BOARD_BOUNDARIES_LAYER, WATERWAYS_MAP_LAYER
+	} from '../../stores/i18n/translations';
+	import { t } from '../../stores/i18n/i18n.svelte';
 
 	const editions = [1, 2, 3, 4, 5].map((i) => `editie_${i}`);
 	for (let ed of editions) mapStore.visibleLayers[ed] = false;
@@ -28,10 +36,11 @@
 			};
 		});
 	}
+
 	let layers = [
 		{
 			id: 'waterstaatskaarten',
-			label: 'Waterstaatskaarten',
+			label: HYDRAULIC_ENGINEERING_MAP_LAYER,
 			get checked() {
 				return mapStore.showWSK;
 			},
@@ -41,7 +50,7 @@
 		},
 		{
 			id: 'background,landcover,park_national_park,park_nature_reserve,landuse_residential,landuse,waterway,boundary_county,boundary_state,water,water_shadow,aeroway-runway,aeroway-taxiway,waterway_label,tunnel_service_case,tunnel_minor_case,tunnel_sec_case,tunnel_pri_case,tunnel_trunk_case,tunnel_mot_case,tunnel_path,tunnel_service_fill,tunnel_minor_fill,tunnel_sec_fill,tunnel_pri_fill,tunnel_trunk_fill,tunnel_mot_fill,tunnel_rail,tunnel_rail_dash,road_service_case,road_minor_case,road_pri_case_ramp,road_trunk_case_ramp,road_mot_case_ramp,road_sec_case_noramp,road_pri_case_noramp,road_trunk_case_noramp,road_mot_case_noramp,road_path,road_service_fill,road_minor_fill,road_pri_fill_ramp,road_trunk_fill_ramp,road_mot_fill_ramp,road_sec_fill_noramp,road_pri_fill_noramp,road_trunk_fill_noramp,road_mot_fill_noramp,rail,rail_dash,bridge_service_case,bridge_minor_case,bridge_sec_case,bridge_pri_case,bridge_trunk_case,bridge_mot_case,bridge_path,bridge_service_fill,bridge_minor_fill,bridge_sec_fill,bridge_pri_fill,bridge_trunk_fill,bridge_mot_fill,building,building-top,boundary_country_outline,boundary_country_inner,watername_ocean,watername_sea,watername_lake,watername_lake_line,place_hamlet,place_suburbs,place_villages,place_town,place_country_2,place_country_1,place_state,place_continent,place_city_r6,place_city_r5,place_city_dot_r7,place_city_dot_r4,place_city_dot_r2,place_city_dot_z7,place_capital_dot_z7,poi_stadium,poi_park,roadname_minor,roadname_sec,roadname_pri,roadname_major,housenumber',
-			label: 'Achtergrondkaart',
+			label: BACKGROUND_MAP_LAYER,
 			get checked() {
 				return mapStore.showBaseMap;
 			},
@@ -51,7 +60,7 @@
 		},
 		{
 			id: 'watername_ocean,watername_sea,watername_lake,watername_lake_line,place_hamlet,place_suburbs,place_villages,place_town,place_country_2,place_country_1,place_state,place_continent,place_city_r6,place_city_r5,place_city_dot_r7,place_city_dot_r4,place_city_dot_r2,place_city_dot_z7,place_capital_dot_z7,poi_stadium,poi_park,roadname_minor,roadname_sec,roadname_pri,roadname_major,housenumber',
-			label: 'Plaatsnamen',
+			label: PLACE_NAMES_MAP_LAYER,
 			get checked() {
 				return mapStore.showLabels;
 			},
@@ -61,7 +70,7 @@
 		},
 		{
 			id: 'custom-water-layer',
-			label: 'Waterwegen',
+			label: WATERWAYS_MAP_LAYER,
 			get checked() {
 				return mapStore.showWater;
 			},
@@ -72,7 +81,7 @@
 
 		{
 			id: 'dsm-05-layer',
-			label: 'AHN',
+			label: AHN_MAP_LAYER,
 			get checked() {
 				return mapStore.showAHN;
 			},
@@ -83,7 +92,7 @@
 
 		{
 			id: 'osm-base',
-			label: 'OSM',
+			label: OSM_MAP_LAYER,
 			get checked() {
 				return mapStore.showOSM;
 			},
@@ -94,7 +103,7 @@
 
 		{
 			id: 'Provinciegebied',
-			label: 'Provinciegrenzen',
+			label: PROVINCIAL_BORDERS_MAP_LAYER,
 			get checked() {
 				return mapStore.showProv;
 			},
@@ -105,7 +114,7 @@
 
 		{
 			id: 'luchtfoto-layer',
-			label: 'Luchtfoto',
+			label: ARIAL_PHOTO_MAP_LAYER,
 			get checked() {
 				return mapStore.showLucht;
 			},
@@ -116,7 +125,7 @@
 
 		{
 			id: 'waterschapsgrenzen',
-			label: 'Waterschapsgrenzen',
+			label: WATER_BOARD_BOUNDARIES_LAYER,
 			get checked() {
 				return mapStore.showWTSc;
 			},
@@ -156,7 +165,7 @@
 		if (!map || typeof map.getLayer !== 'function') return;
 
 		const layerIds = layers.flatMap(layer => layer.id.split(',').map(id => id.trim())).reverse();
-		
+
 		for (let i = 0; i < layerIds.length; i++) {
 			const layerId = layerIds[i];
 			const nextLayerId = layerIds[i + 1] || undefined;
@@ -173,7 +182,7 @@
 <svelte:window {onkeydown} />
 
 <div class="layerspanel">
-	<h2>LAGEN</h2>
+	<h2>{t(LAYERS)}</h2>
 	<div class="layers-checkboxes">
 		{#each layers as layer, i (layer.id)}
 			<label
@@ -189,161 +198,168 @@
 					on:change={() => (layer.checked = !layer.checked)}
 				/>
 				<i class="icon">{i + 1}</i>
-				<span class="description">{layer.label}</span>
-				<span class="drag-handle absolute right-3"><DotsSixVertical size={18}/></span>
+				<span class="description">{t(layer.label)}</span>
+				<span class="drag-handle absolute right-3"><DotsSixVertical size={18} /></span>
 			</label>
 		{/each}
 
-		
+
 	</div>
 </div>
 
 <style>
-	.layerspanel {
-		position: absolute;
-		top: 130px;
-		left: 0;
-		margin: 10px;
-		padding: 15px;
-		outline: 2px solid #00000000;
-		outline-offset: 4px;
-		border-radius: 4px;
-		z-index: 1000;
-		font-family: 'ivypresto-display', serif;
-		font-weight: 300;
-		font-style: normal;
-		transition: all 0.3s;
-	}
-	.layerspanel:hover {
-		background: #fff;
-		margin-left: 20px;
-		outline: 2px solid #00000022;
-		outline-offset: 0px;
-	}
-	.layerspanel::before {
-		position: absolute;
-		content: '';
-		top: 0;
-		left: -20px;
-		width: 20px;
-		bottom: 0;
-		transition: all 0.2s;
-	}
+    .layerspanel {
+        position: absolute;
+        top: 130px;
+        left: 0;
+        margin: 10px;
+        padding: 15px;
+        outline: 2px solid #00000000;
+        outline-offset: 4px;
+        border-radius: 4px;
+        z-index: 1000;
+        font-family: 'ivypresto-display', serif;
+        font-weight: 300;
+        font-style: normal;
+        transition: all 0.3s;
+    }
 
-	.layerspanel h2 {
-		font-family: 'Inter';
-		font-weight: 400;
-		font-size: 11px;
-		text-align: center;
-		color: #22224477;
-		opacity: 0;
-		transition: opacity 0.3s;
-	}
-	.layerspanel:hover h2 {
-		opacity: 1;
-	}
+		h2{
+				text-transform:  uppercase;
+		}
 
-	.layerspanel button {
-		opacity: 0;
-		transition: opacity 0.3s;
-		font-family: 'Inter';
-		font-size: 14px;
-	}
+    .layerspanel:hover {
+        background: #fff;
+        margin-left: 20px;
+        outline: 2px solid #00000022;
+        outline-offset: 0px;
+    }
 
-	.layerspanel:hover button {
-		opacity: 1;
-	}
+    .layerspanel::before {
+        position: absolute;
+        content: '';
+        top: 0;
+        left: -20px;
+        width: 20px;
+        bottom: 0;
+        transition: all 0.2s;
+    }
 
-	.layerspanel .description {
-		position: relative;
-		left: -10px;
-		opacity: 0;
-		transition: all 0.3s;
-		padding-right: 15px;
-	}
+    .layerspanel h2 {
+        font-family: 'Inter';
+        font-weight: 400;
+        font-size: 11px;
+        text-align: center;
+        color: #22224477;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
 
-	.layerspanel:hover .description {
-		opacity: 1;
-		left: 0;
-		/* display: flex; */
-	}
+    .layerspanel:hover h2 {
+        opacity: 1;
+    }
 
-	.layerspanel hr {
-		opacity: 0;
-		margin: 5px;
-		border: 0.5px solid #eee;
-	}
+    .layerspanel button {
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-family: 'Inter';
+        font-size: 14px;
+    }
 
-	.layerspanel:hover hr {
-		opacity: 1;
-	}
+    .layerspanel:hover button {
+        opacity: 1;
+    }
 
-	.layerspanel label {
-		padding: 3px;
-		display: block;
-	}
+    .layerspanel .description {
+        position: relative;
+        left: -10px;
+        opacity: 0;
+        transition: all 0.3s;
+        padding-right: 15px;
+    }
 
-	.layerspanel .icon {
-		position: relative;
-		left: -20px;
-		top: -3px;
-		font-size: 11px;
-		opacity: 0.2;
-		display: inline;
-	}
+    .layerspanel:hover .description {
+        opacity: 1;
+        left: 0;
+        /* display: flex; */
+    }
 
-	.layerspanel input[type='checkbox']:checked + .icon {
-		color: white;
-		opacity: 1;
-	}
+    .layerspanel hr {
+        opacity: 0;
+        margin: 5px;
+        border: 0.5px solid #eee;
+    }
 
-	.layerspanel input[type='checkbox'] {
-		/* appearance: none; */
-		background-color: transparent;
-		appearance: none;
-		width: 18px;
-		height: 18px;
-		background: #fff;
-		border: 1px solid #00000022;
-		border-radius: 4px;
-		cursor: pointer;
-		position: relative;
-		top: 2px;
-		left: -5px;
-	}
-	.layerspanel input[type='checkbox']:checked {
-		background-color: #000;
-		border: 1px solid #fff;
-	}
+    .layerspanel:hover hr {
+        opacity: 1;
+    }
 
-	.drag-handle {
-		margin-left: auto;
-		right: 0;
-		display: inline-block;
-		justify-content: flex-end;
-		cursor: grab;
-		user-select: none;
-		opacity: 0;
-		transition:
-			opacity 0.3s,
-			transform 0.2s;
-		padding-right: 5px;
-	}
+    .layerspanel label {
+        padding: 3px;
+        display: block;
+    }
 
-	.layerspanel:hover .drag-handle {
-		opacity: 0.5;
-	}
+    .layerspanel .icon {
+        position: relative;
+        left: -20px;
+        top: -3px;
+        font-size: 11px;
+        opacity: 0.2;
+        display: inline;
+    }
 
-	.drag-handle:hover {
-		transform: scale(1.2);
-		opacity: 1;
-	}
+    .layerspanel input[type='checkbox']:checked + .icon {
+        color: white;
+        opacity: 1;
+    }
 
-	.draggable-layer {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		padding: 6px;
-		transition: background 0.2s;
-	}
+    .layerspanel input[type='checkbox'] {
+        /* appearance: none; */
+        background-color: transparent;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border: 1px solid #00000022;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        top: 2px;
+        left: -5px;
+    }
+
+    .layerspanel input[type='checkbox']:checked {
+        background-color: #000;
+        border: 1px solid #fff;
+    }
+
+    .drag-handle {
+        margin-left: auto;
+        right: 0;
+        display: inline-block;
+        justify-content: flex-end;
+        cursor: grab;
+        user-select: none;
+        opacity: 0;
+        transition: opacity 0.3s,
+        transform 0.2s;
+        padding-right: 5px;
+    }
+
+    .layerspanel:hover .drag-handle {
+        opacity: 0.5;
+    }
+
+    .drag-handle:hover {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+
+    .draggable-layer {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px;
+        transition: background 0.2s;
+    }
 </style>

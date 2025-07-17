@@ -1,19 +1,19 @@
 <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' />
 <script>
-  import maplibre from 'maplibre-gl';
-  import { WarpedMapLayer } from '@allmaps/maplibre'
+	import maplibre from 'maplibre-gl';
+	import { WarpedMapLayer } from '@allmaps/maplibre';
 
-  import HoveredMap from './HoveredMap.svelte';
-  import LayersPanel from './LayersPanel.svelte';
+	import HoveredMap from './HoveredMap.svelte';
+	import LayersPanel from './LayersPanel.svelte';
 
-  import { mapStore } from '../stores/mapStore.svelte';
-  import { WSK } from '../stores/waterstaatskaarten.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
+	import { WSK } from '../../stores/waterstaatskaarten.svelte.ts';
 
-	import { timelineStore } from '../stores/timelineStore.svelte';
+	import { timelineStore } from '../../stores/timelineStore.svelte.ts';
 	import SheetOverlayNew from './SheetOverlayNew.svelte';
 
 	let map;
-  let waterStaatsKaarten; 
+	let waterStaatsKaarten;
 
 	$effect(() => {
 		if (!map) map = initMap();
@@ -195,20 +195,22 @@
 		});
 
 		m.on('click', onpointerclick);
-    m.on('mousemove', onpointermove);
-    m.on('mouseout', onmouseout);
-    m.on('idle', () => { m.triggerRepaint() })
-    m.on('move', () => {
-      // resetHoveredMap();
-      if(mapStore.hoveredMap) setHoveredMap(mapStore.hoveredMap)
-    })
+		m.on('mousemove', onpointermove);
+		m.on('mouseout', onmouseout);
+		m.on('idle', () => {
+			m.triggerRepaint();
+		});
+		m.on('move', () => {
+			// resetHoveredMap();
+			if (mapStore.hoveredMap) setHoveredMap(mapStore.hoveredMap);
+		});
 
-    m.on('zoom', e => {
-      const zoom = m.getZoom();
-      if(zoom < 9) {
-        if(performance.now() - selectedMapTime > 2500) resetSelectedMap();
-      }
-    })
+		m.on('zoom', e => {
+			const zoom = m.getZoom();
+			if (zoom < 9) {
+				if (performance.now() - selectedMapTime > 2500) resetSelectedMap();
+			}
+		});
 
 		return m;
 	}
@@ -476,13 +478,13 @@
 	}
 
 	function onpointerclick(e) {
-    let warpedMap = waterStaatsKaarten.getMapsByGeoPosition(e.lngLat.lng, e.lngLat.lat);
-    if(warpedMap) warpedMap = warpedMap[0];
+		let warpedMap = waterStaatsKaarten.getMapsByGeoPosition(e.lngLat.lng, e.lngLat.lat);
+		if (warpedMap) warpedMap = warpedMap[0];
 
-    if(mapStore.loaded && warpedMap) {
-      setSelectedMap(warpedMap);
-    }
-  }
+		if (mapStore.loaded && warpedMap) {
+			setSelectedMap(warpedMap);
+		}
+	}
 
   let lastHoveredMap = null;
   let hoverTime = MAP_HIGHLIGHT_TRANSITION_DURATION;
@@ -490,82 +492,82 @@
   let hoverTimeout = null;
   let hoverTimeoutLonger = null;
 
-  let selectedMapTime = null;
-  let selectedMapZIndex = null;
-  let selectedMapResourceMask = null;
+	let selectedMapTime = null;
+	let selectedMapZIndex = null;
+	let selectedMapResourceMask = null;
 
-  function setSelectedMap(warpedMap) {
-	resetSelectedMap();
-    if(!mapStore.waterStaatsKaarten) return;
+	function setSelectedMap(warpedMap) {
+		resetSelectedMap();
+		if (!mapStore.waterStaatsKaarten) return;
 
-    mapStore.selectedMap = warpedMap;
-    console.log('selected map: ', warpedMap);
+		mapStore.selectedMap = warpedMap;
+		console.log('selected map: ', warpedMap);
 
-    const bounds = new maplibre.LngLatBounds();
-    warpedMap.mask.coordinates[0].forEach(coord => bounds.extend(coord));
-    map.fitBounds(bounds, { padding: 200 });
+		const bounds = new maplibre.LngLatBounds();
+		warpedMap.mask.coordinates[0].forEach(coord => bounds.extend(coord));
+		map.fitBounds(bounds, { padding: 200 });
 
-    // mapStore.selectedMap = warpedMap;
-    const layer = mapStore.waterStaatsKaarten.layer;
-    console.log(layer);
+		// mapStore.selectedMap = warpedMap;
+		const layer = mapStore.waterStaatsKaarten.layer;
+		console.log(layer);
 
-    selectedMapTime = performance.now();
-    selectedMapZIndex = layer.renderer.warpedMapList.zIndices.get(warpedMap.id);
-    selectedMapResourceMask = warpedMap.warpedMap.resourceMask;
-    layer.bringMapsToFront([warpedMap.id]);
-    const { width, height } = warpedMap.warpedMap.georeferencedMap.resource;
-    layer.setMapResourceMask(warpedMap.id, [[0,height], [width,height], [width,0], [0,0]]);
-    warpedMap.warpedMap.updateTriangulation(true);
-  }
+		selectedMapTime = performance.now();
+		selectedMapZIndex = layer.renderer.warpedMapList.zIndices.get(warpedMap.id);
+		selectedMapResourceMask = warpedMap.warpedMap.resourceMask;
+		layer.bringMapsToFront([warpedMap.id]);
+		const { width, height } = warpedMap.warpedMap.georeferencedMap.resource;
+		layer.setMapResourceMask(warpedMap.id, [[0, height], [width, height], [width, 0], [0, 0]]);
+		warpedMap.warpedMap.updateTriangulation(true);
+	}
 
-  function resetSelectedMap() {
-    if(!mapStore.waterStaatsKaarten || !mapStore.selectedMap) return;
+	function resetSelectedMap() {
+		if (!mapStore.waterStaatsKaarten || !mapStore.selectedMap) return;
 
-    const layer = mapStore.waterStaatsKaarten.layer;
-    
-    layer.setMapResourceMask(mapStore.selectedMap.id, selectedMapResourceMask);
-    mapStore.selectedMap.warpedMap.updateTriangulation(true);
-    mapStore.selectedMap = null;
-  }
+		const layer = mapStore.waterStaatsKaarten.layer;
 
-  function setHoveredMap(warpedMap) {
-    if(mapStore.selectedMap) return;
-    showWarpedMapOutline(warpedMap.mask);
-    // showWarpedMapFullOutline(warpedMap.geoFullMask);
-    mapStore.hoveredMap = warpedMap;
-    mapStore.hoveredMapMask = warpedMap.mask.coordinates[0].slice(0,4).map(i => map.project(i));
-  }
+		layer.setMapResourceMask(mapStore.selectedMap.id, selectedMapResourceMask);
+		mapStore.selectedMap.warpedMap.updateTriangulation(true);
+		mapStore.selectedMap = null;
+	}
 
-  function resetHoveredMap() {
-    mapStore.hoveredMap = null;
-    hideWarpedMapOutline();
-    hideWarpedMapFullOutline();
-    clearTimeout(hoverTimeout);
-    clearTimeout(hoverTimeoutLonger);
-  }
+	function setHoveredMap(warpedMap) {
+		if (mapStore.selectedMap) return;
+		showWarpedMapOutline(warpedMap.mask);
+		// showWarpedMapFullOutline(warpedMap.geoFullMask);
+		mapStore.hoveredMap = warpedMap;
+		mapStore.hoveredMapMask = warpedMap.mask.coordinates[0].slice(0, 4).map(i => map.project(i));
+	}
+
+	function resetHoveredMap() {
+		mapStore.hoveredMap = null;
+		hideWarpedMapOutline();
+		hideWarpedMapFullOutline();
+		clearTimeout(hoverTimeout);
+		clearTimeout(hoverTimeoutLonger);
+	}
 
 	function onpointermove(e) {
-    mapStore.pointerScreenPos.x = e.point.x;
-    mapStore.pointerScreenPos.y = e.point.y;
+		mapStore.pointerScreenPos.x = e.point.x;
+		mapStore.pointerScreenPos.y = e.point.y;
 
-    let warpedMap = waterStaatsKaarten.getMapsByGeoPosition(e.lngLat.lng, e.lngLat.lat);
-    if(warpedMap) warpedMap = warpedMap[0];
+		let warpedMap = waterStaatsKaarten.getMapsByGeoPosition(e.lngLat.lng, e.lngLat.lat);
+		if (warpedMap) warpedMap = warpedMap[0];
 
-    if(warpedMap != lastHoveredMap) { 
-      resetHoveredMap();
-      if(warpedMap) hoverTimeout = setTimeout(() => {
-        setHoveredMap(warpedMap);
-      }, hoverTime);
-      if(warpedMap) hoverTimeoutLonger = setTimeout(() => {
-        showWarpedMapFullOutline(warpedMap.warpedMap.geoFullMask);
-      }, hoverTimeLonger)
-    }
-    lastHoveredMap = warpedMap;
-  }
+		if (warpedMap != lastHoveredMap) {
+			resetHoveredMap();
+			if (warpedMap) hoverTimeout = setTimeout(() => {
+				setHoveredMap(warpedMap);
+			}, hoverTime);
+			if (warpedMap) hoverTimeoutLonger = setTimeout(() => {
+				showWarpedMapFullOutline(warpedMap.warpedMap.geoFullMask);
+			}, hoverTimeLonger);
+		}
+		lastHoveredMap = warpedMap;
+	}
 
-  function onmouseout(e) {
-    resetHoveredMap();
-  }
+	function onmouseout(e) {
+		resetHoveredMap();
+	}
 </script>
 
 <svelte:window
@@ -581,9 +583,9 @@
 <div id="map"></div>
 
 {#if waterStaatsKaarten && !waterStaatsKaarten.loaded}
-<div id="loading-screen" class="fixed w-full h-full z-5000 bg-[#fff] text-center">
-  Loading...
-</div>
+	<div id="loading-screen" class="fixed w-full h-full z-5000 bg-[#fff] text-center">
+		Loading...
+	</div>
 {/if}
 
 {#if mapStore.loaded}
@@ -599,22 +601,22 @@
 {/if}
 
 <style>
-	#map {
-		width: 100vw;
-		height: 100vh;
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 1;
-	}
+    #map {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
 
-	.hoveredMapTitle {
-		position: fixed;
-		bottom: 180px;
-		left: 50%;
-		width: 250px;
-		margin-left: -125px;
-		text-align: center;
-		z-index: 100;
-	}
+    .hoveredMapTitle {
+        position: fixed;
+        bottom: 180px;
+        left: 50%;
+        width: 250px;
+        margin-left: -125px;
+        text-align: center;
+        z-index: 100;
+    }
 </style>
