@@ -1,3 +1,4 @@
+<link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' />
 <script>
   import maplibre from 'maplibre-gl';
   import { WarpedMapLayer } from '@allmaps/maplibre'
@@ -58,10 +59,22 @@
 			center: [4.55, 52.23],
 			zoom: 6,
 			maxPitch: 0,
-			preserveDrawingBuffer: true // TODO: is this a requirement for allmaps?
+			preserveDrawingBuffer: true,
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: false
 		});
 
+		m.addControl(new maplibre.NavigationControl({
+			visualizePitch: true,
+			visualizeRoll: true,
+			showZoom: true,
+			showCompass: true
+		}), 'bottom-right');
+
 		m.on('load', () => {
+
+      document.querySelector('.maplibregl-ctrl-bottom-right').style.bottom = '170px';
       		waterStaatsKaarten = mapStore.waterStaatsKaarten = new WSK(m);
 
 			initWarpedMapHighlight();
@@ -258,7 +271,7 @@
 		map.setLayoutProperty('waterschapsgrenzen', 'visibility', visible ? 'visible' : 'none');
 	}
 
-	const MAP_HIGHLIGHT_TRANSITION_DURATION = 500;
+	const MAP_HIGHLIGHT_TRANSITION_DURATION = 250;
 
 	function initWarpedMapHighlight() {
 		map.addSource('warpedmap-highlight', {
@@ -472,7 +485,7 @@
   }
 
   let lastHoveredMap = null;
-  let hoverTime = 500;
+  let hoverTime = MAP_HIGHLIGHT_TRANSITION_DURATION;
   let hoverTimeLonger = 2000;
   let hoverTimeout = null;
   let hoverTimeoutLonger = null;
