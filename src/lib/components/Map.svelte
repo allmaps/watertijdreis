@@ -6,10 +6,10 @@
 	import HoveredMap from './HoveredMap.svelte';
 	import LayersPanel from './LayersPanel.svelte';
 
-	import { mapStore } from '../stores/mapStore.svelte';
-	import { WSK } from '../stores/waterstaatskaarten.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
+	import { WSK } from '../../stores/waterstaatskaarten.svelte.ts';
 
-	import { timelineStore } from '../stores/timelineStore.svelte';
+	import { timelineStore } from '../../stores/timelineStore.svelte.ts';
 	import SheetOverlayNew from './SheetOverlayNew.svelte';
 
 	let map;

@@ -1,6 +1,6 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
-	import { timelineStore } from '../stores/timelineStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
+	import { timelineStore } from '../../stores/timelineStore.svelte.ts';
 
 	let canvas;
 	let ctx;

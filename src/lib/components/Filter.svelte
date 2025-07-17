@@ -1,8 +1,8 @@
 <script>
-	import { filterStore } from '../stores/filterStore.svelte';
+	import { filterStore } from '../../stores/filterStore.svelte.ts';
 	import { Accordion, Popover, Separator, Slider, Checkbox, Label, useId } from 'bits-ui';
 	import cn from 'clsx';
-	import { timelineStore } from '../stores/timelineStore.svelte';
+	import { timelineStore } from '../../stores/timelineStore.svelte.ts';
 
 	import Check from 'phosphor-svelte/lib/Check';
 	import Minus from 'phosphor-svelte/lib/Minus';
@@ -11,7 +11,7 @@
 	import CaretDown from 'phosphor-svelte/lib/CaretDown';
 
 	import { fade } from 'svelte/transition';
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
 
 	let visibleEditions = $derived([]);
 
@@ -209,7 +209,7 @@
     @import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
     @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
-    @import "tailwindcss";
+    @import "../../../node_modules/tailwindcss/dist/lib.d.mts";
 
     @plugin "tailwindcss-animate";
 

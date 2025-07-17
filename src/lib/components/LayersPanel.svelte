@@ -1,5 +1,5 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
 
 	import StackPlus from 'phosphor-svelte/lib/StackPlus';
 	import MapTrifold from 'phosphor-svelte/lib/MapTrifold';

@@ -1,5 +1,5 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
 	import { fade } from 'svelte/transition';
 	import ArrowCircleUpRight from 'phosphor-svelte/lib/ArrowCircleUpRight';
 

@@ -1,5 +1,5 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
 
 	let canvas;
 	let ctx;

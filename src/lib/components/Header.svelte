@@ -1,12 +1,12 @@
 <script lang="ts">
-	import AboutPage from '$lib/AboutPage.svelte';
+	import AboutPage from '$lib/components/AboutPage.svelte';
 	import MagnifyingGlass from 'phosphor-svelte/lib/MagnifyingGlass';
 	import Export from 'phosphor-svelte/lib/Export';
 	import MapTrifold from 'phosphor-svelte/lib/MapTrifold';
 	import ArrowElbowDownLeft from 'phosphor-svelte/lib/ArrowElbowDownLeft';
 
 	import Geocoder from './Geocoder.svelte';
-	import { mapStore } from '../stores/mapStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.js';
 
 	let searchQuery = $state('');
 	let searchAutofill = $state('');

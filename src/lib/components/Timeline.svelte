@@ -1,8 +1,8 @@
 <script>
-	import { mapStore } from '../stores/mapStore.svelte';
-	import { lerp, easeInCubic, easeOutCubic } from '../stores/animation.svelte';
-	import { timelineStore } from '../stores/timelineStore.svelte';
-	import { filterStore } from '../stores/filterStore.svelte';
+	import { mapStore } from '../../stores/mapStore.svelte.ts';
+	import { lerp, easeInCubic, easeOutCubic } from '../../stores/animation.svelte.ts';
+	import { timelineStore } from '../../stores/timelineStore.svelte.ts';
+	import { filterStore } from '../../stores/filterStore.svelte.ts';
 
 	let canvas;
 	let ctx;
