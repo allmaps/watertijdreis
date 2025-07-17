@@ -1,13 +1,12 @@
 <script>
-    import Header from '$lib/Header.svelte';
-    import Map from '$lib/Map.svelte';
-    import Timeline from '$lib/Timeline.svelte';
+    import Header from '$lib/components/Header.svelte';
+    import Map from '$lib/components/Map.svelte';
+    import Timeline from '$lib/components/Timeline.svelte';
     
-    let mapContainer;
 </script>
 
 <main>
-    <div bind:this={mapContainer} class="map-container">
+    <div class="map-container">
         <Map/>
         <Header/>
     </div>
