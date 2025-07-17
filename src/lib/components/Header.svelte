@@ -7,6 +7,9 @@
 
 	import Geocoder from './Geocoder.svelte';
 	import { mapStore } from '../../stores/mapStore.svelte.js';
+	import LanguageToggle from '$lib/components/LanguageToggle.svelte';
+	import { t } from '../../stores/i18n/i18n.svelte';
+	import { ABOUT_BUTTON_TEXT, SEARCH_BAR_PLACEHOLDER_TEXT, SHARE_BUTTON_TEXT } from '../../stores/i18n/translations';
 
 	let searchQuery = $state('');
 	let searchAutofill = $state('');
@@ -52,7 +55,7 @@
 		<input
 			type="text"
 			bind:value={searchQuery}
-			placeholder="Zoek op de kaart"
+			placeholder={t(SEARCH_BAR_PLACEHOLDER_TEXT)}
 			class="search-bar"
 			on:keydown={(e) => {
         if (e.key === 'Enter' && searchAutofill) {
@@ -137,12 +140,13 @@
 	<div class="buttons">
 		<button class="button" on:click={toggleAboutPage}>
 			<MapTrifold class="icon size-4 relative right-[5px]"></MapTrifold>
-			Over WaterTijdReis
+			{t(ABOUT_BUTTON_TEXT)}
 		</button>
 		<button class="button" on:click={share}>
 			<Export class="icon size-4 relative right-[5px]"></Export>
-			Deel
+			{t(SHARE_BUTTON_TEXT)}
 		</button>
+		<LanguageToggle />
 	</div>
 </div>
 
