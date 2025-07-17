@@ -134,6 +134,7 @@ export class WSK {
                         const map = getOrCreateMap(sourceId);
                         map.edition = edition;
                         map.metadata = {};
+                        map.metadata.label = item.label.none;
                         for (let i of item.metadata) {
                             const label = i.label.en;
                             const value = i.value.en || i.value.cy; // TODO: waarom is er een item met cy?
@@ -163,16 +164,15 @@ export class WSK {
                             }
                         });
                     })
-                    .then(() => {
-                        loadMetadata()
-                            .then(metadata => {
-                                metadata.flat().forEach(item => {
-                                    if (!item.mapId) return;
-
-                                    const map = getOrCreateMap(item.mapId);
-                                    if(map.metadata) map.metadata.titel = item.titel;
-                                })
-                            })
+                    .then(async () => {
+                        const res = await fetch('/bladtitels.json');
+                        const bladtitels = await res.json();
+                        for(let map of this.maps) {
+                            if(!map.metadata || !map.metadata.label) continue;
+                            const mapLabel = +map.metadata.label[0].split('.')[0];
+                            const titel = bladtitels.find(i => i['map_label'] == mapLabel);
+                            if(titel) map.metadata.titel = titel.name;
+                        }
                     })
             });
 

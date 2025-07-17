@@ -176,12 +176,11 @@
 			this.image.onerror = err => console.error(`Failed to load image: ${this.imageUrl}`, err);
 			this.image.onload = () => this.imageLoaded = true;
 
-			this.rotation = mapThumbnailRotation * (Math.random() - 0.5);
+      this.opacity = 1;
+      this.rotation = mapThumbnailRotation * (Math.random() - 0.5);
 
-			// find out which edition this map belongs
-			// TODO: this should be easier
-			this.edition = map.edition;
-			this.year = map.year;
+      this.edition = map.edition;
+      this.year = map.year;
 
 			this.visible = true;
 			this.animating = {};
@@ -256,7 +255,11 @@
 			ctx.rotate(this.animating.rotation ? this.animating.rotation.getValue() : this.rotation);
 			ctx.translate(-this.thumbnailCenterX, -this.thumbnailCenterY);
 
-			if (this.imageLoaded) ctx.drawImage(this.image, ...this.thumbnailBB);
+      if(!this.warpedMap.visible) this.opacity = .2;
+      else this.opacity = 1;
+      if(this.opacity < 1) ctx.globalAlpha = this.opacity;
+      if(this.imageLoaded) ctx.drawImage(this.image, ...this.thumbnailBB);
+      if(this.opacity < 1) ctx.globalAlpha = 1;
 
 			if (this.hovering) {
 				ctx.save();
@@ -374,10 +377,12 @@
 
 		setInterval(() => { // TODO: netter!
 
-			const mapsInViewport = mapStore.waterStaatsKaarten.maps.filter(map => {
-				return mapStore.waterStaatsKaarten.layer.renderer.mapsInViewport.has(map.id);
-			});
+      let mapsInViewport = mapStore.waterStaatsKaarten.maps.filter(map => {
+        return mapStore.waterStaatsKaarten.layer.renderer.mapsInViewport.has(map.id)
+      })
 
+      // mapsInViewport = mapsInViewport.filter(i => i.warpedMap.visible);
+      
 
 			const newMapThumbnails = new Map();
 			mapsInViewport.forEach(map => {

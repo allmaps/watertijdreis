@@ -1,0 +1,250 @@
+[
+  {
+    "map_label": 1,
+    "name": "TERSCHELLING"
+  },
+  {
+    "map_label": 2,
+    "name": "SCHIERMONNIKOOG"
+  },
+  {
+    "map_label": 3,
+    "name": "UITHUIZEN"
+  },
+  {
+    "map_label": 4,
+    "name": "VLIELAND"
+  },
+  {
+    "map_label": 5,
+    "name": "HARLINGEN"
+  },
+  {
+    "map_label": 6,
+    "name": "LEEUWARDEN"
+  },
+  {
+    "map_label": 7,
+    "name": "GRONINGEN"
+  },
+  {
+    "map_label": 8,
+    "name": "NIEUWESCHANS"
+  },
+  {
+    "map_label": 9,
+    "name": "DEN HELDER"
+  },
+  {
+    "map_label": 10,
+    "name": "SNEEK"
+  },
+  {
+    "map_label": 11,
+    "name": "HEERENVEEN"
+  },
+  {
+    "map_label": 12,
+    "name": "ASSEN"
+  },
+  {
+    "map_label": 13,
+    "name": "BOURTANGE"
+  },
+  {
+    "map_label": 14,
+    "name": "MEDEMBLIK"
+  },
+  {
+    "map_label": 15,
+    "name": "STAVOREN"
+  },
+  {
+    "map_label": 16,
+    "name": "STEENWIJK"
+  },
+  {
+    "map_label": 17,
+    "name": "BEILEN"
+  },
+  {
+    "map_label": 18,
+    "name": "ROSWINKEL"
+  },
+  {
+    "map_label": 19,
+    "name": "ALKMAAR"
+  },
+  {
+    "map_label": 20,
+    "name": "ENKHUIZEN"
+  },
+  {
+    "map_label": 21,
+    "name": "ZWOLLE"
+  },
+  {
+    "map_label": 22,
+    "name": "COEVORDEN"
+  },
+  {
+    "map_label": 23,
+    "name": "NIEUW-SCHOONEBEEK"
+  },
+  {
+    "map_label": 24,
+    "name": "HILLEGOM"
+  },
+  {
+    "map_label": 25,
+    "name": "AMSTERDAM"
+  },
+  {
+    "map_label": 26,
+    "name": "HARDERWIJK"
+  },
+  {
+    "map_label": 27,
+    "name": "HATTEM"
+  },
+  {
+    "map_label": 28,
+    "name": "ALMELO"
+  },
+  {
+    "map_label": 29,
+    "name": "DENEKAMP"
+  },
+  {
+    "map_label": 30,
+    "name": "'S GRAVENHAGE"
+  },
+  {
+    "map_label": 31,
+    "name": "UTRECHT"
+  },
+  {
+    "map_label": 32,
+    "name": "AMERSFOORT"
+  },
+  {
+    "map_label": 33,
+    "name": "ZUTPHEN"
+  },
+  {
+    "map_label": 34,
+    "name": "GROENLO"
+  },
+  {
+    "map_label": 35,
+    "name": "GLANERBRUG"
+  },
+  {
+    "map_label": 36,
+    "name": "GOEDEREEDE"
+  },
+  {
+    "map_label": 37,
+    "name": "ROTTERDAM"
+  },
+  {
+    "map_label": 38,
+    "name": "GORINCHEM"
+  },
+  {
+    "map_label": 39,
+    "name": "RHENEN"
+  },
+  {
+    "map_label": 40,
+    "name": "ARNHEM"
+  },
+  {
+    "map_label": 41,
+    "name": "AALTEN"
+  },
+  {
+    "map_label": 42,
+    "name": "ZIERIKZEE"
+  },
+  {
+    "map_label": 43,
+    "name": "WILLEMSTAD"
+  },
+  {
+    "map_label": 44,
+    "name": "GEERTRUIDENBERG"
+  },
+  {
+    "map_label": 45,
+    "name": "'S HERTOGENBOSCH"
+  },
+  {
+    "map_label": 46,
+    "name": "VIERLINGSBEEK"
+  },
+  {
+    "map_label": 47,
+    "name": "CADZAND"
+  },
+  {
+    "map_label": 48,
+    "name": "MIDDELBURG"
+  },
+  {
+    "map_label": 49,
+    "name": "BERGEN OP ZOOM"
+  },
+  {
+    "map_label": 50,
+    "name": "BREDA"
+  },
+  {
+    "map_label": 51,
+    "name": "EINDHOVEN"
+  },
+  {
+    "map_label": 52,
+    "name": "VENLO"
+  },
+  {
+    "map_label": 53,
+    "name": "SLUIS"
+  },
+  {
+    "map_label": 54,
+    "name": "NEUZEN"
+  },
+  {
+    "map_label": 55,
+    "name": "HULST"
+  },
+  {
+    "map_label": 56,
+    "name": "HERENTALS"
+  },
+  {
+    "map_label": 57,
+    "name": "VALKENSWAARD"
+  },
+  {
+    "map_label": 58,
+    "name": "ROERMOND"
+  },
+  {
+    "map_label": 59,
+    "name": "PEER"
+  },
+  {
+    "map_label": 60,
+    "name": "SITTARD"
+  },
+  {
+    "map_label": 61,
+    "name": "MAASTRICHT"
+  },
+  {
+    "map_label": 62,
+    "name": "HEERLEN"
+  }
+]

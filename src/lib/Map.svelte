@@ -1,3 +1,4 @@
+<link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' />
 <script>
 	import maplibre from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
@@ -58,11 +59,23 @@
 			center: [4.55, 52.23],
 			zoom: 6,
 			maxPitch: 0,
-			preserveDrawingBuffer: true // TODO: is this a requirement for allmaps?
+			preserveDrawingBuffer: true,
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: false
 		});
 
+		m.addControl(new maplibre.NavigationControl({
+			visualizePitch: true,
+			visualizeRoll: true,
+			showZoom: true,
+			showCompass: true
+		}), 'bottom-right');
+
 		m.on('load', () => {
-			waterStaatsKaarten = mapStore.waterStaatsKaarten = new WSK(m);
+
+      document.querySelector('.maplibregl-ctrl-bottom-right').style.bottom = '170px';
+      		waterStaatsKaarten = mapStore.waterStaatsKaarten = new WSK(m);
 
 			initWarpedMapHighlight();
 			initWarpedMapFullHighlight();
@@ -260,7 +273,7 @@
 		map.setLayoutProperty('waterschapsgrenzen', 'visibility', visible ? 'visible' : 'none');
 	}
 
-	const MAP_HIGHLIGHT_TRANSITION_DURATION = 500;
+	const MAP_HIGHLIGHT_TRANSITION_DURATION = 250;
 
 	function initWarpedMapHighlight() {
 		map.addSource('warpedmap-highlight', {
@@ -435,7 +448,6 @@
 			}, MAP_HIGHLIGHT_TRANSITION_DURATION);
 		}
 	}
-
 	function showWarpedMapFullOutline(polygonGeoJson) {
 		const source = map.getSource('warpedmap-full-highlight');
 		if (!source) return;
@@ -474,11 +486,11 @@
 		}
 	}
 
-	let lastHoveredMap = null;
-	let hoverTime = 500;
-	let hoverTimeLonger = 2000;
-	let hoverTimeout = null;
-	let hoverTimeoutLonger = null;
+  let lastHoveredMap = null;
+  let hoverTime = MAP_HIGHLIGHT_TRANSITION_DURATION;
+  let hoverTimeLonger = 2000;
+  let hoverTimeout = null;
+  let hoverTimeoutLonger = null;
 
 	let selectedMapTime = null;
 	let selectedMapZIndex = null;
