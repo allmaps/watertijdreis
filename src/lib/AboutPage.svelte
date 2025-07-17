@@ -11,9 +11,9 @@
 
 </script>
 
-<div class="modal-overlay" role="button" tabindex="0" on:click="{closeModal}" on:keydown={closeModal}>
-	<div class="modal" on:click|stopPropagation>
-		<button class="close-button" on:click={closeModal} aria-label="Sluiten">
+<div class="modal-overlay" role="button" tabindex="0" onclick={closeModal} onkeydown={closeModal}>
+	<div class="modal" onclick={(e: Event) => e.stopPropagation()}>
+		<button class="close-button" onclick={closeModal} aria-label="Sluiten">
 			<i data-feather="x" class="icon"></i>
 		</button>
 		<h1>Over deze applicatie</h1>
