@@ -12,6 +12,9 @@ export default defineConfig({
 		hmr: false
 	},
 	test: {
+		onStackTrace({ method, file, line, column }) {
+			return false
+		},
 		workspace: [
 			{
 				extends: './vite.config.ts',
