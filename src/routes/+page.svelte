@@ -6,6 +6,7 @@
 
     import Header from '$lib/Header.svelte';
     import Tabs from '$lib/Tabs.svelte';
+    import KaartvelOverlay from '$lib/KaartvelOverlay.svelte';
 
 
     let map = $state();
@@ -287,6 +288,7 @@ function addDots(map, warpedMapLayer, color = 'red') {
         width: 100%;
         height: 100vh;
         overflow: hidden;
+        z-index: 0;
     }
 
     #map, #map-compare {
@@ -327,6 +329,7 @@ function addDots(map, warpedMapLayer, color = 'red') {
 </style>
 
 <Header></Header>
+<KaartvelOverlay></KaartvelOverlay>
 
 <div id='map-container'>
     <div id='map'></div>

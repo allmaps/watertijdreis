@@ -170,6 +170,7 @@
     overflow-x: auto;
     gap: 0.5rem;
     scrollbar-width: thin;
+    width: 10vw;
   }
 
   .scroll-container::-webkit-scrollbar {

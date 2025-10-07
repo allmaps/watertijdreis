@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
     import Timeline from "./Timeline.svelte";
     import Thumbnails from "./Thumbnails.svelte";
+    import { Select } from"bits-ui";
+    import { createEventDispatcher, onMount } from 'svelte';
     
-    import { Images, ShareFat, Stack, MapTrifold, ArrowsOutCardinal, ArrowsOutLineHorizontal, MagnifyingGlass, MagnifyingGlassPlus, MagnifyingGlassMinus, NavigationArrow } from "phosphor-svelte";
+    import { Images, CopySimple, CaretDoubleDown, ArrowArcRight, ListNumbers, XSquare, CaretUpDown, CaretUp, CaretDown, CaretRight, CaretLeft, Check, CaretDoubleUp, ShareFat, Stack, MapTrifold, ArrowsOutCardinal, ArrowsOutLineHorizontal, MagnifyingGlass, MagnifyingGlassPlus, MagnifyingGlassMinus, NavigationArrow} from "phosphor-svelte";
 
     let { map, mapCompare, showCompareMap, hideCompareMap, setAnnotationUrl } = $props();
     let mapInitialized = $state(false);
@@ -37,6 +39,48 @@
         if(map && mapRotation) map.setBearing(parseInt(mapRotation));
     })
 
+    const typekaarten = [
+    { typeValue: "WSK", label: "Waterstaatskaart" },
+    { typeValue: "HWP", label: "Hydrologische Waarnemingspunten" },
+    { typeValue: "WVE", label: "Watervoorzieningsenheden" }
+  ];
+ 
+  let typeValue: string = $state("");
+  const selectedLabel1 = $derived(
+    typeValue
+      ? typekaarten.find((typekaart) => typekaart.typeValue === typeValue)?.label
+      : "Kies een type kaartvel"
+  );
+
+  const edities = [
+    { value2: "1e", label: "1e Editie" },
+    { value2: "2e", label: "2e Editie" },
+    { value2: "3e", label: "3e Editie" }
+  ];
+ 
+  let value2 = $state<string>("");
+  const selectedLabel2 = $derived(
+    value2
+      ? edities.find((editie) => editie.value2 === value2)?.label
+      : "Bekijk een andere editie"
+  );
+
+   const achtergrondkaarten = [
+    { value: "ahn", label: "Actueel Hoogtebestand" },
+    { value: "km", label: "Kilometer (km)" },
+    { value: "ft", label: "Voet (ft)" },
+    { value: "mi", label: "Mijl (mi)" }
+  ];
+
+  let achtergrondValue = $state<string>("");
+  const selectedAchtergrond = $derived(() =>
+    achtergrondValue
+      ? achtergrondkaarten.find((a) => a.value === achtergrondValue)?.label
+      : "Kies een achtergrondkaart"
+  );
+
+  const dispatch = createEventDispatcher();
+
 </script>
 
 <div id="tabs-container" class:is-hidden={isHidden}>
@@ -56,13 +100,15 @@
         <button onclick={() => selectTab('tab4')} class:selected={selectedTab === 'tab4'}>
             <Images size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>In Beeld</span>
-            <span id="counter">52</span>
+            <span id="counter2">46</span>
+            <span id="counter1">39</span>
         </button>
         <button onclick={() => selectTab('tab5')} class:selected={selectedTab === 'tab5'}>
             <ShareFat size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>Exporteren</span>
         </button>
     </div>
+
     <div id="content">
         {#if selectedTab === 'tab1'}
             <div id="button-container">
@@ -180,8 +226,118 @@
             </div>
         {:else if selectedTab === 'tab4'}
 
-            <Thumbnails></Thumbnails>
-        {:else if selectedTab === 'tab5'}
+            <!-- <Thumbnails></Thumbnails> -->
+           <!-- <div class="w-10 h-11  pl-4 pt-2 justify-center text-neutral-500 text-s font-light font-['Inter']">
+            Klik op een kaart in de lijst of op het scherm om hem te openen!</div> -->
+       <div id="select-container" class="with-icon relative">
+                <label for="eenheid">Type Kaartvel</label>
+       <Select.Root
+  type="single"
+  onValueChange={(v) => (typeValue = v)}
+  items={typekaarten}
+  allowDeselect={true}
+>
+  <Select.Trigger
+    class="h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-[220px] touch-none select-none items-center border px-[11px] text-sm transition-colors px-4px"
+    aria-label="Kies een type kaartvel"
+  >
+    <CopySimple class="text-muted-foreground mr-[9px] size-6" />
+    {selectedLabel1}
+    <CaretUpDown class="text-muted-foreground ml-auto size-6" />
+  </Select.Trigger>
+  <Select.Portal>
+    <Select.Content
+      class="focus-override z-[9999] border-muted bg-background shadow-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-hidden z-50 max-h-[var(--bits-select-content-available-height)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] select-none rounded-xl border px-1 py-3 data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
+      sideOffset={10}
+    >
+      <Select.ScrollUpButton class="flex w-full items-center justify-center">
+        <CaretDoubleUp class="size-3" />
+      </Select.ScrollUpButton>
+      <Select.Viewport class="p-1">
+        {#each typekaarten as typekaart, i (i + typekaart.typeValue)}
+          <Select.Item
+            class="rounded-button data-highlighted:bg-muted outline-hidden data-disabled:opacity-50 flex h-10 w-full select-none items-center py-3 pl-5 pr-1.5 text-sm capitalize"
+            value={typekaart.typeValue}
+            label={typekaart.label}
+            disabled={typekaart.disabled}
+          >
+            {#snippet children({ selected })}
+              {typekaart.label}
+              {#if selected}
+                <div class="ml-auto">
+                  <Check aria-label="check" />
+                </div>
+              {/if}
+            {/snippet}
+          </Select.Item>
+        {/each}
+      </Select.Viewport>
+      <Select.ScrollDownButton class="flex w-full items-center justify-center">
+        <CaretDoubleDown class="size-3" />
+      </Select.ScrollDownButton>
+    </Select.Content>
+  </Select.Portal>
+</Select.Root>
+</div>
+
+<div id="select-container" class="with-icon relative">
+                <label for="eenheid">Editie</label>
+<Select.Root
+  type="single"
+  onValueChange={(v) => (value2 = v)}
+  items={edities}
+  allowDeselect={true}
+>
+  <Select.Trigger
+    class="h-input rounded-9px border-border-input bg-background data-placeholder:text-foreground-alt/50 inline-flex w-[220px] touch-none select-none items-center border px-[11px] text-sm transition-colors p-5px"
+    aria-label="Kies een type kaartvel"
+  >
+    <CopySimple class="text-muted-foreground mr-[9px] size-6" />
+    {selectedLabel2}
+    <CaretUpDown class="text-muted-foreground ml-auto size-6" />
+  </Select.Trigger>
+  <Select.Portal>
+    <Select.Content
+      class="focus-override z-[9999] border-muted bg-background shadow-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-hidden z-50 max-h-[var(--bits-select-content-available-height)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] select-none rounded-xl border px-1 py-3 data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1"
+      sideOffset={10}
+    >
+      <Select.ScrollUpButton class="flex w-full items-center justify-center">
+        <CaretDoubleUp class="size-3" />
+      </Select.ScrollUpButton>
+      <Select.Viewport class="p-1">
+        {#each edities as editie, i (i + editie.value2)}
+          <Select.Item
+            class="rounded-button data-highlighted:bg-muted outline-hidden data-disabled:opacity-50 flex h-10 w-full select-none items-center py-3 pl-5 pr-1.5 text-sm capitalize"
+            value={editie.value2}
+            label={editie.label}
+            disabled={editie.disabled}
+          >
+            {#snippet children({ selected })}
+              {editie.label}
+              {#if selected}
+                <div class="ml-auto">
+                  <Check aria-label="check" />
+                </div>
+              {/if}
+            {/snippet}
+          </Select.Item>
+        {/each}
+      </Select.Viewport>
+      <Select.ScrollDownButton class="flex w-full items-center justify-center">
+        <CaretDoubleDown class="size-3" />
+      </Select.ScrollDownButton>
+    </Select.Content>
+  </Select.Portal>
+</Select.Root>
+</div>
+
+<div id="button-container">
+                <button style:width="260px">
+                    <MagnifyingGlass size="18" class="inline relative top-[-1px]" />
+                    Kaartvel op een andere locatie...
+                </button>
+            </div>
+            {:else if selectedTab === 'tab5'}
             <p>Exporteren content...</p>
         {/if}
     </div>
@@ -210,7 +366,7 @@
         width: calc(100% - --tabs-side-margin * 2);
         transition: transform 0.3s ease;
         color: var(--foreground-color);
-
+        z-index: 1000;
         user-select: none;
     }
 
@@ -267,8 +423,15 @@
         opacity: 1;
     }
 
-    #tabs button #counter {
-        background: #336;
+    #tabs button #counter1 {
+        background: #aa44ff;
+        color: white;
+        border-radius: 8px;
+        padding: 2px 5px;
+    }
+
+    #tabs button #counter2 {
+        background: #f4a;
         color: white;
         border-radius: 8px;
         padding: 2px 5px;
@@ -282,6 +445,7 @@
     #input-container, #select-container {
         display: inline-flex;
         flex-direction: column;
+        padding-left: 5px; 
     }
 
     #input-container label, #select-container label {
