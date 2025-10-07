@@ -329,7 +329,7 @@ function addDots(map, warpedMapLayer, color = 'red') {
 </style>
 
 <Header></Header>
-<KaartvelOverlay></KaartvelOverlay>
+<!-- <KaartvelOverlay></KaartvelOverlay> -->
 
 <div id='map-container'>
     <div id='map'></div>

@@ -87,8 +87,6 @@
   <div class="kaartvel-overlay">
   <div class="kaartvel">
     
- 
-    <div class="left-rect relative">
   <img src="map.png" alt="map" class="max-w-[90%] max-h-[90%]" />
 
 
@@ -104,16 +102,9 @@
     class="absolute bottom-5 right-3 cursor-pointer text-pink-500 hover:text-pink-500 transition-colors"
     title="Achterkant vel bekijken"
   /> -->
-    </div>
+    
 
  
-    <div class="right-rect">
-      
-      
-
-
- 
-    </div>
-
+    
   </div>
 </div>
