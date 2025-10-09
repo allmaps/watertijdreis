@@ -1,15 +1,24 @@
 <script>
     import Timeline from "./Timeline.svelte";
     import Thumbnails from "./Thumbnails.svelte";
-    
-    import { Images, ShareFat, Stack, MapTrifold, ArrowsOutCardinal, ArrowsOutLineHorizontal, MagnifyingGlass, MagnifyingGlassPlus, MagnifyingGlassMinus, NavigationArrow } from "phosphor-svelte";
+    import { 
+        Images, 
+        ShareFat, 
+        Stack, 
+        MapTrifold, 
+        ArrowsOutCardinal, 
+        ArrowsOutLineHorizontal, 
+        MagnifyingGlass, 
+        MagnifyingGlassPlus, 
+        MagnifyingGlassMinus, 
+        NavigationArrow 
+    } from "phosphor-svelte";
 
-    let { map, mapCompare, showCompareMap, hideCompareMap, setAnnotationUrl } = $props();
+    let { map, compareMap, isComparing = $bindable(), setAnnotationUrl } = $props();
+
     let mapInitialized = $state(false);
     let mapRotation = $state('');
     let mapScale = $state('');
-
-    setTimeout(() => console.log(map), 500);
 
     let selectedTab = $state('tab1');
     let isHidden = $state(false);
@@ -18,23 +27,34 @@
 
     function selectTab(tab) {
         if(tab == selectedTab) isHidden = !isHidden;
-        if(tab == 'tab3') showCompareMap();
-        else hideCompareMap();
+        else isHidden = false;
+        isComparing = tab == 'tab3';
 
         timelineHidden = !tabsWithTimeline.includes(tab);
         selectedTab = tab;
     }
 
+    let mapsInViewport = $state(0);
+    let mapsInViewportCompare = $state(0);
+    setInterval(() => { // TODO: beter
+        if(map && map.warpedMapLayer && map.warpedMapLayer.layer.renderer) {
+            mapsInViewport = map.warpedMapLayer.layer.renderer.mapsInViewport.size;
+        }
+        if(compareMap && compareMap.warpedMapLayer && compareMap.warpedMapLayer.layer.renderer) {
+            mapsInViewportCompare = compareMap.warpedMapLayer.layer.renderer.mapsInViewport.size;
+        }
+    }, 33);
+
     $effect(() => {
         if(map && !mapInitialized) {
             mapInitialized = true;
-            map.on('move', () => {
-                mapScale = '1:' + (40075016.686 / (256 * 2**map.getZoom())).toFixed(0);
-                mapRotation = `${map.getBearing()}°`;
+            map.maplibreInstance.on('move', () => {
+                mapScale = '1:' + (40075016.686 / (256 * 2**map.maplibreInstance.getZoom())).toFixed(0);
+                mapRotation = `${map.maplibreInstance.getBearing()}°`;
             });
-            map.setBearing(0); // Just to update on('move')
+            map.maplibreInstance.setBearing(0); // Just to update on('move')
         }
-        if(map && mapRotation) map.setBearing(parseInt(mapRotation));
+        if(map && mapRotation) map.maplibreInstance.setBearing(parseInt(mapRotation));
     })
 
 </script>
@@ -56,7 +76,10 @@
         <button onclick={() => selectTab('tab4')} class:selected={selectedTab === 'tab4'}>
             <Images size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>In Beeld</span>
-            <span id="counter">52</span>
+            <span id="counter" style:background={'#f4a'}>{mapsInViewport}</span>
+            {#if isComparing}
+                <span id="counter" style:background={'#a4f'}>{mapsInViewportCompare}</span>
+            {/if}
         </button>
         <button onclick={() => selectTab('tab5')} class:selected={selectedTab === 'tab5'}>
             <ShareFat size="18" class="inline mr-1 relative top-[-1px]" />    

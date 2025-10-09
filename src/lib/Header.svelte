@@ -1,11 +1,16 @@
-<script>
-	import { ShareNetwork, Question } from "phosphor-svelte";
+<script lang="ts">
+	import { Waves, ShareNetwork, Question } from "phosphor-svelte";
+
+    let wavesFlipped: boolean = $state(true);
+    setInterval(() => wavesFlipped = !wavesFlipped, 500);
 </script>
 
 <div>
+    <Waves size={20} weight="bold" class={`inline-block relative top-[-2px] mx-1 transform ${wavesFlipped ? '-scale-x-100' : ''}`}></Waves>
     Watertijdreis
-    <Question size={20} class="relative top-[-2px] mx-1" style="display: inline-block" />
-    <ShareNetwork size={20} class="relative top-[-2px] mx-1" style="display: inline-block" />
+    <span class="opacity-50 relative top-[-2x] mx-1">|</span>
+    <Question size={20} class="inline-block relative top-[-2px] mx-1" />
+    <ShareNetwork size={20} class="inline-block relative top-[-2px] mx-1" />
 </div>
 
 <style>
