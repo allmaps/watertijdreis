@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Toast from "./Toast.svelte";
     import { Tween, Spring } from "svelte/motion";
     import { cubicOut } from "svelte/easing";
 	import { Eye, ImagesSquare } from "phosphor-svelte";
@@ -275,5 +274,3 @@
         {/each}
     </div>
 </div>
-
-<Toast content={`Je ziet de kaarten gemaakt tussen ${Math.round(selectionStart)} en ${Math.round(selectionEnd)}`}></Toast>
