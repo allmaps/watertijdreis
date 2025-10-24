@@ -1,20 +1,27 @@
 <script>
+    import { fade } from "svelte/transition";
+    
     import Timeline from "./Timeline.svelte";
+    import Timeline2 from "./Timeline2.svelte";
     import Thumbnails from "./Thumbnails.svelte";
     import { 
         Images, 
         ShareFat, 
         Stack, 
+        FilePlus,
+        HandPointing,
         MapTrifold, 
         ArrowsOutCardinal, 
         ArrowsOutLineHorizontal, 
         MagnifyingGlass, 
         MagnifyingGlassPlus, 
         MagnifyingGlassMinus, 
-        NavigationArrow 
+        NavigationArrow, 
+		ClockCounterClockwise
+
     } from "phosphor-svelte";
 
-    let { map, compareMap, isComparing = $bindable(), setAnnotationUrl } = $props();
+    let { map, compareMap, isComparing = $bindable() } = $props();
 
     let mapInitialized = $state(false);
     let mapRotation = $state('');
@@ -61,9 +68,13 @@
 
 <div id="tabs-container" class:is-hidden={isHidden}>
     <div id="tabs">
-        <button onclick={() => selectTab('tab1')} class:selected={selectedTab === 'tab1'}>
-            <ArrowsOutCardinal size="18" class="inline mr-1 relative top-[-1px]" />    
+        <!-- <button onclick={() => selectTab('tab1')} class:selected={selectedTab === 'tab1'}>
+            <HandPointing size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>Navigatie</span>
+        </button> -->
+        <button onclick={() => selectTab('tab1')} class:selected={selectedTab === 'tab1'}>
+            <ClockCounterClockwise size="18" weight="bold" class="inline mr-1 relative top-[-1px]" />    
+            <span>Tijdreizen</span>
         </button>
         <button onclick={() => selectTab('tab2')} class:selected={selectedTab === 'tab2'}>
             <Stack size="18" class="inline mr-1 relative top-[-1px]" />    
@@ -73,53 +84,57 @@
             <ArrowsOutLineHorizontal size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>Vergelijken</span>
         </button>
-        <button onclick={() => selectTab('tab4')} class:selected={selectedTab === 'tab4'}>
+        <button class="text-[#f4a] opacity-100" onclick={() => selectTab('tab5')} class:selected={selectedTab === 'tab5'}>
+            <FilePlus size="18" weight="regular" class="inline mr-1 relative top-[-1px]" />    
+            <span>Blad selecteren...</span>
+        </button>
+        <!-- <button onclick={() => selectTab('tab4')} class:selected={selectedTab === 'tab4'}>
             <Images size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>In Beeld</span>
             <span id="counter" style:background={'#f4a'}>{mapsInViewport}</span>
             {#if isComparing}
                 <span id="counter" style:background={'#a4f'}>{mapsInViewportCompare}</span>
             {/if}
-        </button>
-        <button onclick={() => selectTab('tab5')} class:selected={selectedTab === 'tab5'}>
+        </button> -->
+        <!-- <button onclick={() => selectTab('tab5')} class:selected={selectedTab === 'tab5'}>
             <ShareFat size="18" class="inline mr-1 relative top-[-1px]" />    
             <span>Exporteren</span>
-        </button>
+        </button> -->
     </div>
     <div id="content">
         {#if selectedTab === 'tab1'}
-            <div id="button-container">
-                <button onclick={() => map.zoomIn()}>
-                    <MagnifyingGlassPlus size="18" class="inline relative top-[-1px]" />
-                </button>
-                <button onclick={() => map.zoomOut()}>
-                    <MagnifyingGlassMinus size="18" class="inline relative top-[-1px]" />
-                </button>
-            </div>
+                <div id="button-container">
+                    <button onclick={() => map.zoomIn()}>
+                        <MagnifyingGlassPlus size="18" class="inline relative top-[-1px]" />
+                    </button>
+                    <button onclick={() => map.zoomOut()}>
+                        <MagnifyingGlassMinus size="18" class="inline relative top-[-1px]" />
+                    </button>
+                </div>
 
-            <div id="input-container">
-                <label for="schaal">Schaal</label>
-                <input name="schaal" type="text" bind:value={mapScale}>
-            </div>
+                <div id="input-container">
+                    <label for="schaal">Schaal</label>
+                    <input name="schaal" type="text" bind:value={mapScale}>
+                </div>
 
-            <div id="input-container">
-                <label for="rotatie">Rotatie</label>
-                <input name="rotatie" type="text" bind:value={mapRotation}>
-            </div>
+                <div id="input-container">
+                    <label for="rotatie">Rotatie</label>
+                    <input name="rotatie" type="text" bind:value={mapRotation}>
+                </div>
 
-            <div id="button-container">
-                <button style:width="165px">
-                    <MagnifyingGlass size="18" class="inline relative top-[-1px]" />
-                    Locatie zoeken...
-                </button>
-            </div>
+                <div id="button-container">
+                    <button style:width="165px">
+                        <MagnifyingGlass size="18" class="inline relative top-[-1px]" />
+                        Locatie zoeken...
+                    </button>
+                </div>
 
-            <div id="button-container">
-                <button>
-                    <NavigationArrow size="18" class="inline relative top-[-1px]" />
-                    Naar mijn locatie
-                </button>
-            </div>
+                <div id="button-container">
+                    <button>
+                        <NavigationArrow size="18" class="inline relative top-[-1px]" />
+                        Naar mijn locatie
+                    </button>
+                </div>
         {:else if selectedTab === 'tab2'}
             <div id="select-container" class="with-icon relative">
                 <label for="eenheid">Achtergrondkaart</label>
@@ -137,7 +152,7 @@
                 <select 
                     name="eenheid" 
                     style:width="220px"
-                    onchange={(e) => setAnnotationUrl(map, e.target.value - 1)}    
+                    onchange={(e) => map.warpedMapLayer.setEditionByIndex(e.target.value - 1)}    
                 >
                     <option value="1">1e editie - Waterstaatskaart</option>
                     <option value="2">2e editie - Waterstaatskaart</option>
@@ -173,7 +188,7 @@
                 <select 
                     name="eenheid" 
                     style:width="220px"
-                    onchange={(e) => setAnnotationUrl(mapCompare, e.target.value - 1)}
+                    onchange={(e) => compareMap.warpedMapLayer.setEditionByIndex(e.target.value - 1)}
                     >
                     <option value="1" selected>1e editie - Waterstaatskaart</option>
                     <option value="2">2e editie - Waterstaatskaart</option>
@@ -201,15 +216,15 @@
                     <option value="spyglass">Loep</option>
                 </select>
             </div>
-        {:else if selectedTab === 'tab4'}
+        <!-- {:else if selectedTab === 'tab4'}
 
-            <Thumbnails></Thumbnails>
+            <Thumbnails></Thumbnails> -->
         {:else if selectedTab === 'tab5'}
-            <p>Exporteren content...</p>
+            <p>Selecteer een blad op de kaart.</p>
         {/if}
     </div>
     <div id="timeline" class="bg-[#f3f3ffcc]" class:hidden={timelineHidden}>
-        <Timeline></Timeline>
+        <Timeline2></Timeline2>
     </div>
 </div>
 
@@ -233,7 +248,6 @@
         width: calc(100% - --tabs-side-margin * 2);
         transition: transform 0.3s ease;
         color: var(--foreground-color);
-
         user-select: none;
     }
 
@@ -288,6 +302,8 @@
     #tabs button.selected {
         background: var(--background-color);
         opacity: 1;
+        border: 2px solid var(--foreground-highlight);
+        border-bottom: none;
     }
 
     #tabs button #counter {

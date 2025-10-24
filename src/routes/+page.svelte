@@ -1,7 +1,10 @@
 <script lang="ts">
     import Map  from '$lib/Map.svelte'
+    import Map2  from '$lib/Map2.svelte'
     import Header from '$lib/Header.svelte';
     import Tabs from '$lib/Tabs.svelte';
+    import Toast from '$lib/Toast.svelte';
+
     import maplibregl from 'maplibre-gl';
 
     let map = $state<maplibregl.Map | null>(null);
@@ -22,7 +25,7 @@
 </script>
 
 <style>
-  :global(body, html, #svelte) { 
+  :gloal(body, html, #svelte) { 
     height: 100%; 
     user-select: none; 
     overflow: hidden;

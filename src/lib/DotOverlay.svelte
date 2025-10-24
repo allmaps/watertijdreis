@@ -3,6 +3,10 @@
 
     let { map, warpedMapDots, dotsVisible, resizePercent, color = "#f4a", isComparing } = $props();
 
+    setInterval(() => {
+         // TODO: tijdelijk!
+    }, 17);
+
     $effect(() => {
         // setInterval(() => {
         //     console.log(map && map.warpedMapLayer.hoveredMapId, warpedMapDots.map(i => i.id));
@@ -30,6 +34,7 @@
 
     svg .hovered #outer-circle {
         opacity: 1;
+        r: 6;
     }
 
     svg g g:hover #outer-circle {
@@ -68,7 +73,14 @@
         </defs>
         <g clip-path="url(#clip)">
         {#each warpedMapDots as dot}
-            <g class={(dot.id == map.warpedMapLayer.hoveredMapId) ? "hovered" : ""}>
+            <g 
+                onmouseenter={() => {
+                    map.warpedMapLayer.fadeInBBoxOutline(map.maplibreInstance, map.warpedMapLayer.getWarpedMapByID(dot.id), 800);
+                }}
+                onmouseleave={() => {
+                    map.warpedMapLayer.fadeOutBBoxOutline(map.maplibreInstance, map.warpedMapLayer.getWarpedMapByID(dot.id), 800);
+                }}
+                class={(dot.id == map.warpedMapLayer.hoveredMapId) ? "hovered" : ""}>
                 <circle id="outer-circle" cx={dot.pos.x} cy={dot.pos.y} r={4} fill={color} stroke="#fff" stroke-width="2"></circle>
                 <circle id="inner-circle" cx={dot.pos.x} cy={dot.pos.y} r={2} fill="#fff"></circle>
                 <!-- <text font-size="12px" x={dot.pos.x - 65} y={dot.pos.y + 25} class="hover-label">Rotterdam West, 1890</text> -->

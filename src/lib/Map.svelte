@@ -4,6 +4,7 @@
 	import { WarpedMapEventType } from '@allmaps/render';
     import { Dot, Hand, HandGrabbing } from "phosphor-svelte";
 	import DotOverlay from './DotOverlay.svelte';
+	import Map2 from './Map2.svelte';
 
     let { map = $bindable(), compareMap = $bindable(), isComparing } = $props();
 
@@ -71,9 +72,21 @@
         constructor(containerId = 'map', props = {}) {
             this.maplibreInstance = new maplibregl.Map({
                 container: containerId,
-                style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-                center: [5, 52.5],
-                zoom: 7,
+                style: {
+                    version: 8,
+                    sources: {},
+                    layers: [
+                        {
+                            id: "background",
+                            type: "background",
+                            paint: {
+                                "background-color": "#ffffff00"
+                            }
+                        }
+                    ]
+                },
+                center: [5, 51.75],
+                zoom: 6.5,
                 maxPitch: 0,
                 preserveDrawingBuffer: true
             });
@@ -127,6 +140,8 @@
                     id: m.mapId,
                     coordinates: [(m.geoMaskBbox[0] + m.geoMaskBbox[2]) / 2, (m.geoMaskBbox[1] + m.geoMaskBbox[3]) / 2]
                 }});
+
+                console.log(this, map);
             }, 1500);
             if(!props.parentMap) map.on('render', () => {
                 warpedMapDots = this.warpedMapCenters.map(m => { return { id: m.id, pos: map.project(m.coordinates) }})
@@ -185,6 +200,74 @@
                 this.layer.removeGeoreferenceAnnotationByUrl(url);
             }
             this.annotationUrls = [];
+        }
+
+        fadeInBBoxOutline(map, warpedMap, duration = 500) {
+            const id = `bbox-outline-${warpedMap.mapId}`;
+            const bbox = warpedMap.geoMaskBbox; // [minX, minY, maxX, maxY]
+
+            // Maak polygon van bbox
+            const geojson = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[
+                            [bbox[0], bbox[1]],
+                            [bbox[2], bbox[1]],
+                            [bbox[2], bbox[3]],
+                            [bbox[0], bbox[3]],
+                            [bbox[0], bbox[1]]
+                        ]]
+                    },
+                    properties: {}
+                }]
+            };
+
+            // Voeg bron en laag toe als ze nog niet bestaan
+            if (!map.getSource(id)) {
+                map.addSource(id, { type: 'geojson', data: geojson });
+            }
+            if (!map.getLayer(id)) {
+                map.addLayer({
+                    id,
+                    type: 'line',
+                    source: id,
+                    paint: {
+                        'line-color': '#fff',
+                        'line-width': 2,
+                        'line-opacity': 0
+                    }
+                });
+            }
+
+            // Fade-in animatie
+            const start = performance.now();
+            const tick = (now) => {
+                const t = Math.min(1, (now - start) / duration);
+                map.setPaintProperty(id, 'line-opacity', Math.min(1,Math.max(0,t)));
+                if (t < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        fadeOutBBoxOutline(map, warpedMap, duration = 500, removeAfter = true) {
+            const id = `bbox-outline-${warpedMap.mapId}`;
+            if (!map.getLayer(id)) return;
+
+            // Fade-out animatie
+            const start = performance.now();
+            const tick = (now) => {
+                const t = Math.min(1, (now - start) / duration);
+                map.setPaintProperty(id, 'line-opacity', 1 - t);
+                if (t < 1) requestAnimationFrame(tick);
+                else if (removeAfter) {
+                    map.removeLayer(id);
+                    map.removeSource(id);
+                }
+            };
+            requestAnimationFrame(tick);
         }
     }
 
@@ -296,6 +379,8 @@
     onmousewheel={showDots}
 ></svelte:window>
 
+<Map2></Map2>
+
 <div id='map-container' bind:clientWidth={clientWidth} bind:clientHeight={clientHeight}>
     <div 
         id='map'
@@ -305,9 +390,9 @@
         id='map-compare'
         style={`clip-path: inset(0 0 0 ${resizePercentX}%)`}
     ></div>
-    <DotOverlay 
+    <!-- <DotOverlay 
     {map} {warpedMapDots} {dotsVisible} {isComparing} resizePercent={resizePercentX}
-    />
+    /> -->
     <div 
         id="divider"
         onmousedown={() => isResizingCompareMap = true}
