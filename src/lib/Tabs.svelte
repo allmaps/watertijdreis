@@ -1,9 +1,7 @@
 <script>
     import { fade } from "svelte/transition";
-    
-    import Timeline from "./Timeline.svelte";
+
     import Timeline2 from "./Timeline2.svelte";
-    import Thumbnails from "./Thumbnails.svelte";
     import { 
         Images, 
         ShareFat, 
@@ -21,7 +19,7 @@
 
     } from "phosphor-svelte";
 
-    let { map, compareMap, isComparing = $bindable() } = $props();
+    let { mapViewer, compareMap, isComparing = $bindable() } = $props();
 
     let mapInitialized = $state(false);
     let mapRotation = $state('');

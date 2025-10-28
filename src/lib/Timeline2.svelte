@@ -3,60 +3,24 @@
     import { cubicOut } from "svelte/easing";
 	import { Eye, ImagesSquare } from "phosphor-svelte";
 
+    let { mapViewer } = $props();
+
+
+    $effect(() => {
+        if(!mapViewer) return;
+        mapViewer.filterHistoricMapsByYear(Math.floor(selectedYear));
+    });
+
     let width : number = $state(0);
     let height : number = $state(0);
 
-    // let view = $state(new Tween({ start: 1800, end: 1900 }, { duration: 250, easing: cubicOut }));
-    let view = $state(new Spring({ start: 1850, end: 1950 }, { stiffness: 0.1, damping: 0.33 }));
+    let view = $state(new Spring({ start: 1950, end: 2000 }, { stiffness: 0.1, damping: 0.33 }));
+    let selectedYear = $derived((view.current.end + view.current.start) / 2);
 
     let timelineTickColor = $state("#336");
 
-    const MIN_YEAR : number = 1750;
+    const MIN_YEAR : number = 1800;
     const MAX_YEAR : number = 2023;
-
-    let dots = $state([]);
-    // for(let i = 0; i < 50; ++i) {
-    //     dots.push({
-    //         year: Math.random() * 75 + 1850,
-    //         rotation: Math.random() * 10 - 5
-    //     })
-    // }
-
-    let editions = {
-        'editie_1': {
-            name: "Eerste editie",
-            start: 1865,
-            end: 1895,
-            maps: Array.from({ length: 168 }, _ => Math.random() * 30 + 1865)
-        },
-        'editie_2': {
-            name: "Tweede editie",
-            start: 1885,
-            end: 1925,
-            maps: Array.from({ length: 159 }, _ => Math.random() * 40 + 1885)
-        },
-        'editie_3': {
-            name: "Derde editie",
-            start: 1910,
-            end: 1950,
-            maps: Array.from({ length: 134 }, _ => Math.random() * 40 + 1910)
-        },
-        'editie_4': {
-            name: "Vierde editie",
-            start: 1940,
-            end: 1980,
-            maps: Array.from({ length: 136 }, _ => Math.random() * 40 + 1940)
-        },
-        'editie_5': {
-            name: "Vijfde editie",
-            start: 1970,
-            end: 2000, 
-            maps: Array.from({ length: 129 }, _ => Math.random() * 30 + 1970)
-        }
-    }
-
-    let selectionStart : number = $state(1850);
-    let selectionEnd : number = $state(1900);
 
     let isPanning : boolean = $state(false);
     let lastX : number = $state(0);
@@ -71,21 +35,15 @@
 
     function onwheel(e: WheelEvent) {
         e.preventDefault();
-        const zoomFactor = 1 + Math.min(Math.max(e.deltaY / 100, -0.2), 0.2);
-        const cursorYear = xToYear(e.offsetX);
-        if (e.deltaY < 0) {
-            const newSpan = (view.current.end - view.current.start) * zoomFactor;
-            view.target = {
-                start: cursorYear - (cursorYear - view.current.start) * zoomFactor,
-                end: view.current.start + newSpan
-            }
-        } else {
-            const newSpan = (view.current.end - view.current.start) * zoomFactor;
-            view.target = {
-                start: cursorYear - (cursorYear - view.current.start) * zoomFactor,
-                end: view.current.start + newSpan
-            }
-        }
+
+        const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.2), 0.2);
+        const cursor = xToYear(e.offsetX);
+        const { start, end } = view.current;
+
+        const newStart = cursor - (cursor - start) * zoom;
+        const newEnd   = cursor + (end - cursor) * zoom;
+
+        view.target = { start: newStart, end: newEnd };
     }
 
     function onpointerdown(e: PointerEvent) {
@@ -97,8 +55,6 @@
         if (!isPanning) return;
         const dx = e.clientX - lastX;
         const yearDelta = (dx / width) * (view.current.end - view.current.start);
-        // view.target.start -= yearDelta;
-        // view.target.end -= yearDelta;
         view.target = {
             start: view.target.start - yearDelta,
             end: view.target.end - yearDelta
@@ -231,46 +187,111 @@
                 text-anchor="middle"
             >{Math.round((view.current.end + view.current.start) / 2)}</text>
         </g>
+
+        <g>
+            {#if true}
+                {@const start = 1960}
+                {@const end = 1971}
+                {@const height = 80}
+                {@const color = "#333366"}
+            <line 
+                x1={yearToX(start)} 
+                y1={height} 
+                x2={yearToX(end)} 
+                y2={height} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <line 
+                x1={yearToX(start)} 
+                y1={height} 
+                x2={yearToX(start)} 
+                y2={height - 8} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <line 
+                x1={yearToX(end)} 
+                y1={height} 
+                x2={yearToX(end)} 
+                y2={height - 8} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <text 
+                x={yearToX((start + end) / 2)} 
+                y={height + 14} 
+                font-size="12" 
+                font-weight="600" 
+                fill={color}
+                text-anchor="middle">Editie 4</text>
+            {/if}
+        </g>
+        <g>
+            {#if true}
+                {@const start = 1969}
+                {@const end = 1980}
+                {@const height = 83}
+                {@const color = "#333366"}
+            <line 
+                x1={yearToX(start)} 
+                y1={height} 
+                x2={yearToX(end)} 
+                y2={height} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <line 
+                x1={yearToX(start)} 
+                y1={height} 
+                x2={yearToX(start)} 
+                y2={height - 8} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <line 
+                x1={yearToX(end)} 
+                y1={height} 
+                x2={yearToX(end)} 
+                y2={height - 8} 
+                stroke={color + "88"} 
+                stroke-width="1"></line>
+            <text 
+                x={yearToX((start + end) / 2)} 
+                y={height + 14} 
+                font-size="12" 
+                font-weight="600" 
+                fill={color}
+                text-anchor="middle">Editie 5</text>
+            <!-- <image 
+                x={yearToX((start + end) / 2) - 16} 
+                y={height - 40} 
+                width={42} 
+                height={32} 
+                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
+                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image>
+            <image 
+                x={yearToX((start + end) / 2) - 16} 
+                y={height - 40} 
+                width={42} 
+                height={32} 
+                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
+                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image>
+            <image 
+                x={yearToX((start + end) / 2) - 16} 
+                y={height - 40} 
+                width={42} 
+                height={32} 
+                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
+                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image> -->
+            {/if}
+
+            {#each mapViewer?.historicMaps as map, i}
+                {@const height = mapViewer?.historicMaps.slice(0,i).filter(m => m.yearStart == map.yearStart).length * -5 + 65}
+                <rect
+                    x={yearToX(map.yearStart) } 
+                    y={height} 
+                    width={6} 
+                    height={6} 
+                    fill="#3366cc88"
+                    transform={"rotate(" + (Math.random() * 10 - 5) + ", " + (yearToX(map.yearStart) + 3) + ", " + (height + 3) + ")"}
+                ></rect>
+            {/each}
+        </g>
     </svg>
-
-    <div class="editions-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden">
-        {#each Object.values(editions) as edition, i}
-            {@const drawHeight = i % 2 == 0 ? 36 : 68}
-            {@const left = yearToX(edition.start)}
-            {@const right = yearToX(edition.end)}
-            {@const widthPx = right - left}
-            
-            <div
-                class="edition"
-                style="
-                    position: absolute;
-                    left: {left}px;
-                    top: {drawHeight}px;
-                    width: {widthPx}px;
-                    height: 28px;
-                    border-radius: 4px;
-                    padding: 1px 15px;
-                    font-size: 14px;
-                    font-weight: 400;
-                    color: #336;
-                    background: #33336611;
-                    box-shadow: 0 4px 8px #00000011;
-                    border: 2px solid #33336611;
-                "
-            >
-                <!-- Hier kun je icons of rich text plaatsen -->
-                {@html edition.name} 
-
-                <span class="text-[#333366ff] opacity-50">
-                    <!-- <Eye size="16" class="inline ml-1 relative top-[-1px]" /> -->
-                    {edition.maps.filter(m => m <= (view.current.end + view.current.start) / 2).length}
-                </span>
-                /
-                <span class="text-[#333366ff] opacity-50">
-                    <!-- <ImagesSquare size="16" class="inline ml-1 relative top-[-1px]" /> -->
-                    {edition.maps.length}
-                 </span>
-            </div>
-        {/each}
-    </div>
 </div>

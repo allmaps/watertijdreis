@@ -4,7 +4,6 @@
 	import { WarpedMapEventType } from '@allmaps/render';
     import { Dot, Hand, HandGrabbing } from "phosphor-svelte";
 	import DotOverlay from './DotOverlay.svelte';
-	import Map2 from './Map2.svelte';
 
     let { map = $bindable(), compareMap = $bindable(), isComparing } = $props();
 
@@ -379,9 +378,7 @@
     onmousewheel={showDots}
 ></svelte:window>
 
-<Map2></Map2>
-
-<div id='map-container' bind:clientWidth={clientWidth} bind:clientHeight={clientHeight}>
+<div hidden id='map-container' bind:clientWidth={clientWidth} bind:clientHeight={clientHeight}>
     <div 
         id='map'
         style={`clip-path: ${isComparing ? `inset(0 ${100 - resizePercentX}%) 0 0` : 'none'}`}
