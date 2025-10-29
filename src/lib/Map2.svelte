@@ -2,9 +2,7 @@
 	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
 	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
-	import Map from './Map.svelte';
-	import type { Image } from 'phosphor-svelte';
-	import { polygon } from '@turf/turf';
+	import * as turf from '@turf/turf';
 
 	let { mapViewer = $bindable<MapViewer | null>(null) } = $props();
 
@@ -15,27 +13,6 @@
 			console.log(mapViewer);
 		}
 	});
-
-	function calculateSimpleCentroid(polygonGeometry) {
-		// Polygon coördinaten zijn [ [ring1], [ring2, ...] ]
-		const coordinates = polygonGeometry.coordinates[0];
-		let x = 0;
-		let y = 0;
-
-		// De laatste coördinaat is vaak hetzelfde als de eerste (gesloten ring),
-		// dus we tellen tot de een-na-laatste.
-		const count = coordinates.length - 1;
-
-		for (let i = 0; i < count; i++) {
-			x += coordinates[i][0]; // Longitude
-			y += coordinates[i][1]; // Latitude
-		}
-
-		return {
-			type: 'Point',
-			coordinates: [x / count, y / count]
-		};
-	}
 
 	class HistoricMap {
 		mapViewer: MapViewer;
@@ -55,7 +32,7 @@
 
 		get imageUrl(): string {
 			// TODO: not hardcoded
-			return this.warpedMap?.georeferencedMap.resource.id + '/full/128,/0/default.jpg';
+			return this.warpedMap?.georeferencedMap.resource.id + '/full/50,/0/default.jpg';
 		}
 
 		constructor(
@@ -88,9 +65,15 @@
 		map: maplibregl.Map | null = null;
 		warpedMapLayer: WarpedMapLayer | null = null;
 		historicMaps: HistoricMap[] = $state([]);
+		historicMapsInViewpot: Set<string>;
 
 		constructor(containerId: string) {
 			this.containerId = containerId;
+
+			$effect(() => {
+				this.updateGridVisibility();
+				this.updateLabelVisibility();
+			});
 		}
 
 		init() {
@@ -133,7 +116,14 @@
 								id: i,
 								type: 'Feature',
 								geometry: o.warpedMap.geoMask,
-								properties: { year: '2025' }
+								properties: { year: o.yearStart }
+							}));
+
+							let points = this.historicMaps.map((o, i) => ({
+								id: i,
+								type: 'Feature',
+								geometry: turf.centerOfMass(o.warpedMap.geoMask).geometry,
+								properties: { year: o.yearStart }
 							}));
 
 							this.map.addSource('map-outlines', {
@@ -143,15 +133,7 @@
 
 							this.map.addSource('map-labels', {
 								type: 'geojson',
-								data: {
-									type: 'FeatureCollection',
-									features: polygons.map((p, i) => ({
-										id: p.id, // Gebruik de ID van de polygoon (i)
-										type: 'Feature',
-										geometry: calculateSimpleCentroid(p.geometry), // <--- FUNCTIE RETOURNEERT NU HET VOLLEDIGE OBJECT
-										properties: { year: p.properties.year } // Haal de year van de polygon feature
-									}))
-								}
+								data: { type: 'FeatureCollection', features: points }
 							});
 
 							this.map.addLayer({
@@ -161,7 +143,8 @@
 								paint: {
 									'fill-color': '#ff44aa',
 									'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.3, 0]
-								}
+								},
+								layout: { visibility: 'none' }
 							});
 
 							this.map.addLayer({
@@ -170,7 +153,9 @@
 								source: 'map-outlines',
 								paint: {
 									'line-color': '#ff44aa',
-									'line-width': 1
+									'line-width': 1,
+									'line-opacity': 0,
+									'line-opacity-transition': { duration: 300 }
 								}
 							});
 
@@ -178,21 +163,27 @@
 								id: 'map-outlines-labels',
 								type: 'symbol',
 								source: 'map-labels',
-								minzoom: 0,
-								maxzoom: 24,
 								layout: {
-									'text-field': ['get', 'year'],
-									'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-									'text-size': 16,
+									'text-field': [
+										'format',
+										['get', 'year']
+										// {}, // normale tekststijl
+										// ' ',
+										// {},
+										// ['concat', '(', ['to-string', ['get', 'diff']], ')'],
+										// {}
+									],
+									'text-font': ['Noto Sans Bold'],
+									'text-size': 13,
 									'text-allow-overlap': true,
-									'symbol-placement': 'point', // belangrijk!
-									'text-anchor': 'center',
-									'text-ignore-placement': true
+									'symbol-placement': 'point'
 								},
 								paint: {
-									'text-color': '#333366',
+									'text-color': '#33336688',
 									'text-halo-color': '#ffffff',
-									'text-halo-width': 1
+									'text-halo-width': 0.5,
+									'text-opacity': 0,
+									'text-opacity-transition': { duration: 300 }
 								}
 							});
 
@@ -233,6 +224,23 @@
 			});
 		}
 
+		setGridVisibility(visible = true) {
+			const map = this.map;
+			if (!map) return;
+
+			map.setLayoutProperty('map-outlines-fill', 'visibility', visible ? 'visible' : 'none');
+			map.setPaintProperty('map-outlines-layer', 'line-opacity-transition', { duration: 300 });
+			map.setPaintProperty('map-outlines-layer', 'line-opacity', visible ? 1 : 0);
+		}
+
+		setLabelVisibility(visible) {
+			const map = this.map;
+			if (!map) return;
+
+			map.setPaintProperty('map-outlines-labels', 'text-opacity-transition', { duration: 300 });
+			map.setPaintProperty('map-outlines-labels', 'text-opacity', visible ? 1 : 0);
+		}
+
 		addHistoricMap(map: GeoreferencedMap) {
 			this.warpedMapLayer?.addGeoreferencedMap(map);
 			this.historicMaps.push(
@@ -252,7 +260,6 @@
 		}
 
 		filterHistoricMapsByYear(year: number) {
-			console.log(year);
 			this.historicMaps.forEach((historicMap) => {
 				const warpedMap = historicMap.warpedMap;
 				if (!warpedMap) return;
@@ -265,6 +272,21 @@
 					historicMap.id,
 					year >= historicMap.yearStart ? 1 : 0.5
 				);
+			});
+
+			this.updateYearLabels(year);
+		}
+
+		updateYearLabels(year: number) {
+			if (!this.map) return;
+
+			const source = this.map.getSource('map-labels') as maplibregl.GeoJSONSource;
+			if (!source) return;
+
+			this.historicMaps.forEach((map, i) => {
+				const diff = map.yearStart - year;
+
+				this.map!.setFeatureState({ source: 'map-labels', id: i }, { diff });
 			});
 		}
 	}
