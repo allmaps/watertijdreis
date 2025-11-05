@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Tween, Spring } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { Eye, ImagesSquare } from 'phosphor-svelte';
+	import MapThumbnail from './MapThumbnail.svelte';
+	import MapThumbnailStack from './MapThumbnailStack.svelte';
+	import TimelinePointer from './TimelinePointer.svelte';
 
 	let { mapViewer } = $props();
 
@@ -10,19 +12,24 @@
 		mapViewer.filterHistoricMapsByYear(Math.floor(selectedYear));
 	});
 
-	let width: number = $state(0);
-	let height: number = $state(0);
-
-	let view = $state(new Spring({ start: 1950, end: 2000 }, { stiffness: 0.1, damping: 0.33 }));
-	let selectedYear = $derived((view.current.end + view.current.start) / 2);
-
-	let timelineTickColor = $state('#336');
-
 	const MIN_YEAR: number = 1800;
 	const MAX_YEAR: number = 2023;
 
+	let width: number = $state(0);
+	let height: number = $state(0);
+
+	let view = $state(new Spring({ start: 1950, end: 2000 }, { stiffness: 0.1, damping: 0.25 }));
+	let selectedYear = $derived((view.target.end + view.target.start) / 2);
+
+	let timelineTickColor = $state('#336');
+
 	let isPanning: boolean = $state(false);
 	let lastX: number = $state(0);
+
+	let editions = [
+		{ name: 'Editie 4', yearStart: 1960, yearEnd: 1971 },
+		{ name: 'Editie 5', yearStart: 1969, yearEnd: 1980 }
+	];
 
 	function yearToX(year: number): number {
 		return ((year - view.current.start) / (view.current.end - view.current.start)) * width;
@@ -36,13 +43,14 @@
 		e.preventDefault();
 
 		const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.2), 0.2);
-		const cursor = xToYear(e.offsetX);
+		const cursor = selectedYear;
+		// const cursor = xToYear(e.offsetX);
 		const { start, end } = view.current;
 
 		const newStart = cursor - (cursor - start) * zoom;
 		const newEnd = cursor + (end - cursor) * zoom;
 
-		view.target = { start: newStart, end: newEnd };
+		view.target = { start: Math.max(newStart, MIN_YEAR), end: Math.min(newEnd, MAX_YEAR) };
 	}
 
 	function onpointerdown(e: PointerEvent) {
@@ -50,29 +58,49 @@
 		lastX = e.clientX;
 
 		mapViewer.setLabelVisibility(true);
+
+		window.addEventListener('pointermove', onpointermove);
+		window.addEventListener('pointerup', onpointerup);
+		window.addEventListener('blur', onpointerup);
 	}
 
 	function onpointermove(e: PointerEvent) {
 		if (!isPanning) return;
+
+		const maxDeltaLeft = view.current.start - MIN_YEAR;
+		const maxDeltaRight = view.current.end - MAX_YEAR;
+
 		const dx = e.clientX - lastX;
-		const yearDelta = (dx / width) * (view.current.end - view.current.start);
+		let yearDelta = (dx / width) * (view.current.end - view.current.start);
+		if (yearDelta > maxDeltaLeft) yearDelta = maxDeltaLeft;
+		if (yearDelta < maxDeltaRight) yearDelta = maxDeltaRight;
+
 		view.target = {
-			start: view.target.start - yearDelta,
-			end: view.target.end - yearDelta
+			start: Math.max(view.target.start - yearDelta, MIN_YEAR),
+			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
 		};
 		lastX = e.clientX;
 	}
 
-	function onpointerup(e: PointerEvent) {
+	function onpointerup() {
 		isPanning = false;
 
 		mapViewer.setLabelVisibility(false);
+
+		view.target = {
+			start: Math.round(view.target.start),
+			end: Math.round(view.target.end)
+		};
+
+		window.removeEventListener('pointermove', onpointermove);
+		window.removeEventListener('pointerup', onpointerup);
 	}
 </script>
 
 <div
-	class="timeline-container"
-	style="position: relative; height: 120px;"
+	class="timeline-container touch-action-none relative h-[120px] touch-none"
+	style:background={//'linear-gradient(0deg, #333366, #2d2d5a)'
+	'linear-gradient(0deg, #eef, #fff)'}
 	bind:clientWidth={width}
 	bind:clientHeight={height}
 	{onwheel}
@@ -80,6 +108,7 @@
 	{onpointermove}
 	{onpointerup}
 >
+	<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
 	<div
 		class="map-markers"
 		style="position: absolute; inset: 0; perspective: 600px; transform-style: preserve-3d; z-index: 1; overflow: hidden"
@@ -88,27 +117,11 @@
 			{@const height =
 				mapViewer?.historicMaps.slice(0, i).filter((m) => m.yearStart == map.yearStart).length *
 					-5 +
-				40}
-			<div
-				class="map-marker"
-				style={`
-				position: absolute;
-				left: ${yearToX(map.yearStart) - 25}px;
-				top: ${height}px;
-				width: 40px;
-				transform: rotateX(60deg);
-				transform-origin: bottom center;
-                box-shadow: 0 6px 6px rgba(0,0,0,0.1);
-			`}
-			>
-				<img
-					src={map.imageUrl}
-					alt=""
-					loading="lazy"
-					style="width:100%; height:100%; object-fit: cover; transition: filter .3s"
-					style:filter={map.yearStart <= selectedYear ? 'none' : 'grayscale(100)'}
-				/>
-			</div>
+				40 +
+				(map.yearStart % 2) * 1}
+			{@const visible = mapViewer.historicMapsInViewport.has(map.id)}
+
+			<MapThumbnail x={yearToX(map.yearStart) - 25} y={height} src={map.imageUrl}></MapThumbnail>
 		{/each}
 	</div>
 	<svg
@@ -186,164 +199,27 @@
 				<stop offset="100%" style="stop-color:#336; stop-opacity:0" />
 			</linearGradient>
 		</defs>
-		<g transform="translate(0, -4)">
-			<rect
-				x={yearToX(view.current.start + (view.current.end - view.current.start) / 2) - 1}
-				y={0}
-				width={2}
-				{height}
-				fill="#33336688"
-			></rect>
-			<rect
-				x={yearToX(view.current.start + (view.current.end - view.current.start) / 2) - 35}
-				y={0}
-				width={70}
-				height={20}
-				fill="#333366"
-				rx="2"
-				ry="2"
-			></rect>
-			<polygon
-				points={`
-                    ${yearToX(view.current.start + (view.current.end - view.current.start) / 2) - 7},20 
-                    ${yearToX(view.current.start + (view.current.end - view.current.start) / 2) + 7},20 
-                    ${yearToX(view.current.start + (view.current.end - view.current.start) / 2)},30
-                `}
-				fill="#333366"
-			></polygon>
-			<!-- Gradient left of the bar -->
+
+		{#each editions as ed, i}
+			{@const height = i % 2 == 0 ? 89 : 86}
+			{@const start = yearToX(ed.yearStart)}
+			{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
+			{@const end = yearToX(ed.yearEnd)}
+			<line x1={start} y1={height} x2={start} y2={height - 8} stroke="#336" stroke-width="1"></line>
+			<line x1={start} y1={height} x2={middle - 25} y2={height} stroke="#336" stroke-width="1"
+			></line>
+			<line x1={middle + 25} y1={height} x2={end} y2={height} stroke="#336" stroke-width="1"></line>
 			<text
-				x={yearToX((view.current.end + view.current.start) / 2)}
-				y={15}
-				font-size="14"
+				x={middle}
+				y={height + 3}
+				font-size="12"
 				font-weight="600"
-				fill="#fff"
+				fill="#336"
 				text-anchor="middle"
-				>&lt; {Math.ceil((view.current.end + view.current.start) / 2)} &gt;</text
 			>
-		</g>
-
-		<g>
-			{#if true}
-				{@const start = 1960}
-				{@const end = 1971}
-				{@const height = 80}
-				{@const color = '#333366'}
-				<line
-					x1={yearToX(start)}
-					y1={height}
-					x2={yearToX(end)}
-					y2={height}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<line
-					x1={yearToX(start)}
-					y1={height}
-					x2={yearToX(start)}
-					y2={height - 8}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<line
-					x1={yearToX(end)}
-					y1={height}
-					x2={yearToX(end)}
-					y2={height - 8}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<text
-					x={yearToX((start + end) / 2)}
-					y={height + 14}
-					font-size="12"
-					font-weight="600"
-					fill={color}
-					text-anchor="middle">Editie 4</text
-				>
-			{/if}
-		</g>
-		<g>
-			{#if true}
-				{@const start = 1969}
-				{@const end = 1980}
-				{@const height = 77}
-				{@const color = '#333366'}
-				<line
-					x1={yearToX(start)}
-					y1={height}
-					x2={yearToX(end)}
-					y2={height}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<line
-					x1={yearToX(start)}
-					y1={height}
-					x2={yearToX(start)}
-					y2={height - 8}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<line
-					x1={yearToX(end)}
-					y1={height}
-					x2={yearToX(end)}
-					y2={height - 8}
-					stroke={color + '88'}
-					stroke-width="1"
-				></line>
-				<text
-					x={yearToX((start + end) / 2)}
-					y={height + 14}
-					font-size="12"
-					font-weight="600"
-					fill={color}
-					text-anchor="middle">Editie 5</text
-				>
-				<!-- <image 
-                x={yearToX((start + end) / 2) - 16} 
-                y={height - 40} 
-                width={42} 
-                height={32} 
-                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
-                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image>
-            <image 
-                x={yearToX((start + end) / 2) - 16} 
-                y={height - 40} 
-                width={42} 
-                height={32} 
-                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
-                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image>
-            <image 
-                x={yearToX((start + end) / 2) - 16} 
-                y={height - 40} 
-                width={42} 
-                height={32} 
-                transform="rotate({Math.random() * 10 - 5}, {yearToX((start + end) / 2)}, 62.5)"
-                href={mapViewer?.historicMaps[0]?.imageUrl || ''}></image> -->
-			{/if}
-
-			<!-- {#each mapViewer?.historicMaps as map, i}
-				{@const height =
-					mapViewer?.historicMaps.slice(0, i).filter((m) => m.yearStart == map.yearStart).length *
-						-5 +
-					65}
-				<rect
-					x={yearToX(map.yearStart) - 5}
-					y={height}
-					width={10}
-					height={3}
-					fill={selectedYear > map.yearStart ? '#3366cc88' : '#888888'}
-					transform={'rotate(' +
-						(Math.random() * 12 - 6) +
-						', ' +
-						(yearToX(map.yearStart) + 3) +
-						', ' +
-						(height + 3) +
-						')'}
-				></rect>
-			{/each} -->
-		</g>
+				{ed.name}</text
+			>
+			<line x1={end} y1={height} x2={end} y2={height - 8} stroke="#336" stroke-width="1"></line>
+		{/each}
 	</svg>
 </div>

@@ -50,7 +50,7 @@
 			<div class="flex flex-col p-2">
 				<label for="">Kaartvellen in beeld</label>
 				<div class="h-[100px] overflow-x-auto whitespace-nowrap">
-					{#each mapViewer.historicMaps.filter( (m) => mapViewer.warpedMapLayer.renderer.mapsInViewport.has(m.id) ) as map}
+					{#each mapViewer.historicMaps.filter( (m) => mapViewer.historicMapsInViewport.has(m.id) ) as map}
 						<img src={map.imageUrl} alt="" class="mt-2 mr-2 inline-block h-[80px]" loading="lazy" />
 					{/each}
 				</div>
@@ -66,10 +66,10 @@
 		--background-color: #005;
 		--foreground-highlight: #ffffff33;
 		--foreground-color: #fff;
-		--background-color: #fff;
-		--foreground-highlight: #eee;
-		--foreground-color: #000;
-		--inactive-tab-color: #f3f3ffcc;
+		--background-color: #336;
+		--foreground-highlight: #222;
+		--foreground-color: #fff;
+		--inactive-tab-color: #33336688;
 		--tabs-side-margin: 10px;
 	}
 
@@ -135,8 +135,6 @@
 	#tabs button.selected {
 		background: var(--background-color);
 		opacity: 1;
-		border: 2px solid var(--foreground-highlight);
-		border-bottom: none;
 	}
 
 	#tabs button #counter {

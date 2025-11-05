@@ -3,8 +3,11 @@
 	import { WarpedMapLayer } from '@allmaps/maplibre';
 	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
 	import * as turf from '@turf/turf';
+	import { cubicOut } from 'svelte/easing';
 
 	let { mapViewer = $bindable<MapViewer | null>(null) } = $props();
+
+	const ANNOTATION_URL = 'filteredMaps.json';
 
 	$effect(() => {
 		if (!mapViewer) {
@@ -32,31 +35,21 @@
 
 		get imageUrl(): string {
 			// TODO: not hardcoded
-			return this.warpedMap?.georeferencedMap.resource.id + '/full/50,/0/default.jpg';
+			if (this.warpedMap?.georeferencedMap)
+				return this.warpedMap?.georeferencedMap.resource.id + '/full/50,/0/default.jpg';
 		}
 
-		constructor(
-			mapViewer: MapViewer,
-			id: string,
-			bis: boolean,
-			edition: number,
-			number: number,
-			position: string,
-			x: number,
-			y: number,
-			yearStart: number,
-			yearEnd: number
-		) {
+		constructor(mapViewer: MapViewer, id: string, meta: any) {
 			this.mapViewer = mapViewer;
 			this.id = id;
-			this.bis = bis;
-			this.edition = edition;
-			this.number = number;
-			this.position = position;
-			this.x = x;
-			this.y = y;
-			this.yearStart = yearStart;
-			this.yearEnd = yearEnd;
+			this.bis = meta.bis;
+			this.edition = meta.edition;
+			this.number = meta.number;
+			this.position = meta.position;
+			this.x = meta.x;
+			this.y = meta.y;
+			this.yearStart = meta.yearStart;
+			this.yearEnd = meta.yearEnd;
 		}
 	}
 
@@ -65,7 +58,10 @@
 		map: maplibregl.Map | null = null;
 		warpedMapLayer: WarpedMapLayer | null = null;
 		historicMaps: HistoricMap[] = $state([]);
-		historicMapsInViewpot: Set<string>;
+		historicMapsInViewport = $state(new Set());
+
+		maplibreLoaded: boolean = $state(false);
+		historicMapsLoaded: boolean = $state(false);
 
 		constructor(containerId: string) {
 			this.containerId = containerId;
@@ -97,131 +93,224 @@
 				preserveDrawingBuffer: true
 			});
 
-			this.warpedMapLayer = new WarpedMapLayer();
+			setTimeout(
+				() => (this.historicMapsInViewport = this.warpedMapLayer.renderer.mapsInViewport),
+				500
+			); // TODO: load event
+			this.map.on(
+				'move',
+				() => (this.historicMapsInViewport = this.warpedMapLayer.renderer.mapsInViewport)
+			);
 
 			this.map.on('load', async () => {
-				if (!this.warpedMapLayer) return;
+				this.maplibreLoaded = true;
+
+				this.warpedMapLayer = new WarpedMapLayer();
 				this.map.addLayer(this.warpedMapLayer);
 
-				const res = await fetch('filteredMaps.json'); // TODO: niet hardcoden
-				const data: GeoreferencedMap[] = await res.json();
-				data.forEach((map) => this.addHistoricMap(map));
+				this.loadAnnotation(ANNOTATION_URL).then(() => {
+					this.historicMapsLoaded = true;
 
-				this.warpedMapLayer.renderer?.warpedMapList.addEventListener(
-					WarpedMapEventType.WARPEDMAPADDED,
-					(event) => {
-						// TODO: kan beter?
-						if (data.length == event.target.warpedMapsById.size) {
-							let polygons = this.historicMaps.map((o, i) => ({
-								id: i,
-								type: 'Feature',
-								geometry: o.warpedMap.geoMask,
-								properties: { year: o.yearStart }
-							}));
+					let polygons = this.historicMaps.map((o, i) => ({
+						id: i,
+						type: 'Feature',
+						geometry: o.warpedMap.geoMask,
+						properties: { year: o.yearStart, id: o.id }
+					}));
 
-							let points = this.historicMaps.map((o, i) => ({
-								id: i,
-								type: 'Feature',
-								geometry: turf.centerOfMass(o.warpedMap.geoMask).geometry,
-								properties: { year: o.yearStart }
-							}));
+					let points = this.historicMaps.map((o, i) => ({
+						id: i,
+						type: 'Feature',
+						geometry: turf.centerOfMass(o.warpedMap.geoMask).geometry,
+						properties: { year: o.yearStart }
+					}));
 
-							this.map.addSource('map-outlines', {
-								type: 'geojson',
-								data: { type: 'FeatureCollection', features: polygons }
-							});
+					this.map.addSource('map-outlines', {
+						type: 'geojson',
+						data: { type: 'FeatureCollection', features: polygons }
+					});
 
-							this.map.addSource('map-labels', {
-								type: 'geojson',
-								data: { type: 'FeatureCollection', features: points }
-							});
+					this.map.addSource('map-labels', {
+						type: 'geojson',
+						data: { type: 'FeatureCollection', features: points }
+					});
 
-							this.map.addLayer({
-								id: 'map-outlines-fill',
-								type: 'fill',
-								source: 'map-outlines',
-								paint: {
-									'fill-color': '#ff44aa',
-									'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.3, 0]
-								},
-								layout: { visibility: 'none' }
-							});
+					this.map.addLayer({
+						id: 'map-outlines-fill',
+						type: 'fill',
+						source: 'map-outlines',
+						paint: {
+							'fill-color': '#ff44aa',
+							'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.3, 0]
+						},
+						layout: { visibility: 'none' }
+					});
 
-							this.map.addLayer({
-								id: 'map-outlines-layer',
-								type: 'line',
-								source: 'map-outlines',
-								paint: {
-									'line-color': '#ff44aa',
-									'line-width': 1,
-									'line-opacity': 0,
-									'line-opacity-transition': { duration: 300 }
-								}
-							});
-
-							this.map.addLayer({
-								id: 'map-outlines-labels',
-								type: 'symbol',
-								source: 'map-labels',
-								layout: {
-									'text-field': [
-										'format',
-										['get', 'year']
-										// {}, // normale tekststijl
-										// ' ',
-										// {},
-										// ['concat', '(', ['to-string', ['get', 'diff']], ')'],
-										// {}
-									],
-									'text-font': ['Noto Sans Bold'],
-									'text-size': 13,
-									'text-allow-overlap': true,
-									'symbol-placement': 'point'
-								},
-								paint: {
-									'text-color': '#33336688',
-									'text-halo-color': '#ffffff',
-									'text-halo-width': 0.5,
-									'text-opacity': 0,
-									'text-opacity-transition': { duration: 300 }
-								}
-							});
-
-							let hoveredPolygonId = null;
-
-							this.map.on('mousemove', 'map-outlines-fill', (e) => {
-								if (e.features.length > 0) {
-									if (hoveredPolygonId !== null) {
-										this.map.setFeatureState(
-											{ source: 'map-outlines', id: hoveredPolygonId },
-											{ hover: false }
-										);
-									}
-									hoveredPolygonId = e.features[0].id;
-									this.map.setFeatureState(
-										{ source: 'map-outlines', id: hoveredPolygonId },
-										{ hover: true }
-									);
-								}
-							});
-
-							this.map.on('mouseleave', 'map-outlines-fill', () => {
-								if (hoveredPolygonId !== null) {
-									this.map.setFeatureState(
-										{ source: 'map-outlines', id: hoveredPolygonId },
-										{ hover: false }
-									);
-								}
-								hoveredPolygonId = null;
-							});
+					this.map.addLayer({
+						id: 'map-outlines-layer',
+						type: 'line',
+						source: 'map-outlines',
+						paint: {
+							'line-color': '#fff',
+							'line-width': 2,
+							'line-opacity': 0,
+							'line-opacity-transition': { duration: 300 }
 						}
-					}
-				);
+					});
+					this.map.addLayer({
+						id: 'map-outlines-layer-2',
+						type: 'line',
+						source: 'map-outlines',
+						paint: {
+							'line-color': '#f4a',
+							'line-width': 1,
+							'line-opacity': 0,
+							'line-opacity-transition': { duration: 300 }
+						}
+					});
+
+					this.map.addLayer({
+						id: 'map-outlines-labels',
+						type: 'symbol',
+						source: 'map-labels',
+						layout: {
+							'text-field': [
+								'format',
+								['get', 'year']
+								// {}, // normale tekststijl
+								// ' ',
+								// {},
+								// ['concat', '(', ['to-string', ['get', 'diff']], ')'],
+								// {}
+							],
+							'text-font': ['Noto Sans Bold'],
+							'text-size': 14,
+							'text-allow-overlap': true,
+							'symbol-placement': 'point'
+						},
+						paint: {
+							'text-color': '#33336688',
+							'text-halo-color': '#ffffff',
+							'text-halo-width': 1,
+							'text-opacity': 0,
+							'text-opacity-transition': { duration: 300 }
+						}
+					});
+
+					let hoveredPolygonId = null;
+
+					this.map.on('click', 'map-outlines-fill', (e) => {
+						if (e.features.length > 0) {
+							this.saveView();
+
+							addEventListener('keydown', (e) => {
+								if (e.key == 'Escape') {
+									this.restoreView();
+									this.filterHistoricMapsByYear(1975);
+									this.map.setPaintProperty('background', 'background-color', '#fff');
+								}
+							});
+
+							const map = this.getHistoricMapById(e.features[0].properties.id);
+
+							this.setGridVisibility(false);
+							this.warpedMapLayer?.setMapOpacity(map?.mapId, 1);
+							this.warpedMapLayer?.setMapSaturation(map?.mapId, 1);
+
+							this.historicMaps.forEach((m) => {
+								m.warpedMap.visible = m.id == map?.mapId;
+							});
+
+							map?.setTransformationType('straight');
+							this.warpedMapLayer.bringMapsToFront([map.mapId]);
+							const { width, height } = map?.georeferencedMap.resource;
+							this.warpedMapLayer?.setMapResourceMask(map?.mapId, [
+								[0, height],
+								[width, height],
+								[width, 0],
+								[0, 0]
+							]);
+							map.updateTriangulation(true); // TODO: kan dit anders?
+
+							const bounds = new maplibregl.LngLatBounds();
+							map?.geoMask.coordinates[0].forEach((coord) => bounds.extend(coord));
+							this.map.fitBounds(bounds, {
+								padding: 50,
+								speed: 2,
+								curve: 2,
+								offset: [0, -50],
+								linear: true
+							});
+
+							this.map.setPaintProperty('background', 'background-color-transition', {
+								duration: 500,
+								delay: 0
+							});
+
+							this.map.setPaintProperty('background', 'background-color', '#336');
+						}
+					});
+
+					this.map.on('mousemove', 'map-outlines-fill', (e) => {
+						if (e.features.length > 0) {
+							if (hoveredPolygonId !== null) {
+								this.map.setFeatureState(
+									{ source: 'map-outlines', id: hoveredPolygonId },
+									{ hover: false }
+								);
+							}
+							hoveredPolygonId = e.features[0].id;
+							this.map.setFeatureState(
+								{ source: 'map-outlines', id: hoveredPolygonId },
+								{ hover: true }
+							);
+						}
+					});
+
+					this.map.on('mouseleave', 'map-outlines-fill', () => {
+						if (hoveredPolygonId !== null) {
+							this.map.setFeatureState(
+								{ source: 'map-outlines', id: hoveredPolygonId },
+								{ hover: false }
+							);
+						}
+						hoveredPolygonId = null;
+					});
+				});
 			});
 
 			this.map.on('idle', () => {
 				this.map?.triggerRepaint();
 			});
+		}
+
+		loadAnnotation(annotationUrl: string) {
+			return fetch(annotationUrl)
+				.then((res) => res.json())
+				.then((data: GeoreferencedMap[]) =>
+					Promise.all(
+						data.map(async (map) => {
+							await this.warpedMapLayer?.addGeoreferencedMap(map);
+							this.historicMaps.push(new HistoricMap(this, map.id, map._meta));
+						})
+					)
+				);
+		}
+
+		saveView() {
+			this.previousView = {
+				center: this.map.getCenter(),
+				zoom: this.map.getZoom(),
+				bearing: this.map.getBearing(),
+				pitch: this.map.getPitch()
+			};
+		}
+
+		// Restore the saved view
+		restoreView(options = { duration: 500 }) {
+			if (!this.previousView) return;
+			const { center, zoom, bearing, pitch } = this.previousView;
+			this.map.easeTo({ center, zoom, bearing, pitch, ...options });
 		}
 
 		setGridVisibility(visible = true) {
@@ -231,6 +320,8 @@
 			map.setLayoutProperty('map-outlines-fill', 'visibility', visible ? 'visible' : 'none');
 			map.setPaintProperty('map-outlines-layer', 'line-opacity-transition', { duration: 300 });
 			map.setPaintProperty('map-outlines-layer', 'line-opacity', visible ? 1 : 0);
+			map.setPaintProperty('map-outlines-layer-2', 'line-opacity-transition', { duration: 300 });
+			map.setPaintProperty('map-outlines-layer-2', 'line-opacity', visible ? 1 : 0);
 		}
 
 		setLabelVisibility(visible) {
@@ -241,29 +332,15 @@
 			map.setPaintProperty('map-outlines-labels', 'text-opacity', visible ? 1 : 0);
 		}
 
-		addHistoricMap(map: GeoreferencedMap) {
-			this.warpedMapLayer?.addGeoreferencedMap(map);
-			this.historicMaps.push(
-				new HistoricMap(
-					this,
-					map.id,
-					map._meta.bis,
-					map._meta.edition,
-					map._meta.number,
-					map._meta.position,
-					map._meta.x,
-					map._meta.y,
-					map._meta.yearStart,
-					map._meta.yearEnd
-				)
-			);
+		getHistoricMapById(id: string) {
+			return this.warpedMapLayer?.getWarpedMapList().warpedMapsById.get(id);
 		}
 
 		filterHistoricMapsByYear(year: number) {
 			this.historicMaps.forEach((historicMap) => {
 				const warpedMap = historicMap.warpedMap;
 				if (!warpedMap) return;
-				// warpedMap.visible = year >= historicMap.yearStart;
+				warpedMap.visible = true;
 				this.warpedMapLayer?.renderer?.setMapSaturation(
 					historicMap.id,
 					year >= historicMap.yearStart ? 1 : 0
