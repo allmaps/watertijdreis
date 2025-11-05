@@ -29,6 +29,9 @@ importers:
       feather-icons:
         specifier: ^4.29.2
         version: 4.29.2
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       maplibre-gl:
         specifier: ^5.3.0
         version: 5.8.0

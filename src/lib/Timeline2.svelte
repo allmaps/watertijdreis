@@ -21,7 +21,7 @@
 	let view = $state(new Spring({ start: 1950, end: 2000 }, { stiffness: 0.1, damping: 0.25 }));
 	let selectedYear = $derived((view.target.end + view.target.start) / 2);
 
-	let timelineTickColor = $state('#336');
+	let timelineTickColor = $state('#fff');
 
 	let isPanning: boolean = $state(false);
 	let lastX: number = $state(0);
@@ -98,9 +98,8 @@
 </script>
 
 <div
-	class="timeline-container touch-action-none relative h-[120px] touch-none"
-	style:background={//'linear-gradient(0deg, #333366, #2d2d5a)'
-	'linear-gradient(0deg, #eef, #fff)'}
+	class="timeline-container touch-action-none relative h-[120px] touch-none rounded-[8px]"
+	style:background={'#336'}
 	bind:clientWidth={width}
 	bind:clientHeight={height}
 	{onwheel}
@@ -205,21 +204,21 @@
 			{@const start = yearToX(ed.yearStart)}
 			{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
 			{@const end = yearToX(ed.yearEnd)}
-			<line x1={start} y1={height} x2={start} y2={height - 8} stroke="#336" stroke-width="1"></line>
-			<line x1={start} y1={height} x2={middle - 25} y2={height} stroke="#336" stroke-width="1"
+			<line x1={start} y1={height} x2={start} y2={height - 8} stroke="#fff" stroke-width="1"></line>
+			<line x1={start} y1={height} x2={middle - 25} y2={height} stroke="#fff" stroke-width="1"
 			></line>
-			<line x1={middle + 25} y1={height} x2={end} y2={height} stroke="#336" stroke-width="1"></line>
+			<line x1={middle + 25} y1={height} x2={end} y2={height} stroke="#fff" stroke-width="1"></line>
 			<text
 				x={middle}
 				y={height + 3}
 				font-size="12"
 				font-weight="600"
-				fill="#336"
+				fill="#fff"
 				text-anchor="middle"
 			>
 				{ed.name}</text
 			>
-			<line x1={end} y1={height} x2={end} y2={height - 8} stroke="#336" stroke-width="1"></line>
+			<line x1={end} y1={height} x2={end} y2={height - 8} stroke="#fff" stroke-width="1"></line>
 		{/each}
 	</svg>
 </div>

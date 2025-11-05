@@ -30,7 +30,7 @@
 </script>
 
 <div id="tabs-container" class:is-hidden={isHidden}>
-	<div id="tabs">
+	<div id="tabs" hidden>
 		<button onclick={() => selectTab('tab1')} class:selected={selectedTab === 'tab1'}>
 			<ClockCounterClockwise size="18" weight="bold" class="relative top-[-1px] mr-1 inline" />
 			<span>Tijdreizen</span>
@@ -50,7 +50,9 @@
 			<div class="flex flex-col p-2">
 				<label for="">Kaartvellen in beeld</label>
 				<div class="h-[100px] overflow-x-auto whitespace-nowrap">
-					{#each mapViewer.historicMaps.filter( (m) => mapViewer.historicMapsInViewport.has(m.id) ) as map}
+					{#each mapViewer.historicMaps
+						.filter((m) => mapViewer.historicMapsInViewport.has(m.id))
+						.slice(0, 10) as map}
 						<img src={map.imageUrl} alt="" class="mt-2 mr-2 inline-block h-[80px]" loading="lazy" />
 					{/each}
 				</div>

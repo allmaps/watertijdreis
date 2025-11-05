@@ -4,8 +4,12 @@
 	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
 	import * as turf from '@turf/turf';
 	import { cubicOut } from 'svelte/easing';
+	import Minimap from './Minimap.svelte';
 
 	let { mapViewer = $bindable<MapViewer | null>(null) } = $props();
+
+	let historicMapPolygons: GeoJSON.Feature<GeoJSON.Polygon>[] = $state([]);
+	let viewportPolygon: GeoJSON.Feature<GeoJSON.Polygon> | null = $state(null);
 
 	const ANNOTATION_URL = 'filteredMaps.json';
 
@@ -97,10 +101,26 @@
 				() => (this.historicMapsInViewport = this.warpedMapLayer.renderer.mapsInViewport),
 				500
 			); // TODO: load event
-			this.map.on(
-				'move',
-				() => (this.historicMapsInViewport = this.warpedMapLayer.renderer.mapsInViewport)
-			);
+			this.map.on('move', () => {
+				const bounds = this.map.getBounds();
+				viewportPolygon = {
+					type: 'Feature',
+					geometry: {
+						type: 'Polygon',
+						coordinates: [
+							[
+								[bounds.getWest(), bounds.getNorth()],
+								[bounds.getEast(), bounds.getNorth()],
+								[bounds.getEast(), bounds.getSouth()],
+								[bounds.getWest(), bounds.getSouth()],
+								[bounds.getWest(), bounds.getNorth()]
+							]
+						]
+					},
+					properties: {}
+				};
+				this.historicMapsInViewport = this.warpedMapLayer.renderer.mapsInViewport;
+			});
 
 			this.map.on('load', async () => {
 				this.maplibreLoaded = true;
@@ -117,6 +137,8 @@
 						geometry: o.warpedMap.geoMask,
 						properties: { year: o.yearStart, id: o.id }
 					}));
+
+					historicMapPolygons = polygons;
 
 					let points = this.historicMaps.map((o, i) => ({
 						id: i,
@@ -151,8 +173,8 @@
 						type: 'line',
 						source: 'map-outlines',
 						paint: {
-							'line-color': '#fff',
-							'line-width': 2,
+							'line-color': '#f4a',
+							'line-width': 4,
 							'line-opacity': 0,
 							'line-opacity-transition': { duration: 300 }
 						}
@@ -280,7 +302,7 @@
 			});
 
 			this.map.on('idle', () => {
-				this.map?.triggerRepaint();
+				// this.map?.triggerRepaint();
 			});
 		}
 
@@ -370,6 +392,7 @@
 </script>
 
 <div id="map-container2" class="width-100 height-[100vh] relative overflow-hidden"></div>
+<Minimap {mapViewer} polygons={historicMapPolygons} viewport={viewportPolygon}></Minimap>
 
 <style>
 	#map-container2 {

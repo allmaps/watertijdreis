@@ -30,7 +30,7 @@
 
 <Tabs2 {mapViewer}></Tabs2>
 
-<!-- <Search></Search> -->
+<Search></Search>
 
 <style>
 	:global(body, html, #svelte) {
