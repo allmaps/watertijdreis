@@ -11,15 +11,15 @@
 </script>
 
 <div
-	class="absolute top-5 left-5 rounded-full p-[3px] shadow-2xl"
+	class="absolute top-20 left-5 rounded-full p-[3px] shadow-lg"
 	style:background={`linear-gradient(${mouseAngle - Math.PI / 2}rad, #ff44aaaa, transparent)`}
 >
-	<div class="rounded-full bg-[#336] hover:bg-[#447] p-3">
-		<MagnifyingGlass size="18" color="white" weight="bold"></MagnifyingGlass>
+	<div class="rounded-full bg-[#336] p-3 hover:bg-[#447]">
+		<MagnifyingGlass size="18" color="#fff" weight="bold"></MagnifyingGlass>
 	</div>
 </div>
 <div
-	class="absolute top-18 left-5 rounded-full p-[3px] shadow-2xl"
+	class="absolute top-35 left-5 rounded-full p-[3px] shadow-lg"
 	style:background={`linear-gradient(${mouseAngle - Math.PI / 2}rad, #ff44aaaa, transparent)`}
 >
 	<div class="rounded-full bg-[#336] p-3">

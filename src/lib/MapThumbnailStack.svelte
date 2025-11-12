@@ -2,6 +2,7 @@
 	import { scale } from 'svelte/transition';
 
 	const { year, x, maps } = $props();
+	const zRotations = maps.map((i) => (Math.random() - 0.5) * 10);
 
 	const loaded = $state(new Set<string>());
 
@@ -11,32 +12,29 @@
 		img.onload = () => loaded.add(map.id);
 	}
 
-	$effect(() => {
-		for (const map of maps) preload(map);
-	});
+	// $effect(() => {
+	// 	for (const map of maps) preload(map);
+	// });
 
 	function yOffset(i: number, map: any) {
-		return 40 - i * 5 + (map.yearStart % 2) * 1;
+		return 40 - i * 2 + (map.yearStart % 2) * 1;
 	}
 </script>
 
 {#each maps as map, i}
-	{#if loaded.has(map.id)}
-		<div
-			transition:scale
-			class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden"
-			style="
+	<!-- {#if loaded.has(map.id)} -->
+	<div
+		class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden bg-[rgb(243,238,218)] shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
+		style="
 				left:{x - 25}px;
 				top:{yOffset(i, map)}px;
-				transform: rotateX(60deg) rotateZ({(Math.random() - 0.5) * 10}deg);
+				transform: rotateX(60deg) rotateZ({zRotations[i]}deg);
 				z-index:{100 - yOffset(i, map)};
 			"
-		>
-			<img
-				src={map.imageUrl}
-				alt={map.name}
-				class="h-full w-full object-cover object-center shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
-			/>
-		</div>
-	{/if}
+	>
+		{#if i == maps.length - 1}
+			<img src={map.imageUrl} alt={map.name} class="h-full w-full object-cover object-center" />
+		{/if}
+	</div>
+	<!-- {/if} -->
 {/each}

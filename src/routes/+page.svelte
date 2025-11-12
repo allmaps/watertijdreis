@@ -1,13 +1,7 @@
 <script lang="ts">
-	// import Map  from '$lib/Map.svelte'
-	import maplibregl from 'maplibre-gl';
-	import Map2 from '$lib/Map2.svelte';
+	import Map from '$lib/Map.svelte';
 	import Header from '$lib/Header.svelte';
-	import Tabs2 from '$lib/Tabs2.svelte';
-	import Toast from '$lib/Toast.svelte';
 	import Search from '$lib/Search.svelte';
-
-	let mapViewer: MapViewer | null = $state(null);
 
 	type ComparingState = {
 		enabled: boolean;
@@ -26,9 +20,10 @@
 <Header></Header>
 
 <!-- <Map bind:map={map} bind:compareMap={compareMap} isComparing={isComparing}></Map> -->
-<Map2 bind:mapViewer></Map2>
+<Map></Map>
+<!-- <Map2></Map2> -->
 
-<Tabs2 {mapViewer}></Tabs2>
+<!-- <Tabs2 {mapViewer}></Tabs2> -->
 
 <Search></Search>
 

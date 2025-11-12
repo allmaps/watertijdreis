@@ -1,741 +1,294 @@
-<script>
-    let loaded = $state(false);
+<script lang="ts">
+	import { Tween, Spring } from 'svelte/motion';
+	import { fly, fade, scale } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import MapThumbnail from './MapThumbnail.svelte';
+	import TimelinePointer from './TimelinePointer.svelte';
+	import MapThumbnailStack from './MapThumbnailStack.svelte';
 
-    let padding = $state(30);
-    let actualWidth = $state(0);
-    let width = $derived(actualWidth - padding * 2);
-    
-    let yearStart = 1900;
-    let yearEnd = 1975;
-    let yearStep = 25;
+	let {
+		filter = $bindable(),
+		applyFilter,
+		historicMapsLoaded,
+		historicMapsById,
+		selectedHistoricMap,
+		setLabelVisibility,
+		map
+	} = $props();
 
-    let steps = (yearEnd - yearStart) / yearStep;
-    let stepWidth = $derived(width / steps);
+	type HistoricMap = {
+		id: string;
+		warpedMap: WarpedMap;
+		polygon: GeojsonPolygon;
+		yearStart: number;
+		yearEnd: number;
+		edition: number;
+		bis: boolean;
+		number: number;
+		position: string;
+		x: number;
+		y: number;
+		type: string | undefined;
+	};
 
-    let dots = $state([
-    1868,
-    1873,
-    1873,
-    1873,
-    1889,
-    1888,
-    1888,
-    1868,
-    1868,
-    1873,
-    1873,
-    1873,
-    1874,
-    1874,
-    1874,
-    1873,
-    1888,
-    1888,
-    1887,
-    1887,
-    1888,
-    1887,
-    1867,
-    1867,
-    1873,
-    1873,
-    1873,
-    1873,
-    1876,
-    1877,
-    1877,
-    1877,
-    1887,
-    1887,
-    1886,
-    1886,
-    1887,
-    1887,
-    1867,
-    1867,
-    1867,
-    1867,
-    1873,
-    1873,
-    1867,
-    1877,
-    1877,
-    1883,
-    1883,
-    1883,
-    1886,
-    1885,
-    1886,
-    1886,
-    1887,
-    1885,
-    1885,
-    1866,
-    1866,
-    1866,
-    1867,
-    1883,
-    1882,
-    1883,
-    1882,
-    1883,
-    1885,
-    1885,
-    1885,
-    1884,
-    1885,
-    1866,
-    1867,
-    1879,
-    1878,
-    1879,
-    1878,
-    1880,
-    1880,
-    1882,
-    1882,
-    1882,
-    1883,
-    1884,
-    1885,
-    1884,
-    1884,
-    1885,
-    1884,
-    1885,
-    1868,
-    1885,
-    1869,
-    1869,
-    1869,
-    1869,
-    1880,
-    1880,
-    1880,
-    1880,
-    1881,
-    1881,
-    1881,
-    1881,
-    1884,
-    1884,
-    1883,
-    // "",
-    1872,
-    1884,
-    1884,
-    1884,
-    1884,
-    1870,
-    1870,
-    1870,
-    1870,
-    1871,
-    1879,
-    1871,
-    1871,
-    1881,
-    1881,
-    1881,
-    1881,
-    1883,
-    1883,
-    1883,
-    1872,
-    1871,
-    1871,
-    1872,
-    1872,
-    1872,
-    1880,
-    1880,
-    1875,
-    1875,
-    1878,
-    1879,
-    1878,
-    1879,
-    1881,
-    1889,
-    1888,
-    1872,
-    1872,
-    1872,
-    1872,
-    1875,
-    1875,
-    1875,
-    1875,
-    1876,
-    1876,
-    1876,
-    1876,
-    1878,
-    1878,
-    1877,
-    1878,
-    1889,
-    1889,
-    1889,
-    1889,
-    1874,
-    1874,
-    1874,
-    1874,
-    1874,
-    1879,
-    1880,
-    1880,
-    1890,
-    1889,
-    1890,
-    1890,
-    1891,
-    1890,
-    1891,
-    1891,
-    1891,
-    1891,
-    1891
-]);
+	type Edition = { name: string; edition: number; bis: false; yearStart: number; yearEnd: number };
 
-let dots2 = $state([
-    1917,
-    1916,
-    1916,
-    1917,
-    1917,
-    1917,
-    1917,
-    1917,
-    1917,
-    1915,
-    1915,
-    1915,
-    1916,
-    1920,
-    1914,
-    1920,
-    1867,
-    1922,
-    1923,
-    1922,
-    1922,
-    1920,
-    1921,
-    1920,
-    1921,
-    1920,
-    1920,
-    1920,
-    1921,
-    1922,
-    1923,
-    1925,
-    1925,
-    1925,
-    1923,
-    1923,
-    1923,
-    1923,
-    1926,
-    1926,
-    1926,
-    1926,
-    1925,
-    1926,
-    1925,
-    1925,
-    1922,
-    1922,
-    1922,
-    1922,
-    1923,
-    1923,
-    1924,
-    1923,
-    1929,
-    1929,
-    1941,
-    "",
-    1941,
-    1899,
-    1899,
-    1925,
-    1924,
-    1925,
-    1920,
-    1928,
-    1942,
-    1936,
-    1937,
-    1937,
-    1928,
-    1928,
-    1918,
-    1918,
-    1918,
-    1940,
-    1919,
-    1920,
-    1928,
-    1928,
-    1928,
-    1928,
-    1935,
-    1935,
-    "",
-    1929,
-    1929,
-    1929,
-    1929,
-    1911,
-    1935,
-    1936,
-    1882,
-    "",
-    1920,
-    "",
-    1882,
-    1921,
-    1934,
-    1934,
-    1934,
-    1934,
-    1934,
-    1929,
-    1934,
-    1929,
-    1928,
-    1928,
-    1928,
-    1913,
-    1914,
-    1911,
-    1911,
-    1912,
-    1912,
-    "",
-    1910,
-    1906,
-    1908,
-    1909,
-    "1911 en 1912",
-    1928,
-    1911,
-    1928,
-    1930,
-    1929,
-    1927,
-    1915,
-    1915,
-    1915,
-    1914,
-    1914,
-    1929,
-    1913,
-    1929,
-    1926,
-    1926,
-    1926,
-    1926,
-    1925,
-    1925,
-    1925,
-    1925,
-    1928,
-    1928,
-    1928,
-    1928,
-    1894,
-    1894,
-    1892,
-    1892,
-    1892,
-    1926,
-    1926,
-    1926,
-    1932,
-    1932,
-    1927,
-    1927,
-    1927,
-    1933,
-    1928,
-    1930,
-    1930
-])
+	$effect(() => {
+		filter.yearEnd = selectedYear;
+		applyFilter(filter);
+	});
 
-let dots3 = $state([
-    1941,
-    1947,
-    1941,
-    1946,
-    1946,
-    1946,
-    1947,
-    1941,
-    1942,
-    1947,
-    1948,
-    1935,
-    1935,
-    1935,
-    1940,
-    1948,
-    0,
-    1947,
-    0,
-    1947,
-    0,
-    1953,
-    1951,
-    1946,
-    1952,
-    1957,
-    0,
-    0,
-    1953,
-    0,
-    1951,
-    1947,
-    1944,
-    1954,
-    1934,
-    1937,
-    1959,
-    1951,
-    1959,
-    1943,
-    1956,
-    1950,
-    1952,
-    1942,
-    1952,
-    0,
-    0,
-    1954,
-    0,
-    1959,
-    1959,
-    1959,
-    1952,
-    1953,
-    1953,
-    1959,
-    1959,
-    null,
-    0,
-    1960,
-    1956,
-    1964,
-    1941,
-    1952,
-    1954,
-    1954,
-    1951,
-    null,
-    null,
-    1952,
-    1959,
-    1960,
-    0,
-    0,
-    0,
-    1946,
-    0,
-    1959,
-    1959,
-    1950,
-    1961,
-    1960,
-    1959,
-    1965,
-    1966,
-    1953,
-    null,
-    1958,
-    1960,
-    null,
-    null,
-    1936,
-    1936,
-    1937,
-    1936,
-    null,
-    1949,
-    1959,
-    null,
-    1958,
-    1953,
-    1954
-]);
+	let historicMapsByEdition: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
+		if (!historicMapsLoaded) return;
+		const grouped = new Map<number, HistoricMap[]>();
+		for (const { edition, ...rest } of historicMapsById.values())
+			(grouped.get(edition) ?? grouped.set(edition, []).get(edition))!.push({ edition, ...rest });
+		return grouped;
+	});
 
-let dots4 = $state(
-    [
-    1964,
-    1964,
-    1964,
-    1964,
-    1955,
-    1959,
-    1966,
-    1966,
-    1964,
-    1964,
-    1966,
-    1966,
-    null,
-    null,
-    null,
-    null,
-    1966,
-    1967,
-    1967,
-    null,
-    null,
-    null,
-    1966,
-    1969,
-    1968,
-    1967,
-    1969,
-    1974,
-    1976,
-    1977,
-    1978,
-    1968,
-    1969,
-    null,
-    1967,
-    1968,
-    1958,
-    1964,
-    1967,
-    1968,
-    1968,
-    1964,
-    null,
-    1967,
-    1967,
-    1962,
-    1974,
-    1976,
-    1978,
-    1978,
-    1977,
-    1970,
-    1970,
-    1969,
-    1970,
-    1969,
-    1968,
-    1974,
-    1974,
-    1975,
-    1977,
-    1977,
-    1970,
-    1971,
-    1971,
-    1960,
-    1967,
-    1969,
-    1973,
-    1973,
-    1977,
-    1977,
-    1978,
-    1970,
-    1970,
-    1970,
-    1970,
-    1969,
-    1965,
-    1973,
-    1973,
-    1974,
-    1974,
-    1971,
-    1971,
-    1971,
-    1972,
-    1971,
-    1969,
-    1966,
-    1972,
-    1973,
-    1975,
-    1975,
-    1971,
-    1971,
-    1971,
-    1971,
-    1972,
-    1973,
-    1975,
-    1976,
-    1965,
-    1968,
-    1968,
-    1970,
-    1969,
-    1970
-]
-);
+	let editions = $derived.by(() => {
+		if (!historicMapsLoaded) return;
+		const editionMap = new Map<string, Edition>();
+		for (const map of historicMapsById.values()) {
+			const key = `${map.edition}-${map.bis}`;
+			let ed = editionMap.get(key);
+			if (!ed) {
+				ed = {
+					name: `Editie ${map.edition}` + (map.bis ? ' (bis)' : ''),
+					edition: map.edition,
+					bis: map.bis,
+					yearStart: map.yearEnd,
+					yearEnd: map.yearEnd
+				};
+				editionMap.set(key, ed);
+			} else {
+				ed.yearStart = Math.min(map.yearEnd, ed.yearStart);
+				ed.yearEnd = Math.max(map.yearEnd, ed.yearEnd);
+			}
+		}
+		return Array.from(editionMap.values());
+	});
 
-let dots5 = $state(
-    [
-    1971,
-    1972,
-    1972,
-    1973,
-    1974,
-    1974,
-    1972,
-    1972,
-    1973,
-    1975,
-    1976,
-    1977,
-    1976,
-    1983,
-    1972,
-    1971,
-    null,
-    1975,
-    1975,
-    1978,
-    1978,
-    1983,
-    1983,
-    1972,
-    1969,
-    1974,
-    null,
-    1989,
-    1988,
-    null,
-    1982,
-    1982,
-    1988,
-    1987,
-    1976,
-    1989,
-    1988,
-    1978,
-    1982,
-    1984,
-    1983,
-    1986,
-    1986,
-    1987,
-    1989,
-    1989,
-    1988,
-    1979,
-    1980,
-    1981,
-    1983,
-    1983,
-    1987,
-    1987,
-    1987,
-    1987,
-    1980,
-    1981,
-    1981,
-    1981,
-    1982,
-    1985,
-    1986,
-    1986,
-    1987,
-    1987,
-    1978,
-    1979,
-    1979,
-    1983,
-    1985,
-    1985,
-    1985,
-    1985,
-    1978,
-    1978,
-    1979,
-    1984,
-    1985,
-    1985,
-    1985,
-    1986,
-    1986,
-    1986,
-    1978,
-    1979,
-    1979,
-    1985,
-    1985,
-    1985,
-    1986,
-    1986,
-    1986,
-    1986,
-    1986
-]
-);
-    // for(let i = 0; i < 80; ++i) {
-    //     dots.push(Math.random() * (yearEnd - yearStart) + yearStart | 0);
-    // }
+	let historicMapsByYear = $derived.by(() => {
+		if (!historicMapsLoaded) return {};
+		const mapsByYear: Record<number, HistoricMap[]> = {};
+		for (const map of historicMapsById.values().filter((map) => !map.type && !map.bis))
+			(mapsByYear[map.yearEnd] ??= []).push(map); // TODO: bis filter in timeline
+		return mapsByYear;
+	});
 
-    function yearToScreen(year) {
-        return (year - yearStart) / (yearEnd - yearStart) * width + padding;
-    }
+	const MIN_YEAR: number = 1800;
+	const MAX_YEAR: number = 2023;
 
-    $effect(() => {
-        loaded = true;
-    });
+	let width: number = $state(0);
+	let height: number = $state(0);
+
+	let view = $state(
+		new Spring({ start: 1965 + 8, end: 2010 - 8 }, { stiffness: 0.1, damping: 0.33 })
+	);
+	let selectedYear = $derived((view.target.end + view.target.start) / 2);
+
+	let timelineTickColor = $state('#fff');
+
+	let isPanning: boolean = $state(false);
+	let lastX: number = $state(0);
+
+	function yearToX(year: number): number {
+		return ((year - view.current.start) / (view.current.end - view.current.start)) * width;
+	}
+
+	function onwheel(e: WheelEvent) {
+		e.preventDefault();
+
+		const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.2), 0.2);
+		const cursor = selectedYear;
+		const { start, end } = view.current;
+
+		const newStart = cursor - (cursor - start) * zoom;
+		const newEnd = cursor + (end - cursor) * zoom;
+
+		view.target = { start: Math.max(newStart, MIN_YEAR), end: Math.min(newEnd, MAX_YEAR) };
+	}
+
+	function onpointerdown(e: PointerEvent) {
+		isPanning = true;
+		lastX = e.clientX;
+
+		setLabelVisibility(true);
+
+		window.addEventListener('pointermove', onpointermove);
+		window.addEventListener('pointerup', onpointerup);
+		window.addEventListener('blur', onpointerup);
+	}
+
+	function onpointermove(e: PointerEvent) {
+		if (!isPanning) return;
+
+		const maxDeltaLeft = view.current.start - MIN_YEAR;
+		const maxDeltaRight = view.current.end - MAX_YEAR;
+
+		const dx = e.clientX - lastX;
+		let yearDelta = (dx / width) * (view.current.end - view.current.start);
+		if (yearDelta > maxDeltaLeft) yearDelta = maxDeltaLeft;
+		if (yearDelta < maxDeltaRight) yearDelta = maxDeltaRight;
+
+		view.target = {
+			start: Math.max(view.target.start - yearDelta, MIN_YEAR),
+			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
+		};
+		lastX = e.clientX;
+
+		map.triggerRepaint(); // TODO: remove
+	}
+
+	function onpointerup() {
+		isPanning = false;
+
+		setLabelVisibility(false);
+
+		view.target = {
+			start: Math.round(view.target.start),
+			end: Math.round(view.target.end)
+		};
+
+		window.removeEventListener('pointermove', onpointermove);
+		window.removeEventListener('pointerup', onpointerup);
+	}
 </script>
 
+{#if !selectedHistoricMap}
+	<div
+		transition:fly={{ y: 100, duration: 250 }}
+		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px]"
+		style:background={'#336'}
+		bind:clientWidth={width}
+		bind:clientHeight={height}
+		{onwheel}
+		{onpointerdown}
+		{onpointermove}
+		{onpointerup}
+	>
+		<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
 
-<svg height="50" width="100%" bind:clientWidth={actualWidth}>
-    {#if loaded}
-    {#each dots as dot} 
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill={`hsl(${dot - 1650},100%,50%)`} stroke="#fff" stroke-width="1"></circle> -->
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill="#f4a" stroke="#fff" stroke-width="1"></circle> -->
-    {/each}
-    {#each dots2 as dot} 
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill={`hsl(${dot - 1650},100%,50%)`} stroke="#fff" stroke-width="1"></circle> -->
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill="#f4a" stroke="#fff" stroke-width="1"></circle> -->
-    {/each}
-    {#each dots3 as dot} 
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill={`hsl(${dot - 1650},100%,50%)`} stroke="#fff" stroke-width="1"></circle> -->
-        <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill="#f4a" stroke="#fff" stroke-width="1"></circle>
-    {/each}
-    {#each dots4 as dot} 
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill={`hsl(${dot - 1650},100%,50%)`} stroke="#fff" stroke-width="1"></circle> -->
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill="#f4a" stroke="#fff" stroke-width="1"></circle> -->
-    {/each}
-    {#each dots5 as dot} 
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill={`hsl(${dot - 1650},100%,50%)`} stroke="#fff" stroke-width="1"></circle> -->
-        <!-- <circle cx={yearToScreen(dot)} cy={Math.random() * 10 + 20} r="4" fill="#f4a" stroke="#fff" stroke-width="1"></circle> -->
-    {/each}
-        {#each {length: steps} as _, i}
+		<!-- <div
+			class="map-markers"
+			style="position: absolute; inset: 0; perspective: 600px; transform-style: preserve-3d; z-index: 1; overflow-x: hidden; overflow-y: visible"
+		>
+			{#each mapViewer?.historicMaps as map, i}
+				{@const height =
+					mapViewer?.historicMaps.slice(0, i).filter((m) => m.yearStart == map.yearStart).length *
+						-3 +
+					40 +
+					(map.yearStart % 2) * 1}
+				{@const visible = mapViewer.historicMapsInViewport.has(map.id)}
 
-            <text style:font="normal 14px sans-serif" x={i * stepWidth + padding - 17} y={35}>{yearStart + yearStep * i}</text>
-            <line x1={i * stepWidth + padding} y1="40" x2={i * stepWidth + padding} y2="50" stroke="#222" stroke-width="1" />
-            {#each { length: 25} as _, j}
-                <line x1={i * stepWidth + j * (stepWidth / 25) + padding} y1="45" x2={i * stepWidth + j * (stepWidth / 25) + padding} y2="50" stroke="#222" stroke-width="1" />
-            {/each}
-        {/each}
-        <text style:font="normal 14px sans-serif" x={steps * stepWidth + padding - 17} y={35}>{yearStart + yearStep * steps}</text>
-        <line x1={steps * stepWidth + padding} y1="40" x2={steps * stepWidth + padding} y2="50" stroke="#222" stroke-width="1" />
+				<MapThumbnail x={yearToX(map.yearStart) - 25} y={height} src={map.thumbnailUrl}
+				></MapThumbnail>
+			{/each}
+		</div> -->
+		<div
+			class="absolute inset-0 z-1 h-[200px] w-full overflow-y-visible"
+			style="perspective: 1000px; transform-style: preserve-3d;"
+		>
+			{#each Object.entries(historicMapsByYear) as [year, maps]}
+				{#if +year + 1 >= view.current.start && +year - 1 <= view.current.end}
+					<MapThumbnailStack x={yearToX(+year)} {maps} {year}></MapThumbnailStack>
+				{/if}
+			{/each}
+		</div>
+		<svg
+			{width}
+			height={120}
+			style="overflow: visible; position: absolute; top: 0; left: 0; z-index: 999;"
+		>
+			{#each Array.from({ length: Math.ceil(view.current.end) - Math.floor(view.current.start) + 1 }, (_, i) => Math.floor(view.current.start) + i) as year}
+				{@const pixelsPerYear = width / (view.current.end - view.current.start)}
+				{#if year % 25 === 0}
+					<line
+						x1={yearToX(year)}
+						y1={height}
+						x2={yearToX(year)}
+						y2={height - 10}
+						stroke={timelineTickColor}
+						stroke-width="1"
+					/>
+					<text
+						x={yearToX(year) - 15}
+						y={height - 15}
+						font-size="14"
+						font-weight="500"
+						fill={timelineTickColor}>{year}</text
+					>
+				{:else if year % 5 === 0 && pixelsPerYear > 7}
+					<line
+						x1={yearToX(year)}
+						y1={height}
+						x2={yearToX(year)}
+						y2={height - 10 + 5 * Math.max(0, (9 - pixelsPerYear) / 2)}
+						stroke={timelineTickColor}
+						stroke-width="1"
+					/>
+					<text
+						x={yearToX(year) - 13}
+						y={height - 15}
+						font-size="12"
+						fill={timelineTickColor}
+						opacity={1 - (9 - pixelsPerYear) / 2}
+					>
+						{year}
+					</text>
+				{/if}
+				{#if pixelsPerYear > 3}
+					<line
+						x1={yearToX(year)}
+						y1={height}
+						x2={yearToX(year)}
+						y2={height - 5}
+						stroke={timelineTickColor}
+						stroke-width="1"
+						opacity={1 - (5 - pixelsPerYear) / 2}
+					/>
+				{/if}
+			{/each}
+			<rect
+				x={yearToX((view.current.end + view.current.start) / 2)}
+				y={0}
+				width={width / 2}
+				{height}
+				fill="url(#gradient-left)"
+			></rect>
+			<defs>
+				<linearGradient id="gradient-left" x1="0%" y1="0%" x2="100%" y2="0%">
+					<stop offset="0%" style="stop-color:#336; stop-opacity:.9" />
+					<stop offset="100%" style="stop-color:#336; stop-opacity:0" />
+				</linearGradient>
+			</defs>
 
-        <!-- {#each [1850,1875,1900,1925,1950,1975] as year, i}
-            <text style:font="normal 14px sans-serif" x={i * 200 + 5} y={30}>{year}</text>
-            <line x1={i * 200 + 25} y1="40" x2={i * 200 + 25} y2="50" stroke="#222" stroke-width="2" />
-            {#each { length: 25} as _, j}
-            <line x1={i * 200 + j * 8 + 25} y1="45" x2={i * 200 + j * 8 + 25} y2="50" stroke="#222" stroke-width="2" />
-            {/each}
-        {/each} -->
-    {/if}
-</svg>
+			{#if editions}
+				{#each editions.filter((i) => !i.bis) as ed, i}
+					{@const height = i % 2 == 0 ? 92 : 88}
+					{@const start = yearToX(ed.yearStart)}
+					{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
+					{@const end = yearToX(ed.yearEnd)}
+					<line x1={start} y1={height} x2={start} y2={height - 8} stroke="#fff" stroke-width="1"
+					></line>
+					<line x1={start} y1={height} x2={middle - 25} y2={height} stroke="#fff" stroke-width="1"
+					></line>
+					<line x1={middle + 25} y1={height} x2={end} y2={height} stroke="#fff" stroke-width="1"
+					></line>
+					<text
+						x={middle}
+						y={height + 3}
+						font-size="12"
+						font-weight="600"
+						fill="#fff"
+						text-anchor="middle"
+					>
+						{ed.name}</text
+					>
+					<line x1={end} y1={height} x2={end} y2={height - 8} stroke="#fff" stroke-width="1"></line>
+				{/each}
+			{/if}
+		</svg>
+	</div>
+{/if}

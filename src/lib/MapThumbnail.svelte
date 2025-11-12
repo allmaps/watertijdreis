@@ -35,4 +35,4 @@
 </div>
 <!-- {/if} -->
 
-<img style:opacity={0} {src} loading="eager" alt="" onload={() => (imageLoaded = true)} />
+<img style:opacity={0} {src} loading="lazy" alt="" onload={() => (imageLoaded = true)} />

@@ -62,7 +62,7 @@
 <input
 	bind:this={inputEl}
 	bind:value={inputValue}
-	class="absolute top-8 left-20 focus:ring-pink h-9 rounded-lg border border-gray-200 bg-white pl-10 pr-2 text-sm focus:z-10 focus:ring-2 focus:outline-none"
+	class="focus:ring-pink absolute top-8 left-20 h-9 rounded-lg border border-gray-200 bg-white pr-2 pl-10 text-sm focus:z-10 focus:ring-2 focus:outline-none"
 	type="search"
 	spellcheck="false"
 	autocomplete="off"
@@ -72,7 +72,7 @@
 
 {#if inputValue !== ''}
 	<ul
-		class="absolute top-20 left-20 z-10 w-full rounded-xl border border-gray-200 bg-white py-1 shadow-md mt-1"
+		class="absolute top-20 left-20 z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white py-1 shadow-md"
 		transition:fade
 	>
 		{#if features.length > 0}
@@ -92,14 +92,14 @@
 						<a
 							href="https://whgazetteer.org/places/{feature.properties.index_id}/portal/"
 							target="_blank"
-							class="rounded-lg bg-gray-200 px-2 py-0.5 text-xs uppercase text-gray-700"
+							class="rounded-lg bg-gray-200 px-2 py-0.5 text-xs text-gray-700 uppercase"
 							on:click|stopPropagation>whg</a
 						>
 					{/if}
 				</li>
 			{/each}
 		{:else}
-			<li class="h-10 flex items-center px-3 text-sm text-gray-400">No results found</li>
+			<li class="flex h-10 items-center px-3 text-sm text-gray-400">No results found</li>
 		{/if}
 	</ul>
 {/if}

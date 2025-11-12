@@ -32,7 +32,8 @@
     left: 0;
     height: 20px;
     color: #336;
-    font-size: 14px;
+	font-family: 'ivypresto-display';
+    font-size: 18px;
     font-weight: 600;
     pointer-events: none;
     transform: translateX(-50%);
