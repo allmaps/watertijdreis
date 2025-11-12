@@ -41,7 +41,7 @@
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
-		"svelte": "^5.0.0",
+		"svelte": "^5.43.6",
 		"svelte-check": "^4.3.3",
 		"svelte-feather-icons": "^4.2.0",
 		"tailwindcss": "^4.1.8",
