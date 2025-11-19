@@ -1,32 +1,38 @@
 <script lang="ts">
 	import { MagnifyingGlass, MapTrifold, NavigationArrow } from 'phosphor-svelte';
-	// import Geocoder from './Geocoder.svelte';
-	// import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
-	// import { WorldHistoricalGazetteer } from '$lib/geocoder/providers/world-historical-gazetteer';
-	// // import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
+	import Geocoder from './Geocoder.svelte';
+	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
+	import { WorldHistoricalGazetteer } from '$lib/geocoder/providers/world-historical-gazetteer';
+	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
+	import { scale } from 'svelte/transition';
 
-	let mouseAngle = $state(0);
+	let { flyToFeature } = $props();
 
-	let loaded = $state(false);
+	let searchBarVisible = $state(false);
+
+	function toggleSearchBar() { searchBarVisible = !searchBarVisible }
 </script>
 
-<div
-	class="absolute top-20 left-5 rounded-full p-[3px] shadow-lg"
-	style:background={`linear-gradient(${mouseAngle - Math.PI / 2}rad, #ff44aaaa, transparent)`}
+<button
+	class="absolute top-60 left-5 rounded-full p-[4px] shadow-lg cursor-pointer"
+	style:background={`linear-gradient(${- Math.PI / 2}rad, #336, 50%, #00f)`}
+	onclick={toggleSearchBar}
 >
-	<div class="rounded-full bg-[#336] p-3 hover:bg-[#447]">
-		<MagnifyingGlass size="18" color="#fff" weight="bold"></MagnifyingGlass>
+	<div class="rounded-full bg-[#fff] p-3 hover:bg-[#eef] active:translate-y-[1px] active:scale-95 transition-transform">
+		<MagnifyingGlass size="18" color="#f4a" weight="bold"></MagnifyingGlass>
 	</div>
-</div>
-<div
-	class="absolute top-35 left-5 rounded-full p-[3px] shadow-lg"
-	style:background={`linear-gradient(${mouseAngle - Math.PI / 2}rad, #ff44aaaa, transparent)`}
+</button>
+<!-- <div
+	class="absolute top-20 left-5 rounded-full p-[4px] shadow-lg cursor-pointer"
+	style:background={`linear-gradient(${- Math.PI / 2}rad, #ff44aa88, #88f)`}
 >
 	<div class="rounded-full bg-[#336] p-3">
 		<MapTrifold size="18" color="white" weight="bold"></MapTrifold>
 	</div>
-</div>
+</div> -->
 
-<!-- <Geocoder providers={[new WorldHistoricalGazetteer()]}></Geocoder> -->
+<svelte:window 
+	onkeydown={(e) => { if(e.metaKey && e.key == "k") searchBarVisible = true }}
+></svelte:window>
 
-<svelte:body onmousemove={(e) => (mouseAngle = Math.atan2(e.clientY, e.clientX))} />
+<Geocoder {flyToFeature} bind:visible={searchBarVisible} providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}></Geocoder>

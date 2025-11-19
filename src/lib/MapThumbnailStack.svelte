@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { scale } from 'svelte/transition';
 
-	const { year, x, maps } = $props();
+	const { year, x, maps, selectedYear, getHistoricMapThumbnail } = $props();
 	const zRotations = maps.map((i) => (Math.random() - 0.5) * 10);
 
 	const loaded = $state(new Set<string>());
@@ -17,7 +17,7 @@
 	// });
 
 	function yOffset(i: number, map: any) {
-		return 40 - i * 2 + (map.yearStart % 2) * 1;
+		return 33 - i * 2 + (map.yearStart % 2) * 1;
 	}
 </script>
 
@@ -30,10 +30,11 @@
 				top:{yOffset(i, map)}px;
 				transform: rotateX(60deg) rotateZ({zRotations[i]}deg);
 				z-index:{100 - yOffset(i, map)};
+				filter: grayscale({selectedYear < year ? "100%" : "0%"});
 			"
 	>
 		{#if i == maps.length - 1}
-			<img src={map.imageUrl} alt={map.name} class="h-full w-full object-cover object-center" />
+			<img src={getHistoricMapThumbnail(map.id, 32)} alt={map.name} class="h-full w-full object-cover object-center" />
 		{/if}
 	</div>
 	<!-- {/if} -->

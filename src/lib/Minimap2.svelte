@@ -1,11 +1,25 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
-	import { ArrowUUpLeft, Binoculars, MouseLeftClick } from 'phosphor-svelte';
-	import { fly, scale, fade } from 'svelte/transition';
+	import { ArrowLineRight, ArrowUUpLeft, Binoculars, ImagesSquare, MapTrifold, MouseLeftClick, PictureInPicture, PushPin } from 'phosphor-svelte';
+	import { fly, scale, draw, fade } from 'svelte/transition';
 
-	let { visibleHistoricMaps, viewportPolygon, selectedHistoricMap, historicMapsLoaded } = $props();
+	let {
+		historicMapsById,
+		visibleHistoricMaps,
+		visibleHistoricMapsInViewport,
+		viewportPolygon,
+		hoveredHistoricMap,
+		selectedHistoricMap,
+		historicMapsLoaded,
+		getHistoricMapThumbnail,
+		getHistoricMapManifest
+	} = $props();
 
-	let gridVisible = $state(false);
+
+	let previewHistoricMap = $derived.by(() => {
+		if(visibleHistoricMapsInViewport.size == 1) return visibleHistoricMapsInViewport.values().next().value;
+		else return hoveredHistoricMap;
+	})
 
 	let polygons = $derived.by(() => {
 		if (!historicMapsLoaded) return [];
@@ -32,8 +46,8 @@
 
 		const viewWidth = bbox[2] - bbox[0];
 		const viewHeight = bbox[3] - bbox[1];
-		const paddingX = viewWidth * 0.05;
-		const paddingY = viewHeight * 0.05;
+		const paddingX = viewWidth * 0.075;
+		const paddingY = viewHeight * 0.075;
 
 		return [
 			bbox[0] - paddingX,
@@ -52,110 +66,107 @@
 		return coordinates.map((coord) => coord.join(',')).join(' ');
 	}
 
-	function getClippedProjectedPoints(coordinates: [number, number][]): string {
-		const minX = viewBox[0] + viewBox[2] / width;
-		const minY = viewBox[1] + viewBox[2] / width;
-		const maxX = viewBox[0] + viewBox[2] - 2 * (viewBox[2] / width);
-		const maxY = viewBox[1] + viewBox[3] - 2 * (viewBox[2] / width);
+	function getClippedProjectedRect(coordinates: [number, number][]): { x: number; y: number; width: number; height: number } {
+		const minXClamp = viewBox[0] + (viewBox[2] / width) * 2;
+		const minYClamp = viewBox[1] + (viewBox[2] / width) * 2;
+		const maxXClamp = viewBox[0] + viewBox[2] - 4 * (viewBox[2] / width);
+		const maxYClamp = viewBox[1] + viewBox[3] - 4 * (viewBox[2] / width);
 
-		return coordinates
-			.map((coords) => [
-				Math.min(Math.max(coords[0], minX), maxX),
-				Math.min(Math.max(coords[1], minY), maxY)
-			])
-			.map((coord) => coord.join(','))
-			.join(' ');
+		const clipped = coordinates.map(([x, y]) => [
+			Math.min(Math.max(x, minXClamp), maxXClamp),
+			Math.min(Math.max(y, minYClamp), maxYClamp)
+		]);
+
+		const xs = clipped.map((c) => c[0]);
+		const ys = clipped.map((c) => c[1]);
+
+		const x = Math.min(...xs);
+		const y = Math.min(...ys);
+		const widthRect = Math.max(...xs) - x;
+		const heightRect = Math.max(...ys) - y;
+
+		return { x, y, width: widthRect, height: heightRect };
 	}
 </script>
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8">
+	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-999">
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
+			{#if previewHistoricMap}
+				{@const hovered = polygons.find((p) => p.properties.id == previewHistoricMap.id)}
+				{@const centerPoint = hovered ? turf.centerOfMass(hovered).geometry.coordinates : [0, 0]}
+
+				{@const x1 = centerPoint[0]}
+				{@const y1 = centerPoint[1]}
+				{@const x2 = viewBox[0] + viewBox[2] / 2}
+				{@const y2 = viewBox[1] - viewBox[3] * 0.03}
+
+				{@const strokeWidth = (viewBox[2] / width) * 2}
+
+				{@const angle = Math.atan2(y2 - y1, x2 - x1)}
+				{@const ah = strokeWidth * 5}
+
+				{@const leftX = x2 - ah * Math.cos(angle) + ah * 0.5 * Math.sin(angle)}
+				{@const leftY = y2 - ah * Math.sin(angle) - ah * 0.5 * Math.cos(angle)}
+
+				{@const rightX = x2 - ah * Math.cos(angle) - ah * 0.5 * Math.sin(angle)}
+				{@const rightY = y2 - ah * Math.sin(angle) + ah * 0.5 * Math.cos(angle)}
+
+				<path
+					in:draw={{ duration: 250 }}
+					fill="none"
+					stroke="#33a"
+					stroke-width={strokeWidth}
+					d={`
+						M ${x1} ${y1}
+						L ${x2} ${y2}
+						L ${leftX} ${leftY}
+					`}
+				/>
+				<path
+					in:draw={{ duration: 250 }}
+					fill="none"
+					stroke="#33a"
+					stroke-width={strokeWidth}
+					d={`
+						M ${x1} ${y1}
+						L ${x2} ${y2}
+						L ${rightX} ${rightY}
+					`}
+				/>
+			{/if}
 			{#each polygons as poly}
-				{@const selected = selectedHistoricMap && poly.properties.id == selectedHistoricMap.id}
+				{@const previewed = previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
+				{@const fill = previewed ? '#ff44aa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
 					points={getProjectedPoints(poly.geometry.coordinates[0])}
-					fill={selected ? '#ff44aa' : '#ff44aa11'}
+					{fill}
 					stroke="#ff44aa"
 					stroke-width={(viewBox[2] / width) * 1.33}
 				/>
 			{/each}
 			{#if viewport && !selectedHistoricMap}
-				<polygon
-					transition:fade
+				<!-- <polygon
 					points={getClippedProjectedPoints(viewport.geometry.coordinates[0])}
 					fill="none"
-					stroke="#33336688"
-					stroke-width={viewBox[2] / width}
-				/>
+					stroke="#33336666"
+					stroke-width={(viewBox[2] / width) * 4}
+					rx="4"
+					ry="4"
+				/> -->
+				{@const { x, y, width: w, height: h} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
+				<rect
+					{x} {y} width={w} height={h}
+					fill="none" 
+					stroke="#33336666"
+					stroke-width={(viewBox[2] / width) * 4}
+					rx={(viewBox[2] / width) * 4}
+					ry={(viewBox[2] / width) * 4}
+				></rect>
 			{/if}
 		</g>
 	</svg>
 {/if}
 
-{#if selectedHistoricMap}
-	<div id="button-container" class="absolute top-55 right-10 text-[14px]" transition:fade>
-		<button>
-			<ArrowUUpLeft size="20" class="inline"></ArrowUUpLeft>
-			Blad sluiten
-			<kbd
-				class="bg-background-alt text-xxs pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-33 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-				><span class="text-foreground-alt text-[10px]">Esc</span></kbd
-			>
-		</button>
-	</div>
-{:else if gridVisible}
-	<div id="button-container" class="absolute top-55 right-10 text-[14px]" transition:fade>
-		<button>
-			<Binoculars size="20" class="inline"></Binoculars>
-			Blad bekijken
-			<MouseLeftClick size="20" class="inline"></MouseLeftClick>
-		</button>
-	</div>
-{:else}
-	<div id="button-container" class="absolute top-55 right-10 text-[14px]" transition:fade>
-		<button>
-			<Binoculars size="20" class="inline"></Binoculars>
-			Bladen ontdekken
-			<kbd
-				class="bg-background-alt text-xxs pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-33 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-				><span class="text-foreground-alt text-[10px]">Spatie</span></kbd
-			>
-		</button>
-	</div>
-{/if}
 
-<svelte:window
-	onkeydown={(e) => {
-		if (e.key == ' ') gridVisible = true;
-	}}
-	onkeyup={(e) => {
-		if (e.key == ' ') gridVisible = false;
-	}}
-/>
-
-<style>
-	#button-container {
-		background: #fff;
-		border: 2px solid rgb(255, 234, 246);
-		border-radius: 8px;
-		display: inline-flex;
-		margin: 0 5px;
-		margin-top: 18px;
-		box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);
-		overflow: hidden;
-		flex-shrink: 0;
-	}
-
-	#button-container button {
-		margin: 0;
-		padding: 8px 10px;
-		border-left: 1px solid var(--foreground-highlight);
-		cursor: pointer;
-	}
-
-	#button-container button:hover {
-		background: var(--inactive-tab-color);
-		/* color: #2222ff; */
-	}
-</style>

@@ -24,6 +24,7 @@ export class GeocodeEarth extends GeocoderProvider {
         return (
             `https://api.geocode.earth/v1/autocomplete` +
             `?api_key=${this.apiKey}` +
+            `&boundary.country=NLD` +
             `&layers=-venue` +
             `&text=${text}`
         )

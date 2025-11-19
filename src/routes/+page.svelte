@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Map from '$lib/Map.svelte';
-	import Header from '$lib/Header.svelte';
-	import Search from '$lib/Search.svelte';
+	import NavigationButtons from '$lib/NavigationButtons.svelte';
+
 
 	type ComparingState = {
 		enabled: boolean;
@@ -17,15 +17,13 @@
 
 <link rel="stylesheet" href="https://use.typekit.net/bis1pqi.css" />
 
-<Header></Header>
+<!-- <NavigationButtons></NavigationButtons> -->
 
 <!-- <Map bind:map={map} bind:compareMap={compareMap} isComparing={isComparing}></Map> -->
 <Map></Map>
 <!-- <Map2></Map2> -->
 
 <!-- <Tabs2 {mapViewer}></Tabs2> -->
-
-<Search></Search>
 
 <style>
 	:global(body, html, #svelte) {

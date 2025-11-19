@@ -5,6 +5,8 @@
 	import MapThumbnail from './MapThumbnail.svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
+	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte'; 
+	import { Label, Switch } from "bits-ui";
 
 	let {
 		filter = $bindable(),
@@ -13,6 +15,7 @@
 		historicMapsById,
 		selectedHistoricMap,
 		setLabelVisibility,
+		getHistoricMapThumbnail,
 		map
 	} = $props();
 
@@ -154,12 +157,16 @@
 		window.removeEventListener('pointermove', onpointermove);
 		window.removeEventListener('pointerup', onpointerup);
 	}
+
+	let selectedOption = $state('');
+	let showSettings = $state(false);
+	function toggleSettings() { showSettings = !showSettings; }
 </script>
 
 {#if !selectedHistoricMap}
 	<div
 		transition:fly={{ y: 100, duration: 250 }}
-		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px]"
+		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md shadow-[#f4a]"
 		style:background={'#336'}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
@@ -192,7 +199,7 @@
 		>
 			{#each Object.entries(historicMapsByYear) as [year, maps]}
 				{#if +year + 1 >= view.current.start && +year - 1 <= view.current.end}
-					<MapThumbnailStack x={yearToX(+year)} {maps} {year}></MapThumbnailStack>
+					<MapThumbnailStack x={yearToX(+year)} {maps} {year} {selectedYear} {getHistoricMapThumbnail}></MapThumbnailStack>
 				{/if}
 			{/each}
 		</div>
@@ -266,7 +273,7 @@
 
 			{#if editions}
 				{#each editions.filter((i) => !i.bis) as ed, i}
-					{@const height = i % 2 == 0 ? 92 : 88}
+					{@const height = i % 2 == 0 ? 90 : 85}
 					{@const start = yearToX(ed.yearStart)}
 					{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
 					{@const end = yearToX(ed.yearEnd)}
@@ -290,5 +297,62 @@
 				{/each}
 			{/if}
 		</svg>
+
+		<div class="absolute top-2 right-2 z-[2000]">
+		<div
+			id="settings-button"
+			class="rounded-full p-[3px] shadow-2xl transition-all duration-300 pointer-events-auto"
+			style="background: linear-gradient(160deg, #ff66aa, #3333aa);"
+		>
+			<button
+				class="flex items-center justify-center w-7 h-7 rounded-full 
+					bg-white text-[#3333aa]
+					hover:scale-[1.05] pointer active:scale-[0.97]
+					transition-all duration-150"
+				title="Kies type kaart"
+				onclick={toggleSettings}
+			>
+				<Gear size={18} />
+			</button>
+		</div>
+
+		{#if showSettings}
+			<div
+				id="settings-menu"
+				class="absolute bg-white shadow-lg rounded-lg border border-gray-200 w-80 py-3 px-3 transition-all duration-200"
+				style="right: 3.0rem; top: {- 60}px;"
+			>
+				<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+					{#each ["Reguliere Waterstaatskaart", "BIS Edities", "Hydrologische Waarnemingspunten", "Watervoorzieningseenheden"] as option}
+						<li class="flex items-center justify-between py-1 px-2 rounded-md hover:bg-gray-50">
+							<Label.Root for={option} class="text-sm font-medium">{option}</Label.Root>
+
+							<Switch.Root
+							id={option}
+							name="settings-switch"
+							checked={selectedOption === option}
+							onCheckedChange={(checked: boolean) => {
+								if (checked) selectedOption = option;
+								}}
+							class="focus-visible:ring-foreground focus-visible:ring-offset-background 
+									data-[state=checked]:bg-[#ff66aa] data-[state=unchecked]:bg-gray-300 
+									data-[state=unchecked]:shadow-mini-inset 
+									focus-visible:outline-hidden inline-flex h-[22px] w-[40px] shrink-0 cursor-pointer 
+									items-center rounded-full px-[2px] transition-colors focus-visible:ring-2 
+									focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+							<Switch.Thumb
+								class="bg-white data-[state=unchecked]:shadow-mini pointer-events-none block size-[18px] shrink-0 rounded-full transition-transform 
+									data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0 border border-gray-200"
+							/>
+							</Switch.Root>
+						</li>
+					{/each}
+
+
+				</ul>
+			</div>
+		{/if}
+	</div>
 	</div>
 {/if}

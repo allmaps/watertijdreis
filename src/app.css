@@ -1,1 +1,16 @@
 @import 'tailwindcss';
+
+.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right {
+    bottom: 140px !important;
+}
+
+/* optional: scalebar visuals */
+.maplibregl-ctrl-scale {
+    background: transparent !important;
+    border: 2px solid #f4a !important;
+    border-top: none !important;
+    color: #336 !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    padding: 4px 6px;
+}

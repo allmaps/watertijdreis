@@ -1,19 +1,24 @@
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 <script lang="ts">
-	import maplibregl, { type LngLatLike } from 'maplibre-gl';
+	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
-	import type { WarpedMap } from '@allmaps/render';
+	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
 	import * as turf from '@turf/turf';
 
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { GeojsonPolygon } from './types/geojson';
 	import Minimap from './Minimap.svelte';
+	import Search from './Search.svelte';
+	import Header from './Header.svelte';
 	import Minimap2 from './Minimap2.svelte';
 	import { apply } from 'ol/transform';
 	import Timeline from './Timeline.svelte';
-	import MetadataPanel from './MetadataPanel.svelte';
+	import { getUserLocation } from '$lib/UserLocation.svelte';
+	import MapInfo from './MapInfo.svelte';
 
 	type HistoricMap = {
 		id: string;
+		manifestId: string;
 		warpedMap: WarpedMap;
 		polygon: GeojsonPolygon;
 		yearStart: number;
@@ -36,7 +41,28 @@
 	};
 
 	const containerId = 'map-container';
-	const annotationUrl = 'maps.json';
+	const ANNOTATION_URL = 'maps.json';
+	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
+	let manifestCollection: any | null = $state(null);
+
+	$effect(() => {
+		fetch(MANIFEST_URL)
+			.then((res) => res.json())
+			.then((data) => (manifestCollection = data));
+	});
+
+	async function getHistoricMapManifest(id) {
+		const historicMap = historicMapsById.get(id);
+		if (!historicMap) return;
+		const { manifestId, edition, bis } = historicMap;
+
+		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
+		const manifestUrl = manifestCollection.items.find((i) => i.label.nl[0] === label).id;
+
+		const response = await fetch(manifestUrl);
+		const result = await response.json();
+		return result.items.find((i) => i.id == manifestId);
+	}
 
 	let map: maplibregl.Map | null = $state(null);
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
@@ -117,6 +143,34 @@
 	});
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
+	let visibleHistoricMapsInViewport = $derived.by(() => {
+		if (!viewportPolygon || !warpedMapLayer) return new Map();
+
+		const result = new Map();
+		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
+			const map = historicMapsById.get(id);
+			if (map && map.warpedMap.visible) {
+				result.set(map.id, map);
+			}
+		}
+
+		return result;
+	});
+
+	$effect(() => { // To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving 
+		if(warpedMapLayer) {
+			warpedMapLayer.renderer?.tileCache?.addEventListener(
+				WarpedMapEventType.MAPTILELOADED,
+				(e) => {
+					const id = e.data.mapId;
+					const historicMap = historicMapsById.get(id);
+					if(historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+				}
+			)
+		}
+	})
+
+	let gridVisible: boolean = $state(false);
 
 	function showHistoricMap(id) {
 		const historicMap = historicMapsById.get(id);
@@ -130,6 +184,12 @@
 		if (!historicMap) return;
 		historicMap.warpedMap.visible = false;
 		visibleHistoricMaps.delete(id);
+	}
+
+	function getHistoricMapThumbnail(id, size = 128) {
+		const map = historicMapsById.get(id);
+		if (!map) return '';
+		return map.warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
 	}
 
 	function applyFilter(filter: Filter) {
@@ -207,7 +267,7 @@
 			style: {
 				version: 8,
 				sources: {},
-				glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+				glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
 				layers: [
 					{
 						id: 'background',
@@ -231,6 +291,8 @@
 			touchPitch: false,
 			preserveDrawingBuffer: true
 		});
+		map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
+
 
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
@@ -238,10 +300,11 @@
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 
-			await loadHistoricMaps(annotationUrl);
+			await loadHistoricMaps(ANNOTATION_URL);
 			addOutlineLayers();
 
 			map.on('move', updateViewport);
+			updateViewport();
 			map.on('moveend', updateUrl);
 			map.on('click', 'map-outlines-fill', handleMapClick);
 			map.on('mousemove', 'map-outlines-fill', handleMapMouseMove);
@@ -260,6 +323,7 @@
 			const warpedMap = warpedMapLayer.getWarpedMapList().warpedMapsById.get(id);
 			const historicMap: HistoricMap = {
 				id,
+				manifestId: item.resource.partOf[0].id,
 				warpedMap,
 				polygon: warpedMap.geoMask,
 				...item._meta
@@ -292,14 +356,14 @@
 			type: 'symbol',
 			source: 'map-labels',
 			layout: {
-				'text-font': ['Noto Sans Bold'],
+				'text-font': ['Open Sans Bold'],
 				'text-field': ['to-string', ['get', 'year']],
-				'text-size': 14,
+				'text-size': 15,
 				'text-allow-overlap': true
 			},
 			paint: {
-				'text-color': '#33336688',
-				'text-halo-color': '#ffffff55',
+				'text-color': '#333366aa',
+				'text-halo-color': '#ffffff88',
 				'text-halo-width': 1,
 				'text-opacity': 0
 			}
@@ -311,9 +375,9 @@
 			source: 'map-outlines',
 			paint: {
 				'fill-color': '#ff44aa',
-				'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.3, 0]
-			},
-			layout: { visibility: 'none' }
+				'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0, 0]
+			}
+			// layout: { visibility: 'none' }
 		});
 
 		map.addLayer({
@@ -328,10 +392,65 @@
 		});
 	}
 
+	function flyToFeature(feature) {
+		const { geometry, bbox } = feature;
+		if(bbox) {
+			const [minLng, minLat, maxLng, maxLat] = bbox;
+			map?.fitBounds(
+				[
+					[minLng,minLat],
+					[maxLng,maxLat]
+				],
+				{ padding: 40, maxZoom: 15, duration: 250 }
+			)
+		} else if(geometry?.type === "Point") {
+			const [lng, lat] = geometry.coordinates;
+
+			map?.flyTo({
+				center: [lng, lat],
+				zoom: 13,
+				speed: 0.8,
+				curve: 1.4,
+				essential: true,
+				duration: 250
+			})
+		}
+	}
+
+	async function flyToUserLocation() {
+		try {
+			const { lat, lng } = await getUserLocation();
+
+			// create a pseudo-feature for your existing flyToFeature()
+			const feature = {
+				geometry: {
+					type: "Point",
+					coordinates: [lng, lat]
+				},
+				properties: {
+					label: "Your location"
+				}
+			};
+
+			flyToFeature(feature);
+		} catch (err) {
+			console.error("Could not get user location:", err);
+			alert("Locatie kon niet worden opgehaald. Heb je toestemming gegeven?");
+		}
+}
+
 	function setGridVisibility(visible = true) {
+		gridVisible = visible;
 		if (!maplibreLoaded) return;
 
-		map.setLayoutProperty('map-outlines-fill', 'visibility', visible ? 'visible' : 'none');
+		const hoverFillOpacity = visible ? 0.3 : 0;
+
+		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			hoverFillOpacity,
+			0
+		]);
 		map.setPaintProperty('map-outlines-stroke', 'line-opacity-transition', { duration: 300 });
 		map.setPaintProperty('map-outlines-stroke', 'line-opacity', visible ? 1 : 0);
 	}
@@ -343,8 +462,31 @@
 		map.setPaintProperty('map-outlines-labels', 'text-opacity', visible ? 1 : 0);
 	}
 
+	type MapView = {
+		center: [number, number],
+		zoom: number,
+		bearing: number,
+		pitch: number
+	}
+	let savedMapViews: MapView[] = $state([]);
+
+	function saveMapView() {
+		savedMapViews.push({
+			center: map.getCenter(),
+			zoom: map.getZoom(),
+			bearing: map.getBearing(),
+			pitch: map.getPitch()
+		});
+	}
+
+	function restoreView(options = { duration: 500 }) {
+		if(savedMapViews.length === 0) return;
+		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
+		map.easeTo({ center, zoom, bearing, pitch, ...options });
+	}
+
 	function handleMapClick(e: any) {
-		if (!map || !warpedMapLayer) return;
+		if (!map || !warpedMapLayer || !gridVisible) return;
 
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
@@ -365,6 +507,7 @@
 
 		setGridVisibility(false);
 
+		saveMapView();
 		const [minX, minY, maxX, maxY] = turf.bbox(selectedHistoricMap.polygon);
 		map.fitBounds(
 			[
@@ -439,7 +582,19 @@
 	}
 </script>
 
-<div id={containerId} class="relative h-full w-full overflow-hidden"></div>
+<style>
+	.polka {
+		background-image:
+		radial-gradient(#eef 2.5px, transparent 2.5px);
+		background-size: 25px 25px; /* spacing */
+		background-color: white;    /* optional */
+	}
+</style>
+
+<div id={containerId} class="relative h-full w-full overflow-hidden polka"></div>
+
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility}/>
+<!-- <Search {flyToFeature}></Search> -->
 
 <Timeline
 	bind:filter
@@ -448,13 +603,32 @@
 	{historicMapsById}
 	{selectedHistoricMap}
 	{setLabelVisibility}
+	{getHistoricMapThumbnail}
 	{map}
 ></Timeline>
 
-<Minimap2 {visibleHistoricMaps} {viewportPolygon} {selectedHistoricMap} {historicMapsLoaded}
+<Minimap2
+	{historicMapsById}
+	{visibleHistoricMaps}
+	{visibleHistoricMapsInViewport}
+	{viewportPolygon}
+	{hoveredHistoricMap}
+	{selectedHistoricMap}
+	{historicMapsLoaded}
+	{getHistoricMapThumbnail}
+	{getHistoricMapManifest}
 ></Minimap2>
-
-<MetadataPanel {selectedHistoricMap}></MetadataPanel>
+<MapInfo
+	{historicMapsById}
+	{visibleHistoricMaps}
+	{visibleHistoricMapsInViewport}
+	{viewportPolygon}
+	{hoveredHistoricMap}
+	{selectedHistoricMap}
+	{historicMapsLoaded}
+	{getHistoricMapThumbnail}
+	{getHistoricMapManifest}
+></MapInfo>
 
 <svelte:window
 	onkeydown={(e) => {
