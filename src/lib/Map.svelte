@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 <script lang="ts">
 	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
@@ -41,7 +40,7 @@
 	};
 
 	const containerId = 'map-container';
-	const ANNOTATION_URL = 'maps.json';
+	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
 	let manifestCollection: any | null = $state(null);
 
@@ -80,10 +79,35 @@
 	let historicMapsById: Map<string, HistoricMap> = $state(new Map());
 	let historicMapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
 		if (!historicMapsLoaded) return;
-		const grouped = new Map<number, HistoricMap[]>();
-		for (const { number, ...rest } of historicMapsById.values())
-			(grouped.get(number) ?? grouped.set(number, []).get(number))!.push({ number, ...rest });
-		return grouped;
+		const numbers = new Map<number, HistoricMap[]>();
+		for (const map of historicMapsById.values()) {
+			const number = map.number;
+			const sheetsForNumber = numbers.get(number);
+			// They should all have a yearEnd now
+			if (map.yearEnd) {
+				if (sheetsForNumber) {
+					sheetsForNumber.push(map);
+				} else {
+					numbers.set(number, new Array(map));
+				}
+			}
+		}
+		numbers.forEach((sheets) =>
+			sheets.sort((a, b) => {
+				const sameEdition = a.edition === b.edition;
+				const bothBis = a.bis === b.bis;
+				if (sameEdition && !bothBis) {
+					const aBis = a.bis ? 1 : 0;
+					const bBis = b.bis ? 1 : 0;
+					return bBis - aBis;
+				} else if (sameEdition) {
+					return b.yearEnd - a.yearEnd;
+				} else {
+					return b.edition - a.edition;
+				}
+			})
+		);
+		return numbers;
 	});
 
 	let hoveredFeature: string | null = $state(null);
@@ -131,8 +155,8 @@
 	let viewportPolygon: GeojsonPolygon | null = $state(null);
 
 	let filter: Filter = $state({
-		yearStart: 1900,
-		yearEnd: 1980,
+		yearStart: 1865,
+		yearEnd: 1991,
 		edition: 'All',
 		bis: false,
 		type: undefined
@@ -157,18 +181,19 @@
 		return result;
 	});
 
-	$effect(() => { // To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving 
-		if(warpedMapLayer) {
+	$effect(() => {
+		// To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving
+		if (warpedMapLayer) {
 			warpedMapLayer.renderer?.tileCache?.addEventListener(
 				WarpedMapEventType.MAPTILELOADED,
 				(e) => {
 					const id = e.data.mapId;
 					const historicMap = historicMapsById.get(id);
-					if(historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
 				}
-			)
+			);
 		}
-	})
+	});
 
 	let gridVisible: boolean = $state(false);
 
@@ -177,6 +202,7 @@
 		if (!historicMap) return;
 		historicMap.warpedMap.visible = true;
 		visibleHistoricMaps.set(id, historicMap);
+		warpedMapLayer?.setMapSaturation(id, 1);
 	}
 
 	function hideHistoricMap(id) {
@@ -198,15 +224,13 @@
 		const visibleSheets: HistoricMap[] = [];
 		const grayedOutSheets: HistoricMap[] = [];
 
+		console.log(`${filter.yearStart} - ${filter.yearEnd}`);
+
 		historicMapsByNumber.forEach((sheets, number) => {
 			let x1, y1, x2, y2;
-			let steps = 0;
 			const firstEdYearEnd = 1894;
 
-			for (const sheet of sheets.toReversed()) {
-				// TODO: remove reversed
-				steps++;
-
+			for (const sheet of sheets) {
 				const { x, y, yearEnd: year, edition, bis, type } = sheet;
 				const maxYearFilter = filter.yearEnd > firstEdYearEnd ? filter.yearEnd : firstEdYearEnd;
 				const periodFilter = filter.edition !== 'All' || year <= maxYearFilter;
@@ -291,8 +315,7 @@
 			touchPitch: false,
 			preserveDrawingBuffer: true
 		});
-		map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
-
+		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
@@ -394,16 +417,16 @@
 
 	function flyToFeature(feature) {
 		const { geometry, bbox } = feature;
-		if(bbox) {
+		if (bbox) {
 			const [minLng, minLat, maxLng, maxLat] = bbox;
 			map?.fitBounds(
 				[
-					[minLng,minLat],
-					[maxLng,maxLat]
+					[minLng, minLat],
+					[maxLng, maxLat]
 				],
 				{ padding: 40, maxZoom: 15, duration: 250 }
-			)
-		} else if(geometry?.type === "Point") {
+			);
+		} else if (geometry?.type === 'Point') {
 			const [lng, lat] = geometry.coordinates;
 
 			map?.flyTo({
@@ -413,7 +436,7 @@
 				curve: 1.4,
 				essential: true,
 				duration: 250
-			})
+			});
 		}
 	}
 
@@ -424,20 +447,20 @@
 			// create a pseudo-feature for your existing flyToFeature()
 			const feature = {
 				geometry: {
-					type: "Point",
+					type: 'Point',
 					coordinates: [lng, lat]
 				},
 				properties: {
-					label: "Your location"
+					label: 'Your location'
 				}
 			};
 
 			flyToFeature(feature);
 		} catch (err) {
-			console.error("Could not get user location:", err);
-			alert("Locatie kon niet worden opgehaald. Heb je toestemming gegeven?");
+			console.error('Could not get user location:', err);
+			alert('Locatie kon niet worden opgehaald. Heb je toestemming gegeven?');
 		}
-}
+	}
 
 	function setGridVisibility(visible = true) {
 		gridVisible = visible;
@@ -463,11 +486,11 @@
 	}
 
 	type MapView = {
-		center: [number, number],
-		zoom: number,
-		bearing: number,
-		pitch: number
-	}
+		center: [number, number];
+		zoom: number;
+		bearing: number;
+		pitch: number;
+	};
 	let savedMapViews: MapView[] = $state([]);
 
 	function saveMapView() {
@@ -480,7 +503,7 @@
 	}
 
 	function restoreView(options = { duration: 500 }) {
-		if(savedMapViews.length === 0) return;
+		if (savedMapViews.length === 0) return;
 		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
 	}
@@ -582,18 +605,11 @@
 	}
 </script>
 
-<style>
-	.polka {
-		background-image:
-		radial-gradient(#eef 2.5px, transparent 2.5px);
-		background-size: 25px 25px; /* spacing */
-		background-color: white;    /* optional */
-	}
-</style>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 
-<div id={containerId} class="relative h-full w-full overflow-hidden polka"></div>
+<div id={containerId} class="polka relative h-full w-full overflow-hidden"></div>
 
-<Header {flyToFeature} {flyToUserLocation} {setGridVisibility}/>
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} />
 <!-- <Search {flyToFeature}></Search> -->
 
 <Timeline
@@ -638,3 +654,11 @@
 		if (e.key == ' ') setGridVisibility(false);
 	}}
 />
+
+<style>
+	.polka {
+		background-image: radial-gradient(#eef 2.5px, transparent 2.5px);
+		background-size: 25px 25px; /* spacing */
+		background-color: white; /* optional */
+	}
+</style>
