@@ -7,14 +7,12 @@
 
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { GeojsonPolygon } from './types/geojson';
-	import Minimap from './Minimap.svelte';
-	import Search from './Search.svelte';
 	import Header from './Header.svelte';
-	import Minimap2 from './Minimap2.svelte';
-	import { apply } from 'ol/transform';
+	import Minimap from './Minimap.svelte';
 	import Timeline from './Timeline.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import MapInfo from './MapInfo.svelte';
+	import NavigationButtons from './NavigationButtons.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -591,6 +589,16 @@
 		}
 		return null;
 	}
+
+	function zoomIn() {
+		if (!map) return;
+		map.zoomIn({ duration: 250 });
+	}
+
+	function zoomOut() {
+		if (!map) return;
+		map.zoomOut({ duration: 250 });
+	}
 </script>
 
 <style>
@@ -604,7 +612,7 @@
 
 <div id={containerId} class="relative h-full w-full overflow-hidden polka"></div>
 
-<Header {flyToFeature} {flyToUserLocation} {setGridVisibility}/>
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut}/>
 <!-- <Search {flyToFeature}></Search> -->
 
 <Timeline
@@ -618,7 +626,7 @@
 	{map}
 ></Timeline>
 
-<Minimap2
+<Minimap
 	{historicMapsById}
 	{visibleHistoricMaps}
 	{visibleHistoricMapsInViewport}
@@ -628,7 +636,7 @@
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
 	{getHistoricMapManifest}
-></Minimap2>
+></Minimap>
 <MapInfo
 	{historicMapsById}
 	{visibleHistoricMaps}
