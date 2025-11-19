@@ -5,8 +5,8 @@
 	import MapThumbnail from './MapThumbnail.svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
-	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte'; 
-	import { Label, Switch } from "bits-ui";
+	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
+	import { Label, Switch } from 'bits-ui';
 
 	let {
 		filter = $bindable(),
@@ -37,7 +37,7 @@
 	type Edition = { name: string; edition: number; bis: false; yearStart: number; yearEnd: number };
 
 	$effect(() => {
-		filter.yearEnd = selectedYear;
+		filter.yearEnd = Math.ceil(selectedYear);
 		applyFilter(filter);
 	});
 
@@ -160,7 +160,9 @@
 
 	let selectedOption = $state('');
 	let showSettings = $state(false);
-	function toggleSettings() { showSettings = !showSettings; }
+	function toggleSettings() {
+		showSettings = !showSettings;
+	}
 </script>
 
 {#if !selectedHistoricMap}
@@ -199,7 +201,13 @@
 		>
 			{#each Object.entries(historicMapsByYear) as [year, maps]}
 				{#if +year + 1 >= view.current.start && +year - 1 <= view.current.end}
-					<MapThumbnailStack x={yearToX(+year)} {maps} {year} {selectedYear} {getHistoricMapThumbnail}></MapThumbnailStack>
+					<MapThumbnailStack
+						x={yearToX(+year)}
+						{maps}
+						{year}
+						{selectedYear}
+						{getHistoricMapThumbnail}
+					></MapThumbnailStack>
 				{/if}
 			{/each}
 		</div>
@@ -299,60 +307,58 @@
 		</svg>
 
 		<div class="absolute top-2 right-2 z-[2000]">
-		<div
-			id="settings-button"
-			class="rounded-full p-[3px] shadow-2xl transition-all duration-300 pointer-events-auto"
-			style="background: linear-gradient(160deg, #ff66aa, #3333aa);"
-		>
-			<button
-				class="flex items-center justify-center w-7 h-7 rounded-full 
-					bg-white text-[#3333aa]
-					hover:scale-[1.05] pointer active:scale-[0.97]
-					transition-all duration-150"
-				title="Kies type kaart"
-				onclick={toggleSettings}
-			>
-				<Gear size={18} />
-			</button>
-		</div>
-
-		{#if showSettings}
 			<div
-				id="settings-menu"
-				class="absolute bg-white shadow-lg rounded-lg border border-gray-200 w-80 py-3 px-3 transition-all duration-200"
-				style="right: 3.0rem; top: {- 60}px;"
+				id="settings-button"
+				class="pointer-events-auto rounded-full p-[3px] shadow-2xl transition-all duration-300"
+				style="background: linear-gradient(160deg, #ff66aa, #3333aa);"
 			>
-				<ul class="flex flex-col gap-2 text-sm text-[#333366]">
-					{#each ["Reguliere Waterstaatskaart", "BIS Edities", "Hydrologische Waarnemingspunten", "Watervoorzieningseenheden"] as option}
-						<li class="flex items-center justify-between py-1 px-2 rounded-md hover:bg-gray-50">
-							<Label.Root for={option} class="text-sm font-medium">{option}</Label.Root>
-
-							<Switch.Root
-							id={option}
-							name="settings-switch"
-							checked={selectedOption === option}
-							onCheckedChange={(checked: boolean) => {
-								if (checked) selectedOption = option;
-								}}
-							class="focus-visible:ring-foreground focus-visible:ring-offset-background 
-									data-[state=checked]:bg-[#ff66aa] data-[state=unchecked]:bg-gray-300 
-									data-[state=unchecked]:shadow-mini-inset 
-									focus-visible:outline-hidden inline-flex h-[22px] w-[40px] shrink-0 cursor-pointer 
-									items-center rounded-full px-[2px] transition-colors focus-visible:ring-2 
-									focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-							>
-							<Switch.Thumb
-								class="bg-white data-[state=unchecked]:shadow-mini pointer-events-none block size-[18px] shrink-0 rounded-full transition-transform 
-									data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0 border border-gray-200"
-							/>
-							</Switch.Root>
-						</li>
-					{/each}
-
-
-				</ul>
+				<button
+					class="pointer flex h-7 w-7 items-center justify-center
+					rounded-full bg-white
+					text-[#3333aa] transition-all duration-150
+					hover:scale-[1.05] active:scale-[0.97]"
+					title="Kies type kaart"
+					onclick={toggleSettings}
+				>
+					<Gear size={18} />
+				</button>
 			</div>
-		{/if}
-	</div>
+
+			{#if showSettings}
+				<div
+					id="settings-menu"
+					class="absolute w-80 rounded-lg border border-gray-200 bg-white px-3 py-3 shadow-lg transition-all duration-200"
+					style="right: 3.0rem; top: {-60}px;"
+				>
+					<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+						{#each ['Reguliere Waterstaatskaart', 'BIS Edities', 'Hydrologische Waarnemingspunten', 'Watervoorzieningseenheden'] as option}
+							<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+								<Label.Root for={option} class="text-sm font-medium">{option}</Label.Root>
+
+								<Switch.Root
+									id={option}
+									name="settings-switch"
+									checked={selectedOption === option}
+									onCheckedChange={(checked: boolean) => {
+										if (checked) selectedOption = option;
+									}}
+									class="focus-visible:ring-foreground focus-visible:ring-offset-background 
+									data-[state=unchecked]:shadow-mini-inset inline-flex 
+									h-[22px] 
+									w-[40px] shrink-0 cursor-pointer items-center rounded-full px-[2px] 
+									transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed 
+									disabled:opacity-50 data-[state=checked]:bg-[#ff66aa] data-[state=unchecked]:bg-gray-300"
+								>
+									<Switch.Thumb
+										class="data-[state=unchecked]:shadow-mini pointer-events-none block size-[18px] shrink-0 rounded-full border border-gray-200 
+									bg-white transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0"
+									/>
+								</Switch.Root>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
+		</div>
 	</div>
 {/if}
