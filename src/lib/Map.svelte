@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 <script lang="ts">
 	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
@@ -59,7 +58,14 @@
 
 		const response = await fetch(manifestUrl);
 		const result = await response.json();
-		return result.items.find((i) => i.id == manifestId);
+		const structure = result.structures.find((i) => i.items.find((j) => j.id == manifestId)); // TODO: always one structure?
+		const variants = structure.items
+			.filter((i) => i.id != manifestId)
+			// .map(i => result.items.find(j => j.id == i.id));
+			.map((i) => historicMapsById.get(i.id));
+		const manifest = result.items.find((i) => i.id == manifestId);
+		manifest.variants = variants;
+		return manifest;
 	}
 
 	let map: maplibregl.Map | null = $state(null);
@@ -155,18 +161,19 @@
 		return result;
 	});
 
-	$effect(() => { // To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving 
-		if(warpedMapLayer) {
+	$effect(() => {
+		// To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving
+		if (warpedMapLayer) {
 			warpedMapLayer.renderer?.tileCache?.addEventListener(
 				WarpedMapEventType.MAPTILELOADED,
 				(e) => {
 					const id = e.data.mapId;
 					const historicMap = historicMapsById.get(id);
-					if(historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
 				}
-			)
+			);
 		}
-	})
+	});
 
 	let gridVisible: boolean = $state(false);
 
@@ -289,8 +296,7 @@
 			touchPitch: false,
 			preserveDrawingBuffer: true
 		});
-		map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
-
+		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
@@ -392,16 +398,16 @@
 
 	function flyToFeature(feature) {
 		const { geometry, bbox } = feature;
-		if(bbox) {
+		if (bbox) {
 			const [minLng, minLat, maxLng, maxLat] = bbox;
 			map?.fitBounds(
 				[
-					[minLng,minLat],
-					[maxLng,maxLat]
+					[minLng, minLat],
+					[maxLng, maxLat]
 				],
 				{ padding: 40, maxZoom: 15, duration: 250 }
-			)
-		} else if(geometry?.type === "Point") {
+			);
+		} else if (geometry?.type === 'Point') {
 			const [lng, lat] = geometry.coordinates;
 
 			map?.flyTo({
@@ -411,7 +417,7 @@
 				curve: 1.4,
 				essential: true,
 				duration: 250
-			})
+			});
 		}
 	}
 
@@ -422,20 +428,20 @@
 			// create a pseudo-feature for your existing flyToFeature()
 			const feature = {
 				geometry: {
-					type: "Point",
+					type: 'Point',
 					coordinates: [lng, lat]
 				},
 				properties: {
-					label: "Your location"
+					label: 'Your location'
 				}
 			};
 
 			flyToFeature(feature);
 		} catch (err) {
-			console.error("Could not get user location:", err);
-			alert("Locatie kon niet worden opgehaald. Heb je toestemming gegeven?");
+			console.error('Could not get user location:', err);
+			alert('Locatie kon niet worden opgehaald. Heb je toestemming gegeven?');
 		}
-}
+	}
 
 	function setGridVisibility(visible = true) {
 		gridVisible = visible;
@@ -461,11 +467,11 @@
 	}
 
 	type MapView = {
-		center: [number, number],
-		zoom: number,
-		bearing: number,
-		pitch: number
-	}
+		center: [number, number];
+		zoom: number;
+		bearing: number;
+		pitch: number;
+	};
 	let savedMapViews: MapView[] = $state([]);
 
 	function saveMapView() {
@@ -478,7 +484,7 @@
 	}
 
 	function restoreView(options = { duration: 500 }) {
-		if(savedMapViews.length === 0) return;
+		if (savedMapViews.length === 0) return;
 		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
 	}
@@ -490,7 +496,8 @@
 			if (e.key == 'Escape') {
 				restoreView();
 				applyFilter(filter);
-				warpedMapLayer?.setMapResourceMask(selectedHistoricMap?.id, 
+				warpedMapLayer?.setMapResourceMask(
+					selectedHistoricMap?.id,
 					selectedHistoricMap?.warpedMap.resourcePreviousMask
 				);
 				selectedHistoricMap = null;
@@ -601,18 +608,11 @@
 	}
 </script>
 
-<style>
-	.polka {
-		background-image:
-		radial-gradient(#eef 2.5px, transparent 2.5px);
-		background-size: 25px 25px; /* spacing */
-		background-color: white;    /* optional */
-	}
-</style>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 
-<div id={containerId} class="relative h-full w-full overflow-hidden polka"></div>
+<div id={containerId} class="polka relative h-full w-full overflow-hidden"></div>
 
-<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut}/>
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut} />
 <!-- <Search {flyToFeature}></Search> -->
 
 <Timeline
@@ -657,3 +657,11 @@
 		if (e.key == ' ') setGridVisibility(false);
 	}}
 />
+
+<style>
+	.polka {
+		background-image: radial-gradient(#eef 2.5px, transparent 2.5px);
+		background-size: 25px 25px; /* spacing */
+		background-color: white; /* optional */
+	}
+</style>

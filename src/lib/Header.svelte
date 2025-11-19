@@ -5,11 +5,14 @@
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { WorldHistoricalGazetteer } from '$lib/geocoder/providers/world-historical-gazetteer';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
+	import LayersPanel from './LayersPanel.svelte';
 
 	let { flyToFeature, flyToUserLocation, setGridVisibility, zoomIn, zoomOut } = $props();
 
 	let searchBarVisible = $state(false);
+	let layersPanelVisible = $state(false);
 	function toggleSearchBar() { searchBarVisible = !searchBarVisible }
+	function toggleLayersPanel() { layersPanelVisible = !layersPanelVisible }
 
 	let gridVisible = $state(false);
 
@@ -26,6 +29,8 @@
 ></svelte:window>
 
 <Geocoder {flyToFeature} bind:visible={searchBarVisible} providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}></Geocoder>
+
+<LayersPanel bind:visible={layersPanelVisible}></LayersPanel>
 
 <div 
 	class="absolute top-5 left-5 shadow-lg px-3 py-3 text-[#336] rounded-[8px] bg-white z-999"
@@ -139,11 +144,11 @@
 		<span class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'max-w-0 opacity-0 ml-0' : 'max-w-40 opacity-100 ml-1.5'}
+			${buttonCollapse ? 'max-w-0 opacity-0 ml-0' : 'max-w-41 opacity-100 ml-1.5'}
 		`}>
 			Locatie zoeken...
 			<kbd
-				class="ml-1 bg-background-alt text-xxs pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-50 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
+				class="ml-1 bg-background-alt text-xxs text-[#cce] pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 			><span class="text-foreground-alt text-[12px]">⌘K</span></kbd>
 		</span>
 
@@ -179,7 +184,7 @@
 
 	<br> 
 	<button
-		onclick={() => setGridVisibility(gridVisible = !gridVisible)}
+		onclick={toggleLayersPanel}
 		class={`
 			group flex my-3 items-center justify-center 
 			bg-white border-2 border-[#33336611] font-[500]
@@ -205,7 +210,7 @@
 		`}>
 			Lagen
 			<kbd
-				class="ml-1 bg-background-alt text-xxs pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-50 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
+				class="ml-1 bg-background-alt text-xxs text-[#cce] pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 			><span class="text-foreground-alt text-[12px]">L</span></kbd>
 		</span>
 	</button>
@@ -245,7 +250,7 @@
 		`}>
 			Grid tonen
 			<kbd
-				class="ml-1 bg-background-alt text-xxs pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-50 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
+				class="ml-1 bg-background-alt text-xxs text-[#cce] pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 			><span class="text-foreground-alt text-[12px]">Spatie</span></kbd>
 		</span>
 	</button>

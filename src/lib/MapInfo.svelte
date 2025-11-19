@@ -15,23 +15,6 @@
 		getHistoricMapManifest
 	} = $props();
 
-    // function getItemFromManifestById(id) {
-	// 	return manifest.items.find((i) => i.id == id);
-	// }
-
-	// $effect(async () => {
-	// 	manifest = await fetch(MANIFEST_URL_ED3).then((res) => res.json());
-
-	// 	voorbeeldBlad = getItemFromManifestById(VOORBEELD_ID);
-
-	// 	const structure = manifest.structures.find((i) => i.items.find((j) => j.id == VOORBEELD_ID));
-	// 	const otherPages = structure.items.map((i) => getItemFromManifestById(i.id));
-	// 	andereBladen = otherPages.map(
-	// 		(i) => i.items[0].items[0].body.service[0].id + '/full/100,/0/default.jpg'
-	// 	);
-	// });
-
-
 	let previewHistoricMap = $derived.by(() => {
 		if(visibleHistoricMapsInViewport.size == 1) return visibleHistoricMapsInViewport.values().next().value;
 		else return hoveredHistoricMap;
@@ -46,6 +29,8 @@
             manifest = data || null;
         });
     })
+
+     $effect(() => console.log(manifest?.variants));
 
     function getLabelFromManifest(m = manifest, lang = 'nl') {
         return (m.label[lang] ?? m.label.en ?? [])[0] ?? '';
@@ -172,11 +157,11 @@
 					<label for="eenheid">Andere bladen</label>
 					<ImagesSquare size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
 					<span class="absolute top-[28px] right-8 rounded-[8px] bg-[#eef] w-8 text-[#336] font-[600] text-center">+3</span>
-					<select name="eenheid" style:width="250px">
-						<option value="m">Hoofdblad</option>
-						<option value="km">Hydrologische Waarnemingspunten</option>
-						<option value="ft">Watervoorzieningseenheden</option>
-						<option value="mi">Achterkant</option>
+					<select name="variant" style:width="250px">
+                        <option value={selectedHistoricMap.id}>Hoofdblad</option>
+                        {#each manifest?.variants as variant}
+                            <option value={variant}>{variant}</option>
+                        {/each}
 					</select>
 				</div>
 			{:else} 
