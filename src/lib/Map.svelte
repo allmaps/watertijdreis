@@ -79,34 +79,10 @@
 	let historicMapsById: Map<string, HistoricMap> = $state(new Map());
 	let historicMapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
 		if (!historicMapsLoaded) return;
-		const numbers = new Map<number, HistoricMap[]>();
-		for (const map of historicMapsById.values()) {
-			const number = map.number;
-			const sheetsForNumber = numbers.get(number);
-			if (map.yearEnd) {
-				if (sheetsForNumber) {
-					sheetsForNumber.push(map);
-				} else {
-					numbers.set(number, new Array(map));
-				}
-			}
-		}
-		numbers.forEach((sheets) =>
-			sheets.sort((a, b) => {
-				const sameEdition = a.edition === b.edition;
-				const bothBis = a.bis === b.bis;
-				if (sameEdition && !bothBis) {
-					const aBis = a.bis ? 1 : 0;
-					const bBis = b.bis ? 1 : 0;
-					return bBis - aBis;
-				} else if (sameEdition) {
-					return b.yearEnd - a.yearEnd;
-				} else {
-					return b.edition - a.edition;
-				}
-			})
-		);
-		return numbers;
+		const grouped = new Map<number, HistoricMap[]>();
+		for (const { number, ...rest } of historicMapsById.values())
+			(grouped.get(number) ?? grouped.set(number, []).get(number))!.unshift({ number, ...rest });
+		return grouped;
 	});
 
 	let hoveredFeature: string | null = $state(null);
