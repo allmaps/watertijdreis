@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Waves, ShareNetwork, Question, Plus, FilePlus, Info, ShareFat, MagnifyingGlass, NavigationArrow, GridFour, SelectionSlash, Stack } from 'phosphor-svelte';
+	import { Waves, ShareNetwork, Question, Plus, FilePlus, Info, ShareFat, MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, GridFour, SelectionSlash, Stack } from 'phosphor-svelte';
 	import { slide, fly, scale } from 'svelte/transition';
 	import Geocoder from './Geocoder.svelte';
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { WorldHistoricalGazetteer } from '$lib/geocoder/providers/world-historical-gazetteer';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 
-	let { flyToFeature, flyToUserLocation, setGridVisibility } = $props();
+	let { flyToFeature, flyToUserLocation, setGridVisibility, zoomIn, zoomOut } = $props();
 
 	let searchBarVisible = $state(false);
 	function toggleSearchBar() { searchBarVisible = !searchBarVisible }
@@ -110,6 +110,8 @@
 </div>
 
 <div 
+	role="button"
+	tabindex="1"
 	onmouseenter={() => buttonCollapse = false}
 	onmouseleave={() => buttonCollapse = true}
 	class="absolute top-1/4 left-5 z-999 w-20 text-[#336]"
@@ -247,6 +249,46 @@
 			><span class="text-foreground-alt text-[12px]">Spatie</span></kbd>
 		</span>
 	</button>
+
+	<div
+		class={`
+			flex flex-col my-3 items-center justify-center mt-20
+			bg-white border-2 border-[#33336611]
+			shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+			rounded-lg overflow-hidden w-fit
+		`}
+	>
+		<button
+			onclick={zoomIn}
+			class={`
+			group p-2 cursor-pointer
+			hover:bg-[#eef] transition-colors duration-200
+			border-b-2 border-[#33336611]
+			flex items-center justify-center
+			`}
+			title="Zoom In"
+		>
+			<MagnifyingGlassPlus
+				color="#f4a"
+				class="h-[22px] w-[22px] opacity-70 group-hover:opacity-100 transition-opacity"
+			/>
+		</button>
+
+		<button
+			onclick={zoomOut}
+			class={`
+			group p-2 cursor-pointer
+			hover:bg-[#eef] transition-colors duration-200
+			flex items-center justify-center
+			`}
+			title="Zoom Out"
+		>
+			<MagnifyingGlassMinus
+				color="#f4a"
+				class="h-[22px] w-[22px] opacity-70 group-hover:opacity-100 transition-opacity"
+			/>
+		</button>
+	</div>
 </div>
 
 <style>

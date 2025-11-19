@@ -15,6 +15,22 @@
 		getHistoricMapManifest
 	} = $props();
 
+    // function getItemFromManifestById(id) {
+	// 	return manifest.items.find((i) => i.id == id);
+	// }
+
+	// $effect(async () => {
+	// 	manifest = await fetch(MANIFEST_URL_ED3).then((res) => res.json());
+
+	// 	voorbeeldBlad = getItemFromManifestById(VOORBEELD_ID);
+
+	// 	const structure = manifest.structures.find((i) => i.items.find((j) => j.id == VOORBEELD_ID));
+	// 	const otherPages = structure.items.map((i) => getItemFromManifestById(i.id));
+	// 	andereBladen = otherPages.map(
+	// 		(i) => i.items[0].items[0].body.service[0].id + '/full/100,/0/default.jpg'
+	// 	);
+	// });
+
 
 	let previewHistoricMap = $derived.by(() => {
 		if(visibleHistoricMapsInViewport.size == 1) return visibleHistoricMapsInViewport.values().next().value;

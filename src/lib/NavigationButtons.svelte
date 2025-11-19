@@ -65,7 +65,7 @@
 
 
 
-<div id="top-controls-right">
+<div id="top-controls-left">
 	<!-- Wrapper voor gradient-rand -->
 <div class="rounded-full p-[2px] bg-gradient-to-br from-pink-400 to-pink-200 shadow-2xl">
   <!-- Knop zelf -->
@@ -172,7 +172,7 @@ button[title]:hover::after {
 }
 #top-controls-left {
   position: absolute;
-  top: 15px;
+  bottom: 150px;
   left: 15px;
   display: flex;
   align-items: center;

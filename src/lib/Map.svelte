@@ -6,14 +6,12 @@
 
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { GeojsonPolygon } from './types/geojson';
-	import Minimap from './Minimap.svelte';
-	import Search from './Search.svelte';
 	import Header from './Header.svelte';
-	import Minimap2 from './Minimap2.svelte';
-	import { apply } from 'ol/transform';
+	import Minimap from './Minimap.svelte';
 	import Timeline from './Timeline.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import MapInfo from './MapInfo.svelte';
+	import NavigationButtons from './NavigationButtons.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -486,6 +484,17 @@
 	function handleMapClick(e: any) {
 		if (!map || !warpedMapLayer || !gridVisible) return;
 
+		addEventListener('keydown', (e) => {
+			if (e.key == 'Escape') {
+				restoreView();
+				applyFilter(filter);
+				warpedMapLayer?.setMapResourceMask(selectedHistoricMap?.id, 
+					selectedHistoricMap?.warpedMap.resourcePreviousMask
+				);
+				selectedHistoricMap = null;
+			}
+		});
+
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
 		selectedHistoricMap = historicMapsById.get(id) || null;
@@ -578,13 +587,23 @@
 		}
 		return null;
 	}
+
+	function zoomIn() {
+		if (!map) return;
+		map.zoomIn({ duration: 250 });
+	}
+
+	function zoomOut() {
+		if (!map) return;
+		map.zoomOut({ duration: 250 });
+	}
 </script>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 
 <div id={containerId} class="polka relative h-full w-full overflow-hidden"></div>
 
-<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} />
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut}/>
 <!-- <Search {flyToFeature}></Search> -->
 
 <Timeline
@@ -598,7 +617,7 @@
 	{map}
 ></Timeline>
 
-<Minimap2
+<Minimap
 	{historicMapsById}
 	{visibleHistoricMaps}
 	{visibleHistoricMapsInViewport}
@@ -608,7 +627,7 @@
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
 	{getHistoricMapManifest}
-></Minimap2>
+></Minimap>
 <MapInfo
 	{historicMapsById}
 	{visibleHistoricMaps}
