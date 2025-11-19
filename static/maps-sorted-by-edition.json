@@ -4963,190 +4963,6 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
-		"id": "9626afa0c4dd6f09",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/14/96/28/14962827569913421498732085540742353977.jp2",
-			"width": 8235,
-			"height": 6574,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p13",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1764, 4808], "geo": [4.5913202, 52.150853] },
-			{ "resource": [6463, 4809], "geo": [4.8835309, 52.1512081] },
-			{ "resource": [6457, 1864], "geo": [4.8835346, 52.263551] },
-			{ "resource": [1765, 1861], "geo": [4.590586, 52.2631951] }
-		],
-		"resourceMask": [
-			[1764, 4808],
-			[6463, 4809],
-			[6457, 1864],
-			[1765, 1861]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 31,
-			"position": "NW",
-			"x": -1,
-			"y": 1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "95ee51e5e9d0b954",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/90/81/80/90818028239314809034632691229282233236.jp2",
-			"width": 8302,
-			"height": 6577,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p14",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1786, 4833], "geo": [4.8835309, 52.1512081] },
-			{ "resource": [6502, 4826], "geo": [5.1757415, 52.1508458] },
-			{ "resource": [6495, 1873], "geo": [5.1764831, 52.2631878] },
-			{ "resource": [1775, 1879], "geo": [4.8835346, 52.263551] }
-		],
-		"resourceMask": [
-			[1786, 4833],
-			[6502, 4826],
-			[6495, 1873],
-			[1775, 1879]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 31,
-			"position": "NE",
-			"x": 1,
-			"y": 1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "5776c594bdf0bccc",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/95/84/84/9584849670376812852930360440200179285.jp2",
-			"width": 8278,
-			"height": 6662,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p15",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1781, 4805], "geo": [4.5920496, 52.0385088] },
-			{ "resource": [6497, 4814], "geo": [4.8835272, 52.038863] },
-			{ "resource": [6497, 1856], "geo": [4.8835309, 52.1512081] },
-			{ "resource": [1791, 1841], "geo": [4.5913202, 52.150853] }
-		],
-		"resourceMask": [
-			[1781, 4805],
-			[6497, 4814],
-			[6497, 1856],
-			[1791, 1841]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 31,
-			"position": "SW",
-			"x": -1,
-			"y": -1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "06823bdcc1aebddb",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/10/39/78/10397806749814922486120464369882989801.jp2",
-			"width": 8072,
-			"height": 6355,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p16",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1707, 4647], "geo": [4.8835272, 52.038863] },
-			{ "resource": [6422, 4639], "geo": [5.1750047, 52.0385016] },
-			{ "resource": [6416, 1684], "geo": [5.1757415, 52.1508458] },
-			{ "resource": [1700, 1675], "geo": [4.8835309, 52.1512081] }
-		],
-		"resourceMask": [
-			[1707, 4647],
-			[6422, 4639],
-			[6416, 1684],
-			[1700, 1675]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 31,
-			"position": "SE",
-			"x": 1,
-			"y": -1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
 		"id": "c01e90f943ebac22",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/62/06/16/62061656426871211627646389294954788136.jp2",
@@ -5321,106 +5137,6 @@
 			"edition": 1,
 			"bis": false,
 			"number": 31,
-			"position": "SE",
-			"x": 1,
-			"y": -1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "51d326d795571e52",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/62/63/54/62635493288638714603683525289902748848.jp2",
-			"width": 8184,
-			"height": 6595,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p17",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1744, 4775], "geo": [4.8835235, 51.9265158] },
-			{ "resource": [6449, 4771], "geo": [5.1742728, 51.9261553] },
-			{ "resource": [6455, 1818], "geo": [5.1750047, 52.0385016] },
-			{ "resource": [1749, 1812], "geo": [4.8835272, 52.038863] }
-		],
-		"resourceMask": [
-			[1744, 4775],
-			[6449, 4771],
-			[6455, 1818],
-			[1749, 1812]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 38,
-			"position": "NE",
-			"x": 1,
-			"y": 1,
-			"yearStart": 1881,
-			"yearEnd": 1882
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "13351448def7a7c6",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/34/63/48/34634837452290817669004051105592101127.jp2",
-			"width": 8241,
-			"height": 6554,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p18",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1772, 4768], "geo": [4.8835199, 51.8141664] },
-			{ "resource": [6454, 4779], "geo": [5.1735455, 51.8138068] },
-			{ "resource": [6463, 1829], "geo": [5.1742727, 51.9261553] },
-			{ "resource": [1774, 1828], "geo": [4.8835235, 51.9265158] }
-		],
-		"resourceMask": [
-			[1772, 4768],
-			[6454, 4779],
-			[6463, 1829],
-			[1774, 1828],
-			[1774, 2077],
-			[1639, 2075],
-			[1639, 2380],
-			[1773, 2379],
-			[1773, 3273],
-			[1628, 3273],
-			[1626, 3623],
-			[1772, 3623]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 38,
 			"position": "SE",
 			"x": 1,
 			"y": -1,
@@ -6622,197 +6338,6 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
-		"id": "85900221db70dc24",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/97/58/14/97581446872963048627340709890355629596.jp2",
-			"width": 8264,
-			"height": 6621,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p6",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1788, 4761], "geo": [4.5883541, 52.6002083] },
-			{ "resource": [6479, 4756], "geo": [4.8835458, 52.6005669] },
-			{ "resource": [6482, 1789], "geo": [4.8835495, 52.7129012] },
-			{ "resource": [1775, 1796], "geo": [4.5876003, 52.7125417] }
-		],
-		"resourceMask": [
-			[1788, 4761],
-			[6479, 4756],
-			[6482, 1789],
-			[1775, 1796]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 19,
-			"position": "NW",
-			"x": -1,
-			"y": 1,
-			"yearStart": 1883,
-			"yearEnd": 1885
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "eda9c034e65c72c9",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/10/08/111008710957401723336762060623881460743.jp2",
-			"width": 8262,
-			"height": 6669,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p7",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1776, 4844], "geo": [4.8835458, 52.6005669] },
-			{ "resource": [6481, 4826], "geo": [5.1787373, 52.6002009] },
-			{ "resource": [6473, 1857], "geo": [5.1794987, 52.7125344] },
-			{ "resource": [1768, 1865], "geo": [4.8835495, 52.7129012] }
-		],
-		"resourceMask": [
-			[1776, 4844],
-			[6481, 4826],
-			[6473, 1857],
-			[1768, 1865]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 19,
-			"position": "NE",
-			"x": 1,
-			"y": 1,
-			"yearStart": 1883,
-			"yearEnd": 1885
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "0feb6d80e32ece78",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/53/50/99/53509933913571808566951966728369868893.jp2",
-			"width": 8258,
-			"height": 6664,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p8",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1767, 4808], "geo": [4.589103, 52.4878727] },
-			{ "resource": [6469, 4826], "geo": [4.883542, 52.4882304] },
-			{ "resource": [6483, 1870], "geo": [4.8835458, 52.6005669] },
-			{ "resource": [1773, 1853], "geo": [4.5883541, 52.6002083] }
-		],
-		"resourceMask": [
-			[1767, 4808],
-			[6469, 4826],
-			[6483, 1870],
-			[1773, 1853],
-			[1768, 4143],
-			[1619, 4226],
-			[1619, 4806]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 19,
-			"position": "SW",
-			"x": -1,
-			"y": -1,
-			"yearStart": 1883,
-			"yearEnd": 1885
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "036c7a885e1bd86b",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/33/02/163302164775035299809325771133628905253.jp2",
-			"width": 8272,
-			"height": 6671,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p9",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1780, 4806], "geo": [4.883542, 52.4882304] },
-			{ "resource": [6501, 4812], "geo": [5.177981, 52.4878654] },
-			{ "resource": [6494, 1842], "geo": [5.1787373, 52.6002009] },
-			{ "resource": [1781, 1847], "geo": [4.8835458, 52.6005669] }
-		],
-		"resourceMask": [
-			[1780, 4806],
-			[6501, 4812],
-			[6494, 1842],
-			[4030, 1846],
-			[4030, 1734],
-			[2701, 1734],
-			[2701, 1846],
-			[1781, 1847]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 19,
-			"position": "SE",
-			"x": 1,
-			"y": -1,
-			"yearStart": 1883,
-			"yearEnd": 1885
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
 		"id": "be74afb2c60825ad",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/52/77/76/52777683093162183608053375153598396465.jp2",
@@ -7281,52 +6806,6 @@
 			"x": 0,
 			"y": 1,
 			"yearStart": 1883,
-			"yearEnd": 1885
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "0f204fcb2a8f9b7c",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/42/71/87/42718739372055801053070424237236344815.jp2",
-			"width": 8193,
-			"height": 6600,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p12",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1745, 4790], "geo": [4.0091318, 52.0356536] },
-			{ "resource": [6454, 4793], "geo": [4.3005814, 52.037439] },
-			{ "resource": [6444, 1838], "geo": [4.299119, 52.1497806] },
-			{ "resource": [1744, 1831], "geo": [4.0069366, 52.1479908] }
-		],
-		"resourceMask": [
-			[1745, 4790],
-			[6454, 4793],
-			[6444, 1838],
-			[1744, 1831]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 1,
-			"bis": true,
-			"number": 30,
-			"position": "SW",
-			"x": -1,
-			"y": -1,
-			"yearStart": 1885,
 			"yearEnd": 1885
 		}
 	},
@@ -9296,6 +8775,527 @@
 			"y": 1,
 			"yearStart": 1892,
 			"yearEnd": 1894
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "9626afa0c4dd6f09",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/14/96/28/14962827569913421498732085540742353977.jp2",
+			"width": 8235,
+			"height": 6574,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p13",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1764, 4808], "geo": [4.5913202, 52.150853] },
+			{ "resource": [6463, 4809], "geo": [4.8835309, 52.1512081] },
+			{ "resource": [6457, 1864], "geo": [4.8835346, 52.263551] },
+			{ "resource": [1765, 1861], "geo": [4.590586, 52.2631951] }
+		],
+		"resourceMask": [
+			[1764, 4808],
+			[6463, 4809],
+			[6457, 1864],
+			[1765, 1861]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 31,
+			"position": "NW",
+			"x": -1,
+			"y": 1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "95ee51e5e9d0b954",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/90/81/80/90818028239314809034632691229282233236.jp2",
+			"width": 8302,
+			"height": 6577,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p14",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1786, 4833], "geo": [4.8835309, 52.1512081] },
+			{ "resource": [6502, 4826], "geo": [5.1757415, 52.1508458] },
+			{ "resource": [6495, 1873], "geo": [5.1764831, 52.2631878] },
+			{ "resource": [1775, 1879], "geo": [4.8835346, 52.263551] }
+		],
+		"resourceMask": [
+			[1786, 4833],
+			[6502, 4826],
+			[6495, 1873],
+			[1775, 1879]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 31,
+			"position": "NE",
+			"x": 1,
+			"y": 1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "5776c594bdf0bccc",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/95/84/84/9584849670376812852930360440200179285.jp2",
+			"width": 8278,
+			"height": 6662,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p15",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1781, 4805], "geo": [4.5920496, 52.0385088] },
+			{ "resource": [6497, 4814], "geo": [4.8835272, 52.038863] },
+			{ "resource": [6497, 1856], "geo": [4.8835309, 52.1512081] },
+			{ "resource": [1791, 1841], "geo": [4.5913202, 52.150853] }
+		],
+		"resourceMask": [
+			[1781, 4805],
+			[6497, 4814],
+			[6497, 1856],
+			[1791, 1841]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 31,
+			"position": "SW",
+			"x": -1,
+			"y": -1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "06823bdcc1aebddb",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/10/39/78/10397806749814922486120464369882989801.jp2",
+			"width": 8072,
+			"height": 6355,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p16",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1707, 4647], "geo": [4.8835272, 52.038863] },
+			{ "resource": [6422, 4639], "geo": [5.1750047, 52.0385016] },
+			{ "resource": [6416, 1684], "geo": [5.1757415, 52.1508458] },
+			{ "resource": [1700, 1675], "geo": [4.8835309, 52.1512081] }
+		],
+		"resourceMask": [
+			[1707, 4647],
+			[6422, 4639],
+			[6416, 1684],
+			[1700, 1675]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 31,
+			"position": "SE",
+			"x": 1,
+			"y": -1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "51d326d795571e52",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/62/63/54/62635493288638714603683525289902748848.jp2",
+			"width": 8184,
+			"height": 6595,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p17",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1744, 4775], "geo": [4.8835235, 51.9265158] },
+			{ "resource": [6449, 4771], "geo": [5.1742728, 51.9261553] },
+			{ "resource": [6455, 1818], "geo": [5.1750047, 52.0385016] },
+			{ "resource": [1749, 1812], "geo": [4.8835272, 52.038863] }
+		],
+		"resourceMask": [
+			[1744, 4775],
+			[6449, 4771],
+			[6455, 1818],
+			[1749, 1812]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 38,
+			"position": "NE",
+			"x": 1,
+			"y": 1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "13351448def7a7c6",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/34/63/48/34634837452290817669004051105592101127.jp2",
+			"width": 8241,
+			"height": 6554,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p18",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1772, 4768], "geo": [4.8835199, 51.8141664] },
+			{ "resource": [6454, 4779], "geo": [5.1735455, 51.8138068] },
+			{ "resource": [6463, 1829], "geo": [5.1742727, 51.9261553] },
+			{ "resource": [1774, 1828], "geo": [4.8835235, 51.9265158] }
+		],
+		"resourceMask": [
+			[1772, 4768],
+			[6454, 4779],
+			[6463, 1829],
+			[1774, 1828],
+			[1774, 2077],
+			[1639, 2075],
+			[1639, 2380],
+			[1773, 2379],
+			[1773, 3273],
+			[1628, 3273],
+			[1626, 3623],
+			[1772, 3623]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 38,
+			"position": "SE",
+			"x": 1,
+			"y": -1,
+			"yearStart": 1881,
+			"yearEnd": 1882
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "85900221db70dc24",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/97/58/14/97581446872963048627340709890355629596.jp2",
+			"width": 8264,
+			"height": 6621,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p6",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1788, 4761], "geo": [4.5883541, 52.6002083] },
+			{ "resource": [6479, 4756], "geo": [4.8835458, 52.6005669] },
+			{ "resource": [6482, 1789], "geo": [4.8835495, 52.7129012] },
+			{ "resource": [1775, 1796], "geo": [4.5876003, 52.7125417] }
+		],
+		"resourceMask": [
+			[1788, 4761],
+			[6479, 4756],
+			[6482, 1789],
+			[1775, 1796]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 19,
+			"position": "NW",
+			"x": -1,
+			"y": 1,
+			"yearStart": 1883,
+			"yearEnd": 1885
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "eda9c034e65c72c9",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/10/08/111008710957401723336762060623881460743.jp2",
+			"width": 8262,
+			"height": 6669,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p7",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1776, 4844], "geo": [4.8835458, 52.6005669] },
+			{ "resource": [6481, 4826], "geo": [5.1787373, 52.6002009] },
+			{ "resource": [6473, 1857], "geo": [5.1794987, 52.7125344] },
+			{ "resource": [1768, 1865], "geo": [4.8835495, 52.7129012] }
+		],
+		"resourceMask": [
+			[1776, 4844],
+			[6481, 4826],
+			[6473, 1857],
+			[1768, 1865]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 19,
+			"position": "NE",
+			"x": 1,
+			"y": 1,
+			"yearStart": 1883,
+			"yearEnd": 1885
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "0feb6d80e32ece78",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/53/50/99/53509933913571808566951966728369868893.jp2",
+			"width": 8258,
+			"height": 6664,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p8",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1767, 4808], "geo": [4.589103, 52.4878727] },
+			{ "resource": [6469, 4826], "geo": [4.883542, 52.4882304] },
+			{ "resource": [6483, 1870], "geo": [4.8835458, 52.6005669] },
+			{ "resource": [1773, 1853], "geo": [4.5883541, 52.6002083] }
+		],
+		"resourceMask": [
+			[1767, 4808],
+			[6469, 4826],
+			[6483, 1870],
+			[1773, 1853],
+			[1768, 4143],
+			[1619, 4226],
+			[1619, 4806]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 19,
+			"position": "SW",
+			"x": -1,
+			"y": -1,
+			"yearStart": 1883,
+			"yearEnd": 1885
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "036c7a885e1bd86b",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/33/02/163302164775035299809325771133628905253.jp2",
+			"width": 8272,
+			"height": 6671,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p9",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1780, 4806], "geo": [4.883542, 52.4882304] },
+			{ "resource": [6501, 4812], "geo": [5.177981, 52.4878654] },
+			{ "resource": [6494, 1842], "geo": [5.1787373, 52.6002009] },
+			{ "resource": [1781, 1847], "geo": [4.8835458, 52.6005669] }
+		],
+		"resourceMask": [
+			[1780, 4806],
+			[6501, 4812],
+			[6494, 1842],
+			[4030, 1846],
+			[4030, 1734],
+			[2701, 1734],
+			[2701, 1846],
+			[1781, 1847]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 19,
+			"position": "SE",
+			"x": 1,
+			"y": -1,
+			"yearStart": 1883,
+			"yearEnd": 1885
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "0f204fcb2a8f9b7c",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/42/71/87/42718739372055801053070424237236344815.jp2",
+			"width": 8193,
+			"height": 6600,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456650/canvas/p12",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1745, 4790], "geo": [4.0091318, 52.0356536] },
+			{ "resource": [6454, 4793], "geo": [4.3005814, 52.037439] },
+			{ "resource": [6444, 1838], "geo": [4.299119, 52.1497806] },
+			{ "resource": [1744, 1831], "geo": [4.0069366, 52.1479908] }
+		],
+		"resourceMask": [
+			[1745, 4790],
+			[6454, 4793],
+			[6444, 1838],
+			[1744, 1831]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 30,
+			"position": "SW",
+			"x": -1,
+			"y": -1,
+			"yearStart": 1885,
+			"yearEnd": 1885
 		}
 	},
 	{
@@ -17174,6 +17174,52 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
+		"id": "4257e62d45b2ebec",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/37/75/163775761101071928727316256742547462321.jp2",
+			"width": 8251,
+			"height": 6819,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-455650/canvas/p67",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-455650",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [1658, 6385], "geo": [5.7533714, 52.2588636] },
+			{ "resource": [6570, 6385], "geo": [6.0580062, 52.2575264] },
+			{ "resource": [6567, 394], "geo": [6.0614698, 52.4857979] },
+			{ "resource": [1648, 390], "geo": [5.7552628, 52.487144] }
+		],
+		"resourceMask": [
+			[1658, 6385],
+			[6570, 6385],
+			[6567, 394],
+			[1648, 390]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 2,
+			"bis": false,
+			"number": 27,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1942,
+			"yearEnd": 1942
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
 		"id": "3ed29b3e26b10afa",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/45/57/21/45572103807062150213545734027973957620.jp2",
@@ -17261,52 +17307,6 @@
 			"y": 0,
 			"yearStart": 1939,
 			"yearEnd": 1941
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "4257e62d45b2ebec",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/37/75/163775761101071928727316256742547462321.jp2",
-			"width": 8251,
-			"height": 6819,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-455650/canvas/p67",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-455650",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [1658, 6385], "geo": [5.7533714, 52.2588636] },
-			{ "resource": [6570, 6385], "geo": [6.0580062, 52.2575264] },
-			{ "resource": [6567, 394], "geo": [6.0614698, 52.4857979] },
-			{ "resource": [1648, 390], "geo": [5.7552628, 52.487144] }
-		],
-		"resourceMask": [
-			[1658, 6385],
-			[6570, 6385],
-			[6567, 394],
-			[1648, 390]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 2,
-			"bis": false,
-			"number": 27,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1942,
-			"yearEnd": 1942
 		}
 	},
 	{
@@ -22416,6 +22416,254 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
+		"id": "248b511e2a7d1c86",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/68/85/38/68853868141790189170746606909701021889.jp2",
+			"width": 8213,
+			"height": 6640,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p66",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [263, 6165], "geo": [5.7534002, 52.2624585] },
+			{ "resource": [4975, 6158], "geo": [6.0463427, 52.261187] },
+			{ "resource": [4962, 254], "geo": [6.049692, 52.4858638] },
+			{ "resource": [249, 261], "geo": [5.7552614, 52.4871436] }
+		],
+		"resourceMask": [
+			[263, 6165],
+			[4975, 6158],
+			[4962, 254],
+			[249, 261]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 3,
+			"bis": false,
+			"number": 27,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1963,
+			"yearEnd": 1965
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "69c69153408bbe85",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/10/98/43/109843281324766150058399632068583182844.jp2",
+			"width": 8221,
+			"height": 6669,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p92",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [252, 6159], "geo": [4.2996664, 51.8085831] },
+			{ "resource": [4974, 6171], "geo": [4.5896443, 51.8109124] },
+			{ "resource": [4983, 276], "geo": [4.5856465, 52.0356008] },
+			{ "resource": [263, 269], "geo": [4.2942154, 52.0332562] }
+		],
+		"resourceMask": [
+			[252, 6159],
+			[4974, 6171],
+			[4983, 276],
+			[263, 269]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 3,
+			"bis": false,
+			"number": 37,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1964,
+			"yearEnd": 1966
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "c0cc31c4502fe225",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/23/20/69/23206919941548346679862397405770054917.jp2",
+			"width": 8212,
+			"height": 6643,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p111",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [265, 6154], "geo": [4.5935963, 51.5862179] },
+			{ "resource": [4981, 6144], "geo": [4.8821663, 51.5878201] },
+			{ "resource": [4964, 246], "geo": [4.8796514, 51.812525] },
+			{ "resource": [251, 257], "geo": [4.5896443, 51.8109124] }
+		],
+		"resourceMask": [
+			[265, 6154],
+			[4981, 6144],
+			[4964, 246],
+			[251, 257]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 3,
+			"bis": false,
+			"number": 44,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1963,
+			"yearEnd": 1966
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "54b5b3c8425d9fae",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/82/41/83/82418382662041150652791302710288015518.jp2",
+			"width": 8226,
+			"height": 6644,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p127",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [267, 6159], "geo": [4.0233002, 51.3562127] },
+			{ "resource": [4985, 6161], "geo": [4.3103825, 51.3592195] },
+			{ "resource": [4980, 261], "geo": [4.3050551, 51.5839036] },
+			{ "resource": [265, 254], "geo": [4.0165531, 51.5808774] }
+		],
+		"resourceMask": [
+			[267, 6159],
+			[4985, 6161],
+			[4980, 261],
+			[265, 254]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 3,
+			"bis": false,
+			"number": 49,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1965,
+			"yearEnd": 1966
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "610befa3510ec36c",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/13/32/47/133247176695601904192923426450383214617.jp2",
+			"width": 8198,
+			"height": 6638,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p129",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [251, 6147], "geo": [4.3103827, 51.3592195] },
+			{ "resource": [4970, 6159], "geo": [4.5975028, 51.361519] },
+			{ "resource": [4974, 266], "geo": [4.5935962, 51.586218] },
+			{ "resource": [259, 251], "geo": [4.3050548, 51.5839037] }
+		],
+		"resourceMask": [
+			[251, 6147],
+			[745, 6149],
+			[753, 6200],
+			[810, 6197],
+			[850, 6188],
+			[881, 6178],
+			[913, 6174],
+			[915, 6186],
+			[1165, 6217],
+			[1189, 6227],
+			[1204, 6249],
+			[1233, 6233],
+			[1367, 6278],
+			[1458, 6274],
+			[1474, 6296],
+			[1553, 6273],
+			[1632, 6267],
+			[1712, 6234],
+			[1851, 6152],
+			[4970, 6159],
+			[4974, 266],
+			[259, 251]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 3,
+			"bis": false,
+			"number": 49,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1966,
+			"yearEnd": 1967
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
 		"id": "50bfa9455cd50fa3",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/60/53/26/60532626183453506748604616101573541830.jp2",
@@ -22600,52 +22848,6 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
-		"id": "248b511e2a7d1c86",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/68/85/38/68853868141790189170746606909701021889.jp2",
-			"width": 8213,
-			"height": 6640,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p66",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [263, 6165], "geo": [5.7534002, 52.2624585] },
-			{ "resource": [4975, 6158], "geo": [6.0463427, 52.261187] },
-			{ "resource": [4962, 254], "geo": [6.049692, 52.4858638] },
-			{ "resource": [249, 261], "geo": [5.7552614, 52.4871436] }
-		],
-		"resourceMask": [
-			[263, 6165],
-			[4975, 6158],
-			[4962, 254],
-			[249, 261]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 3,
-			"bis": false,
-			"number": 27,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1963,
-			"yearEnd": 1965
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
 		"id": "9da05bcfc1396cff",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/95/81/119581173561749320589779029235286907978.jp2",
@@ -22687,144 +22889,6 @@
 			"y": 0,
 			"yearStart": 1962,
 			"yearEnd": 1965
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "69c69153408bbe85",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/10/98/43/109843281324766150058399632068583182844.jp2",
-			"width": 8221,
-			"height": 6669,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p92",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [252, 6159], "geo": [4.2996664, 51.8085831] },
-			{ "resource": [4974, 6171], "geo": [4.5896443, 51.8109124] },
-			{ "resource": [4983, 276], "geo": [4.5856465, 52.0356008] },
-			{ "resource": [263, 269], "geo": [4.2942154, 52.0332562] }
-		],
-		"resourceMask": [
-			[252, 6159],
-			[4974, 6171],
-			[4983, 276],
-			[263, 269]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 3,
-			"bis": false,
-			"number": 37,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1964,
-			"yearEnd": 1966
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "c0cc31c4502fe225",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/23/20/69/23206919941548346679862397405770054917.jp2",
-			"width": 8212,
-			"height": 6643,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p111",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [265, 6154], "geo": [4.5935963, 51.5862179] },
-			{ "resource": [4981, 6144], "geo": [4.8821663, 51.5878201] },
-			{ "resource": [4964, 246], "geo": [4.8796514, 51.812525] },
-			{ "resource": [251, 257], "geo": [4.5896443, 51.8109124] }
-		],
-		"resourceMask": [
-			[265, 6154],
-			[4981, 6144],
-			[4964, 246],
-			[251, 257]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 3,
-			"bis": false,
-			"number": 44,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1963,
-			"yearEnd": 1966
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "54b5b3c8425d9fae",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/82/41/83/82418382662041150652791302710288015518.jp2",
-			"width": 8226,
-			"height": 6644,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p127",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [267, 6159], "geo": [4.0233002, 51.3562127] },
-			{ "resource": [4985, 6161], "geo": [4.3103825, 51.3592195] },
-			{ "resource": [4980, 261], "geo": [4.3050551, 51.5839036] },
-			{ "resource": [265, 254], "geo": [4.0165531, 51.5808774] }
-		],
-		"resourceMask": [
-			[267, 6159],
-			[4985, 6161],
-			[4980, 261],
-			[265, 254]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 3,
-			"bis": false,
-			"number": 49,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1965,
-			"yearEnd": 1966
 		}
 	},
 	{
@@ -22958,70 +23022,6 @@
 			"edition": 3,
 			"bis": true,
 			"number": 39,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1966,
-			"yearEnd": 1967
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "610befa3510ec36c",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/13/32/47/133247176695601904192923426450383214617.jp2",
-			"width": 8198,
-			"height": 6638,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456551/canvas/p129",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456551",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [251, 6147], "geo": [4.3103827, 51.3592195] },
-			{ "resource": [4970, 6159], "geo": [4.5975028, 51.361519] },
-			{ "resource": [4974, 266], "geo": [4.5935962, 51.586218] },
-			{ "resource": [259, 251], "geo": [4.3050548, 51.5839037] }
-		],
-		"resourceMask": [
-			[251, 6147],
-			[745, 6149],
-			[753, 6200],
-			[810, 6197],
-			[850, 6188],
-			[881, 6178],
-			[913, 6174],
-			[915, 6186],
-			[1165, 6217],
-			[1189, 6227],
-			[1204, 6249],
-			[1233, 6233],
-			[1367, 6278],
-			[1458, 6274],
-			[1474, 6296],
-			[1553, 6273],
-			[1632, 6267],
-			[1712, 6234],
-			[1851, 6152],
-			[4970, 6159],
-			[4974, 266],
-			[259, 251]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 3,
-			"bis": false,
-			"number": 49,
 			"position": "E",
 			"x": 1,
 			"y": 0,
@@ -30139,52 +30139,6 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
-		"id": "d89f3b4fd9bcb71b",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/31/66/58/31665881467462707998123522206502823306.jp2",
-			"width": 8232,
-			"height": 6637,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p19",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [277, 6170], "geo": [5.1674846, 52.2628229] },
-			{ "resource": [4999, 6174], "geo": [5.4604446, 52.2630044] },
-			{ "resource": [4999, 279], "geo": [5.4608169, 52.4876928] },
-			{ "resource": [279, 270], "geo": [5.1663679, 52.4875099] }
-		],
-		"resourceMask": [
-			[277, 6170],
-			[4999, 6174],
-			[4999, 279],
-			[279, 270]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": true,
-			"number": 26,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1972,
-			"yearEnd": 1972
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
 		"id": "574226067adf9a16",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/12/60/42/12604282552949347543263826971356208458.jp2",
@@ -30410,98 +30364,6 @@
 			"y": 0,
 			"yearStart": 1971,
 			"yearEnd": 1972
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "52e87677d06a49f7",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/47/19/164719823244076584885740658893935283472.jp2",
-			"width": 8231,
-			"height": 6625,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p4",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [259, 6162], "geo": [5.1663679, 52.4875099] },
-			{ "resource": [4980, 6166], "geo": [5.4608169, 52.4876928] },
-			{ "resource": [4980, 267], "geo": [5.461195, 52.7123701] },
-			{ "resource": [260, 257], "geo": [5.1652404, 52.7121863] }
-		],
-		"resourceMask": [
-			[259, 6162],
-			[4980, 6166],
-			[4980, 267],
-			[260, 257]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": true,
-			"number": 20,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1972,
-			"yearEnd": 1973
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "28354fdac189c383",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/91/93/02/91930258040209071847626815598611387378.jp2",
-			"width": 8247,
-			"height": 6633,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p22",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [277, 6169], "geo": [5.4604446, 52.2630044] },
-			{ "resource": [5002, 6161], "geo": [5.753401, 52.2624586] },
-			{ "resource": [4990, 265], "geo": [5.7552628, 52.487144] },
-			{ "resource": [267, 267], "geo": [5.4608169, 52.4876928] }
-		],
-		"resourceMask": [
-			[277, 6169],
-			[5002, 6161],
-			[4990, 265],
-			[267, 267]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": true,
-			"number": 26,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1972,
-			"yearEnd": 1973
 		}
 	},
 	{
@@ -31024,98 +30886,6 @@
 			"y": 0,
 			"yearStart": 1973,
 			"yearEnd": 1974
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "8569b0194d3c85bd",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/31/13/34/31133443807261766365918265015458759026.jp2",
-			"width": 8240,
-			"height": 6654,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p24",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [255, 6160], "geo": [5.4582924, 50.914733] },
-			{ "resource": [4977, 6171], "geo": [5.7426704, 50.9142088] },
-			{ "resource": [4988, 274], "geo": [5.744408, 51.1389246] },
-			{ "resource": [268, 257], "geo": [5.4586413, 51.1394525] }
-		],
-		"resourceMask": [
-			[255, 6160],
-			[4977, 6171],
-			[4988, 274],
-			[268, 257]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": true,
-			"number": 59,
-			"position": "E",
-			"x": 0,
-			"y": 0,
-			"yearStart": 1973,
-			"yearEnd": 1974
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "30af562882f1b1fc",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/78/84/80/7884809343230007246440293041456222676.jp2",
-			"width": 8234,
-			"height": 6638,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p7",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [267, 6165], "geo": [5.7552628, 52.487144] },
-			{ "resource": [4987, 6164], "geo": [6.049693, 52.4858643] },
-			{ "resource": [4985, 262], "geo": [6.0530818, 52.7105299] },
-			{ "resource": [265, 257], "geo": [5.7571456, 52.7118176] }
-		],
-		"resourceMask": [
-			[267, 6165],
-			[4987, 6164],
-			[4985, 262],
-			[265, 257]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": true,
-			"number": 21,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1973,
-			"yearEnd": 1975
 		}
 	},
 	{
@@ -31857,6 +31627,650 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
+		"id": "3dea1862c571d120",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/42/79/62/42796249738207305127891623096577020334.jp2",
+			"width": 8250,
+			"height": 6644,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p87",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [275, 6182], "geo": [6.33926, 52.259189] },
+			{ "resource": [4997, 6172], "geo": [6.632143, 52.256466] },
+			{ "resource": [4982, 274], "geo": [6.638467, 52.481112] },
+			{ "resource": [261, 279], "geo": [6.344097, 52.483853] }
+		],
+		"resourceMask": [
+			[275, 6182],
+			[4997, 6172],
+			[4982, 274],
+			[261, 279]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 28,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1978,
+			"yearEnd": 1979
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "7325e52ee4d69393",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/69/90/79/69907998570499491004587509310689740836.jp2",
+			"width": 8246,
+			"height": 6639,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p94",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [265, 6168], "geo": [6.924979, 52.253016] },
+			{ "resource": [4985, 6157], "geo": [7.217757, 52.248841] },
+			{ "resource": [4968, 260], "geo": [7.227052, 52.473437] },
+			{ "resource": [251, 264], "geo": [6.932789, 52.47764] }
+		],
+		"resourceMask": [
+			[265, 6168],
+			[4985, 6157],
+			[4968, 260],
+			[251, 264]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 29,
+			"position": "W",
+			"x": 0,
+			"y": 0,
+			"yearStart": 1977,
+			"yearEnd": 1979
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "efaa225abdd52529",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/58/59/23/58592369853262641739626805557257626431.jp2",
+			"width": 8268,
+			"height": 6665,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p125",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [282, 6194], "geo": [6.625892, 52.03181] },
+			{ "resource": [4996, 6180], "geo": [6.917258, 52.028383] },
+			{ "resource": [4975, 281], "geo": [6.924979, 52.253016] },
+			{ "resource": [260, 291], "geo": [6.632143, 52.256466] }
+		],
+		"resourceMask": [
+			[282, 6194],
+			[4996, 6180],
+			[4975, 281],
+			[260, 291]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 34,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1977,
+			"yearEnd": 1979
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "72d245672cc2caa4",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/17/68/01/17680141043163751188430071476074625970.jp2",
+			"width": 8254,
+			"height": 6637,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p129",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [285, 6172], "geo": [6.917258, 52.028383] },
+			{ "resource": [5004, 6167], "geo": [7.208568, 52.024235] },
+			{ "resource": [4992, 270], "geo": [7.217757, 52.248841] },
+			{ "resource": [274, 271], "geo": [6.924979, 52.253016] }
+		],
+		"resourceMask": [
+			[285, 6172],
+			[5004, 6167],
+			[4992, 270],
+			[274, 271]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 35,
+			"position": "W",
+			"x": 0,
+			"y": 0,
+			"yearStart": 1977,
+			"yearEnd": 1979
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "41268fb0fb60930b",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/40/06/29/40062906311946934669097231679427231795.jp2",
+			"width": 8274,
+			"height": 6640,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p168",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [261, 6173], "geo": [6.329754, 51.809835] },
+			{ "resource": [4979, 6165], "geo": [6.619712, 51.807147] },
+			{ "resource": [4967, 267], "geo": [6.625892, 52.03181] },
+			{ "resource": [249, 268], "geo": [6.33448, 52.034516] }
+		],
+		"resourceMask": [
+			[261, 6173],
+			[4979, 6165],
+			[4967, 267],
+			[249, 268]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 41,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1977,
+			"yearEnd": 1979
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "5d0ccdb0598d6746",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/15/42/24/154224482388013127554322431516781097036.jp2",
+			"width": 8240,
+			"height": 6657,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p49",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [265, 6163], "geo": [6.644865, 52.705746] },
+			{ "resource": [4986, 6175], "geo": [6.94069, 52.702251] },
+			{ "resource": [5001, 278], "geo": [6.948685, 52.926849] },
+			{ "resource": [280, 260], "geo": [6.651339, 52.930368] }
+		],
+		"resourceMask": [
+			[265, 6163],
+			[4986, 6175],
+			[5001, 278],
+			[280, 260]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 17,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1978,
+			"yearEnd": 1980
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "a3367abbf3772d99",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/72/51/65/72516559159902420091167595140367388265.jp2",
+			"width": 8244,
+			"height": 6638,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p91",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [273, 6186], "geo": [6.632143, 52.256466] },
+			{ "resource": [4998, 6178], "geo": [6.924979, 52.253016] },
+			{ "resource": [4990, 270], "geo": [6.932789, 52.47764] },
+			{ "resource": [266, 271], "geo": [6.638467, 52.481112] }
+		],
+		"resourceMask": [
+			[273, 6186],
+			[4998, 6178],
+			[4990, 270],
+			[266, 271]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 28,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1978,
+			"yearEnd": 1980
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "537433b7b9003423",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/13/90/65/139065809438101454806586766082501831768.jp2",
+			"width": 8334,
+			"height": 6656,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p164",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [333, 6188], "geo": [6.039759, 51.811806] },
+			{ "resource": [5055, 6169], "geo": [6.329754, 51.809835] },
+			{ "resource": [5025, 277], "geo": [6.33448, 52.034516] },
+			{ "resource": [307, 293], "geo": [6.043032, 52.036501] }
+		],
+		"resourceMask": [
+			[333, 6188],
+			[5055, 6169],
+			[5025, 277],
+			[307, 293]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 40,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1977,
+			"yearEnd": 1980
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "5e3aee7e14a82ef8",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/12/60/84/126084127119323678386869391672075874300.jp2",
+			"width": 8274,
+			"height": 6642,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p171",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [289, 6175], "geo": [6.619712, 51.807147] },
+			{ "resource": [5009, 6168], "geo": [6.909626, 51.803742] },
+			{ "resource": [4996, 261], "geo": [6.917258, 52.028383] },
+			{ "resource": [280, 265], "geo": [6.625892, 52.03181] }
+		],
+		"resourceMask": [
+			[289, 6175],
+			[5009, 6168],
+			[4996, 261],
+			[280, 265]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": false,
+			"number": 41,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1978,
+			"yearEnd": 1980
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "d89f3b4fd9bcb71b",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/31/66/58/31665881467462707998123522206502823306.jp2",
+			"width": 8232,
+			"height": 6637,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p19",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [277, 6170], "geo": [5.1674846, 52.2628229] },
+			{ "resource": [4999, 6174], "geo": [5.4604446, 52.2630044] },
+			{ "resource": [4999, 279], "geo": [5.4608169, 52.4876928] },
+			{ "resource": [279, 270], "geo": [5.1663679, 52.4875099] }
+		],
+		"resourceMask": [
+			[277, 6170],
+			[4999, 6174],
+			[4999, 279],
+			[279, 270]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": true,
+			"number": 26,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1972,
+			"yearEnd": 1972
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "52e87677d06a49f7",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/16/47/19/164719823244076584885740658893935283472.jp2",
+			"width": 8231,
+			"height": 6625,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p4",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [259, 6162], "geo": [5.1663679, 52.4875099] },
+			{ "resource": [4980, 6166], "geo": [5.4608169, 52.4876928] },
+			{ "resource": [4980, 267], "geo": [5.461195, 52.7123701] },
+			{ "resource": [260, 257], "geo": [5.1652404, 52.7121863] }
+		],
+		"resourceMask": [
+			[259, 6162],
+			[4980, 6166],
+			[4980, 267],
+			[260, 257]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": true,
+			"number": 20,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1972,
+			"yearEnd": 1973
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "28354fdac189c383",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/91/93/02/91930258040209071847626815598611387378.jp2",
+			"width": 8247,
+			"height": 6633,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p22",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [277, 6169], "geo": [5.4604446, 52.2630044] },
+			{ "resource": [5002, 6161], "geo": [5.753401, 52.2624586] },
+			{ "resource": [4990, 265], "geo": [5.7552628, 52.487144] },
+			{ "resource": [267, 267], "geo": [5.4608169, 52.4876928] }
+		],
+		"resourceMask": [
+			[277, 6169],
+			[5002, 6161],
+			[4990, 265],
+			[267, 267]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": true,
+			"number": 26,
+			"position": "E",
+			"x": 1,
+			"y": 0,
+			"yearStart": 1972,
+			"yearEnd": 1973
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "8569b0194d3c85bd",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/31/13/34/31133443807261766365918265015458759026.jp2",
+			"width": 8240,
+			"height": 6654,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p24",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [255, 6160], "geo": [5.4582924, 50.914733] },
+			{ "resource": [4977, 6171], "geo": [5.7426704, 50.9142088] },
+			{ "resource": [4988, 274], "geo": [5.744408, 51.1389246] },
+			{ "resource": [268, 257], "geo": [5.4586413, 51.1394525] }
+		],
+		"resourceMask": [
+			[255, 6160],
+			[4977, 6171],
+			[4988, 274],
+			[268, 257]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": true,
+			"number": 59,
+			"position": "E",
+			"x": 0,
+			"y": 0,
+			"yearStart": 1973,
+			"yearEnd": 1974
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "30af562882f1b1fc",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/78/84/80/7884809343230007246440293041456222676.jp2",
+			"width": 8234,
+			"height": 6638,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456553/canvas/p7",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456553",
+							"type": "Manifest"
+						}
+					]
+				}
+			]
+		},
+		"gcps": [
+			{ "resource": [267, 6165], "geo": [5.7552628, 52.487144] },
+			{ "resource": [4987, 6164], "geo": [6.049693, 52.4858643] },
+			{ "resource": [4985, 262], "geo": [6.0530818, 52.7105299] },
+			{ "resource": [265, 257], "geo": [5.7571456, 52.7118176] }
+		],
+		"resourceMask": [
+			[267, 6165],
+			[4987, 6164],
+			[4985, 262],
+			[265, 257]
+		],
+		"transformation": { "type": "thinPlateSpline" },
+		"_meta": {
+			"edition": 4,
+			"bis": true,
+			"number": 21,
+			"position": "W",
+			"x": -1,
+			"y": 0,
+			"yearStart": 1973,
+			"yearEnd": 1975
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
 		"id": "8b487235317dac8e",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/30/35/68/30356843151018575454575848823236625600.jp2",
@@ -32560,282 +32974,6 @@
 	{
 		"@context": "https://schemas.allmaps.org/map/2/context.json",
 		"type": "GeoreferencedMap",
-		"id": "3dea1862c571d120",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/42/79/62/42796249738207305127891623096577020334.jp2",
-			"width": 8250,
-			"height": 6644,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p87",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [275, 6182], "geo": [6.33926, 52.259189] },
-			{ "resource": [4997, 6172], "geo": [6.632143, 52.256466] },
-			{ "resource": [4982, 274], "geo": [6.638467, 52.481112] },
-			{ "resource": [261, 279], "geo": [6.344097, 52.483853] }
-		],
-		"resourceMask": [
-			[275, 6182],
-			[4997, 6172],
-			[4982, 274],
-			[261, 279]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 28,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1978,
-			"yearEnd": 1979
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "7325e52ee4d69393",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/69/90/79/69907998570499491004587509310689740836.jp2",
-			"width": 8246,
-			"height": 6639,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p94",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [265, 6168], "geo": [6.924979, 52.253016] },
-			{ "resource": [4985, 6157], "geo": [7.217757, 52.248841] },
-			{ "resource": [4968, 260], "geo": [7.227052, 52.473437] },
-			{ "resource": [251, 264], "geo": [6.932789, 52.47764] }
-		],
-		"resourceMask": [
-			[265, 6168],
-			[4985, 6157],
-			[4968, 260],
-			[251, 264]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 29,
-			"position": "W",
-			"x": 0,
-			"y": 0,
-			"yearStart": 1977,
-			"yearEnd": 1979
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "efaa225abdd52529",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/58/59/23/58592369853262641739626805557257626431.jp2",
-			"width": 8268,
-			"height": 6665,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p125",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [282, 6194], "geo": [6.625892, 52.03181] },
-			{ "resource": [4996, 6180], "geo": [6.917258, 52.028383] },
-			{ "resource": [4975, 281], "geo": [6.924979, 52.253016] },
-			{ "resource": [260, 291], "geo": [6.632143, 52.256466] }
-		],
-		"resourceMask": [
-			[282, 6194],
-			[4996, 6180],
-			[4975, 281],
-			[260, 291]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 34,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1977,
-			"yearEnd": 1979
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "72d245672cc2caa4",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/17/68/01/17680141043163751188430071476074625970.jp2",
-			"width": 8254,
-			"height": 6637,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p129",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [285, 6172], "geo": [6.917258, 52.028383] },
-			{ "resource": [5004, 6167], "geo": [7.208568, 52.024235] },
-			{ "resource": [4992, 270], "geo": [7.217757, 52.248841] },
-			{ "resource": [274, 271], "geo": [6.924979, 52.253016] }
-		],
-		"resourceMask": [
-			[285, 6172],
-			[5004, 6167],
-			[4992, 270],
-			[274, 271]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 35,
-			"position": "W",
-			"x": 0,
-			"y": 0,
-			"yearStart": 1977,
-			"yearEnd": 1979
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "41268fb0fb60930b",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/40/06/29/40062906311946934669097231679427231795.jp2",
-			"width": 8274,
-			"height": 6640,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p168",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [261, 6173], "geo": [6.329754, 51.809835] },
-			{ "resource": [4979, 6165], "geo": [6.619712, 51.807147] },
-			{ "resource": [4967, 267], "geo": [6.625892, 52.03181] },
-			{ "resource": [249, 268], "geo": [6.33448, 52.034516] }
-		],
-		"resourceMask": [
-			[261, 6173],
-			[4979, 6165],
-			[4967, 267],
-			[249, 268]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 41,
-			"position": "W",
-			"x": -1,
-			"y": 0,
-			"yearStart": 1977,
-			"yearEnd": 1979
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "5d0ccdb0598d6746",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/15/42/24/154224482388013127554322431516781097036.jp2",
-			"width": 8240,
-			"height": 6657,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p49",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [265, 6163], "geo": [6.644865, 52.705746] },
-			{ "resource": [4986, 6175], "geo": [6.94069, 52.702251] },
-			{ "resource": [5001, 278], "geo": [6.948685, 52.926849] },
-			{ "resource": [280, 260], "geo": [6.651339, 52.930368] }
-		],
-		"resourceMask": [
-			[265, 6163],
-			[4986, 6175],
-			[5001, 278],
-			[280, 260]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 17,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1978,
-			"yearEnd": 1980
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
 		"id": "641b0eb2ae8582d1",
 		"resource": {
 			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/12/82/21/128221786350547957493477043620924009229.jp2",
@@ -32872,144 +33010,6 @@
 			"edition": 4,
 			"bis": true,
 			"number": 22,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1978,
-			"yearEnd": 1980
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "a3367abbf3772d99",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/72/51/65/72516559159902420091167595140367388265.jp2",
-			"width": 8244,
-			"height": 6638,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p91",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [273, 6186], "geo": [6.632143, 52.256466] },
-			{ "resource": [4998, 6178], "geo": [6.924979, 52.253016] },
-			{ "resource": [4990, 270], "geo": [6.932789, 52.47764] },
-			{ "resource": [266, 271], "geo": [6.638467, 52.481112] }
-		],
-		"resourceMask": [
-			[273, 6186],
-			[4998, 6178],
-			[4990, 270],
-			[266, 271]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 28,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1978,
-			"yearEnd": 1980
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "537433b7b9003423",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/13/90/65/139065809438101454806586766082501831768.jp2",
-			"width": 8334,
-			"height": 6656,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p164",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [333, 6188], "geo": [6.039759, 51.811806] },
-			{ "resource": [5055, 6169], "geo": [6.329754, 51.809835] },
-			{ "resource": [5025, 277], "geo": [6.33448, 52.034516] },
-			{ "resource": [307, 293], "geo": [6.043032, 52.036501] }
-		],
-		"resourceMask": [
-			[333, 6188],
-			[5055, 6169],
-			[5025, 277],
-			[307, 293]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 40,
-			"position": "E",
-			"x": 1,
-			"y": 0,
-			"yearStart": 1977,
-			"yearEnd": 1980
-		}
-	},
-	{
-		"@context": "https://schemas.allmaps.org/map/2/context.json",
-		"type": "GeoreferencedMap",
-		"id": "5e3aee7e14a82ef8",
-		"resource": {
-			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/12/60/84/126084127119323678386869391672075874300.jp2",
-			"width": 8274,
-			"height": 6642,
-			"type": "ImageService2",
-			"partOf": [
-				{
-					"id": "https://objects.library.uu.nl/iiif_manifest/1874-456588/canvas/p171",
-					"type": "Canvas",
-					"partOf": [
-						{
-							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-456588",
-							"type": "Manifest"
-						}
-					]
-				}
-			]
-		},
-		"gcps": [
-			{ "resource": [289, 6175], "geo": [6.619712, 51.807147] },
-			{ "resource": [5009, 6168], "geo": [6.909626, 51.803742] },
-			{ "resource": [4996, 261], "geo": [6.917258, 52.028383] },
-			{ "resource": [280, 265], "geo": [6.625892, 52.03181] }
-		],
-		"resourceMask": [
-			[289, 6175],
-			[5009, 6168],
-			[4996, 261],
-			[280, 265]
-		],
-		"transformation": { "type": "thinPlateSpline" },
-		"_meta": {
-			"edition": 4,
-			"bis": false,
-			"number": 41,
 			"position": "E",
 			"x": 1,
 			"y": 0,
