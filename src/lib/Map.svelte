@@ -488,6 +488,17 @@
 	function handleMapClick(e: any) {
 		if (!map || !warpedMapLayer || !gridVisible) return;
 
+		addEventListener('keydown', (e) => {
+			if (e.key == 'Escape') {
+				restoreView();
+				applyFilter(filter);
+				warpedMapLayer?.setMapResourceMask(selectedHistoricMap?.id, 
+					selectedHistoricMap?.warpedMap.resourcePreviousMask
+				);
+				selectedHistoricMap = null;
+			}
+		});
+
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
 		selectedHistoricMap = historicMapsById.get(id) || null;
