@@ -38,7 +38,7 @@
 	};
 
 	const containerId = 'map-container';
-	const ANNOTATION_URL = 'maps.json';
+	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
 	let manifestCollection: any | null = $state(null);
 
@@ -86,7 +86,7 @@
 		if (!historicMapsLoaded) return;
 		const grouped = new Map<number, HistoricMap[]>();
 		for (const { number, ...rest } of historicMapsById.values())
-			(grouped.get(number) ?? grouped.set(number, []).get(number))!.push({ number, ...rest });
+			(grouped.get(number) ?? grouped.set(number, []).get(number))!.unshift({ number, ...rest });
 		return grouped;
 	});
 
@@ -106,7 +106,7 @@
 				id: i,
 				type: 'Feature',
 				geometry: structuredClone(o.polygon),
-				properties: { id: o.id, year: o.yearStart }
+				properties: { id: o.id, year: o.yearEnd }
 			}))
 			.toArray();
 
@@ -116,7 +116,7 @@
 				id: i,
 				type: 'Feature',
 				geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
-				properties: { year: o.yearStart }
+				properties: { year: o.yearEnd }
 			}))
 			.toArray();
 
@@ -135,8 +135,8 @@
 	let viewportPolygon: GeojsonPolygon | null = $state(null);
 
 	let filter: Filter = $state({
-		yearStart: 1900,
-		yearEnd: 1980,
+		yearStart: 1865,
+		yearEnd: 1991,
 		edition: 'All',
 		bis: false,
 		type: undefined
@@ -182,6 +182,7 @@
 		if (!historicMap) return;
 		historicMap.warpedMap.visible = true;
 		visibleHistoricMaps.set(id, historicMap);
+		warpedMapLayer?.setMapSaturation(id, 1);
 	}
 
 	function hideHistoricMap(id) {
@@ -203,15 +204,13 @@
 		const visibleSheets: HistoricMap[] = [];
 		const grayedOutSheets: HistoricMap[] = [];
 
+		console.log(`${filter.yearStart} - ${filter.yearEnd}`);
+
 		historicMapsByNumber.forEach((sheets, number) => {
 			let x1, y1, x2, y2;
-			let steps = 0;
 			const firstEdYearEnd = 1894;
 
-			for (const sheet of sheets.toReversed()) {
-				// TODO: remove reversed
-				steps++;
-
+			for (const sheet of sheets) {
 				const { x, y, yearEnd: year, edition, bis, type } = sheet;
 				const maxYearFilter = filter.yearEnd > firstEdYearEnd ? filter.yearEnd : firstEdYearEnd;
 				const periodFilter = filter.edition !== 'All' || year <= maxYearFilter;
