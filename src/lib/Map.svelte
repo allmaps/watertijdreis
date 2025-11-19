@@ -83,7 +83,6 @@
 		for (const map of historicMapsById.values()) {
 			const number = map.number;
 			const sheetsForNumber = numbers.get(number);
-			// They should all have a yearEnd now
 			if (map.yearEnd) {
 				if (sheetsForNumber) {
 					sheetsForNumber.push(map);
