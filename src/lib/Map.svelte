@@ -125,7 +125,7 @@
 				id: i,
 				type: 'Feature',
 				geometry: structuredClone(o.polygon),
-				properties: { id: o.id, year: o.yearStart }
+				properties: { id: o.id, year: o.yearEnd }
 			}))
 			.toArray();
 
@@ -135,7 +135,7 @@
 				id: i,
 				type: 'Feature',
 				geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
-				properties: { year: o.yearStart }
+				properties: { year: o.yearEnd }
 			}))
 			.toArray();
 
