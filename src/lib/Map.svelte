@@ -17,6 +17,7 @@
 		id: string;
 		manifestId: string;
 		warpedMap: WarpedMap;
+		label: string;
 		polygon: GeojsonPolygon;
 		yearStart: number;
 		yearEnd: number;
@@ -67,6 +68,8 @@
 		manifest.variants = variants;
 		return manifest;
 	}
+
+	console.log([getHistoricMapManifest]);
 
 	let map: maplibregl.Map | null = $state(null);
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
@@ -609,7 +612,11 @@
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 
-<div id={containerId} class="polka relative h-full w-full overflow-hidden"></div>
+<div 
+	id={containerId} 
+	class="polka relative h-full w-full overflow-hidden bg-white bg-size-[25px_25px]"
+	style={`background-image: radial-gradient(${selectedHistoricMap ? '#fef' : '#eef'} 2.5px, transparent 2.5px)`}
+></div>
 
 <Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut} />
 <!-- <Search {flyToFeature}></Search> -->
@@ -656,11 +663,3 @@
 		if (e.key == ' ') setGridVisibility(false);
 	}}
 />
-
-<style>
-	.polka {
-		background-image: radial-gradient(#eef 2.5px, transparent 2.5px);
-		background-size: 25px 25px; /* spacing */
-		background-color: white; /* optional */
-	}
-</style>

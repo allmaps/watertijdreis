@@ -37,8 +37,10 @@
 	type Edition = { name: string; edition: number; bis: false; yearStart: number; yearEnd: number };
 
 	$effect(() => {
-		filter.yearEnd = Math.ceil(selectedYear);
-		applyFilter(filter);
+		if(filter.yearEnd - Math.floor(selectedYear)) {
+			filter.yearEnd = Math.floor(selectedYear);
+			applyFilter(filter);
+		}
 	});
 
 	let historicMapsByEdition: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
@@ -149,9 +151,11 @@
 
 		setLabelVisibility(false);
 
+		const range = view.target.end - view.target.start;
+		const middle = (view.target.start + view.target.end) / 2;
 		view.target = {
-			start: Math.round(view.target.start),
-			end: Math.round(view.target.end)
+			start: Math.round(middle) - range / 2,
+			end: Math.round(middle) + range / 2
 		};
 
 		window.removeEventListener('pointermove', onpointermove);

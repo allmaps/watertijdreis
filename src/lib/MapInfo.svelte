@@ -30,8 +30,6 @@
         });
     })
 
-     $effect(() => console.log(manifest?.variants));
-
     function getLabelFromManifest(m = manifest, lang = 'nl') {
         return (m.label[lang] ?? m.label.en ?? [])[0] ?? '';
     }
