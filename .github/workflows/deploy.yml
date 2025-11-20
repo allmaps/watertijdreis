@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      PUBLIC_GEOCODE_EARTH_API_KEY: ${{ secrets.PUBLIC_GEOCODE_EARTH_API_KEY }}
     permissions:
       contents: read
       pages: write
