@@ -172,7 +172,7 @@
 {#if !selectedHistoricMap}
 	<div
 		transition:fly={{ y: 100, duration: 250 }}
-		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md shadow-[#f4a]"
+		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md shadow-[#f4a] z-998"
 		style:background={'#336'}
 		bind:clientWidth={width}
 		bind:clientHeight={height}

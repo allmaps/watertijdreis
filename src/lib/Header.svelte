@@ -9,7 +9,7 @@
 	import AboutPanel from './AboutPanel.svelte';
 	import SharePanel from './SharePanel.svelte';
 
-	let { flyToFeature, flyToUserLocation, setGridVisibility, zoomIn, zoomOut } = $props();
+	let { flyToFeature, flyToUserLocation, setGridVisibility, zoomIn, zoomOut, baseMap = $bindable() } = $props();
 
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
@@ -31,7 +31,10 @@
 </script>
 
 <svelte:window 
-	onkeydown={(e) => { if(e.metaKey && e.key == "k") searchBarVisible = true }}
+	onkeydown={(e) => { 
+		if(e.metaKey && e.key == "k") searchBarVisible = true 
+		if(e.key.toLowerCase() == "l") layersPanelVisible = !layersPanelVisible
+	}}
 ></svelte:window>
 
 <AboutPanel bind:visible={aboutPanelVisible}></AboutPanel>
@@ -40,7 +43,7 @@
 
 <Geocoder {flyToFeature} bind:visible={searchBarVisible} providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}></Geocoder>
 
-<LayersPanel bind:visible={layersPanelVisible}></LayersPanel>
+<LayersPanel bind:visible={layersPanelVisible} bind:baseMap={baseMap}></LayersPanel>
 
 <div 
 	class="absolute top-5 left-5 shadow-lg px-3 py-3 text-[#336] rounded-[8px] bg-white z-999"
