@@ -15,6 +15,7 @@
 	});
 </script>
 
+<link rel="icon" type="image/x-icon" href="waves_flipped.png" />
 <link rel="stylesheet" href="https://use.typekit.net/bis1pqi.css" />
 
 <!-- <NavigationButtons></NavigationButtons> -->
