@@ -1,6 +1,19 @@
 <script lang="ts">
-    import * as turf from '@turf/turf';
-    import { ArrowArcLeft, ArrowBendRightUp, ArrowLineRight, ArrowUUpLeft, Binoculars, ImagesSquare, MapTrifold, MouseLeftClick, PictureInPicture, PushPin } from 'phosphor-svelte';
+	import * as turf from '@turf/turf';
+	import {
+		ArrowArcLeft,
+		ArrowBendRightUp,
+		ArrowLineRight,
+		ArrowUUpLeft,
+		Binoculars,
+		ImagesSquare,
+		MapTrifold,
+		MouseLeftClick,
+		PictureInPicture,
+		PushPin,
+		ArrowSquareOut,
+		Copy
+	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade } from 'svelte/transition';
 
 	let {
@@ -16,35 +29,36 @@
 	} = $props();
 
 	let previewHistoricMap = $derived.by(() => {
-		if(visibleHistoricMapsInViewport.size == 1) return visibleHistoricMapsInViewport.values().next().value;
+		if (visibleHistoricMapsInViewport.size == 1)
+			return visibleHistoricMapsInViewport.values().next().value;
 		else return hoveredHistoricMap;
-	})
+	});
 
-    let manifest = $state(null);
-    let manifestLoading = $state(null);
+	let manifest = $state(null);
+	let manifestLoading = $state(null);
 
-    $effect(() => {
-        manifestLoading = getHistoricMapManifest(previewHistoricMap?.id).then(data => {
-            manifestLoading = null;
-            manifest = data || null;
-        });
-    })
+	$effect(() => {
+		manifestLoading = getHistoricMapManifest(previewHistoricMap?.id).then((data) => {
+			manifestLoading = null;
+			manifest = data || null;
+		});
+	});
 
-    function getLabelFromManifest(m = manifest, lang = 'nl') {
-        return (m.label[lang] ?? m.label.en ?? [])[0] ?? '';
-    }
+	function getLabelFromManifest(m = manifest, lang = 'nl') {
+		return (m.label[lang] ?? m.label.en ?? [])[0] ?? '';
+	}
 
-    function getMetadataFromManifest(m = manifest, lang = 'nl') {
-        return m.metadata.map(i => {
-                const label = i.label[lang] ?? i.label.en;
-                const value = i.value[lang] ?? i.value.en;
+	function getMetadataFromManifest(m = manifest, lang = 'nl') {
+		return m.metadata.map((i) => {
+			const label = i.label[lang] ?? i.label.en;
+			const value = i.value[lang] ?? i.value.en;
 
-                return [label?.[0], value?.[0]];
-            })
-    }
+			return [label?.[0], value?.[0]];
+		});
+	}
 
-    function getViewportRectWithinHistoricMap(historicMap) {
-		if(!viewportPolygon) return;
+	function getViewportRectWithinHistoricMap(historicMap) {
+		if (!viewportPolygon) return;
 
 		const [minX, minY, maxX, maxY] = historicMap.warpedMap.geoFullMaskBbox;
 
@@ -71,14 +85,13 @@
 {#if previewHistoricMap}
 	{#key previewHistoricMap}
 		<div
-			class="absolute top-55 right-5 text-[15px] transition-opacity duration-150 z-998
-				bg-white/90 backdrop-blur-md shadow-lg rounded-[8px] p-3 
-				flex flex-col gap-2"
+			class="absolute top-55 right-5 z-998 flex flex-col gap-2
+				rounded-[8px] bg-white/90 p-3 text-[15px] shadow-lg
+				backdrop-blur-md transition-opacity duration-150"
 			style="box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);"
 			transition:fly={{ y: -10, duration: 500 }}
 		>
-
-            <!-- <div class="text-[#f4a]">
+			<!-- <div class="text-[#f4a]">
                 <ArrowUUpLeft size="20" class="inline"/>
                 Terug naar de kaart
                 <kbd
@@ -86,98 +99,142 @@
                 ><span class="text-foreground-alt text-[10px]">Esc</span></kbd>
             </div> -->
 			<div class="flex items-center gap-3">
-				<div class="flex flex-col leading-tight p-1" transition:fade>
-					{#await getHistoricMapManifest(previewHistoricMap.id)}
-						{:then data}
-                            <h1 
-                                class="text-[14px] text-[#336] font-[700] truncate"
-                                style:transition={"font-size .2s"}
-                                style={selectedHistoricMap ? "max-width: 160px; font-size: 20px" : "max-width: 120px"}
-                            >{data.label.nl[0]}</h1>
-							{#if selectedHistoricMap}
-								<div>
-								<ArrowLineRight size="20" color="#f4a" class="inline relative" />
-								<PushPin size="20" color="#f4a" class="inline relative ml-3" />
-								</div>
-							{:else}
-								<!-- <h1 class="font-[700] text-[#336] max-w-[120px] truncate">{data.label.nl[0]}</h1> -->
-								<p class="text-gray-500">
-									Editie {previewHistoricMap.edition}{previewHistoricMap.bis ? " BIS" : ""}
-								</p>
-								<p class="text-gray-500">{previewHistoricMap.yearEnd}</p>
-							{/if}
-						{:catch error}
-							<p class="text-red-600">Kan geen informatie ophalen</p>
+				<div class="flex flex-col p-1 leading-tight" transition:fade>
+					{#await getHistoricMapManifest(previewHistoricMap.id) then data}
+						<h1
+							class="truncate text-[14px] font-[700] text-[#336]"
+							style:transition={'font-size .2s'}
+							style={selectedHistoricMap ? 'max-width: 160px; font-size: 20px' : 'max-width: 120px'}
+						>
+							{data.label.nl[0]}
+						</h1>
+						{#if selectedHistoricMap}
+							<div>
+								<ArrowLineRight size="20" color="#f4a" class="relative inline" />
+								<PushPin size="20" color="#f4a" class="relative ml-3 inline" />
+							</div>
+						{:else}
+							<!-- <h1 class="font-[700] text-[#336] max-w-[120px] truncate">{data.label.nl[0]}</h1> -->
+							<p class="text-gray-500">
+								Editie {previewHistoricMap.edition}{previewHistoricMap.bis ? ' BIS' : ''}
+							</p>
+							<p class="text-gray-500">{previewHistoricMap.yearEnd}</p>
+						{/if}
+					{:catch error}
+						<p class="text-red-600">Kan geen informatie ophalen</p>
 					{/await}
-					</div>     
+				</div>
 
-				{#await getHistoricMapThumbnail(previewHistoricMap.id, 80)}
-					{:then src}
-						<div class="relative inline-block overflow-hidden bg-red-500 shadow-md">
-							<img 
-								{src} 
-								alt="" 
-								class="block scale-103"
-								style="width: calc(100% + 2px); height: calc(100% + 2px);" 
-							/>
+				{#await getHistoricMapThumbnail(previewHistoricMap.id, 80) then src}
+					<div class="relative inline-block overflow-hidden bg-red-500 shadow-md">
+						<img
+							{src}
+							alt=""
+							class="block scale-103"
+							style="width: calc(100% + 2px); height: calc(100% + 2px);"
+						/>
 
-							{#if viewportPolygon}
-								{@const { leftPct,topPct,widthPct,heightPct } = getViewportRectWithinHistoricMap(previewHistoricMap)}
+						{#if viewportPolygon}
+							{@const { leftPct, topPct, widthPct, heightPct } =
+								getViewportRectWithinHistoricMap(previewHistoricMap)}
 
-								<div 
-									class="absolute border-[4px] border-[#33336666] rounded-[4px] pointer-events-none"
-									style="
+							<div
+								class="pointer-events-none absolute rounded-[4px] border-[4px] border-[#33336666]"
+								style="
 										left: {leftPct}%;
 										top: {topPct}%;
 										width: {widthPct}%;
 										height: {heightPct}%;
-									"	
-								></div>
-							{/if}
-						</div>
-					{:catch error}
-						<p class="text-red-600">{error}</p>
+									"
+							></div>
+						{/if}
+					</div>
+				{:catch error}
+					<p class="text-red-600">{error}</p>
 				{/await}
 			</div>
 
-			{#if selectedHistoricMap}
-                {@const metadata = getMetadataFromManifest()}
+			{#if selectedHistoricMap && manifest}
+				{@const metadata = getMetadataFromManifest()}
+				{@const annotationUrl = manifest.annotations[0].id}
+				<!-- {@const collectionId = "https://tu-delft-heritage.github.io/watertijdreis-data/collection.json"}  -->
+				<!-- {@const manifestId = manifest.id} -->
+				<!-- {@const homepageUrl = manifest.rendering[0].id} -->
+
 				<div>
-                    {#each metadata as [label,value]}
-                        <div class="mt-2">
-                            <h3 class="text-[14px] font-semibold text-[#33336666]">{label}</h3>
-                            <div class="text-[#336]">{value}</div>
-                        </div>
-                    {/each}
+					{#each metadata as [label, value]}
+						<div class="mt-2">
+							<h3 class="text-[14px] font-semibold text-[#33336666]">{label}</h3>
+							<div class="text-[#336]">{value}</div>
+						</div>
+					{/each}
+					<div class="mt-2">
+						<h3 class="text-[14px] font-semibold text-[#33336666]">Links</h3>
+						<a
+							href="https://viewer.allmaps.org/?url={annotationUrl}"
+							class="text-[#f4a] hover:text-[#336]"
+						>
+							<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Open in Allmaps Viewer</a
+						>
+					</div>
+
+					<div class="mt-2">
+						<a
+							href="https://viewer.allmaps.org/?url={annotationUrl}"
+							class="text-[#f4a] hover:text-[#336]"
+						>
+							<Copy size="15" color="#f4a" class="relative inline" /> Kopiëer XYZ tile URL</a
+						>
+					</div>
+
+					<div class="mt-2">
+						<a
+							href="https://viewer.allmaps.org/?url={annotationUrl}"
+							class="text-[#f4a] hover:text-[#336]"
+						>
+							<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Open in Theseus</a
+						>
+					</div>
 				</div>
+
+				<!-- linkjes die erin moeten
+				
+				Copy XYZ tile URL: https://allmaps.xyz/{z}/{x}/{y}.png?url=[annotationUrl]&transformation.type=thin-plate-spline
+					Open in Theseus: https://theseus-viewer.netlify.app/?iiif-content=[manifestId]&collection=[collectionId]
+					View at Utrecht University Library: [homepageUrl]
+					View Georeference Annotation: [annotationUrl]
+					View GeoJSON: [annotationUrl].geojson
+					Open in geojson.io: https://geojson.io/#data=data:text/x-url,[annotationUrl].geojson 
+		 -->
 
 				<div id="select-container" class="with-icon relative">
 					<label for="eenheid">Andere bladen</label>
-					<ImagesSquare size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
-					<span class="absolute top-[28px] right-8 rounded-[8px] bg-[#eef] w-8 text-[#336] font-[600] text-center">+3</span>
+					<ImagesSquare size="18" color="#f4a" class="absolute top-[31px] left-4 inline" />
+					<span
+						class="absolute top-[28px] right-8 w-8 rounded-[8px] bg-[#eef] text-center font-[600] text-[#336]"
+						>+3</span
+					>
 					<select name="variant" style:width="250px">
-                        <option value={selectedHistoricMap.id}>Hoofdblad</option>
-                        {#each manifest?.variants as variant}
-                            <option value={variant}>{variant}</option>
-                        {/each}
+						<option value={selectedHistoricMap.id}>Hoofdblad</option>
+						{#each manifest?.variants as variant}
+							<option value={variant}>{variant}</option>
+						{/each}
 					</select>
 				</div>
-			{:else} 
+			{:else}
 				<div class="w-full rounded-[4px] text-[12px] text-gray-500">
 					<kbd
-					class="bg-background-alt text-[#336] pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-75 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[#336] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-					><span class="text-foreground-alt text-[10px]">Spatie</span></kbd
+						class="bg-background-alt pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#336] opacity-75 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[#336] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
+						><span class="text-foreground-alt text-[10px]">Spatie</span></kbd
 					>
-					en 
+					en
 					<MouseLeftClick size="18" class="inline opacity-75" color="#336"></MouseLeftClick>
 					om blad te bekijken
 				</div>
 			{/if}
-
 		</div>
 	{/key}
 {/if}
-
 
 <style>
 	#button-container {
@@ -205,10 +262,10 @@
 	}
 
 	label {
-        font-size: 12px;
-        opacity: .5;
+		font-size: 12px;
+		opacity: 0.5;
 		margin-left: 10px;
-    }
+	}
 	#select-container {
 		display: inline-flex;
 		flex-direction: column;
