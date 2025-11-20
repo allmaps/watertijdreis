@@ -23,6 +23,7 @@
     let manifest = $state(null);
     let manifestLoading = $state(null);
 
+
     $effect(() => {
         manifestLoading = getHistoricMapManifest(previewHistoricMap?.id).then(data => {
             manifestLoading = null;
@@ -140,7 +141,7 @@
 				{/await}
 			</div>
 
-			{#if selectedHistoricMap}
+			{#if selectedHistoricMap && manifest}
                 {@const metadata = getMetadataFromManifest()}
 				<div>
                     {#each metadata as [label,value]}

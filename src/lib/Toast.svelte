@@ -1,34 +1,24 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
-	let { content = '', visible = $bindable(true) } = $props();
+	let { content = '' } = $props();
+
+	let visible: boolean = $state(false);
 	let timeout: ReturnType<typeof setTimeout>;
 
 	$effect(() => {
-		// if (visible) {
-		clearTimeout(timeout);
-		timeout = setTimeout(() => (visible = false), 1000);
-		// }
-	});
+		if (content) {
+			clearTimeout(timeout);
+			visible = true;
+			timeout = setTimeout(() => (visible = false), 1000);
+		}
+	})
 </script>
 
 {#if visible}
-	<div transition:fade>
-		{content}
-	</div>
+	<!-- {#key content} -->
+		<div class="fixed bottom-42 left-1/2 -translate-x-1/2 bg-white text-center text-[#336] px-4 py-2 rounded-[8px] text-[16px] z-999 shadow-lg" transition:fly={{ y: 20, duration: 250 }}>
+			{@html content}
+		</div>
+	<!-- {/key} -->
 {/if}
-
-<style>
-	div {
-		position: fixed;
-		bottom: 200px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: #333366cc;
-		color: #fff;
-		padding: 10px 20px;
-		border-radius: 4px;
-		font-size: 16px;
-		z-index: 10;
-	}
-</style>

@@ -11,7 +11,10 @@
 	import Timeline from './Timeline.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import MapInfo from './MapInfo.svelte';
-	import NavigationButtons from './NavigationButtons.svelte';
+	import Toast from './Toast.svelte';
+
+	import * as pmtiles from "pmtiles";
+	import { basemapStyle } from './basemap';
 
 	type HistoricMap = {
 		id: string;
@@ -69,8 +72,6 @@
 		return manifest;
 	}
 
-	console.log([getHistoricMapManifest]);
-
 	let map: maplibregl.Map | null = $state(null);
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
 	let maplibreLoaded: boolean = $state(false);
@@ -80,8 +81,9 @@
 	});
 
 	let historicMapsLoaded: boolean = $state(false);
+
 	$effect(() => {
-		if (historicMapsLoaded) console.log('historicMaps loaded', historicMapsById);
+		if (historicMapsLoaded) toastContent = `<b>${historicMapsById.size}</b> historische kaarten geladen`;
 	});
 
 	let historicMapsById: Map<string, HistoricMap> = $state(new Map());
@@ -201,13 +203,15 @@
 		return map.warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
 	}
 
+	let toastContent: string = $state('');
+
 	function applyFilter(filter: Filter) {
 		if (!historicMapsByNumber) return;
 
 		const visibleSheets: HistoricMap[] = [];
 		const grayedOutSheets: HistoricMap[] = [];
 
-		console.log(`${filter.yearStart} - ${filter.yearEnd}`);
+		toastContent = `${filter.yearStart} - ${filter.yearEnd}`;
 
 		historicMapsByNumber.forEach((sheets, number) => {
 			let x1, y1, x2, y2;
@@ -262,27 +266,58 @@
 				warpedMapLayer?.setMapSaturation(sheet.id, 0);
 			} else hideHistoricMap(sheet.id);
 		}
+
+		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
 	}
+
+	let baseMap: 'none' | 'protomaps' = $state('none');
+
+	const EMPTY_STYLE = {
+		version: 8,
+		sources: {},
+		glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
+		layers: [
+			{
+			id: 'background',
+			type: 'background',
+			paint: { 'background-color': '#ffffff00' }
+			}
+		]
+	};
+
+	function setProtomapsVisiblity(visible: boolean) {
+		if (!map) return;
+
+		const { layers } = basemapStyle('nl');
+		layers.forEach((layer) => {
+			if (map.getLayer(layer.id)) {
+				map.setLayoutProperty(
+					layer.id,
+					'visibility',
+					visible ? 'visible' : 'none'
+				);
+			}
+		});
+	}
+
+	$effect(() => {
+		setProtomapsVisiblity(baseMap === 'protomaps')
+	})
 
 	function initMaplibre() {
 		const urlView = getViewFromUrl();
 		const initialCenter: LngLatLike = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
 		const initialZoom = urlView ? urlView.zoom : 7;
 
+		const protocol = new pmtiles.Protocol();
+		maplibregl.addProtocol('pmtiles', protocol.tile);
+
+		const style = basemapStyle('nl');
+		style.layers.forEach(layer => layer.layout = { visibility: 'none' });
+
 		map = new maplibregl.Map({
 			container: containerId,
-			style: {
-				version: 8,
-				sources: {},
-				glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
-				layers: [
-					{
-						id: 'background',
-						type: 'background',
-						paint: { 'background-color': '#ffffff00' }
-					}
-				]
-			},
+			style,
 			center: initialCenter,
 			zoom: initialZoom,
 			minZoom: 6.5,
@@ -358,18 +393,25 @@
 		if (!map) return;
 
 		map.addLayer({
+			id: 'map-outlines-skeleton',
+			type: 'fill',
+			source: 'map-outlines',
+			paint: { 'fill-color': '#eef' }
+		}, "warped-map-layer");
+
+		map.addLayer({
 			id: 'map-outlines-labels',
 			type: 'symbol',
 			source: 'map-labels',
 			layout: {
-				'text-font': ['Open Sans Bold'],
+				'text-font': ['literal', ['Roboto Regular']],
 				'text-field': ['to-string', ['get', 'year']],
 				'text-size': 15,
 				'text-allow-overlap': true
 			},
 			paint: {
 				'text-color': '#333366aa',
-				'text-halo-color': '#ffffff88',
+				'text-halo-color': '#ff44aa44',
 				'text-halo-width': 1,
 				'text-opacity': 0
 			}
@@ -618,8 +660,9 @@
 	style={`background-image: radial-gradient(${selectedHistoricMap ? '#fef' : '#eef'} 2.5px, transparent 2.5px)`}
 ></div>
 
-<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut} />
-<!-- <Search {flyToFeature}></Search> -->
+<Toast content={toastContent}></Toast>
+
+<Header {flyToFeature} {flyToUserLocation} {setGridVisibility} {zoomIn} {zoomOut} bind:baseMap={baseMap} />
 
 <Timeline
 	bind:filter

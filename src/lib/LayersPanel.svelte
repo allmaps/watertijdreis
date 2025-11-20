@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { ImagesSquare, X } from 'phosphor-svelte';
+    import { EyeClosed, ImagesSquare, MapTrifold, X } from 'phosphor-svelte';
     import { fly, fade } from 'svelte/transition';
-    let { visible = $bindable() } = $props();
+    let { visible = $bindable(), baseMap = $bindable() } = $props();
 
 
 </script>
@@ -30,23 +30,23 @@
     <h1 class="text-[#336] font-[700] text-[22px]">Lagen</h1>
     <div id="select-container" class="with-icon relative mt-4">
         <label for="eenheid">Achtergrondkaart</label>
-        <ImagesSquare size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
-        <select name="eenheid" style:width="250px">
-            <option value="m">Geen</option>
-            <option value="km">Basiskaart</option>
-            <option value="ft">AHN</option>
-            <option value="mi">...</option>
+		{#if baseMap == 'none'}
+			<EyeClosed size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
+		{:else}
+        	<MapTrifold size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
+		{/if}
+        <select name="basemap" style:width="250px" bind:value={baseMap}>
+			<option value="protomaps">Protomaps</option>
+            <option value="none" selected>Geen</option>
         </select>
     </div>
     <br>
     <div id="select-container" class="with-icon relative">
         <label for="eenheid">Historische kaarten</label>
         <ImagesSquare size="18" color="#f4a" class="inline absolute top-[31px] left-4"/>
-        <select name="eenheid" style:width="250px">
-            <option value="m">Zichtbaar</option>
-            <option value="km">Hydrologische Waarnemingspunten</option>
-            <option value="ft">Watervoorzieningseenheden</option>
-            <option value="mi">Achterkant</option>
+        <select name="historicmaps" style:width="250px">
+            <option value="m" selected>Waterstaatskaarten</option>
+            <option value="none">Geen</option>
         </select>
     </div>
     <br>
