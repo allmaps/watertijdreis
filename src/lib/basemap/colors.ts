@@ -16,7 +16,7 @@ export const ALLMAPS_FLAVOR = {
   beach: 'rgba(255, 239, 203, 1)',
   aerodrome: 'rgba(245, 245, 249, 1)',
   runway: 'rgba(193, 195, 217, 1)',
-  water: 'rgba(99, 216, 230, 1)',
+  water: 'rgba(128, 128, 209, 1)',
   pier: '#cdf1f0',
   zoo: 'rgba(231, 244, 223, 1)',
   military: 'rgba(246, 241, 231, 1)',
