@@ -6,6 +6,10 @@
 
 </script>
 
+<svelte:window 
+	onkeydown={(e) => { if(e.key == "Escape") visible = false }}
+></svelte:window>
+
 {#if visible}
 <div 
 	class="fixed top-0 left-0 w-full h-full bg-[#33336688] z-1000" 
@@ -13,9 +17,16 @@
 	transition:fade
 ></div>
 <div 
-	class="z-1001 absolute top-50 left-1/2 w-120 -translate-x-1/2 overflow-hidden flex flex-col items-center p-4 shadow-lg rounded-[8px] border-gray-200 bg-white"
+	class="z-1001 absolute top-50 left-1/2 w-120 -translate-x-1/2 overflow-hidden flex flex-col items-center p-6 shadow-lg rounded-[8px] border-gray-200 bg-white"
 	transition:fly={{ y: -20, duration: 250 }}
 >
+
+	<button 
+		onclick={() => visible = false}
+		class="absolute top-4 right-4 bg-[#ff44aa22] opacity-50 rounded-[8px] p-2 cursor-pointer hover:opacity-100 transition-opacity"
+	>
+		<X size="24" color="#f4a" weight="bold" class="opacity-67"></X>
+	</button>
     <h1 class="text-[#336] font-[700] text-[22px]">Lagen</h1>
     <div id="select-container" class="with-icon relative mt-4">
         <label for="eenheid">Achtergrondkaart</label>
@@ -49,35 +60,6 @@
             <option value="mi">Achterkant</option>
         </select>
     </div>
-
-    <button
-		onclick={() => visible = false}
-		class={`
-			group flex my-3 items-center justify-center 
-			bg-white border-2 border-[#33336611] font-[500]
-			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
-			flex-shrink-0 cursor-pointer 
-			hover:bg-[#eef]
-			
-			transition-all duration-500
-			rounded-lg py-2 px-2.5
-		`}
-		>
-		<!-- <X color="#f4a" 
-			class={`
-			h-[22px] w-[22px] opacity-70 group-hover:opacity-100
-			relative -top-px inline flex-shrink-0
-			`}
-		/> -->
-		
-		<span class={`
-			overflow-hidden whitespace-nowrap
-			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			max-w-40 opacity-100 ml-1.5
-		`}>
-			Sluiten
-		</span>
-	</button>
 </div>
 {/if}
 

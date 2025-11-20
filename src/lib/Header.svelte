@@ -1,18 +1,24 @@
 <script lang="ts">
-	import { Waves, ShareNetwork, Question, Plus, FilePlus, Info, ShareFat, MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, GridFour, SelectionSlash, Stack } from 'phosphor-svelte';
+	import { Waves, ShareNetwork, Question, Plus, FilePlus, Info, ShareFat, MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, GridFour, SelectionSlash, Stack, Share } from 'phosphor-svelte';
 	import { slide, fly, scale } from 'svelte/transition';
 	import Geocoder from './Geocoder.svelte';
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { WorldHistoricalGazetteer } from '$lib/geocoder/providers/world-historical-gazetteer';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 	import LayersPanel from './LayersPanel.svelte';
+	import AboutPanel from './AboutPanel.svelte';
+	import SharePanel from './SharePanel.svelte';
 
 	let { flyToFeature, flyToUserLocation, setGridVisibility, zoomIn, zoomOut } = $props();
 
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
+	let aboutPanelVisible = $state(false);
+	let sharePanelVisible = $state(false);
 	function toggleSearchBar() { searchBarVisible = !searchBarVisible }
 	function toggleLayersPanel() { layersPanelVisible = !layersPanelVisible }
+	function toggleAboutPanel() { aboutPanelVisible = !aboutPanelVisible }
+	function toggleSharePanel() { sharePanelVisible = !sharePanelVisible }
 
 	let gridVisible = $state(false);
 
@@ -28,6 +34,10 @@
 	onkeydown={(e) => { if(e.metaKey && e.key == "k") searchBarVisible = true }}
 ></svelte:window>
 
+<AboutPanel bind:visible={aboutPanelVisible}></AboutPanel>
+
+<SharePanel bind:visible={sharePanelVisible}></SharePanel>
+
 <Geocoder {flyToFeature} bind:visible={searchBarVisible} providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}></Geocoder>
 
 <LayersPanel bind:visible={layersPanelVisible}></LayersPanel>
@@ -39,12 +49,12 @@
 	role="button"
   	tabindex="0"
 >
-	<Waves
+	<!-- <Waves
 		size={20}
 		weight="bold"
 		color="#33336688"
 		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
-	></Waves>
+	></Waves> -->
 	<h1 class="inline relative -top-1 font-[700] text-[20px] flex gap-[1px]">
 		{#each "Watertijdreis".split("") as letter, i}
 			<span
@@ -58,6 +68,7 @@
 
 	<div class="inline ml-2">
 		<button
+			onclick={toggleAboutPanel}
 			class={`
 				group inline-flex items-center justify-center 
 				bg-white border-2 border-[#33336611] font-[500]
@@ -85,6 +96,7 @@
 			</span>
 		</button>
 		<button
+			onclick={toggleSharePanel}
 			class={`
 				group inline-flex items-center justify-center 
 				bg-white border-2 border-[#33336611] font-[500]
@@ -308,6 +320,6 @@
 
 	@keyframes wave {
 		0%   { transform: translateY(0px); color: #33a }
-		100% { transform: translateY(-1px); color: #336 }
+		100% { transform: translateY(-2px); color: #336 }
 	}
 </style>
