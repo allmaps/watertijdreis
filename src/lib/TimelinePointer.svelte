@@ -17,11 +17,11 @@
 	style:left="50%"
 	style="z-index: 10000"
 >
-	<div class="absolute top-0 left-[-1px] h-100 w-[2px] bg-[#fff]"></div>
-	<div class="absolute top-0 left-[-30px] h-[20px] w-[60px] rounded-sm bg-[#fff]"></div>
+	<div class="absolute top-0 left-[-1px] h-100 w-[2px] bg-[#eef]"></div>
+	<div class="absolute top-0 left-[-30px] h-[20px] w-[60px] rounded-sm bg-[#eef]"></div>
 
 	<div
-		class="absolute top-[20px] left-[-7px] h-[8px] w-[14px] bg-[#fff]"
+		class="absolute top-[20px] left-[-7px] h-[8px] w-[14px] bg-[#eef]"
 		style="clip-path: polygon(0% 0%, 100% 0%, 50% 100%);"
 	></div>
 

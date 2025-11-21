@@ -37,7 +37,7 @@
 	type Edition = { name: string; edition: number; bis: false; yearStart: number; yearEnd: number };
 
 	$effect(() => {
-		if(filter.yearEnd - Math.floor(selectedYear)) {
+		if (filter.yearEnd - Math.floor(selectedYear)) {
 			filter.yearEnd = Math.floor(selectedYear);
 			applyFilter(filter);
 		}
@@ -93,7 +93,7 @@
 	);
 	let selectedYear = $derived((view.target.end + view.target.start) / 2);
 
-	let timelineTickColor = $state('#fff');
+	let timelineTickColor = $state('#eef');
 
 	let isPanning: boolean = $state(false);
 	let lastX: number = $state(0);
@@ -167,12 +167,14 @@
 	function toggleSettings() {
 		showSettings = !showSettings;
 	}
+
+	let ticksTop = true;
 </script>
 
 {#if !selectedHistoricMap}
 	<div
 		transition:fly={{ y: 100, duration: 250 }}
-		class="touch-action-none absolute bottom-[10px] left-[10px] h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md shadow-[#f4a] z-998"
+		class="touch-action-none absolute bottom-[10px] left-[10px] z-998 h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md"
 		style:background={'#336'}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
@@ -225,34 +227,46 @@
 				{#if year % 25 === 0}
 					<line
 						x1={yearToX(year)}
-						y1={height}
+						y1={ticksTop ? 0 : height}
 						x2={yearToX(year)}
-						y2={height - 10}
+						y2={ticksTop ? 10 : height - 10}
 						stroke={timelineTickColor}
 						stroke-width="1"
 					/>
 					<text
 						x={yearToX(year) - 15}
-						y={height - 15}
-						font-size="14"
-						font-weight="500"
+						y={ticksTop ? 22 : height - 12}
+						font-size="12"
+						font-weight="700"
 						fill={timelineTickColor}>{year}</text
 					>
 				{:else if year % 5 === 0 && pixelsPerYear > 7}
 					<line
 						x1={yearToX(year)}
-						y1={height}
+						y1={ticksTop ? 0 : height}
 						x2={yearToX(year)}
-						y2={height - 10 + 5 * Math.max(0, (9 - pixelsPerYear) / 2)}
+						y2={ticksTop
+							? 10 - 5 * Math.max(0, (9 - pixelsPerYear) / 2)
+							: height - 10 + 5 * Math.max(0, (9 - pixelsPerYear) / 2)}
 						stroke={timelineTickColor}
 						stroke-width="1"
 					/>
 					<text
-						x={yearToX(year) - 13}
-						y={height - 15}
+						x={yearToX(year) - 15}
+						y={ticksTop ? 22 : height - 12}
 						font-size="12"
 						fill={timelineTickColor}
 						opacity={1 - (9 - pixelsPerYear) / 2}
+					>
+						{year}
+					</text>
+				{:else if pixelsPerYear > 35}
+					<text
+						x={yearToX(year) - 15}
+						y={ticksTop ? 22 : height - 12}
+						font-size="12"
+						fill={timelineTickColor}
+						opacity={1 - (38 - pixelsPerYear) / 3}
 					>
 						{year}
 					</text>
@@ -260,9 +274,9 @@
 				{#if pixelsPerYear > 3}
 					<line
 						x1={yearToX(year)}
-						y1={height}
+						y1={ticksTop ? 0 : height}
 						x2={yearToX(year)}
-						y2={height - 5}
+						y2={ticksTop ? 5 : height - 5}
 						stroke={timelineTickColor}
 						stroke-width="1"
 						opacity={1 - (5 - pixelsPerYear) / 2}
@@ -285,27 +299,52 @@
 
 			{#if editions}
 				{#each editions.filter((i) => !i.bis) as ed, i}
-					{@const height = i % 2 == 0 ? 90 : 85}
+					{@const height = i % 2 == 0 ? (ticksTop ? 30 : 90) : ticksTop ? 35 : 85}
 					{@const start = yearToX(ed.yearStart)}
 					{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
 					{@const end = yearToX(ed.yearEnd)}
-					<line x1={start} y1={height} x2={start} y2={height - 8} stroke="#fff" stroke-width="1"
+					<line
+						x1={start}
+						y1={height}
+						x2={start}
+						y2={height + (ticksTop ? 8 : -8)}
+						stroke="#eeeeff88"
+						stroke-width="1"
 					></line>
-					<line x1={start} y1={height} x2={middle - 25} y2={height} stroke="#fff" stroke-width="1"
+					<line
+						x1={start}
+						y1={height}
+						x2={middle - 25}
+						y2={height}
+						stroke="#eeeeff88"
+						stroke-width="1"
 					></line>
-					<line x1={middle + 25} y1={height} x2={end} y2={height} stroke="#fff" stroke-width="1"
+					<line
+						x1={middle + 25}
+						y1={height}
+						x2={end}
+						y2={height}
+						stroke="#eeeeff88"
+						stroke-width="1"
 					></line>
 					<text
 						x={middle}
 						y={height + 3}
 						font-size="12"
 						font-weight="600"
-						fill="#fff"
+						fill="#eeeeff88"
 						text-anchor="middle"
 					>
 						{ed.name}</text
 					>
-					<line x1={end} y1={height} x2={end} y2={height - 8} stroke="#fff" stroke-width="1"></line>
+					<line
+						x1={end}
+						y1={height}
+						x2={end}
+						y2={height + (ticksTop ? 8 : -8)}
+						stroke="#eeeeff88"
+						stroke-width="1"
+					></line>
 				{/each}
 			{/if}
 		</svg>
