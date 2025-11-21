@@ -7,6 +7,7 @@
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
 	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
 	import { Label, Switch } from 'bits-ui';
+	import { stopPropagation } from 'svelte/legacy';
 
 	let {
 		filter = $bindable(),
@@ -361,7 +362,10 @@
 					text-[#3333aa] transition-all duration-150
 					hover:scale-[1.05] active:scale-[0.97]"
 					title="Kies type kaart"
-					onclick={toggleSettings}
+					onclick={(e) => {
+						e.stopPropagation();
+						toggleSettings();
+					}}
 				>
 					<Gear size={18} />
 				</button>
@@ -371,9 +375,22 @@
 				<div
 					id="settings-menu"
 					class="absolute w-80 rounded-lg border border-gray-200 bg-white px-3 py-3 shadow-lg transition-all duration-200"
-					style="right: 3.0rem; top: {-60}px;"
+					style="right: 3.0rem; top: {-130}px;"
 				>
 					<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+						<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+							Ondergrens jaar:
+							<input
+								type="number"
+								min={MIN_YEAR}
+								max={Math.floor(selectedYear)}
+								bind:value={filter.yearStart}
+								onchange={() => {
+									applyFilter(filter);
+								}}
+								class="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
+							/>
+						</li>
 						{#each ['Reguliere Waterstaatskaart', 'BIS Edities', 'Hydrologische Waarnemingspunten', 'Watervoorzieningseenheden'] as option}
 							<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
 								<Label.Root for={option} class="text-sm font-medium">{option}</Label.Root>
