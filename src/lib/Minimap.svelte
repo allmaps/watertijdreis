@@ -1,6 +1,15 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
-	import { ArrowLineRight, ArrowUUpLeft, Binoculars, ImagesSquare, MapTrifold, MouseLeftClick, PictureInPicture, PushPin } from 'phosphor-svelte';
+	import {
+		ArrowLineRight,
+		ArrowUUpLeft,
+		Binoculars,
+		ImagesSquare,
+		MapTrifold,
+		MouseLeftClick,
+		PictureInPicture,
+		PushPin
+	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade } from 'svelte/transition';
 
 	let {
@@ -11,15 +20,16 @@
 		hoveredHistoricMap,
 		selectedHistoricMap,
 		historicMapsLoaded,
+		restoreView,
 		getHistoricMapThumbnail,
 		getHistoricMapManifest
 	} = $props();
 
-
 	let previewHistoricMap = $derived.by(() => {
-		if(visibleHistoricMapsInViewport.size == 1) return visibleHistoricMapsInViewport.values().next().value;
+		if (visibleHistoricMapsInViewport.size == 1)
+			return visibleHistoricMapsInViewport.values().next().value;
 		else return hoveredHistoricMap;
-	})
+	});
 
 	let polygons = $derived.by(() => {
 		if (!historicMapsLoaded) return [];
@@ -66,7 +76,12 @@
 		return coordinates.map((coord) => coord.join(',')).join(' ');
 	}
 
-	function getClippedProjectedRect(coordinates: [number, number][]): { x: number; y: number; width: number; height: number } {
+	function getClippedProjectedRect(coordinates: [number, number][]): {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	} {
 		const minXClamp = viewBox[0] + (viewBox[2] / width) * 2;
 		const minYClamp = viewBox[1] + (viewBox[2] / width) * 2;
 		const maxXClamp = viewBox[0] + viewBox[2] - 4 * (viewBox[2] / width);
@@ -88,6 +103,42 @@
 		return { x, y, width: widthRect, height: heightRect };
 	}
 </script>
+
+{#if selectedHistoricMap}
+	<div class="absolute top-22 right-8 z-1000">
+		<button
+			onclick={restoreView}
+			class={`
+				group inline-flex flex-shrink-0 cursor-pointer 
+				items-center justify-center border-2 border-[#33336611]
+				bg-white/90 
+				font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+				transition-all
+				
+				duration-500 hover:bg-[#eef]
+				${false ? 'rounded-lg p-2' : 'rounded-lg px-2.5 py-2'}
+			`}
+		>
+			<ArrowUUpLeft
+				color="#f4a"
+				class={`
+				relative -top-px inline h-[22px]
+				w-[22px] flex-shrink-0 opacity-70 group-hover:opacity-100
+				`}
+			/>
+
+			<span
+				class={`
+				overflow-hidden whitespace-nowrap
+				transition-[max-width,margin,opacity] duration-500 ease-in-out
+				${false ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			`}
+			>
+				Terug naar kaart
+			</span>
+		</button>
+	</div>
+{/if}
 
 {#if visibleHistoricMaps.size}
 	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-999">
@@ -155,10 +206,18 @@
 					rx="4"
 					ry="4"
 				/> -->
-				{@const { x, y, width: w, height: h} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
+				{@const {
+					x,
+					y,
+					width: w,
+					height: h
+				} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
 				<rect
-					{x} {y} width={w} height={h}
-					fill="none" 
+					{x}
+					{y}
+					width={w}
+					height={h}
+					fill="none"
 					stroke="#33336666"
 					stroke-width={(viewBox[2] / width) * 4}
 					rx={(viewBox[2] / width) * 4}
@@ -168,5 +227,3 @@
 		</g>
 	</svg>
 {/if}
-
-

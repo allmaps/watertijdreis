@@ -17,20 +17,19 @@
 	// });
 
 	function yOffset(i: number, map: any) {
-		return 33 - i * 2 + (map.yearStart % 2) * 1;
+		return 60 - i * 2 + (map.yearStart % 2) * 1;
 	}
 </script>
 
 {#each maps as map, i}
 	<!-- {#if loaded.has(map.id)} -->
 	<div
-		class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden bg-[rgb(243,238,218)] shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
+		class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden bg-[rgb(243,238,218)]"
 		style="
 				left:{x - 25}px;
 				top:{yOffset(i, map)}px;
 				transform: rotateX(60deg) rotateZ({zRotations[i]}deg);
 				z-index:{100 - yOffset(i, map)};
-				filter: grayscale({selectedYear < year ? "100%" : "0%"});
 			"
 	>
 		{#if i == maps.length - 1}

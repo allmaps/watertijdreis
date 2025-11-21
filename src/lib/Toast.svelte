@@ -1,34 +1,46 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
-	let { content = '', visible = $bindable(true) } = $props();
+	let { content = '' } = $props();
+
+	const VISIBLE_TIME = 2500; 
+	let visible: boolean = $state(false);
 	let timeout: ReturnType<typeof setTimeout>;
 
 	$effect(() => {
-		// if (visible) {
-		clearTimeout(timeout);
-		timeout = setTimeout(() => (visible = false), 1000);
-		// }
-	});
+		if (content) {
+			clearTimeout(timeout);
+			visible = true;
+			timeout = setTimeout(() => (visible = false), VISIBLE_TIME);
+		}
+	})
 </script>
 
 {#if visible}
-	<div transition:fade>
-		{content}
-	</div>
+	<!-- {#key content} -->
+		<div 
+			class="bg-[#fff] px-4 py-3 fixed bottom-42 left-1/2 -translate-x-1/2 text-center text-[#336] rounded-[8px] text-[16px] z-999 shadow-lg" 
+			transition:fly={{ y: 20, duration: 250 }}
+		>
+			{@html content}
+		</div>
+	<!-- {/key} -->
 {/if}
 
-<style>
-	div {
-		position: fixed;
-		bottom: 200px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: #333366cc;
-		color: #fff;
-		padding: 10px 20px;
-		border-radius: 4px;
-		font-size: 16px;
-		z-index: 10;
+<!-- <style>
+	@property --angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
 	}
-</style>
+
+	@keyframes rotate-gradient {
+		from { --angle: 0deg; }
+		to   { --angle: 360deg; }
+	}
+
+	.rotating-border {
+		background: linear-gradient(var(--angle), #fef, #fff);
+		animation: rotate-gradient 5s linear infinite;
+	}
+</style> -->
