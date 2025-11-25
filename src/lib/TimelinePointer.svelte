@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="timeline-pointer height-[30px] absolute top-[-4px]"
+	class="timeline-pointer height-[30px] absolute top-[-8px]"
 	style:left="50%"
 	style="z-index: 10000"
 >
