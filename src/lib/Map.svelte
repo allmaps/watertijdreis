@@ -404,8 +404,8 @@
 		map.on('load', async () => {
 			maplibreLoaded = true;
 			warpedMapLayer = new WarpedMapLayer();
-			warpedMapLayer.setLayerOptions({ visible: false });
 			map.addLayer(warpedMapLayer);
+			warpedMapLayer.setLayerOptions({ visible: false });
 
 			await loadHistoricMaps(ANNOTATION_URL);
 			addBackgroundLayers();
