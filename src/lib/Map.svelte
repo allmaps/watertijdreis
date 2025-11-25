@@ -280,6 +280,8 @@
 			}
 		});
 
+		console.log('Applied filter');
+
 		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
 	}
 
@@ -634,7 +636,8 @@
 		applyFilter(filter);
 
 		if (selectedHistoricMap) {
-			// warpedMapLayer?.setMapOptions(selectedHistoricMap.id, { applyMask: true });
+			const { id } = selectedHistoricMap;
+			warpedMapLayer?.setMapOptions(id, { applyMask: true });
 			selectedHistoricMap = null;
 		}
 	}
@@ -642,19 +645,18 @@
 	function changeHistoricMapView(historicMap: HistoricMap) {
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
-		// warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
-		// 	visible: false,
-		// 	transformationType: 'thinPlateSpline',
-		// 	applyMask: true
-		// });
-		// TODO: what if it is something diffferent?
+		warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+			visible: false,
+			transformationType: 'thinPlateSpline',
+			applyMask: true
+		});
 
-		// warpedMapLayer?.setMapOptions(historicMap?.id, {
-		// 	visible: true,
-		// 	transformationType: 'straight',
-		// 	saturation: 1,
-		// 	applyMask: false
-		// });
+		warpedMapLayer?.setMapOptions(historicMap?.id, {
+			visible: true,
+			transformationType: 'straight',
+			saturation: 1,
+			applyMask: false
+		});
 
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
@@ -678,18 +680,19 @@
 	function setHistoricMapView(historicMap: HistoricMap) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
-		// warpedMapLayer?.setMapsOptions(
-		// 	Array.from(visibleHistoricMaps.keys()).filter((i) => i != id),
-		// 	{
-		// 		visible: false
-		// 	}
-		// );
-		// warpedMapLayer?.setMapOptions(historicMap?.id, {
-		// 	visible: true,
-		// 	transformationType: 'straight',
-		// 	saturation: 1,
-		// 	applyMask: false
-		// });
+		const mapsToHide = visibleHistoricMaps
+			.keys()
+			.filter((i) => i != id)
+			.toArray();
+		warpedMapLayer?.setMapsOptions(mapsToHide, {
+			visible: false
+		});
+		warpedMapLayer?.setMapOptions(id, {
+			visible: true,
+			transformationType: 'straight',
+			saturation: 1,
+			applyMask: false
+		});
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'none');
 
