@@ -104,7 +104,7 @@
 </script>
 
 {#if selectedHistoricMap}
-	<div class="absolute top-22 right-8 z-1000">
+	<div class="absolute top-22 right-8 z-998">
 		<button
 			onclick={restoreView}
 			class={`
@@ -140,7 +140,7 @@
 {/if}
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-999">
+	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-998">
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#if previewHistoricMap}
 				{@const hovered = polygons.find((p) => p.properties.id == previewHistoricMap.id)}
