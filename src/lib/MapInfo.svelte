@@ -131,7 +131,7 @@
 
 {#if historicMap}
 	<!-- TODO: get from spritesheet -->
-	{@const thumbnailHeight = 80}
+	{@const thumbnailHeight = 64}
 	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, thumbnailHeight)}
 	<div
 		class="absolute top-55 right-5
@@ -140,17 +140,14 @@
 		style="box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);"
 		transition:fly={{ y: -10, duration: 500, delay: 200 }}
 	>
-		<div class="flex items-center gap-4 p-1">
+		<h1
+			class="w-full text-center font-bold text-[#336] transition-all duration-200
+    					{preview ? 'truncate text-[14px]' : 'text-[18px] leading-tight whitespace-normal'}"
+		>
+			{historicMap.label}
+		</h1>
+		<div class="mt-1 flex items-center gap-4">
 			<div>
-				<h1
-					class="font-bold text-[#336] transition-all duration-200
-    					{preview
-						? 'max-w-[120px] truncate text-[14px]'
-						: 'max-w-[160px] text-[18px] leading-tight whitespace-normal'}"
-				>
-					{historicMap.label}
-				</h1>
-
 				{#if preview}
 					<p class="text-gray-500">{historicMap.yearEnd}</p>
 					<p class="opacity-67">
@@ -178,7 +175,7 @@
 			</div>
 		</div>
 
-		{#if preview}
+		<!-- {#if preview}
 			<div class="absolute -bottom-6 w-full rounded-[4px] text-[12px] text-[#336]">
 				<kbd
 					class="bg-background-alt pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border border-[#336] px-1 font-sans font-medium opacity-75 shadow-[0px_1px_0px_0px_#336] select-none"
@@ -188,7 +185,7 @@
 				<MouseLeftClick size="18" class="inline opacity-75" color="#336"></MouseLeftClick>
 				om blad te bekijken
 			</div>
-		{/if}
+		{/if} -->
 
 		{#if !preview && editionManifest && canvasManifest}
 			{@const metadata = getMetadata(canvasManifest)}
