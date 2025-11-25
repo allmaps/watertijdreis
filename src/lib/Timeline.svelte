@@ -198,7 +198,7 @@
 	>
 		<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
 
-		<div class="absolute bottom-2 left-1/2 z-[2000] -translate-x-1/2">
+		<div class="absolute bottom-0.5 left-1/2 z-[20000] -translate-x-1/2">
 			<PlayPauseButton />
 		</div>
 

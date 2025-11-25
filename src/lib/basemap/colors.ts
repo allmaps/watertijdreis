@@ -22,7 +22,7 @@ export const ALLMAPS_FLAVOR = {
   aerodrome: 'rgba(245, 245, 248, 1)',
   runway: 'rgba(193, 195, 217, 1)',
 
-  water: 'rgba(128, 128, 209, 1)', // onveranderd paarse water
+  water: '#8080d1ff', // onveranderd paarse water
 
   pier: '#d6f4f3',
   zoo: 'rgba(236, 247, 229, 1)',
