@@ -192,26 +192,10 @@
 
 	let gridVisible: boolean = $state(false);
 
-	function showHistoricMap(id) {
-		console.log('showHistoricMap', id)
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		visibleHistoricMaps.set(id, historicMap);
-		// warpedMapLayer?.setMapOptions(id, { opacity: 1, saturation: 1 });
-	}
-	
-	function hideHistoricMap(id) {
-		console.log('hideHistoricMap', id)
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		// warpedMapLayer?.setMapOptions(id, { opacity: 0 });
-		visibleHistoricMaps.delete(id);
-	}
-
 	function getHistoricMapThumbnail(id, size = 128) {
-		const map = historicMapsById.get(id);
+		const warpedMap = warpedMapLayer?.getWarpedMap(id);
 		if (!map) return '';
-		return map.warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
+		return warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
 	}
 
 	let toastContent: string = $state('');
@@ -269,14 +253,32 @@
 			}
 		});
 
-		for (const sheet of historicMapsById.values()) {
-			// TODO: beter
-			if (visibleSheets.find((i) => i.id == sheet.id)) showHistoricMap(sheet.id);
-			else if (grayedOutSheets.find((i) => i.id == sheet.id)) {
-				showHistoricMap(sheet.id);
-				// warpedMapLayer?.setMapOptions(sheet.id, { saturation: 0 });
-			} else hideHistoricMap(sheet.id);
-		}
+		const newIds = visibleSheets
+			.values()
+			.toArray()
+			.map((i) => i.id);
+		const oldIds = visibleHistoricMaps
+			.values()
+			.toArray()
+			.map((i) => i.id);
+		const greyIds = grayedOutSheets
+			.values()
+			.toArray()
+			.map((i) => i.id);
+		const mapIdsToHide = oldIds.filter((id) => !newIds.includes(id));
+		const newlyVisible = newIds.filter((id) => !oldIds.includes(id));
+
+		warpedMapLayer?.setMapsOptions(newIds, { visible: true, saturation: 1 });
+		warpedMapLayer?.setMapsOptions(mapIdsToHide, { visible: false, saturation: 1 });
+		warpedMapLayer?.setMapsOptions(greyIds, { visible: true, saturation: 0 });
+
+		mapIdsToHide.forEach((id) => visibleHistoricMaps.delete(id));
+		newlyVisible.forEach((id) => {
+			const historicMap = historicMapsById.get(id);
+			if (historicMap) {
+				visibleHistoricMaps.set(id, historicMap);
+			}
+		});
 
 		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
 	}
@@ -408,14 +410,11 @@
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
-			
+
 			await loadHistoricMaps(ANNOTATION_URL);
 			addBackgroundLayers();
 			addOutlineLayers();
-			
-			warpedMapLayer.setMapsOptions(['453fcdec37c06312', 'adf44459ff4fe3ad', '3384ed2f18c484b9'], { renderMask: true, visible: true });
-			warpedMapLayer.bringMapsToFront(['453fcdec37c06312', 'adf44459ff4fe3ad', '3384ed2f18c484b9'])
-			
+
 			map.on('move', updateViewport);
 			updateViewport();
 			map.on('moveend', updateUrl);
@@ -437,7 +436,11 @@
 			const historicMap: HistoricMap = {
 				id,
 				manifestId: item.resource.partOf[0].id,
-				polygon: warpedMap.geoMask,
+				polygon: {
+					type: 'Polygon',
+					coordinates: [warpedMap.geoMask]
+				},
+				geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
 				...item._meta
 			};
 			historicMapsById.set(id, historicMap);
