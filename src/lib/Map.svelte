@@ -387,13 +387,13 @@
 			style,
 			center: initialCenter,
 			zoom: initialZoom,
-			minZoom: 6.5,
+			minZoom: 5.5,
 			maxZoom: 16,
 			maxPitch: 0,
 			minPitch: 0,
 			maxBounds: [
-				[-4, 49],
-				[15, 56]
+				[-12, 47],
+				[22, 57]
 			],
 			bearing: 0,
 			dragRotate: false,
