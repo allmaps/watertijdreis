@@ -21,7 +21,7 @@
 	type HistoricMap = {
 		id: string;
 		manifestId: string;
-		warpedMap: WarpedMap;
+		warpedMap?: WarpedMap;
 		label: string;
 		polygon: GeojsonPolygon;
 		yearStart: number;
@@ -168,7 +168,7 @@
 		const result = new Map();
 		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
 			const map = historicMapsById.get(id);
-			if (map && map.warpedMap.options.visible) {
+			if (map && map.warpedMap?.options.visible) {
 				result.set(map.id, map);
 			}
 		}
@@ -193,16 +193,18 @@
 	let gridVisible: boolean = $state(false);
 
 	function showHistoricMap(id) {
+		console.log('showHistoricMap', id)
 		const historicMap = historicMapsById.get(id);
 		if (!historicMap) return;
 		visibleHistoricMaps.set(id, historicMap);
-		warpedMapLayer?.setMapOptions(id, { visible: true, saturation: 1 });
+		// warpedMapLayer?.setMapOptions(id, { opacity: 1, saturation: 1 });
 	}
-
+	
 	function hideHistoricMap(id) {
+		console.log('hideHistoricMap', id)
 		const historicMap = historicMapsById.get(id);
 		if (!historicMap) return;
-		warpedMapLayer?.setMapOptions(id, { visible: false });
+		// warpedMapLayer?.setMapOptions(id, { opacity: 0 });
 		visibleHistoricMaps.delete(id);
 	}
 
@@ -272,7 +274,7 @@
 			if (visibleSheets.find((i) => i.id == sheet.id)) showHistoricMap(sheet.id);
 			else if (grayedOutSheets.find((i) => i.id == sheet.id)) {
 				showHistoricMap(sheet.id);
-				warpedMapLayer?.setMapOptions(sheet.id, { saturation: 0 });
+				// warpedMapLayer?.setMapOptions(sheet.id, { saturation: 0 });
 			} else hideHistoricMap(sheet.id);
 		}
 
@@ -406,11 +408,14 @@
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
-
+			
 			await loadHistoricMaps(ANNOTATION_URL);
 			addBackgroundLayers();
 			addOutlineLayers();
-
+			
+			warpedMapLayer.setMapsOptions(['453fcdec37c06312', 'adf44459ff4fe3ad', '3384ed2f18c484b9'], { renderMask: true, visible: true });
+			warpedMapLayer.bringMapsToFront(['453fcdec37c06312', 'adf44459ff4fe3ad', '3384ed2f18c484b9'])
+			
 			map.on('move', updateViewport);
 			updateViewport();
 			map.on('moveend', updateUrl);
@@ -626,7 +631,7 @@
 		applyFilter(filter);
 
 		if (selectedHistoricMap) {
-			warpedMapLayer?.setMapOptions(selectedHistoricMap.id, { applyMask: true });
+			// warpedMapLayer?.setMapOptions(selectedHistoricMap.id, { applyMask: true });
 			selectedHistoricMap = null;
 		}
 	}
@@ -634,19 +639,19 @@
 	function changeHistoricMapView(historicMap: HistoricMap) {
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
-		warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
-			visible: false,
-			transformationType: 'thinPlateSpline',
-			applyMask: true
-		});
+		// warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+		// 	visible: false,
+		// 	transformationType: 'thinPlateSpline',
+		// 	applyMask: true
+		// });
 		// TODO: what if it is something diffferent?
 
-		warpedMapLayer?.setMapOptions(historicMap?.id, {
-			visible: true,
-			transformationType: 'straight',
-			saturation: 1,
-			applyMask: false
-		});
+		// warpedMapLayer?.setMapOptions(historicMap?.id, {
+		// 	visible: true,
+		// 	transformationType: 'straight',
+		// 	saturation: 1,
+		// 	applyMask: false
+		// });
 
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
@@ -670,18 +675,18 @@
 	function setHistoricMapView(historicMap: HistoricMap) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
-		warpedMapLayer?.setMapsOptions(
-			visibleHistoricMaps.filter((m) => m.id != id).map((m) => m.id),
-			{
-				visible: false
-			}
-		);
-		warpedMapLayer?.setMapOptions(historicMap?.id, {
-			visible: true,
-			transformationType: 'straight',
-			saturation: 1,
-			applyMask: false
-		});
+		// warpedMapLayer?.setMapsOptions(
+		// 	Array.from(visibleHistoricMaps.keys()).filter((i) => i != id),
+		// 	{
+		// 		visible: false
+		// 	}
+		// );
+		// warpedMapLayer?.setMapOptions(historicMap?.id, {
+		// 	visible: true,
+		// 	transformationType: 'straight',
+		// 	saturation: 1,
+		// 	applyMask: false
+		// });
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'none');
 
@@ -803,9 +808,9 @@
 	});
 
 	$effect(() => {
-		if (selectedHistoricMap) {
-			map?.triggerRepaint();
-		}
+		// if (selectedHistoricMap) {
+		// 	map?.triggerRepaint();
+		// }
 	});
 </script>
 
