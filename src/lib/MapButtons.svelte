@@ -13,6 +13,7 @@
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 	import LayersPanel from './LayersPanel.svelte';
+	import { onMount } from 'svelte';
 
 	let {
 		visible = true,
@@ -24,6 +25,23 @@
 		layerOptions
 	} = $props();
 
+	let isMac = $state(false);
+	let isIOS = $state(false);
+	let isAndroid = $state(false);
+
+	onMount(() => {
+		const ua = navigator.userAgent.toLowerCase();
+		const platform = navigator.platform.toLowerCase();
+
+		isMac = platform.includes('mac');
+
+		isIOS =
+			/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+			(ua.includes('mac') && 'ontouchend' in document);
+
+		isAndroid = ua.includes('android');
+	});
+
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
 	let gridVisible = $state(false);
@@ -34,8 +52,16 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.metaKey && e.key == 'k') searchBarVisible = true;
-		if (e.key.toLowerCase() == 'l') layersPanelVisible = !layersPanelVisible;
+		if (isIOS || isAndroid) return;
+
+		if (e.key.toLowerCase() === 'k' && ((isMac && e.metaKey) || (!isMac && e.ctrlKey))) {
+			e.preventDefault();
+			searchBarVisible = true;
+		}
+
+		if (e.key.toLowerCase() === 'l') {
+			layersPanelVisible = !layersPanelVisible;
+		}
 	}}
 />
 
@@ -86,9 +112,16 @@
 			>
 				Locatie zoeken...
 				<kbd
-					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-					><span class="text-foreground-alt text-[12px]">⌘K</span></kbd
+					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce]"
 				>
+					<span class="text-foreground-alt text-[12px]">
+						{#if isIOS}⌘K{/if}
+						{#if isAndroid}Ctrl K{/if}
+						{#if !isIOS && !isAndroid}
+							{#if isMac}⌘K{:else}Ctrl K{/if}
+						{/if}
+					</span>
+				</kbd>
 			</span>
 		</button>
 		<button
