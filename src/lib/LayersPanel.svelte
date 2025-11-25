@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { EyeClosed, ImagesSquare, MapTrifold, X } from 'phosphor-svelte';
 	import { fly, fade } from 'svelte/transition';
-	let { visible = $bindable(), layerOptions } = $props();
+	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 </script>
 
 <svelte:window
@@ -77,6 +77,16 @@
 				<option value="none">Geen</option>
 			</select>
 		</div>
+		<label for="historic-maps-opacity-slider">Doorzichtigheid</label>
+		<input
+			name="historic-maps-opacity-slider"
+			class="w-1/2"
+			type="range"
+			min="0"
+			max="100"
+			bind:value={layerOptions.historicMapsOpacity}
+		/>
+		<span class="text-[14px] font-[500] text-[#336]">{layerOptions.historicMapsOpacity}%</span>
 		<br />
 		<div id="select-container" class="with-icon relative mb-4">
 			<label for="eenheid">Overleg-kaart</label>
