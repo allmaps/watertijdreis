@@ -1,7 +1,7 @@
 <script lang="ts">
 	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
-	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
+	import { WarpedMap, WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
 	import * as turf from '@turf/turf';
 
 	import { SvelteMap } from 'svelte/reactivity';
@@ -17,6 +17,7 @@
 	import { basemapStyle } from './basemap';
 	import MapButtons from './MapButtons.svelte';
 	import SheetControls from './SheetControls.svelte';
+	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 
 	type HistoricMap = {
 		id: string;
@@ -58,27 +59,11 @@
 		if (!manifestCollection) return null;
 
 		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
-		const manifestUrl = manifestCollection.items.find((i) => i.label.nl[0] === label).id;
+		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
 
 		const response = await fetch(manifestUrl);
 		const result = await response.json();
 		return result;
-	}
-
-	async function getHistoricMapManifest(id) {
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		const editionManifest = await getEditionManifest(historicMap.edition, historicMap.bis);
-		if (!editionManifest) return;
-		const manifest = editionManifest.items.find((i) => i.id == historicMap.manifestId);
-		const structure = editionManifest.structures.find((s) =>
-			s.items.find((it) => it.id == historicMap.manifestId)
-		);
-		const variants = structure.items
-			.filter((i) => i.id != historicMap.manifestId)
-			.map((i) => historicMapsById.get(i.id));
-		manifest.variants = variants;
-		return manifest;
 	}
 
 	let map: maplibregl.Map | null = $state(null);
@@ -105,46 +90,49 @@
 		return grouped;
 	});
 
-	let hoveredFeature: string | null = $state(null);
+	let hoveredFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
 	let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
 		if (!hoveredFeature) return null;
-		return historicMapsById.get(hoveredFeature.properties.id) || null;
+		return historicMapsById.get(hoveredFeature.properties?.id) || null;
 	});
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
 		if (!map) return;
 
-		const polygons = visibleHistoricMaps
+		const polygons: Feature<Geometry, GeoJsonProperties>[] = visibleHistoricMaps
 			.values()
-			.map((o, i) => ({
-				id: i,
-				type: 'Feature',
-				geometry: structuredClone(o.polygon),
-				properties: { id: o.id, year: o.yearEnd }
-			}))
+			.map(
+				(o, i): Feature<Geometry, GeoJsonProperties> => ({
+					id: i,
+					type: 'Feature',
+					geometry: structuredClone(o.polygon),
+					properties: { id: o.id, year: o.yearEnd }
+				})
+			)
 			.toArray();
 
-		const points = visibleHistoricMaps
+		const points: Feature<Geometry, GeoJsonProperties>[] = visibleHistoricMaps
 			.values()
-			.map((o, i) => ({
-				id: i,
-				type: 'Feature',
-				geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
-				properties: { year: o.yearEnd }
-			}))
+			.map(
+				(o, i): Feature<Geometry, GeoJsonProperties> => ({
+					id: i,
+					type: 'Feature',
+					geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
+					properties: { year: o.yearEnd }
+				})
+			)
 			.toArray();
 
-		if (map.getSource('map-outlines'))
-			map.getSource('map-outlines').setData({
-				type: 'FeatureCollection',
-				features: polygons
-			});
-		if (map.getSource('map-labels'))
-			map.getSource('map-labels').setData({
-				type: 'FeatureCollection',
-				features: points
-			});
+		(map.getSource('map-outlines') as maplibregl.GeoJSONSource | undefined)?.setData({
+			type: 'FeatureCollection',
+			features: polygons
+		});
+
+		(map.getSource('map-labels') as maplibregl.GeoJSONSource | undefined)?.setData({
+			type: 'FeatureCollection',
+			features: points
+		});
 	});
 
 	let viewportPolygon: GeojsonPolygon | null = $state(null);
@@ -176,13 +164,27 @@
 		return result;
 	});
 
+	let mapsInViewport = $derived.by(() => {
+		if (!viewportPolygon || !warpedMapLayer) return new Map();
+
+		const result = new Map();
+		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
+			const map = historicMapsById.get(id);
+			if (map) {
+				result.set(map.id, map);
+			}
+		}
+
+		return result;
+	});
+
 	$effect(() => {
 		// To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving
 		if (warpedMapLayer) {
 			warpedMapLayer.renderer?.tileCache?.addEventListener(
 				WarpedMapEventType.MAPTILELOADED,
-				(e) => {
-					const id = e.data.mapId;
+				(e: WarpedMapEvent) => {
+					const id = e.data?.mapId;
 					const historicMap = historicMapsById.get(id);
 					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
 				}
@@ -192,7 +194,7 @@
 
 	let gridVisible: boolean = $state(false);
 
-	function showHistoricMap(id) {
+	function showHistoricMap(id: string) {
 		const historicMap = historicMapsById.get(id);
 		if (!historicMap) return;
 		historicMap.warpedMap.visible = true;
@@ -200,14 +202,14 @@
 		warpedMapLayer?.setMapSaturation(id, 1);
 	}
 
-	function hideHistoricMap(id) {
+	function hideHistoricMap(id: string) {
 		const historicMap = historicMapsById.get(id);
 		if (!historicMap) return;
 		historicMap.warpedMap.visible = false;
 		visibleHistoricMaps.delete(id);
 	}
 
-	function getHistoricMapThumbnail(id, size = 128) {
+	function getHistoricMapThumbnail(id: string, size: number = 128) {
 		const map = historicMapsById.get(id);
 		if (!map) return '';
 		return map.warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
@@ -280,6 +282,10 @@
 		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
 	}
 
+	$effect(() => {
+		if (maplibreLoaded) console.log(map);
+	});
+
 	type LayerOptions = {
 		baseMap: 'none' | 'protomaps' | 'ahn';
 		protoMapsWaterInFront: boolean;
@@ -321,8 +327,8 @@
 
 		const { layers } = basemapStyle('nl');
 		layers.forEach((layer) => {
-			if (map.getLayer(layer.id)) {
-				map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+			if (map!.getLayer(layer.id)) {
+				map!.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
 			}
 		});
 	}
@@ -333,8 +339,8 @@
 		const waterLayers = ['water', 'water_stream', 'water_river'];
 
 		waterLayers.forEach((layerId) => {
-			if (map.getLayer(layerId)) {
-				map.moveLayer(layerId, visible ? 'map-outlines-labels' : 'landuse_pedestrian');
+			if (map!.getLayer(layerId)) {
+				map!.moveLayer(layerId, visible ? 'map-outlines-labels' : 'landuse_pedestrian');
 			}
 		});
 	}
@@ -359,8 +365,8 @@
 		];
 
 		labelLayers.forEach((layerId) => {
-			if (map.getLayer(layerId)) {
-				map.moveLayer(layerId, visible ? 'map-outlines-labels' : 'map-outlines-skeleton');
+			if (map!.getLayer(layerId)) {
+				map!.moveLayer(layerId, visible ? 'map-outlines-labels' : 'map-outlines-skeleton');
 			}
 		});
 	}
@@ -373,14 +379,16 @@
 
 	function initMaplibre() {
 		const urlView = getViewFromUrl();
-		const initialCenter: LngLatLike = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
+		const initialCenter = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
 		const initialZoom = urlView ? urlView.zoom : 7;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
 
 		const style = basemapStyle('nl');
-		style.layers.forEach((layer) => (layer.layout = { visibility: 'none' }));
+		style.layers.forEach((layer) => {
+			(layer as maplibregl.LayerSpecification).layout = { visibility: 'none' };
+		});
 
 		map = new maplibregl.Map({
 			container: containerId,
@@ -505,7 +513,7 @@
 			source: 'map-outlines',
 			paint: {
 				'line-color': '#f4a',
-				'line-width': 2,
+				'line-width': 1.5,
 				'line-opacity': 0
 			}
 		});
@@ -629,6 +637,7 @@
 		applyFilter(filter);
 
 		if (selectedHistoricMap) {
+			selectedHistoricMap.warpedMap.setTransformationType('thinPlateSpline');
 			warpedMapLayer?.setMapResourceMask(
 				selectedHistoricMap?.id,
 				selectedHistoricMap?.warpedMap.resourcePreviousMask
@@ -641,7 +650,7 @@
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
 		selectedHistoricMap.warpedMap.visible = false;
-		selectedHistoricMap.warpedMap.setTransformationType('thinPlateSpline'); // TODO: what if it is something diffferent?
+		selectedHistoricMap.warpedMap.setTransformationType('thinPlateSpline');
 		warpedMapLayer?.setMapResourceMask(
 			selectedHistoricMap?.id,
 			selectedHistoricMap?.warpedMap.resourcePreviousMask
@@ -675,6 +684,7 @@
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
 		historicMap.warpedMap.visible = true;
+		console.log('setHistoricMapView', historicMap);
 		historicMap.warpedMap.setTransformationType('straight');
 		historicMapsById.values().forEach((m) => (m.warpedMap.visible = m.id == id));
 		warpedMapLayer.setMapSaturation(id, 1);
@@ -701,17 +711,19 @@
 	}
 
 	function handleMapClick(e: any) {
-		if (!map || !warpedMapLayer || !gridVisible) return;
-
-		addEventListener('keydown', (e) => {
-			if (e.key == 'Escape') restoreView();
-		});
+		if (!map || !warpedMapLayer) return;
 
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
-		selectedHistoricMap = historicMapsById.get(id) || null;
-		if (!selectedHistoricMap) return;
-		setHistoricMapView(selectedHistoricMap);
+		if (gridVisible) {
+			selectedHistoricMap = historicMapsById.get(id) || null;
+			if (!selectedHistoricMap) return;
+			setHistoricMapView(selectedHistoricMap);
+
+			addEventListener('keydown', (e) => {
+				if (e.key == 'Escape') restoreView();
+			});
+		}
 	}
 
 	function handleMapMouseMove(e: any) {
@@ -720,7 +732,7 @@
 		if (!feature) return;
 
 		if (hoveredFeature && hoveredFeature !== feature) {
-			map.setFeatureState({ source: 'map-outlines', id: hoveredFeature.id }, { hover: false });
+			map.setFeatureState({ source: 'map-outlines', id: hoveredFeature?.id }, { hover: false });
 		}
 		hoveredFeature = feature;
 		map.setFeatureState({ source: 'map-outlines', id: hoveredFeature.id }, { hover: true });
@@ -832,6 +844,7 @@
 	{historicMapsLoaded}
 	{historicMapsById}
 	{selectedHistoricMap}
+	{mapsInViewport}
 	{setLabelVisibility}
 	{getHistoricMapThumbnail}
 	{map}
@@ -848,7 +861,6 @@
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
-	{getHistoricMapManifest}
 	{restoreView}
 ></Minimap>
 <MapInfo
@@ -861,7 +873,6 @@
 	{historicMapsLoaded}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
-	{getHistoricMapManifest}
 	{getEditionManifest}
 ></MapInfo>
 

@@ -27,7 +27,6 @@
 		historicMapsLoaded,
 		changeHistoricMapView,
 		getHistoricMapThumbnail,
-		getHistoricMapManifest,
 		getEditionManifest
 	} = $props();
 
@@ -199,6 +198,8 @@
 				'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
 			{@const manifestId = editionManifest.id}
 			{@const homepageUrl = editionManifest.rendering[0].id}
+
+			<h1>{canvasManifest.label.nl[0]}</h1>
 
 			<div class="flex flex-col gap-1 p-2" transition:slide>
 				<div class="flex gap-2">

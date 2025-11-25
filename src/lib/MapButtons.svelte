@@ -197,52 +197,53 @@
 			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
 		`}
 			>
-				Grid tonen
+				Bladindex tonen
 				<kbd
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">Spatie</span></kbd
 				>
 			</span>
 		</button>
-
-		<div
-			class={`
-			my-3 mt-20 flex w-fit flex-col items-center
-			justify-center overflow-hidden rounded-lg
-			border-2
-			border-[#33336611] bg-white shadow-[0_2px_2px_rgba(0,0,0,0.05)]
-		`}
-		>
-			<button
-				onclick={zoomIn}
-				class={`
-			group flex cursor-pointer
-			items-center justify-center border-b-2
-			border-[#33336611] p-2
-			transition-colors duration-200 hover:bg-[#eef]
-			`}
-				title="Zoom In"
-			>
-				<MagnifyingGlassPlus
-					color="#f4a"
-					class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-				/>
-			</button>
-
-			<button
-				onclick={zoomOut}
-				class={`
-			group flex cursor-pointer
-			items-center justify-center p-2
-			transition-colors duration-200 hover:bg-[#eef]
-			`}
-				title="Zoom Out"
-			>
-				<MagnifyingGlassMinus
-					color="#f4a"
-					class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-				/>
-			</button>
-		</div>
 	</div>
 {/if}
+
+<div
+	class={`
+	absolute bottom-${visible ? 47 : 22} left-5
+	my-3 mt-20 flex w-fit flex-col items-center
+	justify-center overflow-hidden rounded-lg
+	border-2
+	border-[#33336611] bg-white shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+`}
+>
+	<button
+		onclick={zoomIn}
+		class={`
+	group flex cursor-pointer
+	items-center justify-center border-b-2
+	border-[#33336611] p-2
+	transition-colors duration-200 hover:bg-[#eef]
+	`}
+		title="Zoom In"
+	>
+		<MagnifyingGlassPlus
+			color="#f4a"
+			class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
+		/>
+	</button>
+
+	<button
+		onclick={zoomOut}
+		class={`
+	group flex cursor-pointer
+	items-center justify-center p-2
+	transition-colors duration-200 hover:bg-[#eef]
+	`}
+		title="Zoom Out"
+	>
+		<MagnifyingGlassMinus
+			color="#f4a"
+			class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
+		/>
+	</button>
+</div>
