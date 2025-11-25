@@ -21,7 +21,7 @@
 		setGridVisibility,
 		zoomIn,
 		zoomOut,
-		layerOptions
+		layerOptions = $bindable()
 	} = $props();
 
 	let searchBarVisible = $state(false);
@@ -45,7 +45,7 @@
 	providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}
 ></Geocoder>
 
-<LayersPanel bind:visible={layersPanelVisible} {layerOptions}></LayersPanel>
+<LayersPanel bind:visible={layersPanelVisible} bind:layerOptions></LayersPanel>
 
 {#if visible}
 	<div
@@ -209,7 +209,7 @@
 
 <div
 	class={`
-	absolute bottom-${visible ? 47 : 22} left-5
+	fixed bottom-48 left-5
 	my-3 mt-20 flex w-fit flex-col items-center
 	justify-center overflow-hidden rounded-lg
 	border-2
