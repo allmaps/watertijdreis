@@ -1,61 +1,73 @@
 export const ALLMAPS_FLAVOR = {
-  background: 'rgba(255, 252, 244, 1)',
-  earth: 'rgba(255, 252, 244, 1)',
-  park_a: '#e0eec9',
-  park_b: '#e0eec9',
-  hospital: 'rgba(255, 240, 240, 1)',
-  industrial: 'rgba(250, 245, 236, 1)',
-  school: 'rgba(255, 245, 229, 1)',
-  wood_a: '#d4ebcc',
-  wood_b: '#d4ebcc',
-  pedestrian: '#fffdf9',
-  scrub_a: '#e9eed9',
-  scrub_b: '#e9eed9',
+  background: 'rgba(250, 240, 220, 1)', // warmer, zandiger
+  earth: 'rgba(255, 243, 236, 1)',
+
+  park_a: '#e3e9c8',   // iets warmer, minder mint, zachter olijf-groen
+  park_b: '#e3e9c8',
+
+  hospital: 'rgba(255, 238, 238, 1)',
+  industrial: 'rgba(252, 245, 230, 1)',
+  school: 'rgba(255, 242, 225, 1)',
+
+  wood_a: '#fff3caff',  // olijfgroen bos
+  wood_b: '#b8c87a',
+
+  pedestrian: '#fffaf3',
+  scrub_a: '#e8e3b8', // warmer, meer droog-gras vibe
+  scrub_b: '#e8e3b8',
+
   glacier: '#ffffff',
-  sand: 'rgba(255, 245, 219, 1)',
-  beach: 'rgba(255, 239, 203, 1)',
-  aerodrome: 'rgba(245, 245, 249, 1)',
+  sand: 'rgba(255, 236, 205, 1)',
+  beach: 'rgba(255, 229, 190, 1)',
+  aerodrome: 'rgba(245, 245, 248, 1)',
   runway: 'rgba(193, 195, 217, 1)',
-  water: 'rgba(128, 128, 209, 1)',
-  pier: '#cdf1f0',
-  zoo: 'rgba(231, 244, 223, 1)',
-  military: 'rgba(246, 241, 231, 1)',
 
-  tunnel_other_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_minor_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_link_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_medium_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_major_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_highway_casing: 'rgba(255, 252, 244, 1)',
-  tunnel_other: 'rgba(222, 220, 216, 1)',
-  tunnel_minor: 'rgba(222, 220, 216, 1)',
-  tunnel_link: 'rgba(222, 220, 216, 1)',
-  tunnel_medium: 'rgba(222, 220, 216, 1)',
-  tunnel_major: 'rgba(205, 204, 200, 1)',
-  tunnel_highway: 'rgba(205, 204, 200, 1)',
+  water: 'rgba(128, 128, 209, 1)', // onveranderd paarse water
 
-  transit_pier: 'rgba(205, 241, 240, 1)',
-  buildings: 'rgba(241, 235, 221, 1)',
+  pier: '#d6f4f3',
+  zoo: 'rgba(236, 247, 229, 1)',
+  military: 'rgba(248, 242, 228, 1)',
 
-  minor_service_casing: 'rgba(255, 252, 244, 1)',
-  minor_casing: 'rgba(255, 252, 244, 1)',
-  link_casing: 'rgba(255, 252, 244, 1)',
-  medium_casing: 'rgba(255, 252, 244, 1)',
-  major_casing_late: 'rgba(255, 252, 244, 1)',
-  highway_casing_late: 'rgba(255, 252, 244, 1)',
-  other: 'rgba(192, 192, 192, 1)',
-  minor_service: 'rgba(192, 192, 192, 1)',
-  minor_a: '#c0c0c0',
-  minor_b: '#c0c0c0',
-  link: 'rgba(192, 192, 192, 1)',
-  medium: 'rgba(192, 192, 192, 1)',
-  major_casing_early: 'rgba(255, 252, 244, 1)',
-  major: 'rgba(170, 170, 170, 1)',
-  highway_casing_early: 'rgba(255, 252, 244, 1)',
-  highway: 'rgba(170, 170, 170, 1)',
+  tunnel_other_casing: 'rgba(250, 240, 220, 1)',
+  tunnel_minor_casing: 'rgba(250, 240, 220, 1)',
+  tunnel_link_casing: 'rgba(250, 240, 220, 1)',
+  tunnel_medium_casing: 'rgba(250, 240, 220, 1)',
+  tunnel_major_casing: 'rgba(250, 240, 220, 1)',
+  tunnel_highway_casing: 'rgba(250, 240, 220, 1)',
 
-  railway: 'rgba(192, 192, 192, 1)',
-  boundaries: '#bfad81',
+  tunnel_other: 'rgba(226, 222, 210, 1)',
+  tunnel_minor: 'rgba(226, 222, 210, 1)',
+  tunnel_link: 'rgba(226, 222, 210, 1)',
+  tunnel_medium: 'rgba(226, 222, 210, 1)',
+  tunnel_major: 'rgba(210, 206, 196, 1)',
+  tunnel_highway: 'rgba(210, 206, 196, 1)',
+
+  transit_pier: 'rgba(208, 244, 242, 1)',
+  buildings: 'rgba(245, 237, 223, 1)',
+
+  minor_service_casing: 'rgba(250, 240, 220, 1)',
+  minor_casing: 'rgba(250, 240, 220, 1)',
+  link_casing: 'rgba(250, 240, 220, 1)',
+  medium_casing: 'rgba(250, 240, 220, 1)',
+  major_casing_late: 'rgba(250, 240, 220, 1)',
+  highway_casing_late: 'rgba(250, 240, 220, 1)',
+
+  other: 'rgba(193, 193, 193, 1)',
+  minor_service: 'rgba(193, 193, 193, 1)',
+  minor_a: '#c2c2c2',
+  minor_b: '#c2c2c2',
+  link: 'rgba(193, 193, 193, 1)',
+  medium: 'rgba(193, 193, 193, 1)',
+
+  major_casing_early: 'rgba(250, 240, 220, 1)',
+  major: 'rgba(175, 175, 175, 1)',
+  highway_casing_early: 'rgba(250, 240, 220, 1)',
+  highway: 'rgba(175, 175, 175, 1)',
+
+  railway: 'rgba(193, 193, 193, 1)',
+
+  boundaries: '#c5b48b',
+
   waterway_label: 'rgba(67, 145, 155, 1)',
 
   bridges_other_casing: 'rgba(255, 252, 244, 1)',
@@ -72,39 +84,43 @@ export const ALLMAPS_FLAVOR = {
   bridges_highway: 'rgba(169, 169, 169, 1)',
 
   roads_label_minor: 'rgba(138, 137, 134, 1)',
-  roads_label_minor_halo: 'rgba(255, 252, 244, 1)',
+  roads_label_minor_halo: 'rgba(250, 240, 220, 1)',
   roads_label_major: 'rgba(123, 122, 119, 1)',
-  roads_label_major_halo: 'rgba(255, 252, 244, 1)',
+  roads_label_major_halo: 'rgba(250, 240, 220, 1)',
+
   ocean_label: 'rgba(67, 145, 155, 1)',
-  peak_label: 'rgba(119, 111, 93, 1)',
-  subplace_label: 'rgba(169, 167, 163, 1)',
-  subplace_label_halo: 'rgba(255, 252, 244, 1)',
+  peak_label: 'rgba(125, 118, 100, 1)',
+  subplace_label: 'rgba(172, 168, 160, 1)',
+  subplace_label_halo: 'rgba(250, 240, 220, 1)',
+
   city_label: '#5c5c5c',
-  city_label_halo: '#fffcf4',
-  state_label: 'rgba(169, 164, 154, 1)',
+  city_label_halo: '#fff8ec',
+
+  state_label: 'rgba(170, 165, 155, 1)',
   state_label_halo: 'rgba(0,0,0,0)',
-  country_label: 'rgba(143, 140, 133, 1)',
+
+  country_label: 'rgba(145, 141, 134, 1)',
 
   address_label: '#5c5c5c',
-  address_label_halo: 'rgba(255, 252, 244, 1)',
+  address_label_halo: 'rgba(250, 240, 220, 1)',
 
   regular: 'Roboto Regular',
   bold: 'Roboto Medium',
   italic: 'Roboto Italic',
 
   landcover: {
-    grassland: 'rgba(224, 238, 205, 1)',
-    barren: 'rgba(247, 243, 218, 1)',
-    urban_area: 'rgba(255, 247, 228, 1)',
-    farmland: 'rgba(230, 237, 209, 1)',
+    grassland: 'rgba(255, 249, 236, 1)',  // warmer geelgroen
+    barren: 'rgba(245, 232, 195, 1)',     // zandiger & warmer
+    urban_area: 'rgba(255, 248, 236, 1)',
+    farmland: 'rgba(228, 236, 195, 1)',   // warm licht-olijfgroen
     glacier: 'rgba(255, 249, 235, 1)',
-    scrub: 'rgba(238, 238, 193, 1)',
-    forest: 'rgba(209, 233, 188, 1)'
+    scrub: 'rgba(235, 227, 172, 1)',      // droog gras tint
+    forest: 'rgba(228, 236, 195, 1)'      // diepere olijfgroen bos
   }
 }
 
 export const TERRAIN_COLORS = {
-  hillshade_shadow_color: 'rgba(76, 63, 34, 1)',
+  hillshade_shadow_color: 'rgba(82, 68, 37, 1)',
   hillshade_accent_color: 'rgba(98, 105, 189, 1)',
   contour_line_color: 'black'
 }
