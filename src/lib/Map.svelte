@@ -435,12 +435,13 @@
 		const loadPromises = data.map(async (item) => {
 			const id = await warpedMapLayer.addGeoreferencedMap(item);
 			const warpedMap = warpedMapLayer.getWarpedMap(id);
+			const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
 			const historicMap: HistoricMap = {
 				id,
 				manifestId: item.resource.partOf[0].id,
 				polygon: {
 					type: 'Polygon',
-					coordinates: [warpedMap.geoMask]
+					coordinates
 				},
 				geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
 				...item._meta
