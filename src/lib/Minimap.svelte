@@ -21,8 +21,7 @@
 		selectedHistoricMap,
 		historicMapsLoaded,
 		restoreView,
-		getHistoricMapThumbnail,
-		getHistoricMapManifest
+		getHistoricMapThumbnai
 	} = $props();
 
 	let previewHistoricMap = $derived.by(() => {

@@ -8,13 +8,13 @@
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
 	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
 	import { Label, Switch } from 'bits-ui';
-	import { stopPropagation } from 'svelte/legacy';
 
 	let {
 		filter = $bindable(),
 		applyFilter,
 		historicMapsLoaded,
 		historicMapsById,
+		mapsInViewport,
 		selectedHistoricMap,
 		setLabelVisibility,
 		getHistoricMapThumbnail,
@@ -84,6 +84,15 @@
 		return mapsByYear;
 	});
 
+	let minHistoricMapYear = $derived.by(() => {
+		if (!historicMapsByYear) return 1800;
+		return Math.min(...Object.keys(historicMapsByYear).map((y) => +y));
+	});
+	let maxHistoricMapYear = $derived.by(() => {
+		if (!historicMapsByYear) return 2025;
+		return Math.max(...Object.keys(historicMapsByYear).map((y) => +y));
+	});
+
 	const MIN_YEAR: number = 1800;
 	const MAX_YEAR: number = 2023;
 
@@ -131,17 +140,19 @@
 	function onpointermove(e: PointerEvent) {
 		if (!isPanning) return;
 
-		const maxDeltaLeft = view.current.start - MIN_YEAR;
-		const maxDeltaRight = view.current.end - MAX_YEAR;
+		const maxDeltaLeft = selectedYear - minHistoricMapYear;
+		const maxDeltaRight = maxHistoricMapYear - selectedYear;
 
 		const dx = e.clientX - lastX;
 		let yearDelta = (dx / width) * (view.current.end - view.current.start);
 		if (yearDelta > maxDeltaLeft) yearDelta = maxDeltaLeft;
 		if (yearDelta < maxDeltaRight) yearDelta = maxDeltaRight;
 
+		console.log('yearDelta', yearDelta);
+
 		view.target = {
-			start: Math.max(view.target.start - yearDelta, MIN_YEAR),
-			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
+			start: view.target.start - yearDelta,
+			end: view.target.end - yearDelta
 		};
 		lastX = e.clientX;
 
@@ -305,7 +316,7 @@
 
 			{#if editions}
 				{#each editions.filter((i) => !i.bis) as ed, i}
-					{@const height = i % 2 == 0 ? (ticksTop ? 30 : 90) : ticksTop ? 35 : 85}
+					{@const height = i % 2 == 0 ? (false ? 30 : 90) : false ? 35 : 85}
 					{@const start = yearToX(ed.yearStart)}
 					{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
 					{@const end = yearToX(ed.yearEnd)}

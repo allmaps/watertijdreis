@@ -2,7 +2,9 @@
 	import { scale } from 'svelte/transition';
 
 	const { year, x, maps, selectedYear, getHistoricMapThumbnail } = $props();
-	const zRotations = maps.map((i) => (Math.random() - 0.5) * 10);
+	const zRotations = Array(25)
+		.fill(0)
+		.map((i) => (Math.random() - 0.5) * 10);
 
 	const loaded = $state(new Set<string>());
 
