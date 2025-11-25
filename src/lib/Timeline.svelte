@@ -4,6 +4,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import MapThumbnail from './MapThumbnail.svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
+	import PlayPauseButton from './PlayPauseButton.svelte';
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
 	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
 	import { Label, Switch } from 'bits-ui';
@@ -185,6 +186,10 @@
 		{onpointerup}
 	>
 		<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
+
+		<div class="absolute bottom-2 left-1/2 z-[2000] -translate-x-1/2">
+			<PlayPauseButton />
+		</div>
 
 		<!-- <div
 			class="map-markers"
