@@ -36,8 +36,9 @@
 			{/if}
 			<select name="basemap" style:width="250px" bind:value={layerOptions.baseMap}>
 				<option value="none" selected>Geen</option>
-				<option value="protomaps">Protomaps</option>
+				<option value="protomaps">Basis achtergrondkaart</option>
 				<option value="ahn">AHN</option>
+				<option value="satelliet">Luchtfoto Actueel Ortho 25cm RGB</option>
 			</select>
 		</div>
 		{#if layerOptions.baseMap == 'protomaps'}
@@ -46,7 +47,7 @@
 					type="checkbox"
 					bind:checked={layerOptions.protoMapsWaterInFront}
 					id="water-in-front-checkbox"
-					class="mr-2"
+					class="mr-2 accent-[#f4a]"
 				/>
 				Waterlagen vóór historische kaarten
 				<kbd
@@ -59,7 +60,7 @@
 					type="checkbox"
 					bind:checked={layerOptions.protomapsLabelsInFront}
 					id="labels-in-front-checkbox"
-					class="mr-2"
+					class="mr-2 accent-[#f4a]"
 				/>
 				Plaatsnamen vóór historische kaarten
 				<kbd
@@ -69,7 +70,7 @@
 			</div>
 		{/if}
 		<br />
-		<div id="select-container" class="with-icon relative">
+		<div id="select-container" class="with-icon relative cursor-pointer">
 			<label for="eenheid">Historische kaarten</label>
 			<ImagesSquare size="18" color="#f4a" class="absolute top-[31px] left-4 inline" />
 			<select name="historicmaps" style:width="250px">
@@ -80,7 +81,7 @@
 		<label for="historic-maps-opacity-slider">Doorzichtigheid</label>
 		<input
 			name="historic-maps-opacity-slider"
-			class="w-1/2"
+			class="w-1/2 cursor-pointer accent-[#f4a]"
 			type="range"
 			min="0"
 			max="100"

@@ -287,7 +287,7 @@
 	});
 
 	type LayerOptions = {
-		baseMap: 'none' | 'protomaps' | 'ahn';
+		baseMap: 'none' | 'protomaps' | 'ahn' | 'satelliet';
 		protoMapsWaterInFront: boolean;
 		protomapsLabelsInFront: boolean;
 	};
@@ -320,6 +320,7 @@
 			setProtomapsLabelsInFront(layerOptions.protomapsLabelsInFront);
 
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
+		setSatellietVisibility(layerOptions.baseMap === 'satelliet');
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -377,6 +378,12 @@
 		map?.setLayoutProperty('dsm-05-layer', 'visibility', visible ? 'visible' : 'none');
 	}
 
+	function setSatellietVisibility(visible: boolean) {
+		if (!maplibreLoaded) return;
+		if (!map?.getLayer('satelliet-layer')) return;
+		map.setLayoutProperty('satelliet-layer', 'visibility', visible ? 'visible' : 'none');
+	}
+
 	function initMaplibre() {
 		const urlView = getViewFromUrl();
 		const initialCenter = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
@@ -413,11 +420,13 @@
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
 			maplibreLoaded = true;
+
+			addBackgroundLayers();
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 
 			await loadHistoricMaps(ANNOTATION_URL);
-			addBackgroundLayers();
+
 			addOutlineLayers();
 
 			map.on('move', updateViewport);
@@ -533,6 +542,28 @@
 			id: 'dsm-05-layer',
 			type: 'raster',
 			source: 'dsm-05',
+			layout: {
+				visibility: 'none'
+			},
+			paint: {}
+		});
+
+		map.addSource('satelliet', {
+			type: 'raster',
+			tiles: [
+				'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?service=WMS&version=1.1.1&request=GetMap&layers=Actueel_ortho25&styles=&format=image/jpeg&transparent=true&height=256&width=256&srs=EPSG:3857&bbox={bbox-epsg-3857}'
+			],
+			tileSize: 256,
+			scheme: 'tms',
+			minzoom: 6,
+			maxzoom: 20,
+			attribution: 'PDOK'
+		});
+
+		map.addLayer({
+			id: 'satelliet-layer',
+			type: 'raster',
+			source: 'satelliet',
 			layout: {
 				visibility: 'none'
 			},
