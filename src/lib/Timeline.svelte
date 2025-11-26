@@ -141,19 +141,17 @@
 	function onpointermove(e: PointerEvent) {
 		if (!isPanning) return;
 
-		const maxDeltaLeft = selectedYear - minHistoricMapYear;
-		const maxDeltaRight = maxHistoricMapYear - selectedYear;
+		const maxDeltaLeft = view.current.start - MIN_YEAR;
+		const maxDeltaRight = view.current.end - MAX_YEAR;
 
 		const dx = e.clientX - lastX;
 		let yearDelta = (dx / width) * (view.current.end - view.current.start);
 		if (yearDelta > maxDeltaLeft) yearDelta = maxDeltaLeft;
 		if (yearDelta < maxDeltaRight) yearDelta = maxDeltaRight;
 
-		console.log('yearDelta', yearDelta);
-
 		view.target = {
-			start: view.target.start - yearDelta,
-			end: view.target.end - yearDelta
+			start: Math.max(view.target.start - yearDelta, MIN_YEAR),
+			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
 		};
 		lastX = e.clientX;
 
