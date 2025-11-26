@@ -25,21 +25,10 @@
 		layerOptions = $bindable()
 	} = $props();
 
-	let isMac = $state(false);
-	let isIOS = $state(false);
-	let isAndroid = $state(false);
-
-	onMount(() => {
-		const ua = navigator.userAgent.toLowerCase();
-		const platform = navigator.platform.toLowerCase();
-
-		isMac = platform.includes('mac');
-
-		isIOS =
-			/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-			(ua.includes('mac') && 'ontouchend' in document);
-
-		isAndroid = ua.includes('android');
+	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+	let kbdVisible = $state(false);
+	$effect(() => {
+		kbdVisible = true;
 	});
 
 	let searchBarVisible = $state(false);
@@ -52,9 +41,7 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (isIOS || isAndroid) return;
-
-		if (e.key.toLowerCase() === 'k' && ((isMac && e.metaKey) || (!isMac && e.ctrlKey))) {
+		if (e.key.toLowerCase() === 'k' && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
 			e.preventDefault();
 			searchBarVisible = true;
 		}
@@ -107,15 +94,20 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-41 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Locatie zoeken...
 				<kbd
-					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-					><span class="text-foreground-alt text-[12px]"
-						>{#if isMac}⌘K{:else}Ctrl K{/if}</span
-					></kbd
+					hidden={!kbdVisible}
+					class="
+					bg-background-alt text-xxs
+					pointer-events-none ml-1 flex inline
+					items-center gap-1 rounded-sm border px-1 font-sans font-medium
+					text-[#cce] shadow-[0px_2px_0px_0px_#cce] transition-[opacity] duration-200
+					select-none dark:border-[rgba(0,_0,_0,_0.10)]
+					dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]
+					"><span class="text-foreground-alt text-[12px]">{isApplePlatform ? '⌘' : 'Ctrl '}K</span></kbd
 				>
 			</span>
 		</button>
@@ -144,7 +136,7 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Naar mijn locatie
@@ -177,11 +169,12 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Lagen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">L</span></kbd
 				>
@@ -222,11 +215,12 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Grid tonen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">Spatie</span></kbd
 				>
