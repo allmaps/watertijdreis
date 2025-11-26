@@ -268,9 +268,36 @@
 		const mapIdsToHide = oldIds.filter((id) => !newIds.includes(id));
 		const newlyVisible = newIds.filter((id) => !oldIds.includes(id));
 
-		warpedMapLayer?.setMapsOptions(newIds, { visible: true, saturation: 1 });
-		warpedMapLayer?.setMapsOptions(mapIdsToHide, { visible: false, saturation: 1 });
-		warpedMapLayer?.setMapsOptions(greyIds, { visible: true, saturation: 0 });
+		const mapOptionsByMapId = new Map();
+
+		const defaultOptions = {
+			applyMask: true,
+			transformationType: 'thinPlateSpline'
+		};
+
+		newIds.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				visible: true,
+				saturation: 1,
+				...defaultOptions
+			})
+		);
+		mapIdsToHide.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				visible: false,
+				saturation: 1,
+				...defaultOptions
+			})
+		);
+		greyIds.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				visible: true,
+				saturation: 0,
+				...defaultOptions
+			})
+		);
+
+		warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
 
 		mapIdsToHide.forEach((id) => visibleHistoricMaps.delete(id));
 		newlyVisible.forEach((id) => {
@@ -280,9 +307,9 @@
 			}
 		});
 
-		console.log('Applied filter');
-
 		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
+
+		console.log('Applied filter');
 	}
 
 	type LayerOptions = {
@@ -406,7 +433,6 @@
 		});
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
-		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
 			maplibreLoaded = true;
 			warpedMapLayer = new WarpedMapLayer();
@@ -636,11 +662,7 @@
 
 		applyFilter(filter);
 
-		if (selectedHistoricMap) {
-			const { id } = selectedHistoricMap;
-			warpedMapLayer?.setMapOptions(id, { applyMask: true });
-			selectedHistoricMap = null;
-		}
+		selectedHistoricMap = null;
 	}
 
 	function changeHistoricMapView(historicMap: HistoricMap) {
@@ -812,12 +834,6 @@
 		const bottomRight = document.querySelector('.maplibregl-ctrl-bottom-right');
 		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
 		if (bottomRight) bottomRight.style.setProperty('bottom', offset + 'px', 'important');
-	});
-
-	$effect(() => {
-		// if (selectedHistoricMap) {
-		// 	map?.triggerRepaint();
-		// }
 	});
 </script>
 
