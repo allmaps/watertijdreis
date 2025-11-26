@@ -18,6 +18,7 @@
 	import MapButtons from './MapButtons.svelte';
 	import SheetControls from './SheetControls.svelte';
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
+	import Timeline2 from './Timeline2.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -91,10 +92,11 @@
 	});
 
 	let hoveredFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
-	let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
-		if (!hoveredFeature) return null;
-		return historicMapsById.get(hoveredFeature.properties?.id) || null;
-	});
+	// let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
+	// 	if (!hoveredFeature) return null;
+	// 	return historicMapsById.get(hoveredFeature.properties?.id) || null;
+	// });
+	let hoveredHistoricMap = $state(null);
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
@@ -151,9 +153,9 @@
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
 	let visibleHistoricMapsInViewport = $derived.by(() => {
-		if (!viewportPolygon || !warpedMapLayer) return new Map();
+		if (!viewportPolygon || !warpedMapLayer) return new SvelteMap();
 
-		const result = new Map();
+		const result = new SvelteMap();
 		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
 			const map = historicMapsById.get(id);
 			if (map && map.warpedMap.visible) {
@@ -290,11 +292,13 @@
 		baseMap: 'none' | 'protomaps' | 'ahn';
 		protoMapsWaterInFront: boolean;
 		protomapsLabelsInFront: boolean;
+		historicMapsOpacity: number;
 	};
 	let layerOptions = $state<LayerOptions>({
 		baseMap: 'none',
 		protoMapsWaterInFront: false,
-		protomapsLabelsInFront: false
+		protomapsLabelsInFront: false,
+		historicMapsOpacity: 100
 	});
 
 	const EMPTY_STYLE = {
@@ -320,6 +324,8 @@
 			setProtomapsLabelsInFront(layerOptions.protomapsLabelsInFront);
 
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
+
+		if (warpedMapLayer) warpedMapLayer!.renderer!.opacity = layerOptions.historicMapsOpacity / 100;
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -406,8 +412,13 @@
 			bearing: 0,
 			dragRotate: false,
 			touchPitch: false,
+			touchRotate: false,
+			attributionControl: false,
 			preserveDrawingBuffer: true
 		});
+		map.dragRotate.disable();
+		map.keyboard.disable();
+		map.touchZoomRotate.disableRotation();
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
@@ -508,6 +519,16 @@
 		});
 
 		map.addLayer({
+			id: 'map-outlines-fill-2',
+			type: 'fill',
+			source: 'map-outlines',
+			paint: {
+				'fill-color': '#ff44aa',
+				'fill-opacity': ['coalesce', ['feature-state', 'animated-fill-opacity'], 0]
+			}
+		});
+
+		map.addLayer({
 			id: 'map-outlines-stroke',
 			type: 'line',
 			source: 'map-outlines',
@@ -517,6 +538,83 @@
 				'line-opacity': 0
 			}
 		});
+
+		map.addLayer({
+			id: 'map-outlines-stroke-2',
+			type: 'line',
+			source: 'map-outlines',
+			paint: {
+				'line-color': '#f4a',
+				'line-width': 1.5,
+				'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
+			}
+		});
+
+		map.on('click', 'map-outlines-fill', (e) => {
+			const source = map.getSource('map-outlines');
+			if (!source || !source._data) return;
+
+			const allFeatures = source._data.features;
+			const rippleCenter = map.unproject(e.point);
+			const speed = 250;
+
+			allFeatures.forEach((feature) => {
+				if (!feature.id) return;
+
+				const [x, y] = feature.geometry.coordinates[0][0];
+				const dx = rippleCenter.lng - x;
+				const dy = rippleCenter.lat - y;
+				const distance = Math.sqrt(dx ** 2 + dy ** 2);
+				const delay = distance * speed;
+				const opacity = 0.5 - distance / 7;
+
+				setTimeout(() => {
+					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, opacity, 500, () => {
+						setTimeout(() => {
+							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 0, 500);
+						}, 1000);
+					});
+				}, delay);
+			});
+
+			const clickedFeature = e.features?.[0];
+			if (clickedFeature) {
+				const targetId = clickedFeature.id;
+				if (!targetId) return;
+
+				hoveredHistoricMap = historicMapsById.get(clickedFeature.properties?.id) || null;
+				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0, 0.3, 500, () => {
+					setTimeout(() => {
+						hoveredHistoricMap = null;
+						animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 0, 500);
+					}, 1000);
+				});
+			}
+		});
+	}
+
+	function animateFeatureOpacity(id, prop, startVal, endVal, duration, callback) {
+		const startTime = performance.now();
+
+		function frame(currentTime) {
+			const elapsed = currentTime - startTime;
+			let progress = elapsed / duration;
+			if (progress > 1) progress = 1;
+
+			const currentVal = startVal + (endVal - startVal) * progress;
+
+			const stateUpdate = {};
+			stateUpdate[prop] = currentVal;
+			map.setFeatureState({ source: 'map-outlines', id: id }, stateUpdate);
+
+			if (progress < 1) {
+				requestAnimationFrame(frame);
+			} else {
+				if (callback) callback();
+			}
+		}
+
+		requestAnimationFrame(frame);
 	}
 
 	function addBackgroundLayers() {
@@ -834,11 +932,11 @@
 	{setGridVisibility}
 	{zoomIn}
 	{zoomOut}
-	{layerOptions}
+	bind:layerOptions
 />
 <Header />
 
-<Timeline
+<!-- <Timeline
 	bind:filter
 	{applyFilter}
 	{historicMapsLoaded}
@@ -848,7 +946,17 @@
 	{setLabelVisibility}
 	{getHistoricMapThumbnail}
 	{map}
-></Timeline>
+></Timeline> -->
+
+<Timeline2
+	visible={!selectedHistoricMap}
+	{historicMapsLoaded}
+	{historicMapsById}
+	{mapsInViewport}
+	bind:filter
+	{applyFilter}
+	{getHistoricMapThumbnail}
+></Timeline2>
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
