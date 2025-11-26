@@ -7,22 +7,18 @@
 	const stop = (e: Event) => e.stopPropagation();
 </script>
 
-<div class="absolute bottom-0 left-1/2 flex -translate-x-1/2 translate-y-2.5 gap-2 select-none">
+<div
+	class="absolute bottom-0 left-1/2 flex h-8
+    -translate-x-1/2 translate-y-3 items-center
+    rounded-md border-1 border-[#6c70b7] bg-[#336] px-1 shadow-md select-none"
+>
 	<button
 		onclick={stop}
-		class="flex h-6 w-6 translate-y-1/6 cursor-pointer
-			items-center justify-center rounded-sm border-2 border-[#6c70b7] bg-[#336] opacity-100 shadow-[0_2px_2px_rgba(0,0,0,0.05)] transition transition-all hover:scale-105 hover:bg-[#336]
-			hover:opacity-100 active:scale-98"
+		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+                p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title="Eén jaar terug"
 	>
-		<SkipBack
-			weight="duotone"
-			color="#fee"
-			class={`
-			relative -top-px inline h-[13px]
-			w-[13px] flex-shrink-0
-			`}
-		/>
+		<SkipBack weight="duotone" color="#fee" class="h-[13px] w-[13px]" />
 	</button>
 
 	<button
@@ -30,45 +26,23 @@
 			stop(e);
 			toggle();
 		}}
-		class="flex h-8 w-8 cursor-pointer
-			items-center justify-center rounded-sm border-2 border-[#6c70b7] bg-[#336] text-[#336] opacity-100 shadow-sm transition transition-all hover:scale-105 hover:bg-[#336] hover:opacity-100 hover:shadow-xl
-			active:scale-98"
+		class="group mx-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+               p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title={isPlaying ? 'Stop met tijdreizen' : 'Reis door de tijd!'}
 	>
 		{#if isPlaying}
-			<Pause
-				color="#fee"
-				weight="fill"
-				class={`
-			relative -top-px inline h-[20px]
-			w-[20px] flex-shrink-0
-			`}
-			/>
+			<Pause color="#fee" weight="fill" class="h-[20px] w-[20px]" />
 		{:else}
-			<Play
-				weight="fill"
-				color="#fee"
-				class={` relative -top-px inline
-			h-[20px] w-[20px] flex-shrink-0
-			`}
-			/>
+			<Play color="#fee" weight="fill" class="h-[20px] w-[20px]" />
 		{/if}
 	</button>
 
 	<button
 		onclick={stop}
-		class="flex h-6 w-6 translate-y-1/6 cursor-pointer
-			items-center justify-center rounded-sm border-2 border-[#6c70b7] bg-[#336] text-[#336] opacity-100 shadow-sm transition transition-all hover:scale-105 hover:bg-[#336]
-			hover:opacity-100 active:scale-98"
+		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+               p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title="Eén jaar verder"
 	>
-		<SkipForward
-			weight="duotone"
-			color="#fee"
-			class={`
-		 relative -top-px inline
-			h-[13px] w-[13px] flex-shrink-0 opacity-100
-			`}
-		/>
+		<SkipForward weight="duotone" color="#fee" class="h-[13px] w-[13px]" />
 	</button>
 </div>

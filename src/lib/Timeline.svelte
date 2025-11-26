@@ -230,7 +230,7 @@
 {#if !selectedHistoricMap}
 	<div
 		transition:fly={{ y: 100, duration: 250 }}
-		class="touch-action-none absolute bottom-[10px] left-[10px] z-998 h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md"
+		class="touch-action-none absolute bottom-[15px] left-[10px] z-998 h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md"
 		style:background={'#336'}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
@@ -476,10 +476,10 @@
 							onchange={(e) => toggleBIS(e.target.checked)}
 							disabled={!selectedRegulier}
 							class="
-				h-4 w-4 rounded border-gray-300 text-[#ff66aa]
+				h-4 w-4 rounded border-gray-300 text-[#fff]
 				{selectedRegulier ? 'cursor-pointer' : 'opacity-80'}
 
-				
+				accent-[#f4a]
 			"
 						/>
 					</label>
