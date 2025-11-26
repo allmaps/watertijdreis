@@ -94,8 +94,8 @@
 		return Math.max(...Object.keys(historicMapsByYear).map((y) => +y));
 	});
 
-	const MIN_YEAR: number = 1800;
-	const MAX_YEAR: number = 2023;
+	const MIN_YEAR: number = 1600;
+	const MAX_YEAR: number = 2300;
 
 	let width: number = $state(0);
 	let height: number = $state(0);
@@ -262,7 +262,7 @@
 			{/each}
 		</div> -->
 		<div
-			class="absolute inset-0 z-1 h-[200px] w-full overflow-y-visible"
+			class="absolute inset-0 z-1 h-[200px] w-full -translate-y-2 overflow-y-visible"
 			style="perspective: 1000px; transform-style: preserve-3d;"
 		>
 			{#each Object.entries(historicMapsByYear) as [year, maps]}
@@ -359,7 +359,7 @@
 
 			{#if editions}
 				{#each editions.filter((i) => !i.bis) as ed, i}
-					{@const height = i % 2 == 0 ? (false ? 30 : 90) : false ? 35 : 85}
+					{@const height = i % 2 == 0 ? (false ? 60 : 110) : false ? 50 : 100}
 					{@const start = yearToX(ed.yearStart)}
 					{@const middle = yearToX((ed.yearStart + ed.yearEnd) / 2)}
 					{@const end = yearToX(ed.yearEnd)}
@@ -367,7 +367,7 @@
 						x1={start}
 						y1={height}
 						x2={start}
-						y2={height + (ticksTop ? 8 : -8)}
+						y2={height + (ticksTop ? -8 : 8)}
 						stroke="#eeeeff88"
 						stroke-width="1"
 					></line>
@@ -389,8 +389,8 @@
 					></line>
 					<text
 						x={middle}
-						y={height + 3}
-						font-size="12"
+						y={height + 4}
+						font-size="13"
 						font-weight="600"
 						fill="#eeeeff88"
 						text-anchor="middle"
@@ -401,7 +401,7 @@
 						x1={end}
 						y1={height}
 						x2={end}
-						y2={height + (ticksTop ? 8 : -8)}
+						y2={height + (ticksTop ? -8 : 8)}
 						stroke="#eeeeff88"
 						stroke-width="1"
 					></line>
