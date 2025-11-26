@@ -15,8 +15,7 @@
 		historicMapsById,
 		selectedHistoricMap,
 		setLabelVisibility,
-		getHistoricMapThumbnail,
-		map
+		getHistoricMapThumbnail
 	} = $props();
 
 	type HistoricMap = {

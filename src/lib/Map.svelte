@@ -866,7 +866,6 @@
 	{selectedHistoricMap}
 	{setLabelVisibility}
 	{getHistoricMapThumbnail}
-	{map}
 ></Timeline>
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
