@@ -556,7 +556,7 @@
 
 			const allFeatures = source._data.features;
 			const rippleCenter = map.unproject(e.point);
-			const speed = 250;
+			const speed = 200;
 
 			allFeatures.forEach((feature) => {
 				if (!feature.id) return;
