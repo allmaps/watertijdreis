@@ -2,8 +2,18 @@
 	import { fade, scale } from 'svelte/transition';
 	import { Gear } from 'phosphor-svelte';
 
-	let { showSettings = false, toggleSettings } = $props();
+	let showSettings = false;
+
+	function toggleSettings() {
+		showSettings = !showSettings;
+	}
+
+	function handleWindowClick() {
+		showSettings = false;
+	}
 </script>
+
+<svelte:window onclick={handleWindowClick} />
 
 <div class="pointer-events-auto absolute top-2 right-2 z-[50000] select-none">
 	<button
@@ -14,7 +24,7 @@
 		title="Instellingen"
 		class="
 			flex h-8 w-8 cursor-pointer items-center justify-center
-			rounded-full bg-white text-[#444]
+			rounded-full bg-[#eef] text-[#444]
 			shadow-md transition-all
 			hover:scale-105 hover:shadow-lg
             active:scale-95
