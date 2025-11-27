@@ -51,7 +51,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@allmaps/maplibre": "1.0.0-beta.39",
+		"@allmaps/maplibre": "1.0.0-beta.40",
 		"@allmaps/render": "1.0.0-beta.79",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@maplibre/maplibre-gl-style-spec": "^24.3.1",
