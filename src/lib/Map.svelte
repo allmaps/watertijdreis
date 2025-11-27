@@ -203,17 +203,17 @@
 	function applyFilter(filter: Filter) {
 		if (!historicMapsByNumber) return;
 
-		const visibleSheets: HistoricMap[] = [];
-		const grayedOutSheets: HistoricMap[] = [];
+		const mapsToColor: string[] = [];
+		const mapsToDesaturate: string[] = [];
 
 		toastContent = `${filter.yearStart} - ${filter.yearEnd}`;
 
-		historicMapsByNumber.forEach((sheets, number) => {
+		historicMapsByNumber.forEach((sheets) => {
 			let x1, y1, x2, y2;
 			const firstEdYearEnd = 1894;
 
 			for (const sheet of sheets) {
-				const { x, y, yearEnd: year, edition, bis, type } = sheet;
+				const { x, y, yearEnd: year, edition, bis, type, id } = sheet;
 				const maxYearFilter = filter.yearEnd > firstEdYearEnd ? filter.yearEnd : firstEdYearEnd;
 				const periodFilter = filter.edition !== 'All' || year <= maxYearFilter;
 				const editionFilter = filter.edition === 'All' || edition === filter.edition;
@@ -223,29 +223,29 @@
 				if (!inScope) continue;
 
 				const stack =
-					year >= filter.yearStart && year <= filter.yearEnd ? visibleSheets : grayedOutSheets;
+					year >= filter.yearStart && year <= filter.yearEnd ? mapsToColor : mapsToDesaturate;
 
 				if (x1 === undefined) {
 					// Get first sheet
-					stack.push(sheet);
+					stack.push(id);
 					[x1, y1] = [x, y];
 					// Stop if no other sheets
 					if (!x1 && !y1) break;
 				} else if (y1 && x === x1 && y === -y1) {
 					// Get optional North or South sheet
-					stack.push(sheet);
+					stack.push(id);
 					y1 = 0;
 					// Stop if no East or West sheets
 					if (!x1) break;
 				} else if (x1 && !x2 && x === -x1) {
 					// Get first East or West sheet
-					stack.push(sheet);
+					stack.push(id);
 					[x2, y2] = [x, y];
 					// Stop if no more North or South sheets
 					if (!y1 && !y) break;
 				} else if (y2 && x === x2 && y === -y2) {
 					// Get optional second East or West sheet
-					stack.push(sheet);
+					stack.push(id);
 					y2 = 0;
 					// Stop if no more North or South sheet
 					if (!y1) break;
@@ -253,61 +253,51 @@
 			}
 		});
 
-		const newIds = visibleSheets
-			.values()
-			.toArray()
-			.map((i) => i.id);
-		const oldIds = visibleHistoricMaps
-			.values()
-			.toArray()
-			.map((i) => i.id);
-		const greyIds = grayedOutSheets
-			.values()
-			.toArray()
-			.map((i) => i.id);
-		const mapIdsToHide = oldIds.filter((id) => !newIds.includes(id));
-		const newlyVisible = newIds.filter((id) => !oldIds.includes(id));
+		const mapsToShow = mapsToColor.concat(mapsToDesaturate);
+		const visibleHistoricMapIds = visibleHistoricMaps.keys().toArray();
+
+		const mapsToHide = visibleHistoricMapIds.filter((id) => !mapsToShow.includes(id));
+		const mapsToAdd = mapsToShow.filter((id) => !visibleHistoricMapIds.includes(id));
 
 		const mapOptionsByMapId = new Map();
 
 		const defaultOptions = {
 			applyMask: true,
-			transformationType: 'thinPlateSpline'
+			transformationType: 'thinPlateSpline',
+			saturation: 1
 		};
 
-		newIds.forEach((id) =>
+		mapsToColor.forEach((id) =>
 			mapOptionsByMapId.set(id, {
-				visible: true,
-				saturation: 1,
-				...defaultOptions
+				...defaultOptions,
+				visible: true
 			})
 		);
-		mapIdsToHide.forEach((id) =>
+		mapsToHide.forEach((id) =>
 			mapOptionsByMapId.set(id, {
-				visible: false,
-				saturation: 1,
-				...defaultOptions
+				...defaultOptions,
+				visible: false
 			})
 		);
-		greyIds.forEach((id) =>
+		mapsToDesaturate.forEach((id) =>
 			mapOptionsByMapId.set(id, {
+				...defaultOptions,
 				visible: true,
-				saturation: 0,
-				...defaultOptions
+				saturation: 0
 			})
 		);
 
 		warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
 
-		mapIdsToHide.forEach((id) => visibleHistoricMaps.delete(id));
-		newlyVisible.forEach((id) => {
+		mapsToHide.forEach((id) => visibleHistoricMaps.delete(id));
+		mapsToAdd.forEach((id) => {
 			const historicMap = historicMapsById.get(id);
 			if (historicMap) {
 				visibleHistoricMaps.set(id, historicMap);
 			}
 		});
 
-		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
+		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${mapsToColor.length}</b> kaarten${mapsToDesaturate.length ? `, <b>${mapsToDesaturate.length}</b> kaarten buiten periode` : ''}`;
 
 		console.log('Applied filter');
 	}
