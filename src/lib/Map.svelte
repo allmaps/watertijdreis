@@ -452,11 +452,27 @@
 		});
 	}
 
+	function getInfoJson(map) {
+		const { id, width, height, tiles } = map.resource;
+		return {
+			'@context': 'http://iiif.io/api/image/2/context.json',
+			'@id': id,
+			profile: 'http://iiif.io/api/image/2/level2.json',
+			protocol: 'http://iiif.io/api/image',
+			width,
+			height,
+			tiles
+		};
+	}
+
 	async function loadHistoricMaps(url) {
 		if (!map || !warpedMapLayer) return;
 
 		const res = await fetch(url);
 		const data = await res.json();
+
+		const imageInfos = data.map(getInfoJson);
+		warpedMapLayer.addImageInfos(imageInfos);
 
 		const loadPromises = data.map(async (item) => {
 			const id = await warpedMapLayer.addGeoreferencedMap(item);
