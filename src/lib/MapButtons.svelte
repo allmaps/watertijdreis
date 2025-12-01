@@ -265,6 +265,6 @@
 					class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
 				/>
 			</button>
-		</div>
+		</div> -->
 	</div>
 {/if}

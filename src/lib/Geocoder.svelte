@@ -84,6 +84,7 @@
 				bind:this={inputEl}
 				bind:value={inputValue}
 				onkeydown={(e) => {
+					e.stopPropagation();
 					if (e.key == 'Escape') visible = false;
 					else if (e.key == 'Enter' && features) {
 						flyToFeature(features[selectedFeature]);
