@@ -18,11 +18,11 @@
 		visibleHistoricMapsInViewport,
 		viewportPolygon,
 		hoveredHistoricMap,
+		clickedHistoricMap,
 		selectedHistoricMap,
 		historicMapsLoaded,
 		restoreView,
-		getHistoricMapThumbnail,
-		getHistoricMapManifest
+		getHistoricMapThumbnail
 	} = $props();
 
 	let previewHistoricMap = $derived.by(() => {
@@ -105,7 +105,7 @@
 </script>
 
 {#if selectedHistoricMap}
-	<div class="absolute top-22 right-8 z-1000">
+	<div class="absolute top-22 right-8 z-998">
 		<button
 			onclick={restoreView}
 			class={`
@@ -141,10 +141,10 @@
 {/if}
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-999">
+	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-5 right-8 z-998">
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
-			{#if previewHistoricMap}
-				{@const hovered = polygons.find((p) => p.properties.id == previewHistoricMap.id)}
+			{#if clickedHistoricMap}
+				{@const hovered = polygons.find((p) => p.properties.id == clickedHistoricMap.id)}
 				{@const centerPoint = hovered ? turf.centerOfMass(hovered).geometry.coordinates : [0, 0]}
 
 				{@const x1 = centerPoint[0]}
@@ -187,9 +187,11 @@
 				/>
 			{/if}
 			{#each polygons as poly}
-				{@const previewed = previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const previewed =
+					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
 				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
-				{@const fill = previewed ? '#ff44aa' : visible ? '#ff44aa44' : '#ff44aa11'}
+				{@const fill = previewed || clicked ? '#ff44aa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
 					points={getProjectedPoints(poly.geometry.coordinates[0])}
 					{fill}

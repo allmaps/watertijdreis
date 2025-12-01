@@ -13,6 +13,7 @@
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 	import LayersPanel from './LayersPanel.svelte';
+	import { onMount } from 'svelte';
 
 	let {
 		visible = true,
@@ -21,8 +22,14 @@
 		setGridVisibility,
 		zoomIn,
 		zoomOut,
-		layerOptions
+		layerOptions = $bindable()
 	} = $props();
+
+	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+	let kbdVisible = $state(false);
+	$effect(() => {
+		kbdVisible = true;
+	});
 
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
@@ -34,8 +41,14 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.metaKey && e.key == 'k') searchBarVisible = true;
-		if (e.key.toLowerCase() == 'l') layersPanelVisible = !layersPanelVisible;
+		if (e.key.toLowerCase() === 'k' && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
+			e.preventDefault();
+			searchBarVisible = true;
+		}
+
+		if (e.key.toLowerCase() === 'l') {
+			layersPanelVisible = !layersPanelVisible;
+		}
 	}}
 />
 
@@ -45,7 +58,7 @@
 	providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}
 ></Geocoder>
 
-<LayersPanel bind:visible={layersPanelVisible} {layerOptions}></LayersPanel>
+<LayersPanel bind:visible={layersPanelVisible} bind:layerOptions></LayersPanel>
 
 {#if visible}
 	<div
@@ -81,13 +94,20 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-41 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Locatie zoeken...
 				<kbd
-					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-					><span class="text-foreground-alt text-[12px]">⌘K</span></kbd
+					hidden={!kbdVisible}
+					class="
+					bg-background-alt text-xxs
+					pointer-events-none ml-1 flex inline
+					items-center gap-1 rounded-sm border px-1 font-sans font-medium
+					text-[#cce] shadow-[0px_2px_0px_0px_#cce] transition-[opacity] duration-200
+					select-none dark:border-[rgba(0,_0,_0,_0.10)]
+					dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]
+					"><span class="text-foreground-alt text-[12px]">{isApplePlatform ? '⌘' : 'Ctrl '}K</span></kbd
 				>
 			</span>
 		</button>
@@ -116,7 +136,7 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Naar mijn locatie
@@ -149,17 +169,18 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Lagen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">L</span></kbd
 				>
 			</span>
 		</button>
-		<button
+		<!-- <button
 			onclick={() => setGridVisibility((gridVisible = !gridVisible))}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
@@ -194,11 +215,12 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Grid tonen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">Spatie</span></kbd
 				>

@@ -2,7 +2,9 @@
 	import { scale } from 'svelte/transition';
 
 	const { year, x, maps, selectedYear, getHistoricMapThumbnail } = $props();
-	const zRotations = maps.map((i) => (Math.random() - 0.5) * 10);
+	const zRotations = Array(25)
+		.fill(0)
+		.map((i) => (Math.random() - 0.5) * 10);
 
 	const loaded = $state(new Set<string>());
 
@@ -24,7 +26,7 @@
 {#each maps as map, i}
 	<!-- {#if loaded.has(map.id)} -->
 	<div
-		class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden bg-[rgb(243,238,218)]"
+		class="absolute h-[42px] w-[42px] origin-bottom overflow-hidden bg-[rgb(243,238,218)] shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
 		style="
 				left:{x - 25}px;
 				top:{yOffset(i, map)}px;
@@ -33,7 +35,11 @@
 			"
 	>
 		{#if i == maps.length - 1}
-			<img src={getHistoricMapThumbnail(map.id, 32)} alt={map.name} class="h-full w-full object-cover object-center" />
+			<img
+				src={getHistoricMapThumbnail(map.id, 32)}
+				alt={map.name}
+				class="h-full w-full object-cover object-center"
+			/>
 		{/if}
 	</div>
 	<!-- {/if} -->

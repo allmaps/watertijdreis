@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="timeline-pointer height-[30px] absolute top-[-4px]"
+	class="timeline-pointer height-[30px] absolute -top-2 left-1/2 -translate-x-1/2"
 	style:left="50%"
 	style="z-index: 10000"
 >
@@ -43,29 +43,5 @@
     "
 	>
 		{year}
-	</div>
-	<div
-		style="
-    position: absolute;
-    top: 125px;
-    left: 0;
-    height: 20px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    pointer-events: none;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    "
-	>
-		<Rewind size="16" class="relative top-0 mx-1 inline cursor-pointer opacity-70"></Rewind>
-		<SkipBack size="16" class="relative top-0 mx-1 inline cursor-pointer opacity-70"></SkipBack>
-		<Play size="16" class="relativeopacity-70  top-0 mx-1 inline cursor-pointer"></Play>
-		<SkipForward size="16" class="relative top-0 mx-1 inline cursor-pointer opacity-70"
-		></SkipForward>
-		<FastForward size="16" class="relativeopacity-70  top-0 mx-1 inline cursor-pointer"
-		></FastForward>
 	</div>
 </div>

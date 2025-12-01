@@ -1,7 +1,7 @@
 <script lang="ts">
 	import maplibregl from 'maplibre-gl';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
-	import { WarpedMap, WarpedMapEventType } from '@allmaps/render';
+	import { WarpedMap, WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
 	import * as turf from '@turf/turf';
 
 	import { SvelteMap } from 'svelte/reactivity';
@@ -17,6 +17,9 @@
 	import { basemapStyle } from './basemap';
 	import MapButtons from './MapButtons.svelte';
 	import SheetControls from './SheetControls.svelte';
+	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
+	import Timeline2 from './Timeline2.svelte';
+	import MapSheetToggle from './MapSheetToggle.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -58,27 +61,11 @@
 		if (!manifestCollection) return null;
 
 		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
-		const manifestUrl = manifestCollection.items.find((i) => i.label.nl[0] === label).id;
+		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
 
 		const response = await fetch(manifestUrl);
 		const result = await response.json();
 		return result;
-	}
-
-	async function getHistoricMapManifest(id) {
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		const editionManifest = await getEditionManifest(historicMap.edition, historicMap.bis);
-		if (!editionManifest) return;
-		const manifest = editionManifest.items.find((i) => i.id == historicMap.manifestId);
-		const structure = editionManifest.structures.find((s) =>
-			s.items.find((it) => it.id == historicMap.manifestId)
-		);
-		const variants = structure.items
-			.filter((i) => i.id != historicMap.manifestId)
-			.map((i) => historicMapsById.get(i.id));
-		manifest.variants = variants;
-		return manifest;
 	}
 
 	let map: maplibregl.Map | null = $state(null);
@@ -105,46 +92,54 @@
 		return grouped;
 	});
 
-	let hoveredFeature: string | null = $state(null);
+	let hoveredFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
 	let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
 		if (!hoveredFeature) return null;
-		return historicMapsById.get(hoveredFeature.properties.id) || null;
+		return historicMapsById.get(hoveredFeature.properties?.id) || null;
+	});
+	let clickedFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
+	let clickedHistoricMap = $derived.by(() => {
+		if (!clickedFeature) return null;
+		return historicMapsById.get(clickedFeature.properties?.id) || null;
 	});
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
 		if (!map) return;
 
-		const polygons = visibleHistoricMaps
+		const polygons: Feature<Geometry, GeoJsonProperties>[] = visibleHistoricMaps
 			.values()
-			.map((o, i) => ({
-				id: i,
-				type: 'Feature',
-				geometry: structuredClone(o.polygon),
-				properties: { id: o.id, year: o.yearEnd }
-			}))
+			.map(
+				(o, i): Feature<Geometry, GeoJsonProperties> => ({
+					id: i,
+					type: 'Feature',
+					geometry: structuredClone(o.polygon),
+					properties: { id: o.id, year: o.yearEnd }
+				})
+			)
 			.toArray();
 
-		const points = visibleHistoricMaps
+		const points: Feature<Geometry, GeoJsonProperties>[] = visibleHistoricMaps
 			.values()
-			.map((o, i) => ({
-				id: i,
-				type: 'Feature',
-				geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
-				properties: { year: o.yearEnd }
-			}))
+			.map(
+				(o, i): Feature<Geometry, GeoJsonProperties> => ({
+					id: i,
+					type: 'Feature',
+					geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
+					properties: { year: o.yearEnd }
+				})
+			)
 			.toArray();
 
-		if (map.getSource('map-outlines'))
-			map.getSource('map-outlines').setData({
-				type: 'FeatureCollection',
-				features: polygons
-			});
-		if (map.getSource('map-labels'))
-			map.getSource('map-labels').setData({
-				type: 'FeatureCollection',
-				features: points
-			});
+		(map.getSource('map-outlines') as maplibregl.GeoJSONSource | undefined)?.setData({
+			type: 'FeatureCollection',
+			features: polygons
+		});
+
+		(map.getSource('map-labels') as maplibregl.GeoJSONSource | undefined)?.setData({
+			type: 'FeatureCollection',
+			features: points
+		});
 	});
 
 	let viewportPolygon: GeojsonPolygon | null = $state(null);
@@ -162,7 +157,19 @@
 	});
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
+	// let mapsInViewport = $derived.by(() => {
+	// 	const result = new SvelteMap();
+	// });
 	let visibleHistoricMapsInViewport = $derived.by(() => {
+		const result = new SvelteMap();
+		if (!viewportPolygon) return result;
+		for (const map of visibleHistoricMaps.values()) {
+			if (warpedMapLayer?.renderer?.mapsInViewport.has(map.id)) result.set(map.id, map);
+		}
+		return result;
+	});
+
+	let mapsInViewport = $derived.by(() => {
 		if (!viewportPolygon || !warpedMapLayer) return new Map();
 
 		const result = new Map();
@@ -181,10 +188,11 @@
 		if (warpedMapLayer) {
 			warpedMapLayer.renderer?.tileCache?.addEventListener(
 				WarpedMapEventType.MAPTILELOADED,
-				(e) => {
-					const id = e.data.mapId;
+				(e: WarpedMapEvent) => {
+					const id = e.data?.mapId;
 					const historicMap = historicMapsById.get(id);
-					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+					if (historicMap && warpedMapLayer?.renderer?.mapsInViewport.has(historicMap.id))
+						visibleHistoricMapsInViewport.set(id, historicMap);
 				}
 			);
 		}
@@ -302,15 +310,21 @@
 		console.log('Applied filter');
 	}
 
+	$effect(() => {
+		if (maplibreLoaded) console.log(map);
+	});
+
 	type LayerOptions = {
-		baseMap: 'none' | 'protomaps' | 'ahn';
+		baseMap: 'none' | 'protomaps' | 'ahn' | 'satelliet';
 		protoMapsWaterInFront: boolean;
 		protomapsLabelsInFront: boolean;
+		historicMapsOpacity: number;
 	};
 	let layerOptions = $state<LayerOptions>({
 		baseMap: 'none',
 		protoMapsWaterInFront: false,
-		protomapsLabelsInFront: false
+		protomapsLabelsInFront: false,
+		historicMapsOpacity: 100
 	});
 
 	const EMPTY_STYLE = {
@@ -336,6 +350,10 @@
 			setProtomapsLabelsInFront(layerOptions.protomapsLabelsInFront);
 
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
+    setSatellietVisibility(layerOptions.baseMap === 'satelliet');
+
+		if (warpedMapLayer) warpedMapLayer!.renderer!.opacity = layerOptions.historicMapsOpacity / 100;
+		
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -343,8 +361,8 @@
 
 		const { layers } = basemapStyle('nl');
 		layers.forEach((layer) => {
-			if (map.getLayer(layer.id)) {
-				map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+			if (map!.getLayer(layer.id)) {
+				map!.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
 			}
 		});
 	}
@@ -355,8 +373,8 @@
 		const waterLayers = ['water', 'water_stream', 'water_river'];
 
 		waterLayers.forEach((layerId) => {
-			if (map.getLayer(layerId)) {
-				map.moveLayer(layerId, visible ? 'map-outlines-labels' : 'landuse_pedestrian');
+			if (map!.getLayer(layerId)) {
+				map!.moveLayer(layerId, visible ? 'map-outlines-labels' : 'landuse_pedestrian');
 			}
 		});
 	}
@@ -381,8 +399,8 @@
 		];
 
 		labelLayers.forEach((layerId) => {
-			if (map.getLayer(layerId)) {
-				map.moveLayer(layerId, visible ? 'map-outlines-labels' : 'map-outlines-skeleton');
+			if (map!.getLayer(layerId)) {
+				map!.moveLayer(layerId, visible ? 'map-outlines-labels' : 'map-outlines-skeleton');
 			}
 		});
 	}
@@ -393,44 +411,60 @@
 		map?.setLayoutProperty('dsm-05-layer', 'visibility', visible ? 'visible' : 'none');
 	}
 
+	function setSatellietVisibility(visible: boolean) {
+		if (!maplibreLoaded) return;
+		if (!map?.getLayer('satelliet-layer')) return;
+		map.setLayoutProperty('satelliet-layer', 'visibility', visible ? 'visible' : 'none');
+	}
+
 	function initMaplibre() {
 		const urlView = getViewFromUrl();
-		const initialCenter: LngLatLike = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
+		const initialCenter = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
 		const initialZoom = urlView ? urlView.zoom : 7;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
 
 		const style = basemapStyle('nl');
-		style.layers.forEach((layer) => (layer.layout = { visibility: 'none' }));
+		style.layers.forEach((layer) => {
+			(layer as maplibregl.LayerSpecification).layout = { visibility: 'none' };
+		});
 
 		map = new maplibregl.Map({
 			container: containerId,
 			style,
 			center: initialCenter,
 			zoom: initialZoom,
-			minZoom: 6.5,
+			minZoom: 5.5,
 			maxZoom: 16,
 			maxPitch: 0,
 			minPitch: 0,
 			maxBounds: [
-				[-4, 49],
-				[15, 56]
+				[-12, 47],
+				[22, 57]
 			],
 			bearing: 0,
 			dragRotate: false,
-			touchPitch: false
+			touchPitch: false,
+			touchRotate: false,
+			attributionControl: false,
+			preserveDrawingBuffer: true
 		});
+		map.dragRotate.disable();
+		map.keyboard.disable();
+		map.touchZoomRotate.disableRotation();
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 		map.on('load', async () => {
 			maplibreLoaded = true;
+
+			addBackgroundLayers();
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
 
 			await loadHistoricMaps(ANNOTATION_URL);
-			addBackgroundLayers();
+
 			addOutlineLayers();
 
 			map.on('move', updateViewport);
@@ -540,15 +574,107 @@
 		});
 
 		map.addLayer({
+			id: 'map-outlines-fill-2',
+			type: 'fill',
+			source: 'map-outlines',
+			paint: {
+				'fill-color': '#ff44aa',
+				'fill-opacity': ['coalesce', ['feature-state', 'animated-fill-opacity'], 0]
+			}
+		});
+
+		map.addLayer({
 			id: 'map-outlines-stroke',
 			type: 'line',
 			source: 'map-outlines',
 			paint: {
 				'line-color': '#f4a',
-				'line-width': 2,
+				'line-width': 1.5,
 				'line-opacity': 0
 			}
 		});
+
+		map.addLayer({
+			id: 'map-outlines-stroke-2',
+			type: 'line',
+			source: 'map-outlines',
+			paint: {
+				'line-color': '#f4a',
+				'line-width': 1.5,
+				'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
+			}
+		});
+
+		map.on('click', 'map-outlines-fill', (e) => {
+			const source = map.getSource('map-outlines');
+			if (!source || !source._data) return;
+
+			const allFeatures = source._data.features;
+			const rippleCenter = map.unproject(e.point);
+			const speed = 300;
+
+			allFeatures.forEach((feature) => {
+				if (feature.id === undefined) return;
+
+				const [x, y] = feature.geometry.coordinates[0][0];
+				const dx = rippleCenter.lng - x;
+				const dy = rippleCenter.lat - y;
+				const distance = Math.sqrt(dx ** 2 + dy ** 2);
+				const delay = distance * speed;
+				const opacity = 0.5 - distance / 7;
+
+				setTimeout(() => {
+					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 500, () => {
+						setTimeout(() => {
+							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, 500);
+						}, 1000);
+					});
+				}, delay);
+			});
+
+			let feature = e.features?.[0] || null;
+			clickedFeature = feature;
+			if (clickedFeature !== null) {
+				const targetId = clickedFeature.id;
+				if (targetId === undefined) return;
+
+				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 500, () => {
+					setTimeout(() => {
+						if (feature)
+							animateFeatureOpacity(feature.id, 'animated-fill-opacity', 0, 500, () => {
+								clickedFeature = null;
+							});
+					}, 1000);
+				});
+			}
+		});
+	}
+
+	function animateFeatureOpacity(id, prop, endVal, duration, callback) {
+		const startTime = performance.now();
+
+		const currentState = map.getFeatureState({ source: 'map-outlines', id: id });
+		const startVal = currentState?.[prop] !== undefined ? currentState[prop] : 0;
+
+		function frame(currentTime) {
+			const elapsed = currentTime - startTime;
+			let progress = elapsed / duration;
+			if (progress > 1) progress = 1;
+
+			const currentVal = startVal + (endVal - startVal) * progress;
+
+			const stateUpdate = {};
+			stateUpdate[prop] = currentVal;
+			map.setFeatureState({ source: 'map-outlines', id: id }, stateUpdate);
+
+			if (progress < 1) {
+				requestAnimationFrame(frame);
+			} else {
+				if (callback) callback();
+			}
+		}
+
+		requestAnimationFrame(frame);
 	}
 
 	function addBackgroundLayers() {
@@ -565,6 +691,28 @@
 			id: 'dsm-05-layer',
 			type: 'raster',
 			source: 'dsm-05',
+			layout: {
+				visibility: 'none'
+			},
+			paint: {}
+		});
+
+		map.addSource('satelliet', {
+			type: 'raster',
+			tiles: [
+				'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?service=WMS&version=1.1.1&request=GetMap&layers=Actueel_ortho25&styles=&format=image/jpeg&transparent=true&height=256&width=256&srs=EPSG:3857&bbox={bbox-epsg-3857}'
+			],
+			tileSize: 256,
+			scheme: 'tms',
+			minzoom: 6,
+			maxzoom: 20,
+			attribution: 'PDOK'
+		});
+
+		map.addLayer({
+			id: 'satelliet-layer',
+			type: 'raster',
+			source: 'satelliet',
 			layout: {
 				visibility: 'none'
 			},
@@ -601,7 +749,6 @@
 		try {
 			const { lat, lng } = await getUserLocation();
 
-			// create a pseudo-feature for your existing flyToFeature()
 			const feature = {
 				geometry: {
 					type: 'Point',
@@ -651,24 +798,32 @@
 	let savedMapViews: MapView[] = $state([]);
 
 	function saveMapView() {
-		savedMapViews.push({
+		const view = {
 			center: map.getCenter(),
 			zoom: map.getZoom(),
 			bearing: map.getBearing(),
 			pitch: map.getPitch()
-		});
+		};
+		savedMapViews.push(view);
+		return view;
 	}
 
-	function restoreView(options = { duration: 500 }) {
-		if (savedMapViews.length === 0 || !map) return;
-		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
+	function restoreView(view = savedMapViews.pop(), options = { duration: 500 }) {
+		if (!map || !view) return;
+		const { center, zoom, bearing, pitch } = view;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'visible');
 
 		applyFilter(filter);
 
-		selectedHistoricMap = null;
+    if (selectedHistoricMap) {
+      warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+        transformationType: 'thinPlateSpline',
+			  applyMask: true
+      })
+      selectedHistoricMap = null;
+    }
 	}
 
 	function changeHistoricMapView(historicMap: HistoricMap) {
@@ -723,6 +878,8 @@
 			applyMask: false
 		});
 
+    selectedHistoricMap = historicMap;
+
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'none');
 
 		saveMapView();
@@ -745,17 +902,18 @@
 	}
 
 	function handleMapClick(e: any) {
-		if (!map || !warpedMapLayer || !gridVisible) return;
-
-		addEventListener('keydown', (e) => {
-			if (e.key == 'Escape') restoreView();
-		});
+		if (!map || !warpedMapLayer) return;
 
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
-		selectedHistoricMap = historicMapsById.get(id) || null;
-		if (!selectedHistoricMap) return;
-		setHistoricMapView(selectedHistoricMap);
+		if (gridVisible) {
+			if (!historicMapsById.has(id)) return;
+			setHistoricMapView(historicMapsById.get(id));
+
+			addEventListener('keydown', (e) => {
+				if (e.key == 'Escape') restoreView();
+			});
+		}
 	}
 
 	function handleMapMouseMove(e: any) {
@@ -764,7 +922,7 @@
 		if (!feature) return;
 
 		if (hoveredFeature && hoveredFeature !== feature) {
-			map.setFeatureState({ source: 'map-outlines', id: hoveredFeature.id }, { hover: false });
+			map.setFeatureState({ source: 'map-outlines', id: hoveredFeature?.id }, { hover: false });
 		}
 		hoveredFeature = feature;
 		map.setFeatureState({ source: 'map-outlines', id: hoveredFeature.id }, { hover: true });
@@ -853,6 +1011,16 @@
 
 <Toast content={toastContent}></Toast>
 
+<MapSheetToggle
+	{hoveredHistoricMap}
+	{clickedHistoricMap}
+	{selectedHistoricMap}
+	{setHistoricMapView}
+	{setGridVisibility}
+	{saveMapView}
+	{restoreView}
+></MapSheetToggle>
+
 <MapButtons
 	visible={!selectedHistoricMap}
 	{flyToFeature}
@@ -860,19 +1028,31 @@
 	{setGridVisibility}
 	{zoomIn}
 	{zoomOut}
-	{layerOptions}
+	bind:layerOptions
 />
 <Header />
 
-<Timeline
+<!-- <Timeline
 	bind:filter
 	{applyFilter}
 	{historicMapsLoaded}
 	{historicMapsById}
 	{selectedHistoricMap}
+	{mapsInViewport}
 	{setLabelVisibility}
 	{getHistoricMapThumbnail}
-></Timeline>
+	{map}
+></Timeline> -->
+
+<Timeline2
+	visible={!selectedHistoricMap}
+	{historicMapsLoaded}
+	{historicMapsById}
+	{mapsInViewport}
+	bind:filter
+	{applyFilter}
+	{getHistoricMapThumbnail}
+></Timeline2>
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
@@ -882,10 +1062,10 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
-	{getHistoricMapManifest}
 	{restoreView}
 ></Minimap>
 <MapInfo
@@ -894,11 +1074,11 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
-	{getHistoricMapManifest}
 	{getEditionManifest}
 ></MapInfo>
 
