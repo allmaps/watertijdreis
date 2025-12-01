@@ -19,6 +19,7 @@
 	import SheetControls from './SheetControls.svelte';
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import Timeline2 from './Timeline2.svelte';
+	import MapSheetToggle from './MapSheetToggle.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -92,11 +93,15 @@
 	});
 
 	let hoveredFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
-	// let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
-	// 	if (!hoveredFeature) return null;
-	// 	return historicMapsById.get(hoveredFeature.properties?.id) || null;
-	// });
-	let hoveredHistoricMap = $state(null);
+	let hoveredHistoricMap: HistoricMap | null = $derived.by(() => {
+		if (!hoveredFeature) return null;
+		return historicMapsById.get(hoveredFeature.properties?.id) || null;
+	});
+	let clickedFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
+	let clickedHistoricMap = $derived.by(() => {
+		if (!clickedFeature) return null;
+		return historicMapsById.get(clickedFeature.properties?.id) || null;
+	});
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
@@ -152,17 +157,15 @@
 	});
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
+	// let mapsInViewport = $derived.by(() => {
+	// 	const result = new SvelteMap();
+	// });
 	let visibleHistoricMapsInViewport = $derived.by(() => {
-		if (!viewportPolygon || !warpedMapLayer) return new SvelteMap();
-
 		const result = new SvelteMap();
-		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
-			const map = historicMapsById.get(id);
-			if (map && map.warpedMap.visible) {
-				result.set(map.id, map);
-			}
+		if (!viewportPolygon) return result;
+		for (const map of visibleHistoricMaps.values()) {
+			if (warpedMapLayer?.renderer?.mapsInViewport.has(map.id)) result.set(map.id, map);
 		}
-
 		return result;
 	});
 
@@ -188,7 +191,8 @@
 				(e: WarpedMapEvent) => {
 					const id = e.data?.mapId;
 					const historicMap = historicMapsById.get(id);
-					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+					if (historicMap && warpedMapLayer?.renderer?.mapsInViewport.has(historicMap.id))
+						visibleHistoricMapsInViewport.set(id, historicMap);
 				}
 			);
 		}
@@ -556,10 +560,10 @@
 
 			const allFeatures = source._data.features;
 			const rippleCenter = map.unproject(e.point);
-			const speed = 200;
+			const speed = 300;
 
 			allFeatures.forEach((feature) => {
-				if (!feature.id) return;
+				if (feature.id === undefined) return;
 
 				const [x, y] = feature.geometry.coordinates[0][0];
 				const dx = rippleCenter.lng - x;
@@ -569,32 +573,37 @@
 				const opacity = 0.5 - distance / 7;
 
 				setTimeout(() => {
-					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, opacity, 500, () => {
+					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 500, () => {
 						setTimeout(() => {
-							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 0, 500);
+							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, 500);
 						}, 1000);
 					});
 				}, delay);
 			});
 
-			const clickedFeature = e.features?.[0];
-			if (clickedFeature) {
+			let feature = e.features?.[0] || null;
+			clickedFeature = feature;
+			if (clickedFeature !== null) {
 				const targetId = clickedFeature.id;
-				if (!targetId) return;
+				if (targetId === undefined) return;
 
-				hoveredHistoricMap = historicMapsById.get(clickedFeature.properties?.id) || null;
-				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0, 0.3, 500, () => {
+				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 500, () => {
 					setTimeout(() => {
-						hoveredHistoricMap = null;
-						animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 0, 500);
+						if (feature)
+							animateFeatureOpacity(feature.id, 'animated-fill-opacity', 0, 500, () => {
+								clickedFeature = null;
+							});
 					}, 1000);
 				});
 			}
 		});
 	}
 
-	function animateFeatureOpacity(id, prop, startVal, endVal, duration, callback) {
+	function animateFeatureOpacity(id, prop, endVal, duration, callback) {
 		const startTime = performance.now();
+
+		const currentState = map.getFeatureState({ source: 'map-outlines', id: id });
+		const startVal = currentState?.[prop] !== undefined ? currentState[prop] : 0;
 
 		function frame(currentTime) {
 			const elapsed = currentTime - startTime;
@@ -667,7 +676,6 @@
 		try {
 			const { lat, lng } = await getUserLocation();
 
-			// create a pseudo-feature for your existing flyToFeature()
 			const feature = {
 				geometry: {
 					type: 'Point',
@@ -717,17 +725,19 @@
 	let savedMapViews: MapView[] = $state([]);
 
 	function saveMapView() {
-		savedMapViews.push({
+		const view = {
 			center: map.getCenter(),
 			zoom: map.getZoom(),
 			bearing: map.getBearing(),
 			pitch: map.getPitch()
-		});
+		};
+		savedMapViews.push(view);
+		return view;
 	}
 
-	function restoreView(options = { duration: 500 }) {
-		if (savedMapViews.length === 0 || !map) return;
-		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
+	function restoreView(view = savedMapViews.pop(), options = { duration: 500 }) {
+		if (!map || !view) return;
+		const { center, zoom, bearing, pitch } = view;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'visible');
@@ -781,8 +791,9 @@
 	function setHistoricMapView(historicMap: HistoricMap) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
+		selectedHistoricMap = historicMap;
+
 		historicMap.warpedMap.visible = true;
-		console.log('setHistoricMapView', historicMap);
 		historicMap.warpedMap.setTransformationType('straight');
 		historicMapsById.values().forEach((m) => (m.warpedMap.visible = m.id == id));
 		warpedMapLayer.setMapSaturation(id, 1);
@@ -814,9 +825,8 @@
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
 		if (gridVisible) {
-			selectedHistoricMap = historicMapsById.get(id) || null;
-			if (!selectedHistoricMap) return;
-			setHistoricMapView(selectedHistoricMap);
+			if (!historicMapsById.has(id)) return;
+			setHistoricMapView(historicMapsById.get(id));
 
 			addEventListener('keydown', (e) => {
 				if (e.key == 'Escape') restoreView();
@@ -925,6 +935,16 @@
 
 <Toast content={toastContent}></Toast>
 
+<MapSheetToggle
+	{hoveredHistoricMap}
+	{clickedHistoricMap}
+	{selectedHistoricMap}
+	{setHistoricMapView}
+	{setGridVisibility}
+	{saveMapView}
+	{restoreView}
+></MapSheetToggle>
+
 <MapButtons
 	visible={!selectedHistoricMap}
 	{flyToFeature}
@@ -966,6 +986,7 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
@@ -977,6 +998,7 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{changeHistoricMapView}

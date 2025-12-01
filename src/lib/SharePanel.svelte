@@ -47,7 +47,7 @@
 	></div>
 	<div
 		class="
-            max-h-90vh fixed top-1/2 left-1/2
+            fixed top-1/2 left-1/2
             z-1001 flex
             w-[90vw] max-w-120 -translate-x-1/2 -translate-y-1/2
             flex-col items-center overflow-auto rounded-[8px] border border-gray-200

@@ -159,7 +159,7 @@
 				>
 			</span>
 		</button>
-		<button
+		<!-- <button
 			onclick={() => setGridVisibility((gridVisible = !gridVisible))}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
@@ -203,7 +203,7 @@
 					><span class="text-foreground-alt text-[12px]">Spatie</span></kbd
 				>
 			</span>
-		</button>
+		</button> -->
 	</div>
 {/if}
 
