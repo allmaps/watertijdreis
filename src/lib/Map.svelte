@@ -24,7 +24,7 @@
 	type HistoricMap = {
 		id: string;
 		manifestId: string;
-		warpedMap: WarpedMap;
+		warpedMap?: WarpedMap;
 		label: string;
 		polygon: GeojsonPolygon;
 		yearStart: number;
@@ -175,7 +175,7 @@
 		const result = new Map();
 		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
 			const map = historicMapsById.get(id);
-			if (map) {
+			if (map && map.warpedMap?.options.visible) {
 				result.set(map.id, map);
 			}
 		}
@@ -200,25 +200,10 @@
 
 	let gridVisible: boolean = $state(false);
 
-	function showHistoricMap(id: string) {
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		historicMap.warpedMap.visible = true;
-		visibleHistoricMaps.set(id, historicMap);
-		warpedMapLayer?.setMapSaturation(id, 1);
-	}
-
-	function hideHistoricMap(id: string) {
-		const historicMap = historicMapsById.get(id);
-		if (!historicMap) return;
-		historicMap.warpedMap.visible = false;
-		visibleHistoricMaps.delete(id);
-	}
-
-	function getHistoricMapThumbnail(id: string, size: number = 128) {
-		const map = historicMapsById.get(id);
+	function getHistoricMapThumbnail(id, size = 128) {
+		const warpedMap = warpedMapLayer?.getWarpedMap(id);
 		if (!map) return '';
-		return map.warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
+		return warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
 	}
 
 	let toastContent: string = $state('');
@@ -226,17 +211,17 @@
 	function applyFilter(filter: Filter) {
 		if (!historicMapsByNumber) return;
 
-		const visibleSheets: HistoricMap[] = [];
-		const grayedOutSheets: HistoricMap[] = [];
+		const mapsToColor: string[] = [];
+		const mapsToDesaturate: string[] = [];
 
 		toastContent = `${filter.yearStart} - ${filter.yearEnd}`;
 
-		historicMapsByNumber.forEach((sheets, number) => {
+		historicMapsByNumber.forEach((sheets) => {
 			let x1, y1, x2, y2;
 			const firstEdYearEnd = 1894;
 
 			for (const sheet of sheets) {
-				const { x, y, yearEnd: year, edition, bis, type } = sheet;
+				const { x, y, yearEnd: year, edition, bis, type, id } = sheet;
 				const maxYearFilter = filter.yearEnd > firstEdYearEnd ? filter.yearEnd : firstEdYearEnd;
 				const periodFilter = filter.edition !== 'All' || year <= maxYearFilter;
 				const editionFilter = filter.edition === 'All' || edition === filter.edition;
@@ -246,29 +231,29 @@
 				if (!inScope) continue;
 
 				const stack =
-					year >= filter.yearStart && year <= filter.yearEnd ? visibleSheets : grayedOutSheets;
+					year >= filter.yearStart && year <= filter.yearEnd ? mapsToColor : mapsToDesaturate;
 
 				if (x1 === undefined) {
 					// Get first sheet
-					stack.push(sheet);
+					stack.push(id);
 					[x1, y1] = [x, y];
 					// Stop if no other sheets
 					if (!x1 && !y1) break;
 				} else if (y1 && x === x1 && y === -y1) {
 					// Get optional North or South sheet
-					stack.push(sheet);
+					stack.push(id);
 					y1 = 0;
 					// Stop if no East or West sheets
 					if (!x1) break;
 				} else if (x1 && !x2 && x === -x1) {
 					// Get first East or West sheet
-					stack.push(sheet);
+					stack.push(id);
 					[x2, y2] = [x, y];
 					// Stop if no more North or South sheets
 					if (!y1 && !y) break;
 				} else if (y2 && x === x2 && y === -y2) {
 					// Get optional second East or West sheet
-					stack.push(sheet);
+					stack.push(id);
 					y2 = 0;
 					// Stop if no more North or South sheet
 					if (!y1) break;
@@ -276,16 +261,53 @@
 			}
 		});
 
-		for (const sheet of historicMapsById.values()) {
-			// TODO: beter
-			if (visibleSheets.find((i) => i.id == sheet.id)) showHistoricMap(sheet.id);
-			else if (grayedOutSheets.find((i) => i.id == sheet.id)) {
-				showHistoricMap(sheet.id);
-				warpedMapLayer?.setMapSaturation(sheet.id, 0);
-			} else hideHistoricMap(sheet.id);
-		}
+		const mapsToShow = mapsToColor.concat(mapsToDesaturate);
+		const visibleHistoricMapIds = visibleHistoricMaps.keys().toArray();
 
-		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${visibleSheets.length}</b> kaarten${grayedOutSheets.length ? `, <b>${grayedOutSheets.length}</b> kaarten buiten periode` : ''}`;
+		const mapsToHide = visibleHistoricMapIds.filter((id) => !mapsToShow.includes(id));
+		const mapsToAdd = mapsToShow.filter((id) => !visibleHistoricMapIds.includes(id));
+
+		const mapOptionsByMapId = new Map();
+
+		const defaultOptions = {
+			applyMask: true,
+			transformationType: 'thinPlateSpline',
+			saturation: 1
+		};
+
+		mapsToColor.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				...defaultOptions,
+				visible: true
+			})
+		);
+		mapsToHide.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				...defaultOptions,
+				visible: false
+			})
+		);
+		mapsToDesaturate.forEach((id) =>
+			mapOptionsByMapId.set(id, {
+				...defaultOptions,
+				visible: true,
+				saturation: 0
+			})
+		);
+
+		warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
+
+		mapsToHide.forEach((id) => visibleHistoricMaps.delete(id));
+		mapsToAdd.forEach((id) => {
+			const historicMap = historicMapsById.get(id);
+			if (historicMap) {
+				visibleHistoricMaps.set(id, historicMap);
+			}
+		});
+
+		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${mapsToColor.length}</b> kaarten${mapsToDesaturate.length ? `, <b>${mapsToDesaturate.length}</b> kaarten buiten periode` : ''}`;
+
+		console.log('Applied filter');
 	}
 
 	$effect(() => {
@@ -433,13 +455,13 @@
 		map.touchZoomRotate.disableRotation();
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
-		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
 		map.on('load', async () => {
 			maplibreLoaded = true;
 
 			addBackgroundLayers();
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
+			warpedMapLayer.setLayerOptions({ visible: false });
 
 			await loadHistoricMaps(ANNOTATION_URL);
 
@@ -454,23 +476,42 @@
 		});
 	}
 
+	function getInfoJson(map) {
+		const { id, width, height, tiles } = map.resource;
+		return {
+			'@context': 'http://iiif.io/api/image/2/context.json',
+			'@id': id,
+			profile: 'http://iiif.io/api/image/2/level2.json',
+			protocol: 'http://iiif.io/api/image',
+			width,
+			height,
+			tiles
+		};
+	}
+
 	async function loadHistoricMaps(url) {
 		if (!map || !warpedMapLayer) return;
 
 		const res = await fetch(url);
 		const data = await res.json();
 
+		const imageInfos = data.map(getInfoJson);
+		warpedMapLayer.addImageInfos(imageInfos);
+
 		const loadPromises = data.map(async (item) => {
 			const id = await warpedMapLayer.addGeoreferencedMap(item);
-			const warpedMap = warpedMapLayer.getWarpedMapList().warpedMapsById.get(id);
+			const warpedMap = warpedMapLayer.getWarpedMap(id);
+			const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
 			const historicMap: HistoricMap = {
 				id,
 				manifestId: item.resource.partOf[0].id,
-				warpedMap,
-				polygon: warpedMap.geoMask,
+				polygon: {
+					type: 'Polygon',
+					coordinates
+				},
+				geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
 				...item._meta
 			};
-			warpedMap.visible = false;
 			historicMapsById.set(id, historicMap);
 		});
 
@@ -776,46 +817,46 @@
 
 		applyFilter(filter);
 
-		if (selectedHistoricMap) {
-			selectedHistoricMap.warpedMap.setTransformationType('thinPlateSpline');
-			warpedMapLayer?.setMapResourceMask(
-				selectedHistoricMap?.id,
-				selectedHistoricMap?.warpedMap.resourcePreviousMask
-			);
-			selectedHistoricMap = null;
-		}
+    if (selectedHistoricMap) {
+      warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+        transformationType: 'thinPlateSpline',
+			  applyMask: true
+      })
+      selectedHistoricMap = null;
+    }
 	}
 
 	function changeHistoricMapView(historicMap: HistoricMap) {
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
-		selectedHistoricMap.warpedMap.visible = false;
-		selectedHistoricMap.warpedMap.setTransformationType('thinPlateSpline');
-		warpedMapLayer?.setMapResourceMask(
-			selectedHistoricMap?.id,
-			selectedHistoricMap?.warpedMap.resourcePreviousMask
-		);
+		warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+			visible: false,
+			transformationType: 'thinPlateSpline',
+			applyMask: true
+		});
 
-		historicMap.warpedMap.visible = true;
-		historicMap.warpedMap.setTransformationType('straight');
-		warpedMapLayer.setMapSaturation(historicMap.id, 1);
+		warpedMapLayer?.setMapOptions(historicMap?.id, {
+			visible: true,
+			transformationType: 'straight',
+			saturation: 1,
+			applyMask: false
+		});
 
-		const { width, height } = historicMap.warpedMap.georeferencedMap.resource;
-		warpedMapLayer.setMapResourceMask(historicMap.id, [
-			[0, height],
-			[width, height],
-			[width, 0],
-			[0, 0]
-		]);
-
-		const [minX, minY, maxX, maxY] = turf.bbox(historicMap.warpedMap.geoFullMask);
-		map.fitBounds(
-			[
-				[minX, minY],
-				[maxX, maxY]
-			],
-			{ padding: 50, animate: false }
-		);
+		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
+			projection: {
+				definition: 'EPSG:4326'
+			}
+		});
+		if (bbox) {
+			const [minX, minY, maxX, maxY] = bbox;
+			map.fitBounds(
+				[
+					[minX, minY],
+					[maxX, maxY]
+				],
+				{ padding: 50, animate: false }
+			);
+		}
 
 		selectedHistoricMap = historicMap;
 	}
@@ -823,32 +864,41 @@
 	function setHistoricMapView(historicMap: HistoricMap) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
-		selectedHistoricMap = historicMap;
+		const mapsToHide = visibleHistoricMaps
+			.keys()
+			.filter((i) => i != id)
+			.toArray();
+		warpedMapLayer?.setMapsOptions(mapsToHide, {
+			visible: false
+		});
+		warpedMapLayer?.setMapOptions(id, {
+			visible: true,
+			transformationType: 'straight',
+			saturation: 1,
+			applyMask: false
+		});
 
-		historicMap.warpedMap.visible = true;
-		historicMap.warpedMap.setTransformationType('straight');
-		historicMapsById.values().forEach((m) => (m.warpedMap.visible = m.id == id));
-		warpedMapLayer.setMapSaturation(id, 1);
+    selectedHistoricMap = historicMap;
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'none');
 
-		const { width, height } = historicMap.warpedMap.georeferencedMap.resource;
-		warpedMapLayer.setMapResourceMask(id, [
-			[0, height],
-			[width, height],
-			[width, 0],
-			[0, 0]
-		]);
-
 		saveMapView();
-		const [minX, minY, maxX, maxY] = turf.bbox(historicMap.warpedMap.geoFullMask);
-		map.fitBounds(
-			[
-				[minX, minY],
-				[maxX, maxY]
-			],
-			{ padding: 50, speed: 2, curve: 1.8 }
-		);
+
+		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
+			projection: {
+				definition: 'EPSG:4326'
+			}
+		});
+		if (bbox) {
+			const [minX, minY, maxX, maxY] = bbox;
+			map.fitBounds(
+				[
+					[minX, minY],
+					[maxX, maxY]
+				],
+				{ padding: 50, speed: 2, curve: 1.8 }
+			);
+		}
 	}
 
 	function handleMapClick(e: any) {
@@ -948,12 +998,6 @@
 		const bottomRight = document.querySelector('.maplibregl-ctrl-bottom-right');
 		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
 		if (bottomRight) bottomRight.style.setProperty('bottom', offset + 'px', 'important');
-	});
-
-	$effect(() => {
-		if (selectedHistoricMap) {
-			map?.triggerRepaint();
-		}
 	});
 </script>
 

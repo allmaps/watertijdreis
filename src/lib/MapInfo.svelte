@@ -74,7 +74,7 @@
 	function getViewportRectWithinHistoricMap(historicMap) {
 		if (!viewportPolygon) return;
 
-		const [minX, minY, maxX, maxY] = historicMap.warpedMap.geoFullMaskBbox;
+		const [minX, minY, maxX, maxY] = historicMap.geoFullMaskBbox;
 
 		const vpBbox = turf.bbox(viewportPolygon);
 		const [vMinX, vMinY, vMaxX, vMaxY] = vpBbox;
