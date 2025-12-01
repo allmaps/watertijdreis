@@ -1,20 +1,6 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
-	import {
-		ArrowArcLeft,
-		ArrowBendRightUp,
-		ArrowLineRight,
-		ArrowUUpLeft,
-		Binoculars,
-		ImagesSquare,
-		MapTrifold,
-		MouseLeftClick,
-		PictureInPicture,
-		PushPin,
-		ArrowSquareOut,
-		Copy,
-		Check
-	} from 'phosphor-svelte';
+	import { ImagesSquare, ArrowSquareOut, Copy, Check } from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 
 	let {
@@ -23,6 +9,7 @@
 		visibleHistoricMapsInViewport,
 		viewportPolygon,
 		hoveredHistoricMap,
+		clickedHistoricMap,
 		selectedHistoricMap,
 		historicMapsLoaded,
 		changeHistoricMapView,
@@ -33,7 +20,7 @@
 	let historicMap = $derived.by(() => {
 		return (
 			selectedHistoricMap ||
-			hoveredHistoricMap ||
+			clickedHistoricMap ||
 			(visibleHistoricMapsInViewport.size == 1
 				? visibleHistoricMapsInViewport.values().next().value
 				: null)

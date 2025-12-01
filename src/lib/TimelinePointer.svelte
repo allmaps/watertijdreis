@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="timeline-pointer height-[30px] absolute top-[-8px]"
+	class="timeline-pointer height-[30px] absolute -top-2 left-1/2 -translate-x-1/2"
 	style:left="50%"
 	style="z-index: 10000"
 >
@@ -44,20 +44,4 @@
 	>
 		{year}
 	</div>
-	<div
-		style="
-    position: absolute;
-    top: 125px;
-    left: 0;
-    height: 20px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    pointer-events: none;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    "
-	></div>
 </div>

@@ -27,7 +27,9 @@
 		color="#33336688"
 		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
 	></Waves> -->
-	<h1 class="relative -top-1 flex inline gap-[1px] text-[20px] font-[700]">
+	<h1
+		class="relative -top-1 flex inline gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
+	>
 		{#each 'Watertijdreis'.split('') as letter, i}
 			<span class="wave-letter inline-block" style="animation-delay: {i * 60}ms">
 				{letter}

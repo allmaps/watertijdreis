@@ -180,7 +180,7 @@
 				>
 			</span>
 		</button>
-		<button
+		<!-- <button
 			onclick={() => setGridVisibility((gridVisible = !gridVisible))}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 

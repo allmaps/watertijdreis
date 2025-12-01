@@ -18,6 +18,8 @@
 	import MapButtons from './MapButtons.svelte';
 	import SheetControls from './SheetControls.svelte';
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
+	import Timeline2 from './Timeline2.svelte';
+	import MapSheetToggle from './MapSheetToggle.svelte';
 
 	type HistoricMap = {
 		id: string;
@@ -95,6 +97,11 @@
 		if (!hoveredFeature) return null;
 		return historicMapsById.get(hoveredFeature.properties?.id) || null;
 	});
+	let clickedFeature: Feature<Geometry, GeoJsonProperties> | null = $state(null);
+	let clickedHistoricMap = $derived.by(() => {
+		if (!clickedFeature) return null;
+		return historicMapsById.get(clickedFeature.properties?.id) || null;
+	});
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
@@ -150,17 +157,15 @@
 	});
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
+	// let mapsInViewport = $derived.by(() => {
+	// 	const result = new SvelteMap();
+	// });
 	let visibleHistoricMapsInViewport = $derived.by(() => {
-		if (!viewportPolygon || !warpedMapLayer) return new Map();
-
-		const result = new Map();
-		for (const id of warpedMapLayer.renderer?.mapsInViewport ?? []) {
-			const map = historicMapsById.get(id);
-			if (map && map.warpedMap.visible) {
-				result.set(map.id, map);
-			}
+		const result = new SvelteMap();
+		if (!viewportPolygon) return result;
+		for (const map of visibleHistoricMaps.values()) {
+			if (warpedMapLayer?.renderer?.mapsInViewport.has(map.id)) result.set(map.id, map);
 		}
-
 		return result;
 	});
 
@@ -186,7 +191,8 @@
 				(e: WarpedMapEvent) => {
 					const id = e.data?.mapId;
 					const historicMap = historicMapsById.get(id);
-					if (historicMap) visibleHistoricMapsInViewport.set(id, historicMap);
+					if (historicMap && warpedMapLayer?.renderer?.mapsInViewport.has(historicMap.id))
+						visibleHistoricMapsInViewport.set(id, historicMap);
 				}
 			);
 		}
@@ -290,11 +296,13 @@
 		baseMap: 'none' | 'protomaps' | 'ahn' | 'satelliet';
 		protoMapsWaterInFront: boolean;
 		protomapsLabelsInFront: boolean;
+		historicMapsOpacity: number;
 	};
 	let layerOptions = $state<LayerOptions>({
 		baseMap: 'none',
 		protoMapsWaterInFront: false,
-		protomapsLabelsInFront: false
+		protomapsLabelsInFront: false,
+		historicMapsOpacity: 100
 	});
 
 	const EMPTY_STYLE = {
@@ -320,7 +328,10 @@
 			setProtomapsLabelsInFront(layerOptions.protomapsLabelsInFront);
 
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
-		setSatellietVisibility(layerOptions.baseMap === 'satelliet');
+    setSatellietVisibility(layerOptions.baseMap === 'satelliet');
+
+		if (warpedMapLayer) warpedMapLayer!.renderer!.opacity = layerOptions.historicMapsOpacity / 100;
+		
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -413,8 +424,13 @@
 			bearing: 0,
 			dragRotate: false,
 			touchPitch: false,
+			touchRotate: false,
+			attributionControl: false,
 			preserveDrawingBuffer: true
 		});
+		map.dragRotate.disable();
+		map.keyboard.disable();
+		map.touchZoomRotate.disableRotation();
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 		// map.on('idle', () => map?.triggerRepaint()); // TODO: weghalen!!
@@ -517,6 +533,16 @@
 		});
 
 		map.addLayer({
+			id: 'map-outlines-fill-2',
+			type: 'fill',
+			source: 'map-outlines',
+			paint: {
+				'fill-color': '#ff44aa',
+				'fill-opacity': ['coalesce', ['feature-state', 'animated-fill-opacity'], 0]
+			}
+		});
+
+		map.addLayer({
 			id: 'map-outlines-stroke',
 			type: 'line',
 			source: 'map-outlines',
@@ -526,6 +552,88 @@
 				'line-opacity': 0
 			}
 		});
+
+		map.addLayer({
+			id: 'map-outlines-stroke-2',
+			type: 'line',
+			source: 'map-outlines',
+			paint: {
+				'line-color': '#f4a',
+				'line-width': 1.5,
+				'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
+			}
+		});
+
+		map.on('click', 'map-outlines-fill', (e) => {
+			const source = map.getSource('map-outlines');
+			if (!source || !source._data) return;
+
+			const allFeatures = source._data.features;
+			const rippleCenter = map.unproject(e.point);
+			const speed = 300;
+
+			allFeatures.forEach((feature) => {
+				if (feature.id === undefined) return;
+
+				const [x, y] = feature.geometry.coordinates[0][0];
+				const dx = rippleCenter.lng - x;
+				const dy = rippleCenter.lat - y;
+				const distance = Math.sqrt(dx ** 2 + dy ** 2);
+				const delay = distance * speed;
+				const opacity = 0.5 - distance / 7;
+
+				setTimeout(() => {
+					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 500, () => {
+						setTimeout(() => {
+							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, 500);
+						}, 1000);
+					});
+				}, delay);
+			});
+
+			let feature = e.features?.[0] || null;
+			clickedFeature = feature;
+			if (clickedFeature !== null) {
+				const targetId = clickedFeature.id;
+				if (targetId === undefined) return;
+
+				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 500, () => {
+					setTimeout(() => {
+						if (feature)
+							animateFeatureOpacity(feature.id, 'animated-fill-opacity', 0, 500, () => {
+								clickedFeature = null;
+							});
+					}, 1000);
+				});
+			}
+		});
+	}
+
+	function animateFeatureOpacity(id, prop, endVal, duration, callback) {
+		const startTime = performance.now();
+
+		const currentState = map.getFeatureState({ source: 'map-outlines', id: id });
+		const startVal = currentState?.[prop] !== undefined ? currentState[prop] : 0;
+
+		function frame(currentTime) {
+			const elapsed = currentTime - startTime;
+			let progress = elapsed / duration;
+			if (progress > 1) progress = 1;
+
+			const currentVal = startVal + (endVal - startVal) * progress;
+
+			const stateUpdate = {};
+			stateUpdate[prop] = currentVal;
+			map.setFeatureState({ source: 'map-outlines', id: id }, stateUpdate);
+
+			if (progress < 1) {
+				requestAnimationFrame(frame);
+			} else {
+				if (callback) callback();
+			}
+		}
+
+		requestAnimationFrame(frame);
 	}
 
 	function addBackgroundLayers() {
@@ -600,7 +708,6 @@
 		try {
 			const { lat, lng } = await getUserLocation();
 
-			// create a pseudo-feature for your existing flyToFeature()
 			const feature = {
 				geometry: {
 					type: 'Point',
@@ -650,17 +757,19 @@
 	let savedMapViews: MapView[] = $state([]);
 
 	function saveMapView() {
-		savedMapViews.push({
+		const view = {
 			center: map.getCenter(),
 			zoom: map.getZoom(),
 			bearing: map.getBearing(),
 			pitch: map.getPitch()
-		});
+		};
+		savedMapViews.push(view);
+		return view;
 	}
 
-	function restoreView(options = { duration: 500 }) {
-		if (savedMapViews.length === 0 || !map) return;
-		const { center, zoom, bearing, pitch } = savedMapViews.pop()!;
+	function restoreView(view = savedMapViews.pop(), options = { duration: 500 }) {
+		if (!map || !view) return;
+		const { center, zoom, bearing, pitch } = view;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'visible');
@@ -714,8 +823,9 @@
 	function setHistoricMapView(historicMap: HistoricMap) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
+		selectedHistoricMap = historicMap;
+
 		historicMap.warpedMap.visible = true;
-		console.log('setHistoricMapView', historicMap);
 		historicMap.warpedMap.setTransformationType('straight');
 		historicMapsById.values().forEach((m) => (m.warpedMap.visible = m.id == id));
 		warpedMapLayer.setMapSaturation(id, 1);
@@ -747,9 +857,8 @@
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
 		if (gridVisible) {
-			selectedHistoricMap = historicMapsById.get(id) || null;
-			if (!selectedHistoricMap) return;
-			setHistoricMapView(selectedHistoricMap);
+			if (!historicMapsById.has(id)) return;
+			setHistoricMapView(historicMapsById.get(id));
 
 			addEventListener('keydown', (e) => {
 				if (e.key == 'Escape') restoreView();
@@ -858,6 +967,16 @@
 
 <Toast content={toastContent}></Toast>
 
+<MapSheetToggle
+	{hoveredHistoricMap}
+	{clickedHistoricMap}
+	{selectedHistoricMap}
+	{setHistoricMapView}
+	{setGridVisibility}
+	{saveMapView}
+	{restoreView}
+></MapSheetToggle>
+
 <MapButtons
 	visible={!selectedHistoricMap}
 	{flyToFeature}
@@ -865,11 +984,11 @@
 	{setGridVisibility}
 	{zoomIn}
 	{zoomOut}
-	{layerOptions}
+	bind:layerOptions
 />
 <Header />
 
-<Timeline
+<!-- <Timeline
 	bind:filter
 	{applyFilter}
 	{historicMapsLoaded}
@@ -879,7 +998,17 @@
 	{setLabelVisibility}
 	{getHistoricMapThumbnail}
 	{map}
-></Timeline>
+></Timeline> -->
+
+<Timeline2
+	visible={!selectedHistoricMap}
+	{historicMapsLoaded}
+	{historicMapsById}
+	{mapsInViewport}
+	bind:filter
+	{applyFilter}
+	{getHistoricMapThumbnail}
+></Timeline2>
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
@@ -889,6 +1018,7 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{getHistoricMapThumbnail}
@@ -900,6 +1030,7 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
 	{changeHistoricMapView}
