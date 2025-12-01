@@ -13,6 +13,7 @@
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 	import LayersPanel from './LayersPanel.svelte';
+	import { onMount } from 'svelte';
 
 	let {
 		visible = true,
@@ -24,6 +25,12 @@
 		layerOptions = $bindable()
 	} = $props();
 
+	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+	let kbdVisible = $state(false);
+	$effect(() => {
+		kbdVisible = true;
+	});
+
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
 	let gridVisible = $state(false);
@@ -34,8 +41,14 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.metaKey && e.key == 'k') searchBarVisible = true;
-		if (e.key.toLowerCase() == 'l') layersPanelVisible = !layersPanelVisible;
+		if (e.key.toLowerCase() === 'k' && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
+			e.preventDefault();
+			searchBarVisible = true;
+		}
+
+		if (e.key.toLowerCase() === 'l') {
+			layersPanelVisible = !layersPanelVisible;
+		}
 	}}
 />
 
@@ -81,13 +94,20 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-41 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Locatie zoeken...
 				<kbd
-					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
-					><span class="text-foreground-alt text-[12px]">⌘K</span></kbd
+					hidden={!kbdVisible}
+					class="
+					bg-background-alt text-xxs
+					pointer-events-none ml-1 flex inline
+					items-center gap-1 rounded-sm border px-1 font-sans font-medium
+					text-[#cce] shadow-[0px_2px_0px_0px_#cce] transition-[opacity] duration-200
+					select-none dark:border-[rgba(0,_0,_0,_0.10)]
+					dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]
+					"><span class="text-foreground-alt text-[12px]">{isApplePlatform ? '⌘' : 'Ctrl '}K</span></kbd
 				>
 			</span>
 		</button>
@@ -116,7 +136,7 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Naar mijn locatie
@@ -149,11 +169,12 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
 				Lagen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">L</span></kbd
 				>
@@ -194,56 +215,56 @@
 				class={`
 			overflow-hidden whitespace-nowrap
 			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 max-w-40 opacity-100'}
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 		`}
 			>
-				Bladindex tonen
+				Grid tonen
 				<kbd
+					hidden={!kbdVisible}
 					class="bg-background-alt text-xxs pointer-events-none ml-1 flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
 					><span class="text-foreground-alt text-[12px]">Spatie</span></kbd
 				>
 			</span>
-		</button> -->
+		</button>
+
+		<div
+			class={`
+			my-3 mt-20 flex w-fit flex-col items-center
+			justify-center overflow-hidden rounded-lg
+			border-2
+			border-[#33336611] bg-white shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+		`}
+		>
+			<button
+				onclick={zoomIn}
+				class={`
+			group flex cursor-pointer
+			items-center justify-center border-b-2
+			border-[#33336611] p-2
+			transition-colors duration-200 hover:bg-[#eef]
+			`}
+				title="Zoom In"
+			>
+				<MagnifyingGlassPlus
+					color="#f4a"
+					class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
+				/>
+			</button>
+
+			<button
+				onclick={zoomOut}
+				class={`
+			group flex cursor-pointer
+			items-center justify-center p-2
+			transition-colors duration-200 hover:bg-[#eef]
+			`}
+				title="Zoom Out"
+			>
+				<MagnifyingGlassMinus
+					color="#f4a"
+					class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
+				/>
+			</button>
+		</div>
 	</div>
 {/if}
-
-<div
-	class={`
-	fixed bottom-48 left-5
-	my-3 mt-20 flex w-fit flex-col items-center
-	justify-center overflow-hidden rounded-lg
-	border-2
-	border-[#33336611] bg-white shadow-[0_2px_2px_rgba(0,0,0,0.05)]
-`}
->
-	<button
-		onclick={zoomIn}
-		class={`
-	group flex cursor-pointer
-	items-center justify-center border-b-2
-	border-[#33336611] p-2
-	transition-colors duration-200 hover:bg-[#eef]
-	`}
-		title="Zoom In"
-	>
-		<MagnifyingGlassPlus
-			color="#f4a"
-			class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-		/>
-	</button>
-
-	<button
-		onclick={zoomOut}
-		class={`
-	group flex cursor-pointer
-	items-center justify-center p-2
-	transition-colors duration-200 hover:bg-[#eef]
-	`}
-		title="Zoom Out"
-	>
-		<MagnifyingGlassMinus
-			color="#f4a"
-			class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-		/>
-	</button>
-</div>

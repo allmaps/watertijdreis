@@ -4,9 +4,11 @@
 	import { cubicOut } from 'svelte/easing';
 	import MapThumbnail from './MapThumbnail.svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
+	import PlayPauseButton from './PlayPauseButton.svelte';
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
 	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
 	import { Label, Switch } from 'bits-ui';
+	import TimelineSettings from './TimelineSettings.svelte';
 
 	let {
 		filter = $bindable(),
@@ -139,19 +141,17 @@
 	function onpointermove(e: PointerEvent) {
 		if (!isPanning) return;
 
-		const maxDeltaLeft = selectedYear - minHistoricMapYear;
-		const maxDeltaRight = maxHistoricMapYear - selectedYear;
+		const maxDeltaLeft = view.current.start - MIN_YEAR;
+		const maxDeltaRight = view.current.end - MAX_YEAR;
 
 		const dx = e.clientX - lastX;
 		let yearDelta = (dx / width) * (view.current.end - view.current.start);
 		if (yearDelta > maxDeltaLeft) yearDelta = maxDeltaLeft;
 		if (yearDelta < maxDeltaRight) yearDelta = maxDeltaRight;
 
-		console.log('yearDelta', yearDelta);
-
 		view.target = {
-			start: view.target.start - yearDelta,
-			end: view.target.end - yearDelta
+			start: Math.max(view.target.start - yearDelta, MIN_YEAR),
+			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
 		};
 		lastX = e.clientX;
 
@@ -174,10 +174,54 @@
 		window.removeEventListener('pointerup', onpointerup);
 	}
 
+	let selectedRegulier = $state(true);
+	let selectedBIS = $state(false);
+	let selectedHWP = $state(false);
+	let selectedWVE = $state(false);
 	let selectedOption = $state('');
 	let showSettings = $state(false);
 	function toggleSettings() {
 		showSettings = !showSettings;
+	}
+
+	function clearAll() {
+		selectedRegulier = false;
+		selectedBIS = false;
+		selectedHWP = false;
+		selectedWVE = false;
+	}
+
+	function toggleRegulier(v: boolean) {
+		if (v) {
+			clearAll();
+			selectedRegulier = true;
+		} else {
+			selectedRegulier = false;
+			selectedBIS = false;
+		}
+	}
+
+	function toggleBIS(v: boolean) {
+		if (!selectedRegulier) return;
+		selectedBIS = v;
+	}
+
+	function toggleHWP(v: boolean) {
+		if (v) {
+			clearAll();
+			selectedHWP = true;
+		} else {
+			selectedHWP = false;
+		}
+	}
+
+	function toggleWVE(v: boolean) {
+		if (v) {
+			clearAll();
+			selectedWVE = true;
+		} else {
+			selectedWVE = false;
+		}
 	}
 
 	let ticksTop = true;
@@ -186,7 +230,7 @@
 {#if !selectedHistoricMap}
 	<div
 		transition:fly={{ y: 100, duration: 250 }}
-		class="touch-action-none absolute bottom-[10px] left-[10px] z-998 h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md"
+		class="touch-action-none absolute bottom-[15px] left-[10px] z-998 h-[120px] w-[calc(100%-20px)] touch-none overflow-visible rounded-[8px] shadow-md"
 		style:background={'#336'}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
@@ -196,6 +240,10 @@
 		{onpointerup}
 	>
 		<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
+
+		<div class="absolute bottom-0.5 left-1/2 z-[20000] -translate-x-1/2">
+			<PlayPauseButton />
+		</div>
 
 		<!-- <div
 			class="map-markers"
@@ -361,75 +409,140 @@
 			{/if}
 		</svg>
 
-		<div class="absolute top-2 right-2 z-[2000]">
-			<div
-				id="settings-button"
-				class="pointer-events-auto rounded-full p-[3px] shadow-2xl transition-all duration-300"
-				style="background: linear-gradient(160deg, #ff66aa, #3333aa);"
-			>
-				<button
-					class="pointer flex h-7 w-7 items-center justify-center
-					rounded-full bg-white
-					text-[#3333aa] transition-all duration-150
-					hover:scale-[1.05] active:scale-[0.97]"
-					title="Kies type kaart"
-					onclick={(e) => {
-						e.stopPropagation();
-						toggleSettings();
-					}}
+		<TimelineSettings {showSettings} {toggleSettings}>
+			<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+				<li
+					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
 				>
-					<Gear size={18} />
-				</button>
-			</div>
+					Ondergrens jaar:
+					<input
+						type="number"
+						min={MIN_YEAR}
+						max={Math.floor(selectedYear)}
+						bind:value={filter.yearStart}
+						onchange={() => {
+							applyFilter(filter);
+						}}
+						class="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
+					/>
+				</li>
+				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+					Reguliere Waterstaatskaarten
 
-			{#if showSettings}
-				<div
-					id="settings-menu"
-					class="absolute w-80 rounded-lg border border-gray-200 bg-white px-3 py-3 shadow-lg transition-all duration-200"
-					style="right: 3.0rem; top: {-130}px;"
+					<Switch.Root
+						checked={selectedRegulier}
+						onCheckedChange={toggleRegulier}
+						class="
+        relative inline-flex h-[22px]
+        w-[40px] cursor-pointer
+        items-center rounded-full
+        bg-gray-300 px-[2px]
+        transition-colors data-[state=checked]:bg-[#ff66aa]
+    "
+					>
+						<Switch.Thumb
+							class="
+            block
+            h-[18px] w-[18px]
+            translate-x-0 cursor-pointer
+            rounded-full bg-white
+            transition-transform
+            duration-200 data-[state=checked]:translate-x-[18px]
+        "
+						/>
+					</Switch.Root>
+				</li>
+
+				<li
+					class="
+		flex cursor-pointer items-center justify-between rounded-md px-2 py-1
+		pl-5 transition
+		{selectedRegulier
+						? 'text-[#333366] hover:bg-gray-100'
+						: 'cursor-not-allowed text-gray-300 opacity-80'}
+	"
 				>
-					<ul class="flex flex-col gap-2 text-sm text-[#333366]">
-						<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
-							Ondergrens jaar:
-							<input
-								type="number"
-								min={MIN_YEAR}
-								max={Math.floor(selectedYear)}
-								bind:value={filter.yearStart}
-								onchange={() => {
-									applyFilter(filter);
-								}}
-								class="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
-							/>
-						</li>
-						{#each ['Reguliere Waterstaatskaart', 'BIS Edities', 'Hydrologische Waarnemingspunten', 'Watervoorzieningseenheden'] as option}
-							<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
-								<Label.Root for={option} class="text-sm font-medium">{option}</Label.Root>
+					BIS-edities
 
-								<Switch.Root
-									id={option}
-									name="settings-switch"
-									checked={selectedOption === option}
-									onCheckedChange={(checked: boolean) => {
-										if (checked) selectedOption = option;
-									}}
-									class="focus-visible:ring-foreground focus-visible:ring-offset-background 
-									data-[state=unchecked]:shadow-mini-inset inline-flex 
-									h-[22px] 
-									w-[40px] shrink-0 cursor-pointer items-center rounded-full px-[2px] 
-									transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed 
-									disabled:opacity-50 data-[state=checked]:bg-[#ff66aa] data-[state=unchecked]:bg-gray-300"
-								>
-									<Switch.Thumb
-										class="data-[state=unchecked]:shadow-mini pointer-events-none block size-[18px] shrink-0 rounded-full border border-gray-200 
-									bg-white transition-transform data-[state=checked]:translate-x-[18px] data-[state=unchecked]:translate-x-0"
-									/>
-								</Switch.Root>
-							</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
-		</div>
+					<label
+						class="
+			flex items-center gap-2
+			{selectedRegulier ? 'cursor-pointer' : 'pointer-events-none cursor-not-allowed'}
+		"
+					>
+						<input
+							type="checkbox"
+							checked={selectedBIS}
+							onchange={(e) => toggleBIS(e.target.checked)}
+							disabled={!selectedRegulier}
+							class="
+				h-4 w-4 rounded border-gray-300 text-[#fff]
+				{selectedRegulier ? 'cursor-pointer' : 'opacity-80'}
+
+				accent-[#f4a]
+			"
+						/>
+					</label>
+				</li>
+
+				<li
+					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+				>
+					Hydrologische Waarnemingspunten
+
+					<Switch.Root
+						checked={selectedHWP}
+						onCheckedChange={toggleHWP}
+						class="
+        relative inline-flex h-[22px]
+        w-[40px] cursor-pointer
+        items-center rounded-full
+        bg-gray-300 px-[2px]
+        transition-colors data-[state=checked]:bg-[#ff66aa]
+    "
+					>
+						<Switch.Thumb
+							class="
+            block
+            h-[18px] w-[18px]
+            translate-x-0 cursor-pointer
+            rounded-full bg-white
+            transition-transform
+            duration-200 data-[state=checked]:translate-x-[18px] 
+        "
+						/>
+					</Switch.Root>
+				</li>
+
+				<li
+					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+				>
+					Watervoorzieningseenheden
+
+					<Switch.Root
+						checked={selectedWVE}
+						onCheckedChange={toggleWVE}
+						class="
+        relative inline-flex h-[22px]
+        w-[40px] cursor-pointer
+        items-center rounded-full
+        bg-gray-300 px-[2px]
+        transition-colors  data-[state=checked]:bg-[#ff66aa]
+    "
+					>
+						<Switch.Thumb
+							class="
+            block
+            h-[18px] w-[18px]
+            translate-x-0 cursor-pointer
+            rounded-full bg-white
+            transition-transform
+            duration-200 data-[state=checked]:translate-x-[18px]
+        "
+						/>
+					</Switch.Root>
+				</li>
+			</ul>
+		</TimelineSettings>
 	</div>
 {/if}
