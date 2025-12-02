@@ -92,7 +92,7 @@
 </script>
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-2 right-8 z-998" style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));">
+	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-2 z-998 right-2 sm:right-8" style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));">
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#if clickedHistoricMap}
