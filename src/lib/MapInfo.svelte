@@ -3,6 +3,26 @@
 	import { ImagesSquare, ArrowSquareOut, Copy, Check } from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 
+	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
+	let manifestCollection: any | null = $state(null);
+
+	$effect(() => {
+		fetch(MANIFEST_URL)
+			.then((res) => res.json())
+			.then((data) => (manifestCollection = data));
+	});
+
+	async function getEditionManifest(edition: number, bis: boolean) {
+		if (!manifestCollection) return null;
+
+		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
+		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
+
+		const response = await fetch(manifestUrl);
+		const result = await response.json();
+		return result;
+	}
+
 	let {
 		historicMapsById,
 		visibleHistoricMaps,
@@ -13,8 +33,7 @@
 		selectedHistoricMap,
 		historicMapsLoaded,
 		changeHistoricMapView,
-		getHistoricMapThumbnail,
-		getEditionManifest
+		getHistoricMapThumbnail
 	} = $props();
 
 	let historicMap = $derived.by(() => {

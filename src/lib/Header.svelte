@@ -28,7 +28,7 @@
 		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
 	></Waves> -->
 	<h1
-		class="relative -top-1 flex inline gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
+		class="display-inline-block relative -top-1 flex inline cursor-pointer gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
 	>
 		{#each 'Watertijdreis'.split('') as letter, i}
 			<span class="wave-letter inline-block" style="animation-delay: {i * 60}ms">
@@ -104,10 +104,6 @@
 </div>
 
 <style>
-	h1 {
-		/* font-family: "ivypresto-display"; */
-	}
-
 	.wave-letter {
 		display: inline-block;
 		animation: wave 600ms ease-in-out infinite alternate;

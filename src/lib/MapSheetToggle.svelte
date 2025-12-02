@@ -29,8 +29,7 @@
 	function rightBtnClick() {
 		rightBtnSelected = true;
 		if (pinnedHistoricMap) {
-			restoreView(pinnedView);
-			setHistoricMapView(pinnedHistoricMap);
+			setHistoricMapView(pinnedHistoricMap, pinnedView);
 		} else if (clickedHistoricMap && !selectedHistoricMap) {
 			setHistoricMapView(clickedHistoricMap);
 		}
@@ -46,8 +45,8 @@
 
 <div
 	class="
-        group fixed top-25 left-5 z-1000 my-3 flex flex-shrink-0 cursor-pointer
-        items-center justify-center rounded-lg border-2 border-[#33336611]
+        group fixed top-24 left-5 z-1000 my-3 flex flex-shrink-0 cursor-pointer
+        items-center justify-center rounded-[9px] border-2 border-[#33336611]
         bg-[#33336611] font-[500]
         text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
         backdrop-blur-md duration-500
@@ -66,7 +65,7 @@
 		<MapTrifold
 			size="18"
 			color={!rightBtnSelected ? '#f4a' : '#336'}
-			class="relative -top-[2px] inline"
+			class="relative -top-[2px] inline transition-[fill] duration-500"
 		/>
 		Kaart
 	</button>
@@ -78,7 +77,7 @@
 		<FileText
 			size="18"
 			color={rightBtnSelected ? '#f4a' : '#336'}
-			class="relative -top-[2px] inline"
+			class="relative -top-[2px] inline transition-[fill] duration-500"
 		/>
 		{#if pinnedHistoricMap}
 			{pinnedHistoricMap.label}

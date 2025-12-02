@@ -1,88 +1,46 @@
 <script lang="ts">
 	import maplibregl from 'maplibre-gl';
+	import * as turf from '@turf/turf';
+	import * as pmtiles from 'pmtiles';
 	import { WarpedMapLayer } from '@allmaps/maplibre';
 	import { WarpedMap, WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
-	import * as turf from '@turf/turf';
 
 	import { SvelteMap } from 'svelte/reactivity';
-	import type { GeojsonPolygon } from './types/geojson';
+
 	import Header from './Header.svelte';
 	import Minimap from './Minimap.svelte';
 	import Timeline from './Timeline.svelte';
-	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import MapInfo from './MapInfo.svelte';
 	import Toast from './Toast.svelte';
-
-	import * as pmtiles from 'pmtiles';
-	import { basemapStyle } from './basemap';
-	import MapButtons from './MapButtons.svelte';
-	import SheetControls from './SheetControls.svelte';
-	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import Timeline2 from './Timeline2.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
+	import MapButtons from './MapButtons.svelte';
+	import SheetControls from './SheetControls.svelte';
+	import { getUserLocation } from '$lib/UserLocation.svelte';
+	import { basemapStyle } from './basemap';
 
-	type HistoricMap = {
-		id: string;
-		manifestId: string;
-		warpedMap?: WarpedMap;
-		label: string;
-		polygon: GeojsonPolygon;
-		yearStart: number;
-		yearEnd: number;
-		edition: number;
-		bis: boolean;
-		number: number;
-		position: string;
-		x: number;
-		y: number;
-		type: string | undefined;
-	};
-
-	type Filter = {
-		yearStart: number;
-		yearEnd: number;
-		edition: 'All' | 1 | 2 | 3 | 4 | 5;
-		bis: boolean;
-		type: undefined | 'WVE' | 'HWP';
-	};
+	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
+	import type { HistoricMap } from './types/historicmap';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
-	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
-	let manifestCollection: any | null = $state(null);
-
-	$effect(() => {
-		fetch(MANIFEST_URL)
-			.then((res) => res.json())
-			.then((data) => (manifestCollection = data));
-	});
-
-	async function getEditionManifest(edition: number, bis: boolean) {
-		if (!manifestCollection) return null;
-
-		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
-		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
-
-		const response = await fetch(manifestUrl);
-		const result = await response.json();
-		return result;
-	}
 
 	let map: maplibregl.Map | null = $state(null);
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
 	let maplibreLoaded: boolean = $state(false);
 
 	$effect(() => {
-		if (maplibreLoaded) console.log('maplibre loaded');
+		if (!map) initMaplibre();
+	});
+
+	$effect(() => {
+		if (maplibreLoaded) console.log('maplibre geladen: ', map);
+	});
+	$effect(() => {
+		if (historicMapsLoaded) console.log('historische kaarten geladen: ', warpedMapLayer);
 	});
 
 	let historicMapsLoaded: boolean = $state(false);
-
-	$effect(() => {
-		if (historicMapsLoaded)
-			toastContent = `<b>${historicMapsById.size}</b> historische kaarten geladen`;
-	});
-
 	let historicMapsById: Map<string, HistoricMap> = $state(new Map());
 	let historicMapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
 		if (!historicMapsLoaded) return;
@@ -117,6 +75,14 @@
 					properties: { id: o.id, year: o.yearEnd }
 				})
 			)
+			.map((f) => {
+				const h = 44;
+				const s = 46 + Math.floor(Math.random() * 10);
+				const l = 90 + Math.floor(Math.random() * 5);
+
+				f.properties!.skeletonColor = `hsl(${h}, ${s}%, ${l}%)`;
+				return f;
+			})
 			.toArray();
 
 		const points: Feature<Geometry, GeoJsonProperties>[] = visibleHistoricMaps
@@ -144,16 +110,20 @@
 
 	let viewportPolygon: GeojsonPolygon | null = $state(null);
 
+	type Filter = {
+		yearStart: number;
+		yearEnd: number;
+		edition: 'All' | 1 | 2 | 3 | 4 | 5;
+		bis: boolean;
+		type: undefined | 'WVE' | 'HWP';
+	};
+
 	let filter: Filter = $state({
 		yearStart: 1865,
 		yearEnd: 1991,
 		edition: 'All',
 		bis: false,
 		type: undefined
-	});
-
-	$effect(() => {
-		if (!map) initMaplibre();
 	});
 
 	let visibleHistoricMaps: SvelteMap<string, HistoricMap> = $state(new SvelteMap());
@@ -305,14 +275,10 @@
 			}
 		});
 
-		toastContent = `Ingestelde periode: <b>${filter.yearStart} - ${filter.yearEnd}</b><br><b>${mapsToColor.length}</b> kaarten${mapsToDesaturate.length ? `, <b>${mapsToDesaturate.length}</b> kaarten buiten periode` : ''}`;
+		toastContent = `Je ziet nu kaarten uit de periode <code style="font-weight: 600">${filter.yearStart}</code> en <code style="font-weight: 600">${filter.yearEnd}</code>`
 
 		console.log('Applied filter');
 	}
-
-	$effect(() => {
-		if (maplibreLoaded) console.log(map);
-	});
 
 	type LayerOptions = {
 		baseMap: 'none' | 'protomaps' | 'ahn' | 'satelliet';
@@ -350,10 +316,9 @@
 			setProtomapsLabelsInFront(layerOptions.protomapsLabelsInFront);
 
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
-    setSatellietVisibility(layerOptions.baseMap === 'satelliet');
+		setSatellietVisibility(layerOptions.baseMap === 'satelliet');
 
 		if (warpedMapLayer) warpedMapLayer!.renderer!.opacity = layerOptions.historicMapsOpacity / 100;
-		
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -539,7 +504,7 @@
 				id: 'map-outlines-skeleton',
 				type: 'fill',
 				source: 'map-outlines',
-				paint: { 'fill-color': '#eef' }
+				paint: { 'fill-color': ['get', 'skeletonColor'] }
 			},
 			'warped-map-layer'
 		);
@@ -817,13 +782,13 @@
 
 		applyFilter(filter);
 
-    if (selectedHistoricMap) {
-      warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
-        transformationType: 'thinPlateSpline',
-			  applyMask: true
-      })
-      selectedHistoricMap = null;
-    }
+		if (selectedHistoricMap) {
+			warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+				transformationType: 'thinPlateSpline',
+				applyMask: true
+			});
+			selectedHistoricMap = null;
+		}
 	}
 
 	function changeHistoricMapView(historicMap: HistoricMap) {
@@ -861,7 +826,7 @@
 		selectedHistoricMap = historicMap;
 	}
 
-	function setHistoricMapView(historicMap: HistoricMap) {
+	function setHistoricMapView(historicMap: HistoricMap, view: MapView | undefined) {
 		if (!map || !warpedMapLayer) return;
 		const { id } = historicMap;
 		const mapsToHide = visibleHistoricMaps
@@ -878,26 +843,30 @@
 			applyMask: false
 		});
 
-    selectedHistoricMap = historicMap;
+		selectedHistoricMap = historicMap;
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'none');
 
 		saveMapView();
 
-		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
-			projection: {
-				definition: 'EPSG:4326'
+		if (view) {
+			map.easeTo(view);
+		} else {
+			const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
+				projection: {
+					definition: 'EPSG:4326'
+				}
+			});
+			if (bbox) {
+				const [minX, minY, maxX, maxY] = bbox;
+				map.fitBounds(
+					[
+						[minX, minY],
+						[maxX, maxY]
+					],
+					{ padding: 50, speed: 2, curve: 1.8 }
+				);
 			}
-		});
-		if (bbox) {
-			const [minX, minY, maxX, maxY] = bbox;
-			map.fitBounds(
-				[
-					[minX, minY],
-					[maxX, maxY]
-				],
-				{ padding: 50, speed: 2, curve: 1.8 }
-			);
 		}
 	}
 
@@ -1005,8 +974,12 @@
 
 <div
 	id={containerId}
-	class="polka relative h-full w-full overflow-hidden bg-size-[25px_25px]"
-	style={`background-color: ${selectedHistoricMap ? '#fffaff' : '#fafaff'}; background-image: radial-gradient(${selectedHistoricMap ? '#fef' : '#eef'} 2.5px, transparent 2.5px)`}
+	class="fixed inset-0 h-full w-full polka bg-size-[25px_25px]"
+	style={`
+		touch-action: auto; 
+		background-color: ${selectedHistoricMap ? '#fffaff' : '#fafaff'}; 
+		background-image: radial-gradient(${selectedHistoricMap ? '#fef' : '#eef'} 2.5px, transparent 2.5px)
+	`}
 ></div>
 
 <Toast content={toastContent}></Toast>
@@ -1044,8 +1017,8 @@
 	{map}
 ></Timeline> -->
 
+{#if historicMapsLoaded && !selectedHistoricMap}
 <Timeline2
-	visible={!selectedHistoricMap}
 	{historicMapsLoaded}
 	{historicMapsById}
 	{mapsInViewport}
@@ -1053,6 +1026,7 @@
 	{applyFilter}
 	{getHistoricMapThumbnail}
 ></Timeline2>
+{/if}
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
@@ -1079,7 +1053,6 @@
 	{historicMapsLoaded}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
-	{getEditionManifest}
 ></MapInfo>
 
 <svelte:window

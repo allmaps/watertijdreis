@@ -31,7 +31,7 @@
 </script>
 
 <div class="absolute" style={containerStyle}>
-	{#each maps.filter((i) => mapsInViewport.has(i.id)) as map, index (map.id)}
+	{#each maps as map, index (map.id)}
 		<!-- {@const isVisible = visibleMapIds.has(map.id)} -->
 		{@const isVisible = true}
 

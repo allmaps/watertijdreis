@@ -69,6 +69,29 @@
 		onmouseleave={() => (buttonCollapse = true)}
 		class="absolute top-1/4 left-5 z-999 w-20 text-[#336]"
 	>
+		<!-- <button
+			class="
+			group fixed top-40 left-5 z-1000 my-3 flex flex-shrink-0 cursor-pointer
+			items-center justify-center rounded-[8px] border-2 border-[#33336611]
+			bg-[#33336611] font-[500]
+			text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+			backdrop-blur-md duration-500
+		"
+		>
+			<div class="flex flex-shrink items-center justify-center h-10 rounded-[8px] bg-white p-2 group-active:scale-95">
+				<MagnifyingGlass
+					color="#f4a"
+					class={`
+						relative inline -top-px inline h-[22px]
+						w-[22px] flex-shrink-0 opacity-70 group-hover:opacity-100
+						`}
+				/>
+				<div class="px-2 overflow-hidden whitespace-nowrap w-0 transition:w duration-500 group-hover:w-full">
+					Locatie zoeken...
+				</div>
+			</div>
+		</button> -->
+
 		<button
 			onclick={() => (searchBarVisible = !searchBarVisible)}
 			class={`

@@ -5,7 +5,6 @@
 	import MapStack from './MapStack.svelte';
 
 	let {
-		visible = true,
 		historicMapsLoaded,
 		historicMapsById,
 		mapsInViewport,
@@ -34,8 +33,8 @@
 
 	let view = new Spring(
 		{
-			start: 1900,
-			end: 2000
+			start: 1977,
+			end: 1983
 		},
 		{ stiffness: 0.1, damping: 0.25 }
 	);
@@ -149,94 +148,94 @@
 	onpointercancel={onWindowPointerUp}
 />
 
-{#if visible}
-	<div class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none">
-		<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
+<div 
+class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
+transition:fly={{ y: 200, duration: 250 }}
+>
+	<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
+	<div
+		{onpointerdown}
+		{onwheel}
+		bind:clientWidth={width}
+		bind:clientHeight={height}
+		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336]"
+	>
+		<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
 		<div
-			{onpointerdown}
-			{onwheel}
-			bind:clientWidth={width}
-			bind:clientHeight={height}
-			class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336]"
-			transition:fly={{ y: 200, duration: 250 }}
+			class="absolute inset-0 z-1 h-[200px] w-full"
+			style="perspective: 1000px; transform-style: preserve-3d;"
 		>
-			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
-			<div
-				class="absolute inset-0 z-1 h-[200px] w-full"
-				style="perspective: 1000px; transform-style: preserve-3d;"
-			>
-				{#each yearsWithMaps as year}
-					{#if year >= startYearInt && year <= endYearInt}
-						{@const x = getX(year)}
-						<MapStack
-							{x}
-							maps={mapsByYear[year]}
-							{pixelsPerYear}
-							{mapsInViewport}
-							{getHistoricMapThumbnail}
-							{selectedYear}
-						></MapStack>
-						<!-- <div
-                            class="absolute h-10 w-10 bg-[#f00]"
-                            style="
-                                transform: translateX({x}px) translateY({60}px) rotateX(60deg) rotateZ({0}deg);
-                            "
-                        ></div> -->
-					{/if}
-				{/each}
-			</div>
-			<svg class="absolute inset-0 z-999 h-full w-full cursor-grab">
-				{#if pixelsPerYear > 3}
-					<path
-						d={ticks.minor}
-						stroke={timelineTickColor}
-						stroke-width="1"
-						opacity={1 - (5 - pixelsPerYear) / 2}
-					/>
-				{/if}
-
-				{#if pixelsPerYear > 7}
-					<path
-						d={ticks.medium}
-						stroke={timelineTickColor}
-						stroke-width="1"
-						opacity={1 - (9 - pixelsPerYear) / 2}
-					/>
-				{/if}
-
-				<path d={ticks.major} stroke={timelineTickColor} stroke-width="1" />
-
-				{#each { length: endYearInt - startYearInt + 1 } as _, i}
-					{@const year = startYearInt + i}
+			{#each yearsWithMaps as year}
+				{#if year >= startYearInt && year <= endYearInt}
 					{@const x = getX(year)}
-
-					{#if year % 25 === 0}
-						<text
-							x={x - 15}
-							y={ticksOnTop ? 22 : height - 12}
-							font-size="12"
-							font-weight="700"
-							fill={timelineTickColor}>{year}</text
-						>
-					{:else if year % 5 === 0 && pixelsPerYear > 7}
-						<text
-							x={x - 15}
-							y={ticksOnTop ? 22 : height - 12}
-							font-size="12"
-							fill={timelineTickColor}
-							opacity={1 - (9 - pixelsPerYear) / 2}>{year}</text
-						>
-					{:else if pixelsPerYear > 35}
-						<text
-							x={x - 15}
-							y={ticksOnTop ? 22 : height - 12}
-							font-size="12"
-							fill={timelineTickColor}
-							opacity={1 - (38 - pixelsPerYear) / 3}>{year}</text
-						>
-					{/if}
-				{/each}
-			</svg>
+					<MapStack
+						{x}
+						maps={mapsByYear[year]}
+						{pixelsPerYear}
+						{mapsInViewport}
+						{getHistoricMapThumbnail}
+						{selectedYear}
+					></MapStack>
+					<!-- <div
+						class="absolute h-10 w-10 bg-[#f00]"
+						style="
+							transform: translateX({x}px) translateY({60}px) rotateX(60deg) rotateZ({0}deg);
+						"
+					></div> -->
+				{/if}
+			{/each}
 		</div>
+		<svg class="absolute inset-0 z-999 h-full w-full cursor-grab">
+			{#if pixelsPerYear > 3}
+				<path
+					d={ticks.minor}
+					stroke={timelineTickColor}
+					stroke-width="1"
+					opacity={1 - (5 - pixelsPerYear) / 2}
+				/>
+			{/if}
+
+			{#if pixelsPerYear > 7}
+				<path
+					d={ticks.medium}
+					stroke={timelineTickColor}
+					stroke-width="1"
+					opacity={1 - (9 - pixelsPerYear) / 2}
+				/>
+			{/if}
+
+			<path d={ticks.major} stroke={timelineTickColor} stroke-width="1" />
+
+			{#each { length: endYearInt - startYearInt + 1 } as _, i}
+				{@const year = startYearInt + i}
+				{@const x = getX(year)}
+
+				{#if year % 25 === 0}
+					<text
+						x={x - 15}
+						y={ticksOnTop ? 22 : height - 12}
+						font-size="12"
+						font-weight="700"
+						fill={timelineTickColor}>{year}</text
+					>
+				{:else if year % 5 === 0 && pixelsPerYear > 7}
+					<text
+						x={x - 15}
+						y={ticksOnTop ? 22 : height - 12}
+						font-size="12"
+						fill={timelineTickColor}
+						opacity={1 - (9 - pixelsPerYear) / 2}>{year}</text
+					>
+				{:else if pixelsPerYear > 35}
+					<text
+						x={x - 15}
+						y={ticksOnTop ? 22 : height - 12}
+						font-size="12"
+						fill={timelineTickColor}
+						opacity={1 - (38 - pixelsPerYear) / 3}>{year}</text
+					>
+				{/if}
+			{/each}
+		</svg>
 	</div>
-{/if}
+</div>
