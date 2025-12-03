@@ -1,19 +1,9 @@
 <script>
-	import {
-		Eye,
-		ImagesSquare,
-		SkipBack,
-		SkipForward,
-		Rewind,
-		FastForward,
-		Play
-	} from 'phosphor-svelte';
-
 	let { year } = $props();
 </script>
 
 <div
-	class="timeline-pointer height-[30px] absolute -top-2 left-1/2 -translate-x-1/2"
+	class="timeline-pointer touch-action-none pointer-events-none height-[30px] absolute -top-2 left-1/2 -translate-x-1/2"
 	style:left="50%"
 	style="z-index: 10000"
 >

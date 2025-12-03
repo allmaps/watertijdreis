@@ -3,6 +3,8 @@
 	import { Spring } from 'svelte/motion';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapStack from './MapStack.svelte';
+	import { Label, Switch } from 'bits-ui';
+	import TimelineSettings from './TimelineSettings.svelte';
 
 	let {
 		historicMapsLoaded,
@@ -24,7 +26,10 @@
 	let height = $state(120);
 	let selectedYear = $state(1980);
 	let pixelsPerYear = $state(50);
-	let isPanning = $state(false);
+
+	let pointerCache = new Map<number, PointerEvent>();
+	let prevDiff = -1;
+    let lastX = 0;
 
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
@@ -56,45 +61,78 @@
 	let startYearInt = $derived(Math.floor(view.current.start));
 	let endYearInt = $derived(Math.ceil(view.current.end));
 
-	let lastX = 0;
+    function getCacheDiff() {
+        const pointers = Array.from(pointerCache.values());
+        if (pointers.length !== 2) return -1;
+        
+        const dx = Math.abs(pointers[0].clientX - pointers[1].clientX);
+        const dy = Math.abs(pointers[0].clientY - pointers[1].clientY);
+        
+        return Math.hypot(dx, dy);
+    }
 
 	function onpointerdown(e: PointerEvent) {
 		e.preventDefault();
-		isPanning = true;
-		lastX = e.clientX;
+        
+        pointerCache.set(e.pointerId, e);
+        
+        if (pointerCache.size === 1) {
+		    lastX = e.clientX;
+        } else if (pointerCache.size === 2) {
+            prevDiff = getCacheDiff();
+        }
 	}
 
 	function onWindowPointerMove(e: PointerEvent) {
-		if (!isPanning) return;
-
+        if (!pointerCache.has(e.pointerId)) return;
+        
 		e.preventDefault();
+        pointerCache.set(e.pointerId, e);
 
-		const dx = lastX - e.clientX;
+        if (pointerCache.size === 2) {
+            const curDiff = getCacheDiff();
+            
+            if (prevDiff > 0 && curDiff > 0) {
+                const scale = curDiff / prevDiff;
+                let newPixelsPerYear = pixelsPerYear * scale;
+                newPixelsPerYear = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newPixelsPerYear));
+                pixelsPerYear = newPixelsPerYear;
+            }
+            
+            prevDiff = curDiff;
+        }
+        
+        else if (pointerCache.size === 1) {
+            const dx = lastX - e.clientX;
+            const currentRange = view.current.end - view.current.start;
+            const yearDelta = (dx / width) * currentRange;
 
-		const currentRange = view.current.end - view.current.start;
-		const yearDelta = (dx / width) * currentRange;
-
-		selectedYear = Math.min(
-			Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
-			maxHistoricMapYear + 1
-		);
-		lastX = e.clientX;
+            selectedYear = Math.min(
+                Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
+                maxHistoricMapYear + 1
+            );
+            lastX = e.clientX;
+        }
 	}
 
 	function onWindowPointerUp(e: PointerEvent) {
-		selectedYear = Math.round(selectedYear);
-		isPanning = false;
+        pointerCache.delete(e.pointerId);
+        
+        if (pointerCache.size < 2) prevDiff = -1;
+        if (pointerCache.size === 1) {
+            const remainingPointer = pointerCache.values().next().value;
+            if (remainingPointer) lastX = remainingPointer.clientX;
+        }
+        if (pointerCache.size === 0) {
+		    selectedYear = Math.round(selectedYear);
+        }
 	}
 
 	function onwheel(e: WheelEvent) {
 		e.preventDefault();
-
 		const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.02), 0.02);
-
 		let newPixelsPerYear = pixelsPerYear / zoom;
-
 		newPixelsPerYear = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newPixelsPerYear));
-
 		pixelsPerYear = newPixelsPerYear;
 	}
 
@@ -133,13 +171,86 @@
 	let mapsByYear = $derived.by(() => {
 		if (!historicMapsLoaded) return {};
 		const mapsByYear: Record<number, HistoricMap[]> = {};
-		for (const map of historicMapsById.values()) (mapsByYear[map.yearEnd] ??= []).push(map);
+		const filteredMaps = historicMapsById.values()
+			.filter(map => filter.bis || !map.bis)
+			.filter(map => filter.type == map.type)
+		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);
 		return mapsByYear;
 	});
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
 	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : selectedYear);
 	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : selectedYear);
+
+	let selectedRegulier = $state(true);
+	let selectedBIS = $state(false);
+	let selectedHWP = $state(false);
+	let selectedWVE = $state(false);
+	let selectedOption = $state('');
+	let showSettings = $state(false);
+	function toggleSettings() {
+		showSettings = !showSettings;
+	}
+
+	function clearAll() {
+		selectedRegulier = false;
+		selectedBIS = false;
+		selectedHWP = false;
+		selectedWVE = false;
+	}
+
+	function toggleRegulier(v: boolean) {
+		if(selectedRegulier !== v) {
+			filter.type = undefined;
+			applyFilter(filter);
+		}
+		if (v) {
+			clearAll();
+			selectedRegulier = true;
+		} else {
+			selectedRegulier = false;
+			if(selectedBIS) {
+				filter.bis = false;
+				applyFilter(filter);
+			}
+			selectedBIS = false;
+		}
+	}
+
+	function toggleBIS(v: boolean) {
+		if (!selectedRegulier) return;
+		if(selectedBIS !== v) {
+			filter.bis = v;
+			applyFilter(filter);
+		}
+		selectedBIS = v;
+	}
+
+	function toggleHWP(v: boolean) {
+		if(selectedHWP !== v) {
+			filter.type = "HWP";
+			applyFilter(filter);
+		}
+		if (v) {
+			clearAll();
+			selectedHWP = true;
+		} else {
+			selectedHWP = false;
+		}
+	}
+
+	function toggleWVE(v: boolean) {
+		if(selectedWVE !== v) {
+			filter.type = "WVE";
+			applyFilter(filter);
+		}
+		if (v) {
+			clearAll();
+			selectedWVE = true;
+		} else {
+			selectedWVE = false;
+		}
+	}
 </script>
 
 <svelte:window
@@ -238,4 +349,140 @@ transition:fly={{ y: 200, duration: 250 }}
 			{/each}
 		</svg>
 	</div>
+
+	<TimelineSettings {showSettings} {toggleSettings}>
+		<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+			<li
+				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+			>
+				Ondergrens jaar:
+				<input
+					type="number"
+					min={minHistoricMapYear - 1}
+					max={Math.floor(selectedYear)}
+					bind:value={filter.yearStart}
+					onchange={() => {
+						applyFilter(filter);
+					}}
+					class="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
+				/>
+			</li>
+			<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+				Reguliere Waterstaatskaarten
+
+				<Switch.Root
+					checked={selectedRegulier}
+					onCheckedChange={toggleRegulier}
+					class="
+	relative inline-flex h-[22px]
+	w-[40px] cursor-pointer
+	items-center rounded-full
+	bg-gray-300 px-[2px]
+	transition-colors data-[state=checked]:bg-[#ff66aa]
+"
+				>
+					<Switch.Thumb
+						class="
+		block
+		h-[18px] w-[18px]
+		translate-x-0 cursor-pointer
+		rounded-full bg-white
+		transition-transform
+		duration-200 data-[state=checked]:translate-x-[18px]
+	"
+					/>
+				</Switch.Root>
+			</li>
+
+			<li
+				class="
+	flex cursor-pointer items-center justify-between rounded-md px-2 py-1
+	pl-5 transition
+	{selectedRegulier
+					? 'text-[#333366] hover:bg-gray-100'
+					: 'cursor-not-allowed text-gray-300 opacity-80'}
+"
+			>
+				BIS-edities
+
+				<label
+					class="
+		flex items-center gap-2
+		{selectedRegulier ? 'cursor-pointer' : 'pointer-events-none cursor-not-allowed'}
+	"
+				>
+					<input
+						type="checkbox"
+						checked={selectedBIS}
+						onchange={(e) => toggleBIS(e.target.checked)}
+						disabled={!selectedRegulier}
+						class="
+			h-4 w-4 rounded border-gray-300 text-[#fff]
+			{selectedRegulier ? 'cursor-pointer' : 'opacity-80'}
+
+			accent-[#f4a]
+		"
+					/>
+				</label>
+			</li>
+
+			<li
+				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+			>
+				Hydrologische Waarnemingspunten
+
+				<Switch.Root
+					checked={selectedHWP}
+					onCheckedChange={toggleHWP}
+					class="
+	relative inline-flex h-[22px]
+	w-[40px] cursor-pointer
+	items-center rounded-full
+	bg-gray-300 px-[2px]
+	transition-colors data-[state=checked]:bg-[#ff66aa]
+"
+				>
+					<Switch.Thumb
+						class="
+		block
+		h-[18px] w-[18px]
+		translate-x-0 cursor-pointer
+		rounded-full bg-white
+		transition-transform
+		duration-200 data-[state=checked]:translate-x-[18px] 
+	"
+					/>
+				</Switch.Root>
+			</li>
+
+			<li
+				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+			>
+				Watervoorzieningseenheden
+
+				<Switch.Root
+					checked={selectedWVE}
+					onCheckedChange={toggleWVE}
+					class="
+	relative inline-flex h-[22px]
+	w-[40px] cursor-pointer
+	items-center rounded-full
+	bg-gray-300 px-[2px]
+	transition-colors  data-[state=checked]:bg-[#ff66aa]
+"
+				>
+					<Switch.Thumb
+						class="
+		block
+		h-[18px] w-[18px]
+		translate-x-0 cursor-pointer
+		rounded-full bg-white
+		transition-transform
+		duration-200 data-[state=checked]:translate-x-[18px]
+	"
+					/>
+				</Switch.Root>
+			</li>
+		</ul>
+	</TimelineSettings>
 </div>

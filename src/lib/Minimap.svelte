@@ -32,8 +32,8 @@
 			}));
 	});
 
-	let width: number = $state(160 * .8);
-	let height: number = $state(200 * .8);
+	let width: number = $state(160);
+	let height: number = $state(200);
 
 	let viewBox = $derived.by(() => {
 		const bbox = turf.bbox({
@@ -92,7 +92,7 @@
 </script>
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-2 z-998 right-2 sm:right-8" style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));">
+	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-2 z-998 right-2 sm:right-8 origin-top-right scale-80 transition-scale duration-300 hover:scale-100" style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));">
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#if clickedHistoricMap}

@@ -516,12 +516,26 @@
 			layout: {
 				'text-font': ['literal', ['Roboto Regular']],
 				'text-field': ['to-string', ['get', 'year']],
-				'text-size': 15,
+				'text-size': [
+				'interpolate',
+					['exponential', 1.2],
+					['zoom'],
+					5, 6,
+					6, 9,
+					7, 12,
+					8, 15,
+					9, 17,
+					10, 18,
+					12, 22,
+					14, 26,
+					15, 28,
+					20, 28
+				],
 				'text-allow-overlap': true
 			},
 			paint: {
-				'text-color': '#333366aa',
-				'text-halo-color': '#ff44aa44',
+				'text-color': '#00a',
+				'text-halo-color': '#eeeeff',
 				'text-halo-width': 1,
 				'text-opacity': 0
 			}
@@ -745,6 +759,8 @@
 		]);
 		map.setPaintProperty('map-outlines-stroke', 'line-opacity-transition', { duration: 300 });
 		map.setPaintProperty('map-outlines-stroke', 'line-opacity', visible ? 1 : 0);
+
+		// setLabelVisibility();
 	}
 
 	function setLabelVisibility(visible = true) {
@@ -1043,14 +1059,12 @@
 	{restoreView}
 ></Minimap>
 <MapInfo
+	{warpedMapLayer}
 	{historicMapsById}
-	{visibleHistoricMaps}
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
-	{hoveredHistoricMap}
 	{clickedHistoricMap}
 	{selectedHistoricMap}
-	{historicMapsLoaded}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
 ></MapInfo>
