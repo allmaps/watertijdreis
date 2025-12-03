@@ -19,28 +19,13 @@
 {#if visible}
 	<!-- {#key content} -->
 		<div 
-			class="bg-[#fff] px-4 py-3 fixed bottom-42 left-1/2 -translate-x-1/2 text-center text-[#336] rounded-[8px] text-[16px] z-999 shadow-lg" 
+			class="
+			border-2 border-[#33336611] bg-[#3333aa22] font-[500] text-[14px]
+			shadow-[0_2px_2px_rgba(0,0,0,0.05)] backdrop-blur-md
+			px-4 py-2 fixed bottom-42 left-1/2 -translate-x-1/2 text-center text-[#336] rounded-[8px] z-999 shadow-lg" 
 			transition:fly={{ y: 20, duration: 250 }}
 		>
 			{@html content}
 		</div>
 	<!-- {/key} -->
 {/if}
-
-<!-- <style>
-	@property --angle {
-		syntax: '<angle>';
-		initial-value: 0deg;
-		inherits: false;
-	}
-
-	@keyframes rotate-gradient {
-		from { --angle: 0deg; }
-		to   { --angle: 360deg; }
-	}
-
-	.rotating-border {
-		background: linear-gradient(var(--angle), #fef, #fff);
-		animation: rotate-gradient 5s linear infinite;
-	}
-</style> -->

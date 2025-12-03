@@ -15,7 +15,7 @@
 <SharePanel bind:visible={sharePanelVisible}></SharePanel>
 
 <div
-	class="absolute top-5 left-5 z-999 rounded-[8px] bg-white px-3 py-3 text-[#336] shadow-lg"
+	class="absolute top-5 left-2 sm:left-5 z-999 rounded-[8px] bg-white px-3 py-3 text-[#336] shadow-lg"
 	onmouseenter={() => (buttonCollapse = false)}
 	onmouseleave={() => (buttonCollapse = true)}
 	role="button"
@@ -27,7 +27,9 @@
 		color="#33336688"
 		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
 	></Waves> -->
-	<h1 class="relative -top-1 flex inline gap-[1px] text-[20px] font-[700]">
+	<h1
+		class="display-inline-block relative -top-1 flex inline cursor-pointer gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
+	>
 		{#each 'Watertijdreis'.split('') as letter, i}
 			<span class="wave-letter inline-block" style="animation-delay: {i * 60}ms">
 				{letter}
@@ -102,10 +104,6 @@
 </div>
 
 <style>
-	h1 {
-		/* font-family: "ivypresto-display"; */
-	}
-
 	.wave-letter {
 		display: inline-block;
 		animation: wave 600ms ease-in-out infinite alternate;

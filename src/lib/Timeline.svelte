@@ -18,8 +18,7 @@
 		mapsInViewport,
 		selectedHistoricMap,
 		setLabelVisibility,
-		getHistoricMapThumbnail,
-		map
+		getHistoricMapThumbnail
 	} = $props();
 
 	type HistoricMap = {
@@ -154,8 +153,6 @@
 			end: Math.min(view.target.end - yearDelta, MAX_YEAR)
 		};
 		lastX = e.clientX;
-
-		map.triggerRepaint(); // TODO: remove
 	}
 
 	function onpointerup() {
