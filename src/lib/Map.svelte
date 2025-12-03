@@ -21,6 +21,7 @@
 
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
+	import { MapPinSimple } from 'phosphor-svelte';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
@@ -28,6 +29,7 @@
 	let map: maplibregl.Map | null = $state(null);
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
 	let maplibreLoaded: boolean = $state(false);
+	let userLocationActive: boolean = $state(false);
 
 	$effect(() => {
 		if (!map) initMaplibre();
@@ -437,6 +439,28 @@
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
 
+			// Add user location source and layer
+			map.addSource('user-location', {
+				type: 'geojson',
+				data: {
+					type: 'FeatureCollection',
+					features: []
+				}
+			});
+
+			map.addLayer({
+				id: 'user-location-layer',
+				type: 'circle',
+				source: 'user-location',
+				paint: {
+					'circle-radius': 10,
+					'circle-color': '#f4a',
+					'circle-stroke-width': 4,
+					'circle-stroke-color': '#fff',
+					'circle-opacity': 0.8
+				}
+			});
+
 			await loadHistoricMaps(ANNOTATION_URL);
 
 			addOutlineLayers();
@@ -819,6 +843,20 @@
 
 	async function flyToUserLocation() {
 		try {
+			if (userLocationActive) {
+				userLocationActive = false;
+				if (map) {
+					const source = map.getSource('user-location') as maplibregl.GeoJSONSource;
+					if (source) {
+						source.setData({
+							type: 'FeatureCollection',
+							features: []
+						});
+					}
+				}
+				return;
+			}
+
 			const loc = await getUserLocation().catch(async () => {
 				return await getFallbackIPLocation();
 			});
@@ -829,6 +867,27 @@
 				alert('Je bent te ver buiten Nederland!');
 				return;
 			}
+
+			if (map) {
+				const source = map.getSource('user-location') as maplibregl.GeoJSONSource;
+				if (source) {
+					source.setData({
+						type: 'FeatureCollection',
+						features: [
+							{
+								type: 'Feature',
+								geometry: {
+									type: 'Point',
+									coordinates: [lng, lat]
+								},
+								properties: {}
+							}
+						]
+					});
+				}
+			}
+
+			userLocationActive = true;
 
 			flyToFeature({
 				geometry: {
@@ -1102,6 +1161,7 @@
 	{zoomIn}
 	{zoomOut}
 	bind:layerOptions
+	bind:userLocationActive
 />
 <Header />
 

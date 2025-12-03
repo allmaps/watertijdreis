@@ -22,7 +22,8 @@
 		setGridVisibility,
 		zoomIn,
 		zoomOut,
-		layerOptions = $bindable()
+		layerOptions = $bindable(),
+		userLocationActive = $bindable()
 	} = $props();
 
 	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
@@ -138,32 +139,38 @@
 		<button
 			onclick={flyToUserLocation}
 			class={`
-			group my-3 flex flex-shrink-0 cursor-pointer 
-			items-center justify-center bg-white font-[500]
-			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
-			outline-2 outline-[#33336622] 
-			transition-all
-			
-			duration-500 hover:bg-[#eef]
-			${buttonCollapse ? 'rounded-lg p-2' : 'rounded-lg px-2.5 py-2'}
-		`}
+		group my-3 flex flex-shrink-0 cursor-pointer 
+		items-center justify-center font-[500]
+		shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+		outline-2 outline-[#33336622]
+		transition-all duration-300
+
+		${buttonCollapse ? 'rounded-lg p-2' : 'rounded-lg px-2.5 py-2'}
+
+		${userLocationActive ? 'bg-[#f4a]' : 'bg-white'}
+		hover:bg-[#eef]
+	`}
 		>
 			<NavigationArrow
-				color="#f4a"
 				class={`
-			relative -top-px inline h-[22px]
-			w-[22px] flex-shrink-0 opacity-70 group-hover:opacity-100
-			`}
+		h-[22px] w-[22px] flex-shrink-0
+		transition-colors duration-300
+		${userLocationActive ? 'text-white' : 'text-[#f4a]'}
+		group-hover:text-[#f4a]
+	`}
 			/>
 
 			<span
 				class={`
-			overflow-hidden whitespace-nowrap
-			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
-		`}
+		overflow-hidden whitespace-nowrap
+		transition-[max-width,margin,opacity,color] duration-500 ease-in-out
+		${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
+
+		${userLocationActive ? 'text-[#f4a]' : 'text-[#333]'}
+		
+	`}
 			>
-				Naar mijn locatie
+				{userLocationActive ? 'Mijn locatie niet meer tonen' : 'Mijn locatie tonen'}
 			</span>
 		</button>
 
