@@ -28,10 +28,15 @@
 	let height = $state(120);
 	let selectedYear = $state(1980);
 	let pixelsPerYear = $state(50);
+	let backgroundOffsetX = $state(0);
+	let backgroundVelocity = $state(0);
+	let backgroundOpacity = $state(0.6);
+	let momentumTimeout: ReturnType<typeof setTimeout> | null = null;
+	let opacityTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	let pointerCache = new Map<number, PointerEvent>();
 	let prevDiff = -1;
-    let lastX = 0;
+	let lastX = 0;
 
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
@@ -63,74 +68,117 @@
 	let startYearInt = $derived(Math.floor(view.current.start));
 	let endYearInt = $derived(Math.ceil(view.current.end));
 
-    function getCacheDiff() {
-        const pointers = Array.from(pointerCache.values());
-        if (pointers.length !== 2) return -1;
-        
-        const dx = Math.abs(pointers[0].clientX - pointers[1].clientX);
-        const dy = Math.abs(pointers[0].clientY - pointers[1].clientY);
-        
-        return Math.hypot(dx, dy);
-    }
+	function getCacheDiff() {
+		const pointers = Array.from(pointerCache.values());
+		if (pointers.length !== 2) return -1;
+
+		const dx = Math.abs(pointers[0].clientX - pointers[1].clientX);
+		const dy = Math.abs(pointers[0].clientY - pointers[1].clientY);
+
+		return Math.hypot(dx, dy);
+	}
 
 	function onpointerdown(e: PointerEvent) {
 		e.preventDefault();
-        
-        pointerCache.set(e.pointerId, e);
-        
-        if (pointerCache.size === 1) {
-		    lastX = e.clientX;
-        } else if (pointerCache.size === 2) {
-            prevDiff = getCacheDiff();
-        }
+
+		pointerCache.set(e.pointerId, e);
+
+		if (pointerCache.size === 1) {
+			lastX = e.clientX;
+		} else if (pointerCache.size === 2) {
+			prevDiff = getCacheDiff();
+		}
 
 		setLabelVisibility(true);
 		setGridVisibility(true);
 	}
 
 	function onWindowPointerMove(e: PointerEvent) {
-        if (!pointerCache.has(e.pointerId)) return;
-        
+		if (!pointerCache.has(e.pointerId)) return;
+
 		e.preventDefault();
-        pointerCache.set(e.pointerId, e);
+		pointerCache.set(e.pointerId, e);
 
-        if (pointerCache.size === 2) {
-            const curDiff = getCacheDiff();
-            
-            if (prevDiff > 0 && curDiff > 0) {
-                const scale = curDiff / prevDiff;
-                let newPixelsPerYear = pixelsPerYear * scale;
-                newPixelsPerYear = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newPixelsPerYear));
-                pixelsPerYear = newPixelsPerYear;
-            }
-            
-            prevDiff = curDiff;
-        }
-        
-        else if (pointerCache.size === 1) {
-            const dx = lastX - e.clientX;
-            const currentRange = view.current.end - view.current.start;
-            const yearDelta = (dx / width) * currentRange;
+		if (pointerCache.size === 2) {
+			const curDiff = getCacheDiff();
 
-            selectedYear = Math.min(
-                Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
-                maxHistoricMapYear + 1
-            );
-            lastX = e.clientX;
-        }
+			if (prevDiff > 0 && curDiff > 0) {
+				const scale = curDiff / prevDiff;
+				let newPixelsPerYear = pixelsPerYear * scale;
+				newPixelsPerYear = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newPixelsPerYear));
+				pixelsPerYear = newPixelsPerYear;
+			}
+
+			prevDiff = curDiff;
+		} else if (pointerCache.size === 1) {
+			const dx = lastX - e.clientX;
+			const currentRange = view.current.end - view.current.start;
+			const yearDelta = (dx / width) * currentRange;
+
+			selectedYear = Math.min(
+				Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
+				maxHistoricMapYear + 1
+			);
+			backgroundOffsetX += dx * -0.5;
+			backgroundVelocity = dx * -0.2;
+
+			backgroundOpacity = 0.9;
+			if (opacityTimeout) clearTimeout(opacityTimeout);
+			lastX = e.clientX;
+		}
 	}
 
 	function onWindowPointerUp(e: PointerEvent) {
-        pointerCache.delete(e.pointerId);
-        
-        if (pointerCache.size < 2) prevDiff = -1;
-        if (pointerCache.size === 1) {
-            const remainingPointer = pointerCache.values().next().value;
-            if (remainingPointer) lastX = remainingPointer.clientX;
-        }
-        if (pointerCache.size === 0) {
-		    selectedYear = Math.round(selectedYear);
-        }
+		pointerCache.delete(e.pointerId);
+
+		if (pointerCache.size < 2) prevDiff = -1;
+		if (pointerCache.size === 1) {
+			const remainingPointer = pointerCache.values().next().value;
+			if (remainingPointer) lastX = remainingPointer.clientX;
+		}
+		if (pointerCache.size === 0) {
+			selectedYear = Math.round(selectedYear);
+
+			if (momentumTimeout) clearTimeout(momentumTimeout);
+			let elapsed = 0;
+			const duration = 1000;
+			const startVelocity = backgroundVelocity;
+
+			const animate = () => {
+				elapsed += 16;
+				const progress = Math.min(elapsed / duration, 1);
+				const easeOut = 1 - (1 - progress) * (1 - progress);
+				backgroundVelocity = startVelocity * (1 - easeOut);
+				backgroundOffsetX += backgroundVelocity;
+
+				if (progress < 1) {
+					momentumTimeout = setTimeout(animate, 16);
+				} else {
+					backgroundVelocity = 0;
+					momentumTimeout = null;
+				}
+			};
+			animate();
+
+			if (opacityTimeout) clearTimeout(opacityTimeout);
+			let opacityElapsed = 0;
+			const opacityDuration = 400;
+			const startOpacity = backgroundOpacity;
+
+			const fadeOpacity = () => {
+				opacityElapsed += 16;
+				const progress = Math.min(opacityElapsed / opacityDuration, 1);
+				backgroundOpacity = startOpacity + (0.3 - startOpacity) * progress;
+
+				if (progress < 1) {
+					opacityTimeout = setTimeout(fadeOpacity, 16);
+				} else {
+					backgroundOpacity = 0.3;
+					opacityTimeout = null;
+				}
+			};
+			fadeOpacity();
+		}
 
 		setLabelVisibility(false);
 		setGridVisibility(false);
@@ -179,11 +227,12 @@
 	let mapsByYear = $derived.by(() => {
 		if (!historicMapsLoaded) return {};
 		const mapsByYear: Record<number, HistoricMap[]> = {};
-		const filteredMaps = historicMapsById.values()
+		const filteredMaps = historicMapsById
+			.values()
 			// .toArray()
 			// .toSorted((a,b) => a.bis - b.bis)
-			.filter(map => filter.bis || !map.bis)
-			.filter(map => filter.type == map.type)
+			.filter((map) => filter.bis || !map.bis)
+			.filter((map) => filter.type == map.type);
 		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);
 		return mapsByYear;
 	});
@@ -210,7 +259,7 @@
 	}
 
 	function toggleRegulier(v: boolean) {
-		if(selectedRegulier !== v) {
+		if (selectedRegulier !== v) {
 			filter.type = undefined;
 			applyFilter(filter);
 		}
@@ -219,7 +268,7 @@
 			selectedRegulier = true;
 		} else {
 			selectedRegulier = false;
-			if(selectedBIS) {
+			if (selectedBIS) {
 				filter.bis = false;
 				applyFilter(filter);
 			}
@@ -229,7 +278,7 @@
 
 	function toggleBIS(v: boolean) {
 		if (!selectedRegulier) return;
-		if(selectedBIS !== v) {
+		if (selectedBIS !== v) {
 			filter.bis = v;
 			applyFilter(filter);
 		}
@@ -237,8 +286,8 @@
 	}
 
 	function toggleHWP(v: boolean) {
-		if(selectedHWP !== v) {
-			filter.type = "HWP";
+		if (selectedHWP !== v) {
+			filter.type = 'HWP';
 			applyFilter(filter);
 		}
 		if (v) {
@@ -250,8 +299,8 @@
 	}
 
 	function toggleWVE(v: boolean) {
-		if(selectedWVE !== v) {
-			filter.type = "WVE";
+		if (selectedWVE !== v) {
+			filter.type = 'WVE';
 			applyFilter(filter);
 		}
 		if (v) {
@@ -269,9 +318,9 @@
 	onpointercancel={onWindowPointerUp}
 />
 
-<div 
-class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
-transition:fly={{ y: 200, duration: 250 }}
+<div
+	class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
+	transition:fly={{ y: 200, duration: 250 }}
 >
 	<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
 	<div
@@ -281,6 +330,10 @@ transition:fly={{ y: 200, duration: 250 }}
 		bind:clientHeight={height}
 		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336]"
 	>
+		<div
+			class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
+			style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
+		></div>
 		<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
 		<div
 			class="absolute inset-0 z-1 h-[200px] w-full"
@@ -496,3 +549,6 @@ transition:fly={{ y: 200, duration: 250 }}
 		</ul>
 	</TimelineSettings>
 </div>
+
+<style>
+</style>
