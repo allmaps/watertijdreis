@@ -322,6 +322,11 @@
 			warpedMapLayer.setLayerOptions({
 				opacity: layerOptions.historicMapsOpacity / 100
 			});
+
+		if (map && map.getLayer('map-outlines-skeleton')) {
+			const visibility = layerOptions.historicMapsOpacity < 100 ? 'none' : 'visible';
+			map.setLayoutProperty('map-outlines-skeleton', 'visibility', visibility);
+		}
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
