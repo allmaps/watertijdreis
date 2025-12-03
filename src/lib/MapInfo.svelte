@@ -170,21 +170,21 @@
 					"resource": [0,0],
 					"geo": [
 						mainWarpedMap.geoFullMaskBbox[0], 
-						mainWarpedMap.geoFullMaskBbox[1]  - height * scaleVertical
+						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
 					]
 				},
 				{
 					"resource": [width,0],
 					"geo": [
 						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal, 
-						mainWarpedMap.geoFullMaskBbox[1] - height * scaleVertical
+						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
 					]
 				},
 				{
 					"resource": [width,height],
 					"geo": [
 						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal, 
-						mainWarpedMap.geoFullMaskBbox[1]
+						mainWarpedMap.geoFullMaskBbox[3]
 					]
 				}
 			],
@@ -297,7 +297,7 @@
 	{@const thumbnailHeight = 64}
 	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, thumbnailHeight)}
 	<div
-		class="select-text absolute top-55 right-5
+		class="select-text absolute top-45 right-5
 			z-998 rounded-[8px] bg-white/90 p-3 text-[15px] font-[500] text-[#336]
 			shadow-lg backdrop-blur-md transition-opacity duration-150"
 		style="box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);"

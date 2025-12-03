@@ -12,7 +12,9 @@
 		mapsInViewport,
 		getHistoricMapThumbnail,
 		filter = $bindable(),
-		applyFilter
+		applyFilter,
+		setLabelVisibility,
+		setGridVisibility
 	} = $props();
 
 	$effect(() => {
@@ -41,7 +43,7 @@
 			start: 1977,
 			end: 1983
 		},
-		{ stiffness: 0.1, damping: 0.25 }
+		{ stiffness: 0.1, damping: 0.5 }
 	);
 
 	$effect(() => {
@@ -81,6 +83,9 @@
         } else if (pointerCache.size === 2) {
             prevDiff = getCacheDiff();
         }
+
+		setLabelVisibility(true);
+		setGridVisibility(true);
 	}
 
 	function onWindowPointerMove(e: PointerEvent) {
@@ -126,6 +131,9 @@
         if (pointerCache.size === 0) {
 		    selectedYear = Math.round(selectedYear);
         }
+
+		setLabelVisibility(false);
+		setGridVisibility(false);
 	}
 
 	function onwheel(e: WheelEvent) {
@@ -172,6 +180,8 @@
 		if (!historicMapsLoaded) return {};
 		const mapsByYear: Record<number, HistoricMap[]> = {};
 		const filteredMaps = historicMapsById.values()
+			// .toArray()
+			// .toSorted((a,b) => a.bis - b.bis)
 			.filter(map => filter.bis || !map.bis)
 			.filter(map => filter.type == map.type)
 		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);

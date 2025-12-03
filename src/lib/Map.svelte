@@ -41,7 +41,7 @@
 	});
 
 	let historicMapsLoaded: boolean = $state(false);
-	let historicMapsById: Map<string, HistoricMap> = $state(new Map());
+	let historicMapsById: Map<string, HistoricMap> = $state(new SvelteMap());
 	let historicMapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
 		if (!historicMapsLoaded) return;
 		const grouped = new Map<number, HistoricMap[]>();
@@ -275,7 +275,7 @@
 			}
 		});
 
-		toastContent = `Je ziet nu kaarten uit de periode <code style="font-weight: 600">${filter.yearStart}</code> en <code style="font-weight: 600">${filter.yearEnd}</code>`
+		toastContent = `Je ziet nu kaarten uit de periode <code style="font-weight: 600">${filter.yearStart}</code> en <code style="font-weight: 600">${filter.yearEnd}</code>`;
 
 		console.log('Applied filter');
 	}
@@ -318,7 +318,10 @@
 		setAHNVisibility(layerOptions.baseMap === 'ahn');
 		setSatellietVisibility(layerOptions.baseMap === 'satelliet');
 
-		if (warpedMapLayer) warpedMapLayer!.renderer!.opacity = layerOptions.historicMapsOpacity / 100;
+		if (warpedMapLayer)
+			warpedMapLayer.setLayerOptions({
+				opacity: layerOptions.historicMapsOpacity / 100
+			});
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -517,19 +520,29 @@
 				'text-font': ['literal', ['Roboto Regular']],
 				'text-field': ['to-string', ['get', 'year']],
 				'text-size': [
-				'interpolate',
+					'interpolate',
 					['exponential', 1.2],
 					['zoom'],
-					5, 6,
-					6, 9,
-					7, 12,
-					8, 15,
-					9, 17,
-					10, 18,
-					12, 22,
-					14, 26,
-					15, 28,
-					20, 28
+					5,
+					6,
+					6,
+					9,
+					7,
+					12,
+					8,
+					15,
+					9,
+					17,
+					10,
+					18,
+					12,
+					22,
+					14,
+					26,
+					15,
+					28,
+					20,
+					28
 				],
 				'text-allow-overlap': true
 			},
@@ -585,55 +598,108 @@
 		});
 
 		map.on('click', 'map-outlines-fill', (e) => {
-			const source = map.getSource('map-outlines');
-			if (!source || !source._data) return;
+			console.log(e.lngLat);
+			setGridVisibility(true, e.lngLat);
 
-			const allFeatures = source._data.features;
-			const rippleCenter = map.unproject(e.point);
-			const speed = 300;
+			gridResetTimer = setTimeout(() => {
+				setGridVisibility(false, e.lngLat);
+			}, 1500);
 
-			allFeatures.forEach((feature) => {
-				if (feature.id === undefined) return;
+			clickedFeature = e.features?.[0];
+			const newId = clickedFeature?.id;
 
-				const [x, y] = feature.geometry.coordinates[0][0];
-				const dx = rippleCenter.lng - x;
-				const dy = rippleCenter.lat - y;
-				const distance = Math.sqrt(dx ** 2 + dy ** 2);
-				const delay = distance * speed;
-				const opacity = 0.5 - distance / 7;
+			if (newId !== undefined && newId !== currentFillId) {
+				if (currentFillId !== null) {
+					animateFeatureOpacity(currentFillId, 'animated-fill-opacity', 0, 300);
+				}
 
-				setTimeout(() => {
-					animateFeatureOpacity(feature.id, 'animated-stroke-opacity', opacity, 500, () => {
-						setTimeout(() => {
-							animateFeatureOpacity(feature.id, 'animated-stroke-opacity', 0, 500);
-						}, 1000);
-					});
-				}, delay);
-			});
-
-			let feature = e.features?.[0] || null;
-			clickedFeature = feature;
-			if (clickedFeature !== null) {
-				const targetId = clickedFeature.id;
-				if (targetId === undefined) return;
-
-				animateFeatureOpacity(clickedFeature.id, 'animated-fill-opacity', 0.3, 500, () => {
+				currentFillId = newId;
+				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.3, 300, () => {
 					setTimeout(() => {
-						if (feature)
-							animateFeatureOpacity(feature.id, 'animated-fill-opacity', 0, 500, () => {
-								clickedFeature = null;
-							});
+						if (currentFillId === newId) {
+							animateFeatureOpacity(newId, 'animated-fill-opacity', 0, 500);
+							currentFillId = null;
+							clickedFeature = null;
+						}
 					}, 1000);
 				});
 			}
 		});
 	}
 
+	const activeAnimations = {};
+	const featureTimeouts = {};
+	let gridResetTimer = null;
+	let currentFillId = null;
+
+	function setGridVisibility(isVisible, centerLngLat = { lng: 5.63, lat: 52.16 }) {
+		const source = map.getSource('map-outlines');
+		if (!source || !source._data) return;
+		const allFeatures = source._data.features;
+		const speed = 300;
+
+		setTimeout(() => (gridVisible = isVisible), 100);
+
+		if (isVisible && gridResetTimer) {
+			clearTimeout(gridResetTimer);
+			gridResetTimer = null;
+		}
+
+		const hoverFillOpacity = isVisible ? 0.3 : 0;
+
+		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
+			'case',
+			['boolean', ['feature-state', 'hover'], false],
+			hoverFillOpacity,
+			0
+		]);
+
+		allFeatures.forEach((feature) => {
+			const id = feature.id;
+			if (id === undefined) return;
+
+			if (featureTimeouts[id]) {
+				clearTimeout(featureTimeouts[id]);
+				delete featureTimeouts[id];
+			}
+
+			if (!isVisible) {
+				animateFeatureOpacity(id, 'animated-stroke-opacity', 0, 500);
+				return;
+			}
+
+			const [x, y] = feature.geometry.coordinates[0][0];
+			const dx = centerLngLat.lng - x;
+			const dy = centerLngLat.lat - y;
+			const distance = Math.sqrt(dx ** 2 + dy ** 2);
+
+			const delay = distance * speed;
+			const targetOpacity = Math.max(0, 0.5 - distance / 7);
+
+			featureTimeouts[id] = setTimeout(() => {
+				animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
+				delete featureTimeouts[id];
+			}, delay);
+		});
+	}
+
 	function animateFeatureOpacity(id, prop, endVal, duration, callback) {
+		const animKey = `${id}-${prop}`;
+
+		if (activeAnimations[animKey]) {
+			cancelAnimationFrame(activeAnimations[animKey]);
+		}
+
 		const startTime = performance.now();
 
 		const currentState = map.getFeatureState({ source: 'map-outlines', id: id });
 		const startVal = currentState?.[prop] !== undefined ? currentState[prop] : 0;
+
+		if (Math.abs(startVal - endVal) < 0.01) {
+			delete activeAnimations[animKey];
+			if (callback) callback();
+			return;
+		}
 
 		function frame(currentTime) {
 			const elapsed = currentTime - startTime;
@@ -642,18 +708,17 @@
 
 			const currentVal = startVal + (endVal - startVal) * progress;
 
-			const stateUpdate = {};
-			stateUpdate[prop] = currentVal;
-			map.setFeatureState({ source: 'map-outlines', id: id }, stateUpdate);
+			map.setFeatureState({ source: 'map-outlines', id: id }, { [prop]: currentVal });
 
 			if (progress < 1) {
-				requestAnimationFrame(frame);
+				activeAnimations[animKey] = requestAnimationFrame(frame);
 			} else {
+				delete activeAnimations[animKey];
 				if (callback) callback();
 			}
 		}
 
-		requestAnimationFrame(frame);
+		activeAnimations[animKey] = requestAnimationFrame(frame);
 	}
 
 	function addBackgroundLayers() {
@@ -724,11 +789,42 @@
 		}
 	}
 
+	async function getFallbackIPLocation() {
+		const res = await fetch('https://ipapi.co/json/');
+		const data = await res.json();
+		return { lat: data.latitude, lng: data.longitude };
+	}
+
+	function isInNL(lat, lng) {
+		const NL_BBOX = {
+			minLat: 50.5,
+			maxLat: 53.7,
+			minLng: 3.0,
+			maxLng: 7.5
+		};
+
+		return (
+			lat >= NL_BBOX.minLat &&
+			lat <= NL_BBOX.maxLat &&
+			lng >= NL_BBOX.minLng &&
+			lng <= NL_BBOX.maxLng
+		);
+	}
+
 	async function flyToUserLocation() {
 		try {
-			const { lat, lng } = await getUserLocation();
+			const loc = await getUserLocation().catch(async () => {
+				return await getFallbackIPLocation();
+			});
 
-			const feature = {
+			const { lat, lng } = loc;
+
+			if (!isInNL(lat, lng)) {
+				alert('Je bent te ver buiten Nederland!');
+				return;
+			}
+
+			flyToFeature({
 				geometry: {
 					type: 'Point',
 					coordinates: [lng, lat]
@@ -736,31 +832,11 @@
 				properties: {
 					label: 'Your location'
 				}
-			};
-
-			flyToFeature(feature);
+			});
 		} catch (err) {
-			console.error('Could not get user location:', err);
-			alert('Locatie kon niet worden opgehaald. Heb je toestemming gegeven?');
+			console.error(err);
+			alert('Kon locatie niet bepalen.');
 		}
-	}
-
-	function setGridVisibility(visible = true) {
-		gridVisible = visible;
-		if (!maplibreLoaded) return;
-
-		const hoverFillOpacity = visible ? 0.3 : 0;
-
-		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
-			'case',
-			['boolean', ['feature-state', 'hover'], false],
-			hoverFillOpacity,
-			0
-		]);
-		map.setPaintProperty('map-outlines-stroke', 'line-opacity-transition', { duration: 300 });
-		map.setPaintProperty('map-outlines-stroke', 'line-opacity', visible ? 1 : 0);
-
-		// setLabelVisibility();
 	}
 
 	function setLabelVisibility(visible = true) {
@@ -984,13 +1060,15 @@
 		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
 		if (bottomRight) bottomRight.style.setProperty('bottom', offset + 'px', 'important');
 	});
+
+	let spaceKeyDown = $state(false);
 </script>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
 
 <div
 	id={containerId}
-	class="fixed inset-0 h-full w-full polka bg-size-[25px_25px]"
+	class="polka fixed inset-0 h-full w-full bg-size-[25px_25px]"
 	style={`
 		touch-action: auto; 
 		background-color: ${selectedHistoricMap ? '#fffaff' : '#fafaff'}; 
@@ -1034,14 +1112,16 @@
 ></Timeline> -->
 
 {#if historicMapsLoaded && !selectedHistoricMap}
-<Timeline2
-	{historicMapsLoaded}
-	{historicMapsById}
-	{mapsInViewport}
-	bind:filter
-	{applyFilter}
-	{getHistoricMapThumbnail}
-></Timeline2>
+	<Timeline2
+		{historicMapsLoaded}
+		{historicMapsById}
+		{mapsInViewport}
+		bind:filter
+		{applyFilter}
+		{getHistoricMapThumbnail}
+		{setLabelVisibility}
+		{setGridVisibility}
+	></Timeline2>
 {/if}
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
@@ -1071,10 +1151,16 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key == ' ') setGridVisibility(true);
+		if (e.key == ' ' && !spaceKeyDown) {
+			setGridVisibility(true);
+			spaceKeyDown = true;
+		}
 	}}
 	onkeyup={(e) => {
-		if (e.key == ' ') setGridVisibility(false);
+		if (e.key == ' ') {
+			setGridVisibility(false);
+			spaceKeyDown = false;
+		}
 	}}
 	onkeypress={(e) => {
 		if (e.key.toLowerCase() == 'w' && layerOptions.baseMap == 'protomaps') {

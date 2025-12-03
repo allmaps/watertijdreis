@@ -32,6 +32,8 @@
 			setHistoricMapView(pinnedHistoricMap, pinnedView);
 		} else if (clickedHistoricMap && !selectedHistoricMap) {
 			setHistoricMapView(clickedHistoricMap);
+		} else {
+			setGridVisibility(true)
 		}
 	}
 
