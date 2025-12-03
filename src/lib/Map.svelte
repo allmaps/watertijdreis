@@ -351,7 +351,7 @@
 
 		const labelLayers = [
 			'address_label',
-			'water_waterway_label',
+			'waterway_label',
 			'roads_oneway',
 			'roads_labels_minor',
 			'water_label_ocean',
@@ -362,7 +362,8 @@
 			'places_subplace',
 			'places_region',
 			'places_locality',
-			'places_country'
+			'places_country',
+			'city_label'
 		];
 
 		labelLayers.forEach((layerId) => {
@@ -482,7 +483,9 @@
 				id: 'map-outlines-skeleton',
 				type: 'fill',
 				source: 'map-outlines',
-				paint: { 'fill-color': '#eef' }
+				paint: { 'fill-color': '#eef' },
+
+				layout: { visibility: 'none' }
 			},
 			'warped-map-layer'
 		);
