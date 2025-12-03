@@ -4,6 +4,22 @@
 
 	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 
+	if (layerOptions) {
+		if (layerOptions.historicMap === undefined || layerOptions.historicMap === null) {
+			layerOptions.historicMap = 'm';
+		}
+		if (
+			layerOptions.historicMapsOpacity === undefined ||
+			layerOptions.historicMapsOpacity === null
+		) {
+			layerOptions.historicMapsOpacity = 100;
+		}
+
+		if (layerOptions.overlayMap === undefined || layerOptions.overlayMap === null) {
+			layerOptions.overlayMap = 'none';
+		}
+	}
+
 	const baseMapOptions = [
 		{ label: 'Geen', value: 'none', icon: EyeClosed },
 		{ label: 'Basis achtergrondkaart', value: 'protomaps', icon: MapTrifold },
@@ -17,7 +33,7 @@
 	];
 
 	const overlayMapOptions = [
-		{ label: 'Geen', value: 'm', icon: EyeClosed },
+		{ label: 'Geen', value: 'none', icon: EyeClosed },
 		{ label: 'Hydrologische Waarnemingspunten', value: 'km', icon: MapPin },
 		{ label: 'Watervoorzieningseenheden', value: 'ft', icon: MapPin },
 		{ label: 'Achterkant', value: 'mi', icon: MapTrifold }
@@ -50,7 +66,7 @@
 	></div>
 
 	<div
-		class="absolute top-50 left-1/2 z-1001 flex -translate-x-1/2 flex-col items-center overflow-hidden rounded-[8px] border-gray-200 bg-white p-6 shadow-lg"
+		class="absolute top-50 left-1/2 z-1001 flex -translate-x-1/2 flex-col items-center overflow-visible rounded-[8px] border-gray-200 bg-white p-6 shadow-lg"
 		transition:fly={{ y: -20, duration: 250 }}
 	>
 		<button
