@@ -96,9 +96,10 @@
 			onclick={() => (searchBarVisible = !searchBarVisible)}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
-			items-center justify-center border-2 border-[#33336611]
-			bg-white 
-			font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			items-center justify-center
+			bg-white font-[500]
+			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			outline-2 outline-[#33336622]
 			transition-all
 			
 			duration-500 hover:bg-[#eef]
@@ -138,9 +139,9 @@
 			onclick={flyToUserLocation}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
-			items-center justify-center border-2 border-[#33336611]
-			bg-white 
-			font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			items-center justify-center bg-white font-[500]
+			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			outline-2 outline-[#33336622] 
 			transition-all
 			
 			duration-500 hover:bg-[#eef]
@@ -171,9 +172,9 @@
 			onclick={() => (layersPanelVisible = !layersPanelVisible)}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
-			items-center justify-center border-2 border-[#33336611]
-			bg-white 
-			font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			items-center justify-center bg-white font-[500]
+			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			outline-2 outline-[#33336622] 
 			transition-all
 			
 			duration-500 hover:bg-[#eef]

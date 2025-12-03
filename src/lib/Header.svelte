@@ -15,7 +15,7 @@
 <SharePanel bind:visible={sharePanelVisible}></SharePanel>
 
 <div
-	class="absolute top-5 left-2 sm:left-5 z-999 rounded-[8px] bg-white px-3 py-3 text-[#336] shadow-lg"
+	class="absolute top-5 left-2 z-999 rounded-[8px] bg-white px-3 py-3 text-[#336] shadow-lg sm:left-5"
 	onmouseenter={() => (buttonCollapse = false)}
 	onmouseleave={() => (buttonCollapse = true)}
 	role="button"
