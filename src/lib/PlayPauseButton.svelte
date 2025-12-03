@@ -10,11 +10,11 @@
 <div
 	class="absolute bottom-0 left-1/2 flex h-8
     -translate-x-1/2 translate-y-3 items-center
-    rounded-md border-1 border-[#6c70b7] bg-[#336] px-1 shadow-md select-none"
+    rounded-xl border-1 border-[#6c70b7] bg-[#336] px-1 shadow-md select-none"
 >
 	<button
 		onclick={stop}
-		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg
                 p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title="Eén jaar terug"
 	>
@@ -26,7 +26,7 @@
 			stop(e);
 			toggle();
 		}}
-		class="group mx-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+		class="group mx-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg
                p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title={isPlaying ? 'Stop met tijdreizen' : 'Reis door de tijd!'}
 	>
@@ -39,7 +39,7 @@
 
 	<button
 		onclick={stop}
-		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm
+		class="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg
                p-1 transition-all hover:bg-[#6c70b7] active:scale-95"
 		title="Eén jaar verder"
 	>
