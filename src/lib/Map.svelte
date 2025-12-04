@@ -333,10 +333,11 @@
 	function setProtomapsVisiblity(visible: boolean) {
 		if (!maplibreLoaded) return;
 
-		const { layers } = basemapStyle('nl');
+		const layers = map?.getStyle().layers || [];
 		layers.forEach((layer) => {
-			if (map!.getLayer(layer.id)) {
-				map!.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+			// Todo: fix ts error
+			if (layer.source === 'protomaps' || layer.type === 'background') {
+				map?.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
 			}
 		});
 	}
@@ -402,7 +403,10 @@
 
 		const style = basemapStyle('nl');
 		style.layers.forEach((layer) => {
-			(layer as maplibregl.LayerSpecification).layout = { visibility: 'none' };
+			layer.layout = {
+				...layer.layout,
+				visibility: 'none'
+			};
 		});
 
 		map = new maplibregl.Map({
