@@ -2,7 +2,7 @@
 	import { X } from 'phosphor-svelte';
 	import { fade, fly } from 'svelte/transition';
 
-	let { visible = $bindable() } = $props();
+	let { visible = $bindable(), title, children } = $props();
 
 	function close() {
 		visible = false;
@@ -10,7 +10,7 @@
 
 	function handleKey(e: KeyboardEvent) {
 		if (!visible) return;
-		if (e.key === "Escape") close();
+		if (e.key === 'Escape') close();
 	}
 </script>
 
@@ -21,13 +21,13 @@
 		class="fixed inset-0 z-1000 flex items-center justify-center"
 		role="dialog"
 		aria-modal="true"
-		transition:fade
 	>
 		<button
 			type="button"
-			class="absolute inset-0 bg-[#33336688] cursor-default"
+			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
 			aria-label="Sluit venster"
 			onclick={close}
+			transition:fly={{ y: -5, duration: 250 }}
 		></button>
 
 		<div
@@ -48,10 +48,12 @@
 				<X size="24" color="#f4a" weight="bold" />
 			</button>
 
-			<h1 class="text-[22px] font-[700] text-[#336]">Over Watertijdreis</h1>
+			{#if title}
+				<h1 class="text-[22px] font-[700] text-[#336]">{title}</h1>
+			{/if}
 
 			<div class="mt-2 p-8 text-[#336]">
-				Lorem ipsum dolor sit amet…
+				{@render children?.()}
 			</div>
 		</div>
 	</div>
