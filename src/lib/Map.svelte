@@ -954,24 +954,29 @@
 	function changeHistoricMapView(historicMap: HistoricMap) {
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
-		warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+		const optionsByMapId = new Map();
+
+		optionsByMapId.set(selectedHistoricMap?.id, {
 			visible: false,
 			transformationType: 'thinPlateSpline',
 			applyMask: true
 		});
 
-		warpedMapLayer?.setMapOptions(historicMap?.id, {
+		optionsByMapId.set(historicMap?.id, {
 			visible: true,
 			transformationType: 'straight',
 			saturation: 1,
 			applyMask: false
 		});
 
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId);
+
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
 				definition: 'EPSG:4326'
 			}
 		});
+
 		if (bbox) {
 			const [minX, minY, maxX, maxY] = bbox;
 			map.fitBounds(
