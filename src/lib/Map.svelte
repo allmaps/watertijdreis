@@ -2,8 +2,7 @@
 	import maplibregl from 'maplibre-gl';
 	import * as turf from '@turf/turf';
 	import * as pmtiles from 'pmtiles';
-	import { WarpedMapLayer } from '@allmaps/maplibre';
-	import { WarpedMap, WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
+	import { WarpedMapLayer, WarpedMapEvent, WarpedMapEventType } from '@allmaps/maplibre';
 
 	import { SvelteMap } from 'svelte/reactivity';
 
