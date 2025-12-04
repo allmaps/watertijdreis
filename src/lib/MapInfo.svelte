@@ -1,6 +1,13 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
-	import { ImagesSquare, ArrowSquareOut, Copy, Check, CaretCircleDown, CaretDown } from 'phosphor-svelte';
+	import {
+		ImagesSquare,
+		ArrowSquareOut,
+		Copy,
+		Check,
+		CaretCircleDown,
+		CaretDown
+	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 	import type { HistoricMap } from './types/historicmap';
 
@@ -70,11 +77,10 @@
 	// TODO: dit kan makkelijker?
 	let mainSheet = $derived.by(() => {
 		if (!variants) return null;
-		const mainVariant = variants.find(i => !getMetadata(i).flat().includes('Type')); 
+		const mainVariant = variants.find((i) => !getMetadata(i).flat().includes('Type'));
 		if (!mainVariant) return null;
-		return historicMapsById.values().find(i => i.manifestId == mainVariant.id);
+		return historicMapsById.values().find((i) => i.manifestId == mainVariant.id);
 	});
-
 
 	$effect(() => {
 		if (!historicMap) return;
@@ -146,58 +152,52 @@
 		const { id, height, width } = canvasManifest;
 
 		const mainWarpedMap = warpedMapLayer.getWarpedMap(mainSheet.id);
-		const scaleHorizontal = (mainWarpedMap.geoFullMaskBbox[2] - mainWarpedMap.geoFullMaskBbox[0]) / mainWarpedMap.georeferencedMap.resource.width;
-		const scaleVertical = (mainWarpedMap.geoFullMaskBbox[3] - mainWarpedMap.geoFullMaskBbox[1]) / mainWarpedMap.georeferencedMap.resource.height;
+		const [minLng, minLat, maxLng, maxLat] = mainWarpedMap.geoFullMaskBbox;
 		const annotation = {
-			"@context": "https://schemas.allmaps.org/map/2/context.json",
-			"type": "GeoreferencedMap",
-			"id": id,
-			"resource": {
-				"id": canvasManifest.items[0]?.items[0]?.body?.service[0]?.id,
-				"width": width,
-				"height": height,
-				"type": "ImageService2",
-				"tiles": [
+			'@context': 'https://schemas.allmaps.org/map/2/context.json',
+			type: 'GeoreferencedMap',
+			id: id,
+			resource: {
+				id: canvasManifest.items[0]?.items[0]?.body?.service[0]?.id,
+				width: width,
+				height: height,
+				type: 'ImageService2',
+				tiles: [
 					{
-						"width": 256,
-						"height": 256,
-						"scaleFactors": [1, 2, 4, 8, 16, 32]
+						width: 256,
+						height: 256,
+						scaleFactors: [1, 2, 4, 8, 16, 32]
 					}
 				]
 			},
-			"gcps": [
+			gcps: [
 				{
-					"resource": [0,0],
-					"geo": [
-						mainWarpedMap.geoFullMaskBbox[0], 
-						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
-					]
+					resource: [0, 0],
+					geo: [minLng, maxLat]
 				},
 				{
-					"resource": [width,0],
-					"geo": [
-						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal, 
-						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
-					]
+					resource: [width, 0],
+					geo: [maxLng, maxLat]
 				},
 				{
-					"resource": [width,height],
-					"geo": [
-						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal, 
-						mainWarpedMap.geoFullMaskBbox[3]
-					]
+					resource: [width, height],
+					geo: [maxLng, minLat]
+				},
+				{
+					resource: [0, height],
+					geo: [minLng, minLat]
 				}
 			],
-			"resourceMask": [
+			resourceMask: [
 				[0, height],
 				[width, height],
-				[width, 0], 
-				[0,0]
+				[width, 0],
+				[0, 0]
 			],
-			"transformation": {
-				"type": "straight"
+			transformation: {
+				type: 'straight'
 			}
-		}
+		};
 
 		console.log(id);
 		await warpedMapLayer.addGeoreferencedMap(annotation);
@@ -211,8 +211,8 @@
 				type: 'Polygon',
 				coordinates
 			},
-			type: "Achterkant",
-			geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
+			type: 'Achterkant',
+			geoFullMaskBbox: warpedMap?.geoFullMaskBbox
 		};
 		historicMapsById.set(id, historicMap);
 
@@ -247,49 +247,52 @@
 </button> -->
 
 {#if false}
-<div
-	class="
+	<div
+		class="
 		fixed right-2 bottom-2 left-2 z-[1000]
-		bg-[#336]/90 backdrop-blur-sm rounded-[8px] shadow-lg
-		overflow-hidden transition-all duration-300
+		overflow-hidden rounded-[8px] bg-[#336]/90 shadow-lg
+		backdrop-blur-sm transition-all duration-300
 	"
-	style:height={(closed ? 0 : 200) + 'px'}
->
-	<!-- <h1 class="font-bold pt-4 text-[#eef] w-full text-center mb-2">Eindhoven Oost</h1> -->
-	<div class="flex gap-2 justify-start px-4 transition-opacity duration-300" style:opacity={closed ? 0 : 1}>
-
-		<div class="relative inline-block shadow-md overflow-hidden rounded-[4px] h-16">
-			<img
-				alt=""
-				class="block h-full w-auto object-cover scale-[1.04]"
-				src="https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/18/38/111838154470798873696440689860241541701.jp2/full/256,/0/default.jpg"
-			/>
-			<div
-				class="pointer-events-none absolute border-[3px] border-[#33336666] rounded-[4px]"
-				style="
+		style:height={(closed ? 0 : 200) + 'px'}
+	>
+		<!-- <h1 class="font-bold pt-4 text-[#eef] w-full text-center mb-2">Eindhoven Oost</h1> -->
+		<div
+			class="flex justify-start gap-2 px-4 transition-opacity duration-300"
+			style:opacity={closed ? 0 : 1}
+		>
+			<div class="relative inline-block h-16 overflow-hidden rounded-[4px] shadow-md">
+				<img
+					alt=""
+					class="block h-full w-auto scale-[1.04] object-cover"
+					src="https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/18/38/111838154470798873696440689860241541701.jp2/full/256,/0/default.jpg"
+				/>
+				<div
+					class="pointer-events-none absolute rounded-[4px] border-[3px] border-[#33336666]"
+					style="
 					left: 57.8229%;
 					top: 48.0804%;
 					width: 1.36974%;
 					height: 2.31579%;
 				"
-			></div>
-		</div>
-
-		{#if canvasManifest}
-			{@const metadata = getMetadata(canvasManifest)}
-			{@const editionMetadata = getMetadata(editionManifest)}
-			{@const collectionId = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
-			<div class="inline h-20">
-				{#each metadata as [label, value]}
-					<div class="">
-						<p class="text-[12px] font-semibold text-[#eeeeffaa]">{label}</p>
-						<span class="max-w-30 text-[14px] text-[#eef]">{value}</span>
-					</div>
-				{/each}
+				></div>
 			</div>
-		{/if}
+
+			{#if canvasManifest}
+				{@const metadata = getMetadata(canvasManifest)}
+				{@const editionMetadata = getMetadata(editionManifest)}
+				{@const collectionId =
+					'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
+				<div class="inline h-20">
+					{#each metadata as [label, value]}
+						<div class="">
+							<p class="text-[12px] font-semibold text-[#eeeeffaa]">{label}</p>
+							<span class="max-w-30 text-[14px] text-[#eef]">{value}</span>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
 	</div>
-</div>
 {/if}
 
 {#if historicMap}
@@ -297,9 +300,9 @@
 	{@const thumbnailHeight = 64}
 	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, thumbnailHeight)}
 	<div
-		class="select-text absolute top-45 right-5
-			z-998 rounded-[8px] bg-white/90 p-3 text-[15px] font-[500] text-[#336]
-			shadow-lg backdrop-blur-md transition-opacity duration-150"
+		class="absolute top-45 right-5 z-998
+			rounded-[8px] bg-white/90 p-3 text-[15px] font-[500] text-[#336] shadow-lg
+			backdrop-blur-md transition-opacity duration-150 select-text"
 		style="box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);"
 		transition:fly={{ y: -10, duration: 500, delay: 200 }}
 	>
