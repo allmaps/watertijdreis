@@ -101,10 +101,11 @@
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
-			{#if clickedHistoricMap}
+			{#if clickedHistoricMap || selectedHistoricMap}
 				<g out:fade={{ duration: 250 }}>
-					{#key clickedHistoricMap}
-						{@const hovered = polygons.find((p) => p.properties.id == clickedHistoricMap.id)}
+					{#key clickedHistoricMap || selectedHistoricMap}
+						{@const historicMap = clickedHistoricMap || selectedHistoricMap}
+						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates
 							: [0, 0]}

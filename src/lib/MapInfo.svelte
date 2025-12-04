@@ -250,6 +250,7 @@
 			fixed right-2 bottom-2 left-2
 			z-[1000] h-30 overflow-hidden rounded-[8px] bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
 		"
+		style:background-color={selectedHistoricMap ? "#336" : "transparent"}
 		transition:fade={{ duration: 250 }}
 	>
 		<div
