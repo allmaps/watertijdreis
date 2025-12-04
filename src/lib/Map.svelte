@@ -21,6 +21,8 @@
 
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
+	import Button from './Button.svelte';
+	import { MagnifyingGlass } from 'phosphor-svelte';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
@@ -422,7 +424,7 @@
 		map.dragRotate.disable();
 		map.keyboard.disable();
 		map.touchZoomRotate.disableRotation();
-		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
 
 		map.on('load', async () => {
 			maplibreLoaded = true;
@@ -598,6 +600,7 @@
 			}
 		});
 
+		let clickedMapTimeout = null;
 		map.on('click', 'map-outlines-fill', (e) => {
 			console.log(e.lngLat);
 			setGridVisibility(true, e.lngLat);
@@ -615,14 +618,16 @@
 				}
 
 				currentFillId = newId;
-				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.3, 300, () => {
+				if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
+				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.25, 300, () => {
 					setTimeout(() => {
 						if (currentFillId === newId) {
 							animateFeatureOpacity(newId, 'animated-fill-opacity', 0, 500);
 							currentFillId = null;
-							clickedFeature = null;
 						}
 					}, 1000);
+
+					clickedMapTimeout = setTimeout(() => (clickedFeature = null), 2500);
 				});
 			}
 		});
@@ -646,7 +651,7 @@
 			gridResetTimer = null;
 		}
 
-		const hoverFillOpacity = isVisible ? 0.3 : 0;
+		const hoverFillOpacity = isVisible ? 0.1 : 0;
 
 		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
 			'case',
@@ -965,6 +970,7 @@
 
 	function handleMapClick(e: any) {
 		if (!map || !warpedMapLayer) return;
+		return;
 
 		const feature = e.features?.[0];
 		const id = feature?.properties?.id;
@@ -1128,7 +1134,6 @@
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
 <Minimap
-	{historicMapsById}
 	{visibleHistoricMaps}
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
