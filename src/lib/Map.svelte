@@ -20,7 +20,8 @@
 
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
-	import { MapPinSimple } from 'phosphor-svelte';
+	import Button from './Button.svelte';
+	import { MagnifyingGlass, MapPinSimple } from 'phosphor-svelte';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
@@ -432,7 +433,7 @@
 		map.dragRotate.disable();
 		map.keyboard.disable();
 		map.touchZoomRotate.disableRotation();
-		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
 
 		map.on('load', async () => {
 			maplibreLoaded = true;
@@ -471,7 +472,6 @@
 			map.on('move', updateViewport);
 			updateViewport();
 			map.on('moveend', updateUrl);
-			map.on('click', 'map-outlines-fill', handleMapClick);
 			map.on('mousemove', 'map-outlines-fill', handleMapMouseMove);
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
 		});
@@ -630,13 +630,19 @@
 			}
 		});
 
+		let clickedMapTimeout = null;
+		map.doubleClickZoom.disable();
 		map.on('click', 'map-outlines-fill', (e) => {
-			console.log(e.lngLat);
 			setGridVisibility(true, e.lngLat);
 
 			gridResetTimer = setTimeout(() => {
 				setGridVisibility(false, e.lngLat);
 			}, 1500);
+
+			if (clickedFeature && clickedFeature.properties?.id === e.features?.[0]?.properties?.id) {
+				const id = e.features?.[0]?.properties?.id;
+				if (id) setHistoricMapView(historicMapsById.get(id));
+			}
 
 			clickedFeature = e.features?.[0];
 			const newId = clickedFeature?.id;
@@ -647,14 +653,16 @@
 				}
 
 				currentFillId = newId;
-				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.3, 300, () => {
+				if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
+				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.25, 300, () => {
 					setTimeout(() => {
 						if (currentFillId === newId) {
 							animateFeatureOpacity(newId, 'animated-fill-opacity', 0, 500);
 							currentFillId = null;
-							clickedFeature = null;
 						}
 					}, 1000);
+
+					clickedMapTimeout = setTimeout(() => (clickedFeature = null), 2500);
 				});
 			}
 		});
@@ -678,7 +686,7 @@
 			gridResetTimer = null;
 		}
 
-		const hoverFillOpacity = isVisible ? 0.3 : 0;
+		const hoverFillOpacity = isVisible ? 0.1 : 0;
 
 		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
 			'case',
@@ -707,7 +715,7 @@
 			const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
 			const delay = distance * speed;
-			const targetOpacity = Math.max(0, 0.5 - distance / 7);
+			const targetOpacity = Math.max(0, 0.5 - distance / 3);
 
 			featureTimeouts[id] = setTimeout(() => {
 				animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
@@ -1035,21 +1043,6 @@
 		}
 	}
 
-	function handleMapClick(e: any) {
-		if (!map || !warpedMapLayer) return;
-
-		const feature = e.features?.[0];
-		const id = feature?.properties?.id;
-		if (gridVisible) {
-			if (!historicMapsById.has(id)) return;
-			setHistoricMapView(historicMapsById.get(id));
-
-			addEventListener('keydown', (e) => {
-				if (e.key == 'Escape') restoreView();
-			});
-		}
-	}
-
 	function handleMapMouseMove(e: any) {
 		if (!map) return;
 		const feature = e.features?.[0];
@@ -1201,7 +1194,6 @@
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
 <Minimap
-	{historicMapsById}
 	{visibleHistoricMaps}
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}

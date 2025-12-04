@@ -6,7 +6,9 @@
 		Copy,
 		Check,
 		CaretCircleDown,
-		CaretDown
+		CaretDown,
+		Info,
+		ShareFat
 	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 	import type { HistoricMap } from './types/historicmap';
@@ -220,82 +222,145 @@
 	}
 
 	let closed = $state(false);
+
+	let visible = $derived(clickedHistoricMap || selectedHistoricMap);
+
+	let thumbnailEl = $state(null);
+	$effect(() => {
+		if (historicMap && thumbnailEl) {
+			thumbnailEl.style.transform = `scale(${historicMap ? 100 : 25}%) translate(${historicMap ? 0 : -30}px,0px) rotateX(${historicMap ? 0 : 60}deg) rotateY(${historicMap ? 0 : 0}deg)`;
+			thumbnailEl.style.opacity = 1;
+		}
+	});
+
+	let sheetInformationVisible = $state(false);
+
+	function toggleSheetInformation() {
+		sheetInformationVisible = !sheetInformationVisible;
+	}
 </script>
 
-<!-- <button
-	onclick={() => (closed = !closed)}
-	class="
-		fixed left-1/2 bottom-[calc(.5rem+160px)] md:bottom-[calc(.5rem+200px)]
-		-translate-x-1/2
-		cursor-pointer h-6 w-auto rounded-t-[8px]
-		bg-white/90 backdrop-blur-sm py-4 z-[1001]
-		flex items-center justify-center
-		transition-all duration-300
-	"
-	style:bottom={(closed ? '.5rem' : 'calc(.5rem + 160px)')}
->
-	<div
-		class="inline px-2 transition-transform duration-300"
-		style:transform={closed ? 'rotate(180deg)' : 'rotate(0deg)'}
-	>
-		<CaretDown size="25" color="#f4a" />
-	</div>
-	<div
-		class="inline pr-2 text-[#336] text-[14px] font-[700]"
-		transition:slide={{ axis: "x" }}
-	>Bladinformatie</div>
-</button> -->
-
-{#if false}
+{#if historicMap}
 	<div
 		class="
-		fixed right-2 bottom-2 left-2 z-[1000]
-		overflow-hidden rounded-[8px] bg-[#336]/90 shadow-lg
-		backdrop-blur-sm transition-all duration-300
-	"
-		style:height={(closed ? 0 : 200) + 'px'}
+			fixed right-2 bottom-2 left-2
+			z-[1000] h-30 overflow-hidden rounded-[8px] bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
+		"
+		transition:fade={{ duration: 250 }}
 	>
-		<!-- <h1 class="font-bold pt-4 text-[#eef] w-full text-center mb-2">Eindhoven Oost</h1> -->
 		<div
-			class="flex justify-start gap-2 px-4 transition-opacity duration-300"
-			style:opacity={closed ? 0 : 1}
+			class="flex h-full items-stretch gap-3 transition-opacity duration-300"
+			style:opacity={!historicMap ? 0 : 1}
 		>
-			<div class="relative inline-block h-16 overflow-hidden rounded-[4px] shadow-md">
-				<img
-					alt=""
-					class="block h-full w-auto scale-[1.04] object-cover"
-					src="https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/18/38/111838154470798873696440689860241541701.jp2/full/256,/0/default.jpg"
-				/>
+			{#key historicMap}
 				<div
-					class="pointer-events-none absolute rounded-[4px] border-[3px] border-[#33336666]"
-					style="
-					left: 57.8229%;
-					top: 48.0804%;
-					width: 1.36974%;
-					height: 2.31579%;
-				"
-				></div>
-			</div>
+					class="flex-shrink-0 p-4 pr-1"
+					style="transform-style: preserve-3d; perspective: 100px"
+				>
+					<div
+						bind:this={thumbnailEl}
+						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500"
+						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
+					>
+						<img
+							alt=""
+							class="block h-full w-auto scale-[1.04] object-cover"
+							src="https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/18/38/111838154470798873696440689860241541701.jp2/full/256,/0/default.jpg"
+						/>
+						{#if historicMap && viewportPolygon}
+							{@const { leftPct, topPct, widthPct, heightPct } =
+								getViewportRectWithinHistoricMap(historicMap)}
 
-			{#if canvasManifest}
-				{@const metadata = getMetadata(canvasManifest)}
-				{@const editionMetadata = getMetadata(editionManifest)}
-				{@const collectionId =
-					'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
-				<div class="inline h-20">
-					{#each metadata as [label, value]}
-						<div class="">
-							<p class="text-[12px] font-semibold text-[#eeeeffaa]">{label}</p>
-							<span class="max-w-30 text-[14px] text-[#eef]">{value}</span>
-						</div>
-					{/each}
+							<div
+								class="pointer-events-none absolute rounded-[4px] border-[4px] border-[#33336666]"
+								style="left: {leftPct}%; top: {topPct}%; width: {widthPct}%; height: {heightPct}%;"
+							></div>
+						{/if}
+					</div>
 				</div>
-			{/if}
+			{/key}
+
+			{#key historicMap}
+				<div
+					class="flex flex-1 flex-col items-start justify-center gap-1 pr-4"
+					in:fly|global={{ x: -20 }}
+				>
+					<h1 class="text-[16px] font-bold text-[#eef]">
+						{historicMap ? historicMap.label : '...'}
+					</h1>
+					<p class="text-[14px] font-[500] text-[#eeeeff]">
+						{historicMap?.yearEnd} &middot; Editie {historicMap?.edition}{historicMap?.bis
+							? ' BIS'
+							: ''}
+					</p>
+					<button
+						onclick={toggleSheetInformation}
+						class={`
+						group my-1 flex flex-shrink-0 
+						cursor-pointer items-center justify-center bg-[#3a3a6a]
+						py-1 
+						text-[14px] font-[500] text-[#eef] 
+						shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2 outline-[#eeeeff22] transition-all
+						
+						duration-500 hover:bg-[#eeeeff22]
+						${false ? 'rounded-lg px-2' : 'rounded-lg px-2.5'}
+					`}
+					>
+						<Info
+							color="#eef"
+							class={`
+						relative -top-px inline h-[22px]
+						w-[22px] flex-shrink-0 opacity-70 group-hover:opacity-100
+						`}
+						/>
+
+						<span
+							class={`
+						overflow-hidden whitespace-nowrap
+						transition-[max-width,margin,opacity] duration-500 ease-in-out
+						${false ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
+					`}
+						>
+							Bladinformatie
+						</span>
+					</button>
+				</div>
+			{/key}
 		</div>
 	</div>
 {/if}
 
-{#if historicMap}
+{#if !sheetInformationVisible && canvasManifest && editionManifest}
+	{@const metadata = getMetadata(canvasManifest)}
+	{@const editionMetadata = getMetadata(editionManifest)}
+	{@const collectionId = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
+	{@const manifestId = editionManifest.id}
+	{@const homepageUrl = editionManifest.rendering[0].id}
+
+	<div
+		transition:fly={{ y: 20, duration: 250 }}
+		class="fixed bottom-16 left-35 z-1003 w-80 rounded-lg bg-[#333366] p-3 shadow-lg"
+	>
+		<ul class="text-[#eef]">
+			<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+				<i class="font-[600] opacity-50">Bladtitel:</i>
+				<span class="font-[500]">{historicMap.label}</span>
+			</li>
+			{#each metadata as [label, value]}
+				<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+					<i class="font-[600] opacity-50">{label}:</i>
+					<span class="font-[500]">{value}</span>
+				</li>
+			{/each}
+		</ul>
+		<a class="mt-4 px-2 text-[#f4a] hover:underline">
+			<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+			Externe links
+		</a>
+	</div>
+{/if}
+
+{#if false}
 	<!-- TODO: get from spritesheet -->
 	{@const thumbnailHeight = 64}
 	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, thumbnailHeight)}

@@ -3,7 +3,6 @@
 	import { Spring } from 'svelte/motion';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapStack from './MapStack.svelte';
-	import { Label, Switch } from 'bits-ui';
 	import TimelineSettings from './TimelineSettings.svelte';
 
 	let {
@@ -240,76 +239,6 @@
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
 	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : selectedYear);
 	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : selectedYear);
-
-	let selectedRegulier = $state(true);
-	let selectedBIS = $state(false);
-	let selectedHWP = $state(false);
-	let selectedWVE = $state(false);
-	let selectedOption = $state('');
-	let showSettings = $state(false);
-	function toggleSettings() {
-		showSettings = !showSettings;
-	}
-
-	function clearAll() {
-		selectedRegulier = false;
-		selectedBIS = false;
-		selectedHWP = false;
-		selectedWVE = false;
-	}
-
-	function toggleRegulier(v: boolean) {
-		if (selectedRegulier !== v) {
-			filter.type = undefined;
-			applyFilter(filter);
-		}
-		if (v) {
-			clearAll();
-			selectedRegulier = true;
-		} else {
-			selectedRegulier = false;
-			if (selectedBIS) {
-				filter.bis = false;
-				applyFilter(filter);
-			}
-			selectedBIS = false;
-		}
-	}
-
-	function toggleBIS(v: boolean) {
-		if (!selectedRegulier) return;
-		if (selectedBIS !== v) {
-			filter.bis = v;
-			applyFilter(filter);
-		}
-		selectedBIS = v;
-	}
-
-	function toggleHWP(v: boolean) {
-		if (selectedHWP !== v) {
-			filter.type = 'HWP';
-			applyFilter(filter);
-		}
-		if (v) {
-			clearAll();
-			selectedHWP = true;
-		} else {
-			selectedHWP = false;
-		}
-	}
-
-	function toggleWVE(v: boolean) {
-		if (selectedWVE !== v) {
-			filter.type = 'WVE';
-			applyFilter(filter);
-		}
-		if (v) {
-			clearAll();
-			selectedWVE = true;
-		} else {
-			selectedWVE = false;
-		}
-	}
 </script>
 
 <svelte:window
@@ -328,7 +257,7 @@
 		{onwheel}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
-		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336]"
+		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-[url('wave_pattern.png')] bg-size-[32px]"
 	>
 		<div
 			class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
@@ -413,141 +342,13 @@
 		</svg>
 	</div>
 
-	<TimelineSettings {showSettings} {toggleSettings}>
-		<ul class="flex flex-col gap-2 text-sm text-[#333366]">
-			<li
-				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-			>
-				Ondergrens jaar:
-				<input
-					type="number"
-					min={minHistoricMapYear - 1}
-					max={Math.floor(selectedYear)}
-					bind:value={filter.yearStart}
-					onchange={() => {
-						applyFilter(filter);
-					}}
-					class="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
-				/>
-			</li>
-			<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
-				Reguliere Waterstaatskaarten
-
-				<Switch.Root
-					checked={selectedRegulier}
-					onCheckedChange={toggleRegulier}
-					class="
-	relative inline-flex h-[22px]
-	w-[40px] cursor-pointer
-	items-center rounded-full
-	bg-gray-300 px-[2px]
-	transition-colors data-[state=checked]:bg-[#ff66aa]
-"
-				>
-					<Switch.Thumb
-						class="
-		block
-		h-[18px] w-[18px]
-		translate-x-0 cursor-pointer
-		rounded-full bg-white
-		transition-transform
-		duration-200 data-[state=checked]:translate-x-[18px]
-	"
-					/>
-				</Switch.Root>
-			</li>
-
-			<li
-				class="
-	flex cursor-pointer items-center justify-between rounded-md px-2 py-1
-	pl-5 transition
-	{selectedRegulier
-					? 'text-[#333366] hover:bg-gray-100'
-					: 'cursor-not-allowed text-gray-300 opacity-80'}
-"
-			>
-				BIS-edities
-
-				<label
-					class="
-		flex items-center gap-2
-		{selectedRegulier ? 'cursor-pointer' : 'pointer-events-none cursor-not-allowed'}
-	"
-				>
-					<input
-						type="checkbox"
-						checked={selectedBIS}
-						onchange={(e) => toggleBIS(e.target.checked)}
-						disabled={!selectedRegulier}
-						class="
-			h-4 w-4 rounded border-gray-300 text-[#fff]
-			{selectedRegulier ? 'cursor-pointer' : 'opacity-80'}
-
-			accent-[#f4a]
-		"
-					/>
-				</label>
-			</li>
-
-			<li
-				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-			>
-				Hydrologische Waarnemingspunten
-
-				<Switch.Root
-					checked={selectedHWP}
-					onCheckedChange={toggleHWP}
-					class="
-	relative inline-flex h-[22px]
-	w-[40px] cursor-pointer
-	items-center rounded-full
-	bg-gray-300 px-[2px]
-	transition-colors data-[state=checked]:bg-[#ff66aa]
-"
-				>
-					<Switch.Thumb
-						class="
-		block
-		h-[18px] w-[18px]
-		translate-x-0 cursor-pointer
-		rounded-full bg-white
-		transition-transform
-		duration-200 data-[state=checked]:translate-x-[18px] 
-	"
-					/>
-				</Switch.Root>
-			</li>
-
-			<li
-				class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-			>
-				Watervoorzieningseenheden
-
-				<Switch.Root
-					checked={selectedWVE}
-					onCheckedChange={toggleWVE}
-					class="
-	relative inline-flex h-[22px]
-	w-[40px] cursor-pointer
-	items-center rounded-full
-	bg-gray-300 px-[2px]
-	transition-colors  data-[state=checked]:bg-[#ff66aa]
-"
-				>
-					<Switch.Thumb
-						class="
-		block
-		h-[18px] w-[18px]
-		translate-x-0 cursor-pointer
-		rounded-full bg-white
-		transition-transform
-		duration-200 data-[state=checked]:translate-x-[18px]
-	"
-					/>
-				</Switch.Root>
-			</li>
-		</ul>
-	</TimelineSettings>
+	<TimelineSettings
+		bind:filter
+		bind:selectedYear
+		{applyFilter}
+		minYear={minHistoricMapYear}
+		maxYear={maxHistoricMapYear}
+	></TimelineSettings>
 </div>
 
 <style>

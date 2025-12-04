@@ -14,6 +14,7 @@
 	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
 	import LayersPanel from './LayersPanel.svelte';
 	import { onMount } from 'svelte';
+	import Button from './Button.svelte';
 
 	let {
 		visible = true,
@@ -38,6 +39,8 @@
 
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);
+
+	let locationBtnWidth = $state(0);
 </script>
 
 <svelte:window
@@ -93,13 +96,29 @@
 			</div>
 		</button> -->
 
-		<button
+		<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
+			Locatie zoeken...
+		</Button>
+
+		<div class="mt-3">
+			<Button Icon={NavigationArrow} onclick={flyToUserLocation}
+				>{userLocationActive ? 'Mijn locatie niet meer tonen' : 'Mijn locatie tonen'}</Button
+			>
+		</div>
+
+		<div class="mt-5">
+			<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible = !layersPanelVisible)}
+				>Lagen</Button
+			>
+		</div>
+
+		<!-- <button
 			onclick={() => (searchBarVisible = !searchBarVisible)}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
 			items-center justify-center
 			bg-white font-[500]
-			shadow-[0_2px_2px_rgba(0,0,0,0.05)] 
+			shadow-lg
 			outline-2 outline-[#33336622]
 			transition-all
 			
@@ -116,10 +135,11 @@
 			/>
 
 			<span
+				bind:clientWidth={locationBtnWidth}
 				class={`
 			overflow-hidden whitespace-nowrap
-			transition-[max-width,margin,opacity] duration-500 ease-in-out
-			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
+			transition-[max-w,margin,opacity] duration-500 ease-in-out
+			${buttonCollapse ? 'ml-0 max-w-0 opacity-0' : `ml-1.5 max-w-[${locationBtnWidth}px] opacity-100`}
 		`}
 			>
 				Locatie zoeken...
@@ -135,8 +155,8 @@
 					"><span class="text-foreground-alt text-[12px]">{isApplePlatform ? '⌘' : 'Ctrl '}K</span></kbd
 				>
 			</span>
-		</button>
-		<button
+		</button> -->
+		<!-- <button
 			onclick={flyToUserLocation}
 			class={`
 		group my-3 flex flex-shrink-0 cursor-pointer 
@@ -172,10 +192,10 @@
 			>
 				{userLocationActive ? 'Mijn locatie niet meer tonen' : 'Mijn locatie tonen'}
 			</span>
-		</button>
+		</button> -->
 
 		<br />
-		<button
+		<!-- <button
 			onclick={() => (layersPanelVisible = !layersPanelVisible)}
 			class={`
 			group my-3 flex flex-shrink-0 cursor-pointer 
@@ -210,7 +230,7 @@
 					><span class="text-foreground-alt text-[12px]">L</span></kbd
 				>
 			</span>
-		</button>
+		</button> -->
 		<!-- <button
 			onclick={() => setGridVisibility((gridVisible = !gridVisible))}
 			class={`

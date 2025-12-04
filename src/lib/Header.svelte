@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { ShareFat, Info } from 'phosphor-svelte';
-	import AboutPanel from './AboutPanel.svelte';
 	import SharePanel from './SharePanel.svelte';
+	import Button from './Button.svelte';
+	import Modal from './Modal.svelte';
 
 	let aboutPanelVisible = $state(false);
 	let sharePanelVisible = $state(false);
@@ -10,12 +11,14 @@
 	setTimeout(() => (buttonCollapse = true), 2000);
 </script>
 
-<AboutPanel bind:visible={aboutPanelVisible}></AboutPanel>
+<Modal title="Over Watertijdreis" bind:visible={aboutPanelVisible}>
+	<p>Lorem ipsum dolor sit amet…</p>
+</Modal>
 
 <SharePanel bind:visible={sharePanelVisible}></SharePanel>
 
 <div
-	class="absolute top-5 left-2 z-999 rounded-[8px] bg-white px-3 py-3 text-[#336] shadow-lg sm:left-5"
+	class="absolute top-5 left-2 z-999 flex items-center gap-2 rounded-[8px] bg-white p-4 text-[#336] shadow-lg sm:left-5"
 	onmouseenter={() => (buttonCollapse = false)}
 	onmouseleave={() => (buttonCollapse = true)}
 	role="button"
@@ -28,7 +31,7 @@
 		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
 	></Waves> -->
 	<h1
-		class="display-inline-block relative -top-1 flex inline cursor-pointer gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
+		class="flex inline cursor-pointer gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
 	>
 		{#each 'Watertijdreis'.split('') as letter, i}
 			<span class="wave-letter inline-block" style="animation-delay: {i * 60}ms">
@@ -37,8 +40,10 @@
 		{/each}
 	</h1>
 
-	<div class="ml-2 inline">
-		<button
+	<!-- <div class="ml-2 inline"> -->
+	<Button onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}>Over</Button>
+	<Button onclick={() => (sharePanelVisible = !sharePanelVisible)} Icon={ShareFat}>Delen</Button>
+	<!-- <button
 			onclick={() => (aboutPanelVisible = !aboutPanelVisible)}
 			class={`
 				group inline-flex flex-shrink-0 cursor-pointer 
@@ -99,8 +104,8 @@
 			>
 				Delen
 			</span>
-		</button>
-	</div>
+		</button> -->
+	<!-- </div> -->
 </div>
 
 <style>

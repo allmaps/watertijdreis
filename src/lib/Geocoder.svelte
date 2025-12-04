@@ -68,7 +68,7 @@
 
 {#if visible}
 	<div
-		class="fixed top-0 left-0 z-1000 h-full w-full bg-[#33336688]"
+		class="fixed top-0 left-0 z-1000 h-full w-full bg-[#33336688] bg-[url('wave_pattern.png')] bg-size-[32px]"
 		onclick={() => (visible = false)}
 		transition:fade
 	></div>
