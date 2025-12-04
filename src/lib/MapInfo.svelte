@@ -238,6 +238,10 @@
 	function toggleSheetInformation() {
 		sheetInformationVisible = !sheetInformationVisible;
 	}
+
+	$effect(() => {
+		if(!clickedHistoricMap) sheetInformationVisible = false;
+	})
 </script>
 
 {#if historicMap}
@@ -330,7 +334,7 @@
 	</div>
 {/if}
 
-{#if !sheetInformationVisible && canvasManifest && editionManifest}
+{#if sheetInformationVisible && canvasManifest && editionManifest}
 	{@const metadata = getMetadata(canvasManifest)}
 	{@const editionMetadata = getMetadata(editionManifest)}
 	{@const collectionId = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}

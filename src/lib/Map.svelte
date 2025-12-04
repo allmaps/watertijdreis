@@ -673,11 +673,10 @@
 	let gridResetTimer = null;
 	let currentFillId = null;
 
-	function setGridVisibility(isVisible, centerLngLat = { lng: 5.63, lat: 52.16 }) {
+	function setGridVisibility(isVisible, centerLngLat = { lng: 5.63, lat: 52.16 }, rippleScale = 3, speed = 300) {
 		const source = map.getSource('map-outlines');
 		if (!source || !source._data) return;
 		const allFeatures = source._data.features;
-		const speed = 300;
 
 		setTimeout(() => (gridVisible = isVisible), 100);
 
@@ -715,7 +714,7 @@
 			const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
 			const delay = distance * speed;
-			const targetOpacity = Math.max(0, 0.5 - distance / 3);
+			const targetOpacity = Math.max(0, 0.5 - distance / rippleScale);
 
 			featureTimeouts[id] = setTimeout(() => {
 				animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
@@ -1218,13 +1217,13 @@
 <svelte:window
 	onkeydown={(e) => {
 		if (e.key == ' ' && !spaceKeyDown) {
-			setGridVisibility(true);
+			setGridVisibility(true, { lng: 5.63, lat: 52.16 }, 100, 150);
 			spaceKeyDown = true;
 		}
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
-			setGridVisibility(false);
+			setGridVisibility(false, { lng: 5.63, lat: 52.16 }, 100, 150);
 			spaceKeyDown = false;
 		}
 	}}
