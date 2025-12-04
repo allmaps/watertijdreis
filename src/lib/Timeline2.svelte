@@ -27,6 +27,11 @@
 	let height = $state(120);
 	let selectedYear = $state(1980);
 	let pixelsPerYear = $state(50);
+	let backgroundOffsetX = $state(0);
+	let backgroundVelocity = $state(0);
+	let backgroundOpacity = $state(0.6);
+	let momentumTimeout: ReturnType<typeof setTimeout> | null = null;
+	let opacityTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	let pointerCache = new Map<number, PointerEvent>();
 	let prevDiff = -1;
@@ -113,6 +118,11 @@
 				Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
 			);
+			backgroundOffsetX += dx * -0.5;
+			backgroundVelocity = dx * -0.2;
+
+			backgroundOpacity = 0.9;
+			if (opacityTimeout) clearTimeout(opacityTimeout);
 			lastX = e.clientX;
 		}
 	}
@@ -127,6 +137,46 @@
 		}
 		if (pointerCache.size === 0) {
 			selectedYear = Math.round(selectedYear);
+
+			if (momentumTimeout) clearTimeout(momentumTimeout);
+			let elapsed = 0;
+			const duration = 1000;
+			const startVelocity = backgroundVelocity;
+
+			const animate = () => {
+				elapsed += 16;
+				const progress = Math.min(elapsed / duration, 1);
+				const easeOut = 1 - (1 - progress) * (1 - progress);
+				backgroundVelocity = startVelocity * (1 - easeOut);
+				backgroundOffsetX += backgroundVelocity;
+
+				if (progress < 1) {
+					momentumTimeout = setTimeout(animate, 16);
+				} else {
+					backgroundVelocity = 0;
+					momentumTimeout = null;
+				}
+			};
+			animate();
+
+			if (opacityTimeout) clearTimeout(opacityTimeout);
+			let opacityElapsed = 0;
+			const opacityDuration = 400;
+			const startOpacity = backgroundOpacity;
+
+			const fadeOpacity = () => {
+				opacityElapsed += 16;
+				const progress = Math.min(opacityElapsed / opacityDuration, 1);
+				backgroundOpacity = startOpacity + (0.3 - startOpacity) * progress;
+
+				if (progress < 1) {
+					opacityTimeout = setTimeout(fadeOpacity, 16);
+				} else {
+					backgroundOpacity = 0.3;
+					opacityTimeout = null;
+				}
+			};
+			fadeOpacity();
 		}
 
 		setLabelVisibility(false);
@@ -209,6 +259,10 @@
 		bind:clientHeight={height}
 		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-[url('wave_pattern.png')] bg-size-[32px]"
 	>
+		<div
+			class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
+			style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
+		></div>
 		<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
 		<div
 			class="absolute inset-0 z-1 h-[200px] w-full"
@@ -296,3 +350,6 @@
 		maxYear={maxHistoricMapYear}
 	></TimelineSettings>
 </div>
+
+<style>
+</style>
