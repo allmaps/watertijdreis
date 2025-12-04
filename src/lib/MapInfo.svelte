@@ -10,7 +10,7 @@
 		Info,
 		ShareFat
 	} from 'phosphor-svelte';
-	import { fly, scale, fade, slide } from 'svelte/transition';
+	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 	import type { HistoricMap } from './types/historicmap';
 
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
@@ -154,12 +154,7 @@
 		const { id, height, width } = canvasManifest;
 
 		const mainWarpedMap = warpedMapLayer.getWarpedMap(mainSheet.id);
-		const scaleHorizontal =
-			(mainWarpedMap.geoFullMaskBbox[2] - mainWarpedMap.geoFullMaskBbox[0]) /
-			mainWarpedMap.georeferencedMap.resource.width;
-		const scaleVertical =
-			(mainWarpedMap.geoFullMaskBbox[3] - mainWarpedMap.geoFullMaskBbox[1]) /
-			mainWarpedMap.georeferencedMap.resource.height;
+		const [minLng, minLat, maxLng, maxLat] = mainWarpedMap.geoFullMaskBbox;
 		const annotation = {
 			'@context': 'https://schemas.allmaps.org/map/2/context.json',
 			type: 'GeoreferencedMap',
@@ -180,24 +175,19 @@
 			gcps: [
 				{
 					resource: [0, 0],
-					geo: [
-						mainWarpedMap.geoFullMaskBbox[0],
-						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
-					]
+					geo: [minLng, maxLat]
 				},
 				{
 					resource: [width, 0],
-					geo: [
-						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal,
-						mainWarpedMap.geoFullMaskBbox[3] + height * scaleVertical
-					]
+					geo: [maxLng, maxLat]
 				},
 				{
 					resource: [width, height],
-					geo: [
-						mainWarpedMap.geoFullMaskBbox[0] + width * scaleHorizontal,
-						mainWarpedMap.geoFullMaskBbox[3]
-					]
+					geo: [maxLng, minLat]
+				},
+				{
+					resource: [0, height],
+					geo: [minLng, minLat]
 				}
 			],
 			resourceMask: [

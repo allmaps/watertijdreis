@@ -2,8 +2,7 @@
 	import maplibregl from 'maplibre-gl';
 	import * as turf from '@turf/turf';
 	import * as pmtiles from 'pmtiles';
-	import { WarpedMapLayer } from '@allmaps/maplibre';
-	import { WarpedMap, WarpedMapEvent, WarpedMapEventType } from '@allmaps/render';
+	import { WarpedMapLayer, WarpedMapEvent, WarpedMapEventType } from '@allmaps/maplibre';
 
 	import { SvelteMap } from 'svelte/reactivity';
 
@@ -335,10 +334,11 @@
 	function setProtomapsVisiblity(visible: boolean) {
 		if (!maplibreLoaded) return;
 
-		const { layers } = basemapStyle('nl');
+		const layers = map?.getStyle().layers || [];
 		layers.forEach((layer) => {
-			if (map!.getLayer(layer.id)) {
-				map!.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+			// Todo: fix ts error
+			if (layer.source === 'protomaps' || layer.type === 'background') {
+				map?.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
 			}
 		});
 	}
@@ -404,7 +404,10 @@
 
 		const style = basemapStyle('nl');
 		style.layers.forEach((layer) => {
-			(layer as maplibregl.LayerSpecification).layout = { visibility: 'none' };
+			layer.layout = {
+				...layer.layout,
+				visibility: 'none'
+			};
 		});
 
 		map = new maplibregl.Map({
@@ -959,24 +962,29 @@
 	function changeHistoricMapView(historicMap: HistoricMap) {
 		if (!selectedHistoricMap || !warpedMapLayer || !map) return;
 
-		warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
+		const optionsByMapId = new Map();
+
+		optionsByMapId.set(selectedHistoricMap?.id, {
 			visible: false,
 			transformationType: 'thinPlateSpline',
 			applyMask: true
 		});
 
-		warpedMapLayer?.setMapOptions(historicMap?.id, {
+		optionsByMapId.set(historicMap?.id, {
 			visible: true,
 			transformationType: 'straight',
 			saturation: 1,
 			applyMask: false
 		});
 
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId);
+
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
 				definition: 'EPSG:4326'
 			}
 		});
+
 		if (bbox) {
 			const [minX, minY, maxX, maxY] = bbox;
 			map.fitBounds(
