@@ -66,7 +66,7 @@
 	></div>
 
 	<div
-		class="absolute top-50 left-1/2 z-1001 flex -translate-x-1/2 flex-col items-center overflow-visible rounded-[8px] border-gray-200 bg-white p-6 shadow-lg"
+		class="absolute top-20 left-1/2 z-1001 flex -translate-x-1/2 flex-col items-center overflow-visible rounded-[8px] border-gray-200 bg-white p-6 shadow-lg"
 		transition:fly={{ y: -20, duration: 250 }}
 	>
 		<button
@@ -195,7 +195,7 @@
 				>
 					{#each overlayMapOptions as option}
 						<li
-							class="cursor-pointer px-3 py-2 hover:bg-[#f4a22a22]"
+							class="cursor-pointer px-3 py-2 hover:bg-[#eef]"
 							onclick={() => selectOption('overlayMap', option.value)}
 						>
 							{option.label}
