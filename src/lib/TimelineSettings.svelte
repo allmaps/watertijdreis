@@ -121,7 +121,7 @@
 			onclick={(e) => e.stopPropagation()}
 			transition:scale={{ duration: 250, y: 10 }}
 		>
-			<ul class="flex flex-col gap-2 text-sm text-[#333366]">
+			<ul class="flex flex-col gap-2 text-sm font-[500] text-[#333366]">
 				<li
 					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
 				>

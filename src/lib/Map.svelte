@@ -469,7 +469,6 @@
 			map.on('move', updateViewport);
 			updateViewport();
 			map.on('moveend', updateUrl);
-			map.on('click', 'map-outlines-fill', handleMapClick);
 			map.on('mousemove', 'map-outlines-fill', handleMapMouseMove);
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
 		});
@@ -629,13 +628,18 @@
 		});
 
 		let clickedMapTimeout = null;
+		map.doubleClickZoom.disable();
 		map.on('click', 'map-outlines-fill', (e) => {
-			console.log(e.lngLat);
 			setGridVisibility(true, e.lngLat);
 
 			gridResetTimer = setTimeout(() => {
 				setGridVisibility(false, e.lngLat);
 			}, 1500);
+
+			if (clickedFeature && clickedFeature.properties?.id === e.features?.[0]?.properties?.id) {
+				const id = e.features?.[0]?.properties?.id;
+				if (id) setHistoricMapView(historicMapsById.get(id));
+			}
 
 			clickedFeature = e.features?.[0];
 			const newId = clickedFeature?.id;
@@ -708,7 +712,7 @@
 			const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
 			const delay = distance * speed;
-			const targetOpacity = Math.max(0, 0.5 - distance / 7);
+			const targetOpacity = Math.max(0, 0.5 - distance / 3);
 
 			featureTimeouts[id] = setTimeout(() => {
 				animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
@@ -1028,22 +1032,6 @@
 					{ padding: 50, speed: 2, curve: 1.8 }
 				);
 			}
-		}
-	}
-
-	function handleMapClick(e: any) {
-		if (!map || !warpedMapLayer) return;
-		return;
-
-		const feature = e.features?.[0];
-		const id = feature?.properties?.id;
-		if (gridVisible) {
-			if (!historicMapsById.has(id)) return;
-			setHistoricMapView(historicMapsById.get(id));
-
-			addEventListener('keydown', (e) => {
-				if (e.key == 'Escape') restoreView();
-			});
 		}
 	}
 

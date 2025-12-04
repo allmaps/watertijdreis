@@ -242,13 +242,19 @@
 			thumbnailEl.style.opacity = 1;
 		}
 	});
+
+	let sheetInformationVisible = $state(false);
+
+	function toggleSheetInformation() {
+		sheetInformationVisible = !sheetInformationVisible;
+	}
 </script>
 
 {#if historicMap}
 	<div
 		class="
-			bg-[linear-gradient(0deg, #f00, #ff000000)] fixed right-2 bottom-2 left-2
-			z-[1000] h-30 overflow-hidden rounded-[8px] bg-linear-to-r from-[#333366] from-33% to-[#33336600] to-50% shadow-lg
+			fixed right-2 bottom-2 left-2
+			z-[1000] h-30 overflow-hidden rounded-[8px] bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
 		"
 		transition:fade={{ duration: 250 }}
 	>
@@ -298,9 +304,10 @@
 							: ''}
 					</p>
 					<button
+						onclick={toggleSheetInformation}
 						class={`
 						group my-1 flex flex-shrink-0 
-						cursor-pointer items-center justify-center bg-[#eeeeff11]
+						cursor-pointer items-center justify-center bg-[#3a3a6a]
 						py-1 
 						text-[14px] font-[500] text-[#eef] 
 						shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2 outline-[#eeeeff22] transition-all
@@ -330,6 +337,36 @@
 				</div>
 			{/key}
 		</div>
+	</div>
+{/if}
+
+{#if !sheetInformationVisible && canvasManifest && editionManifest}
+	{@const metadata = getMetadata(canvasManifest)}
+	{@const editionMetadata = getMetadata(editionManifest)}
+	{@const collectionId = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
+	{@const manifestId = editionManifest.id}
+	{@const homepageUrl = editionManifest.rendering[0].id}
+
+	<div
+		transition:fly={{ y: 20, duration: 250 }}
+		class="fixed bottom-16 left-35 z-1003 w-80 rounded-lg bg-[#333366] p-3 shadow-lg"
+	>
+		<ul class="text-[#eef]">
+			<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+				<i class="font-[600] opacity-50">Bladtitel:</i>
+				<span class="font-[500]">{historicMap.label}</span>
+			</li>
+			{#each metadata as [label, value]}
+				<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+					<i class="font-[600] opacity-50">{label}:</i>
+					<span class="font-[500]">{value}</span>
+				</li>
+			{/each}
+		</ul>
+		<a class="mt-4 px-2 text-[#f4a] hover:underline">
+			<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+			Externe links
+		</a>
 	</div>
 {/if}
 

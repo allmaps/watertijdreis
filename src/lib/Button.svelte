@@ -33,7 +33,7 @@
 		onmouseenter={() => (collapsed = collapsed && !openOnHover)}
 		class="
 		group relative cursor-pointer
-		rounded-[9px] bg-linear-to-bl from-[#eeeeff88] to-[#ffffff8] font-[500]
+		rounded-[9px] bg-linear-to-bl from-[#33336622] to-[#ffffff8] font-[500]
 		text-[#336] backdrop-blur-sm transition-all
 		duration-500 ease-out active:scale-95 active:outline-3
 		"

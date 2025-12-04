@@ -96,7 +96,7 @@
 		{width}
 		{height}
 		viewBox={viewBox.join(' ')}
-		class="transition-scale absolute bottom-23 -left-6 z-998 origin-top-right scale-80 duration-300 hover:scale-100 sm:right-8"
+		class="transition-scale absolute bottom-22.5 -left-6 z-998 origin-top-right scale-80 duration-300 hover:scale-100 sm:right-8"
 		style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
