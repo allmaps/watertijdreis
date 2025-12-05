@@ -1177,18 +1177,17 @@
 	{map}
 ></Timeline> -->
 
-{#if historicMapsLoaded && !selectedHistoricMap}
-	<Timeline2
-		{historicMapsLoaded}
-		{historicMapsById}
-		{mapsInViewport}
-		bind:filter
-		{applyFilter}
-		{getHistoricMapThumbnail}
-		{setLabelVisibility}
-		{setGridVisibility}
-	></Timeline2>
-{/if}
+<Timeline2
+	visible={historicMapsLoaded && !selectedHistoricMap}
+	{historicMapsLoaded}
+	{historicMapsById}
+	{mapsInViewport}
+	bind:filter
+	{applyFilter}
+	{getHistoricMapThumbnail}
+	{setLabelVisibility}
+	{setGridVisibility}
+></Timeline2>
 
 <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
 
