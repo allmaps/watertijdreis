@@ -47,10 +47,11 @@
 	let historicMap = $derived.by(() => {
 		return (
 			selectedHistoricMap ||
-			clickedHistoricMap ||
-			(visibleHistoricMapsInViewport.size == 1
-				? visibleHistoricMapsInViewport.values().next().value
-				: null)
+			clickedHistoricMap 
+			// ||
+			// (visibleHistoricMapsInViewport.size == 1
+			// 	? visibleHistoricMapsInViewport.values().next().value
+			// 	: null)
 		);
 	});
 
