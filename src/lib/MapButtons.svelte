@@ -101,9 +101,7 @@
 		</Button>
 
 		<div class="mt-3">
-			<Button Icon={NavigationArrow} onclick={flyToUserLocation}
-				>{userLocationActive ? 'Mijn locatie niet meer tonen' : 'Mijn locatie tonen'}</Button
-			>
+			<Button Icon={NavigationArrow} onclick={flyToUserLocation}>Mijn locatie tonen</Button>
 		</div>
 
 		<div class="mt-5">

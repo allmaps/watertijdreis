@@ -31,6 +31,7 @@
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
 	let maplibreLoaded: boolean = $state(false);
 	let userLocationActive: boolean = $state(false);
+	let userLocationTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	$effect(() => {
 		if (!map) initMaplibre();
@@ -401,11 +402,11 @@
 		const initialCenter = urlParams ? [urlParams.lng, urlParams.lat] : [5, 51.75];
 		const initialZoom = urlParams ? urlParams.zoom : 7;
 
-		if(urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
-		if(urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
-		if(urlParams && urlParams.edition) filter.edition = urlParams.edition;
-		if(urlParams && urlParams.bis) filter.bis = urlParams.bis;
-		if(urlParams && urlParams.type) filter.type = urlParams.type;
+		if (urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
+		if (urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
+		if (urlParams && urlParams.edition) filter.edition = urlParams.edition;
+		if (urlParams && urlParams.bis) filter.bis = urlParams.bis;
+		if (urlParams && urlParams.type) filter.type = urlParams.type;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -461,21 +462,23 @@
 			});
 
 			map.addLayer({
-				id: 'user-location-layer',
+				id: 'user-location',
 				type: 'circle',
 				source: 'user-location',
 				paint: {
-					'circle-radius': 10,
+					'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 6, 22, 20],
 					'circle-color': '#f4a',
+					'circle-opacity': 0,
+					'circle-stroke-color': '#ffffff',
 					'circle-stroke-width': 4,
-					'circle-stroke-color': '#fff',
-					'circle-opacity': 0.8
+
+					'circle-opacity-transition': { duration: 400 },
+					'circle-radius-transition': { duration: 400 }
 				}
 			});
-			
+
 			await loadHistoricMaps(ANNOTATION_URL);
 			addOutlineLayers();
-
 
 			map.on('move', updateViewport);
 			updateViewport();
@@ -484,11 +487,11 @@
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
 
 			// setTimeout(() => {
-				if(urlParams.selectedSheetId) {
-					console.log(urlParams.selectedSheetId);
-					const historicMap = historicMapsById.get(urlParams.selectedSheetId);
-					if(historicMap) setHistoricMapView(historicMap);
-				}
+			if (urlParams.selectedSheetId) {
+				console.log(urlParams.selectedSheetId);
+				const historicMap = historicMapsById.get(urlParams.selectedSheetId);
+				if (historicMap) setHistoricMapView(historicMap);
+			}
 			// }, 2000);
 		});
 	}
@@ -689,7 +692,12 @@
 	let gridResetTimer = null;
 	let currentFillId = null;
 
-	function setGridVisibility(isVisible, centerLngLat = { lng: 5.63, lat: 52.16 }, rippleScale = 3, speed = 300) {
+	function setGridVisibility(
+		isVisible,
+		centerLngLat = { lng: 5.63, lat: 52.16 },
+		rippleScale = 3,
+		speed = 300
+	) {
 		const source = map.getSource('map-outlines');
 		if (!source || !source._data) return;
 		const allFeatures = source._data.features;
@@ -869,20 +877,6 @@
 
 	async function flyToUserLocation() {
 		try {
-			if (userLocationActive) {
-				userLocationActive = false;
-				if (map) {
-					const source = map.getSource('user-location') as maplibregl.GeoJSONSource;
-					if (source) {
-						source.setData({
-							type: 'FeatureCollection',
-							features: []
-						});
-					}
-				}
-				return;
-			}
-
 			const loc = await getUserLocation().catch(async () => {
 				return await getFallbackIPLocation();
 			});
@@ -910,6 +904,9 @@
 							}
 						]
 					});
+
+					map.setPaintProperty('user-location', 'circle-opacity', 1);
+					map.setPaintProperty('user-location', 'circle-radius', 10);
 				}
 			}
 
@@ -924,6 +921,21 @@
 					label: 'Your location'
 				}
 			});
+
+			if (userLocationTimeout) clearTimeout(userLocationTimeout);
+			userLocationTimeout = setTimeout(() => {
+				map.setPaintProperty('user-location', 'circle-opacity', 0);
+				map.setPaintProperty('user-location', 'circle-radius', 6);
+
+				setTimeout(() => {
+					const source = map?.getSource('user-location');
+					if (source) {
+						source.setData({ type: 'FeatureCollection', features: [] });
+					}
+					userLocationActive = false;
+					userLocationTimeout = null;
+				}, 400);
+			}, 2500);
 		} catch (err) {
 			console.error(err);
 			alert('Kon locatie niet bepalen.');
@@ -1098,7 +1110,7 @@
 	}
 
 	function updateURL() {
-		if(!maplibreLoaded || !historicMapsLoaded) return;
+		if (!maplibreLoaded || !historicMapsLoaded) return;
 		const params = new URLSearchParams();
 
 		const center = map!.getCenter();
@@ -1277,7 +1289,7 @@
 			setGridVisibility(true, { lng: 5.63, lat: 52.16 }, 100, 150);
 			spaceKeyDown = true;
 		}
-		if(e.key == 'Escape' && selectedHistoricMap) restoreView();
+		if (e.key == 'Escape' && selectedHistoricMap) restoreView();
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
