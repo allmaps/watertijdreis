@@ -75,7 +75,7 @@
 					id: i,
 					type: 'Feature',
 					geometry: structuredClone(o.polygon),
-					properties: { id: o.id, year: o.yearEnd }
+					properties: { id: o.id }
 				})
 			)
 			.map((f) => {
@@ -95,7 +95,7 @@
 					id: i,
 					type: 'Feature',
 					geometry: turf.centerOfMass(structuredClone(o.polygon)).geometry,
-					properties: { year: o.yearEnd }
+					properties: { year: o.yearEnd, num: o.number + '.' + o.position }
 				})
 			)
 			.toArray();
@@ -401,11 +401,11 @@
 		const initialCenter = urlParams ? [urlParams.lng, urlParams.lat] : [5, 51.75];
 		const initialZoom = urlParams ? urlParams.zoom : 7;
 
-		if(urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
-		if(urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
-		if(urlParams && urlParams.edition) filter.edition = urlParams.edition;
-		if(urlParams && urlParams.bis) filter.bis = urlParams.bis;
-		if(urlParams && urlParams.type) filter.type = urlParams.type;
+		if (urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
+		if (urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
+		if (urlParams && urlParams.edition) filter.edition = urlParams.edition;
+		if (urlParams && urlParams.bis) filter.bis = urlParams.bis;
+		if (urlParams && urlParams.type) filter.type = urlParams.type;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -472,10 +472,9 @@
 					'circle-opacity': 0.8
 				}
 			});
-			
+
 			await loadHistoricMaps(ANNOTATION_URL);
 			addOutlineLayers();
-
 
 			map.on('move', updateViewport);
 			updateViewport();
@@ -484,11 +483,11 @@
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
 
 			// setTimeout(() => {
-				if(urlParams.selectedSheetId) {
-					console.log(urlParams.selectedSheetId);
-					const historicMap = historicMapsById.get(urlParams.selectedSheetId);
-					if(historicMap) setHistoricMapView(historicMap);
-				}
+			if (urlParams.selectedSheetId) {
+				console.log(urlParams.selectedSheetId);
+				const historicMap = historicMapsById.get(urlParams.selectedSheetId);
+				if (historicMap) setHistoricMapView(historicMap);
+			}
 			// }, 2000);
 		});
 	}
@@ -566,7 +565,7 @@
 			type: 'symbol',
 			source: 'map-labels',
 			layout: {
-				'text-font': ['literal', ['Roboto Regular']],
+				'text-font': ['literal', ['Metropolis Bold']],
 				'text-field': ['to-string', ['get', 'year']],
 				'text-size': [
 					'interpolate',
@@ -596,9 +595,52 @@
 				'text-allow-overlap': true
 			},
 			paint: {
-				'text-color': '#00a',
+				'text-color': '#65e',
 				'text-halo-color': '#eeeeff',
 				'text-halo-width': 1,
+				'text-opacity': 0
+			}
+		});
+
+		map.addLayer({
+			id: 'map-outlines-numbers',
+			type: 'symbol',
+			source: 'map-labels',
+			layout: {
+				'text-font': ['literal', ['Metropolis Bold']],
+				'text-field': ['to-string', ['get', 'num']],
+				'text-size': [
+					'interpolate',
+					['exponential', 1.2],
+					['zoom'],
+					5,
+					6,
+					6,
+					9,
+					7,
+					12,
+					8,
+					15,
+					9,
+					17,
+					10,
+					18,
+					12,
+					22,
+					14,
+					26,
+					15,
+					28,
+					20,
+					28
+				],
+				'text-allow-overlap': true
+			},
+			paint: {
+				'text-color': '#65e',
+				'text-halo-color': '#eeeeff',
+				'text-halo-width': 1,
+				'text-opacity-transition': { duration: 1000 },
 				'text-opacity': 0
 			}
 		});
@@ -609,34 +651,12 @@
 			source: 'map-outlines',
 			paint: {
 				'fill-color': '#ff44aa',
-				'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0, 0]
-			}
-			// layout: { visibility: 'none' }
-		});
-
-		map.addLayer({
-			id: 'map-outlines-fill-2',
-			type: 'fill',
-			source: 'map-outlines',
-			paint: {
-				'fill-color': '#ff44aa',
 				'fill-opacity': ['coalesce', ['feature-state', 'animated-fill-opacity'], 0]
 			}
 		});
 
 		map.addLayer({
 			id: 'map-outlines-stroke',
-			type: 'line',
-			source: 'map-outlines',
-			paint: {
-				'line-color': '#f4a',
-				'line-width': 1.5,
-				'line-opacity': 0
-			}
-		});
-
-		map.addLayer({
-			id: 'map-outlines-stroke-2',
 			type: 'line',
 			source: 'map-outlines',
 			paint: {
@@ -689,7 +709,12 @@
 	let gridResetTimer = null;
 	let currentFillId = null;
 
-	function setGridVisibility(isVisible, centerLngLat = { lng: 5.63, lat: 52.16 }, rippleScale = 3, speed = 300) {
+	function setGridVisibility(
+		isVisible,
+		centerLngLat = { lng: 5.63, lat: 52.16 },
+		rippleScale = 3,
+		speed = 300
+	) {
 		const source = map.getSource('map-outlines');
 		if (!source || !source._data) return;
 		const allFeatures = source._data.features;
@@ -1098,7 +1123,7 @@
 	}
 
 	function updateURL() {
-		if(!maplibreLoaded || !historicMapsLoaded) return;
+		if (!maplibreLoaded || !historicMapsLoaded) return;
 		const params = new URLSearchParams();
 
 		const center = map!.getCenter();
@@ -1275,13 +1300,15 @@
 	onkeydown={(e) => {
 		if (e.key == ' ' && !spaceKeyDown) {
 			setGridVisibility(true, { lng: 5.63, lat: 52.16 }, 100, 150);
+			map?.setPaintProperty('map-outlines-numbers', 'text-opacity', 1);
 			spaceKeyDown = true;
 		}
-		if(e.key == 'Escape' && selectedHistoricMap) restoreView();
+		if (e.key == 'Escape' && selectedHistoricMap) restoreView();
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
 			setGridVisibility(false, { lng: 5.63, lat: 52.16 }, 100, 150);
+			map?.setPaintProperty('map-outlines-numbers', 'text-opacity', 0);
 			spaceKeyDown = false;
 		}
 	}}

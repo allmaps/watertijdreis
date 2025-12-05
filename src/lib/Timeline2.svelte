@@ -191,7 +191,6 @@
 		}
 
 		setLabelVisibility(false);
-		setGridVisibility(false);
 	}
 
 	function onwheel(e: WheelEvent) {
@@ -260,7 +259,7 @@
 
 {#if visible}
 	<div
-		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
+		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none"
 		transition:fly={{ y: 200, duration: 250 }}
 	>
 		<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>

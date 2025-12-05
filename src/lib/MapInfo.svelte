@@ -330,6 +330,28 @@
 					</button>
 				</div>
 			{/key}
+
+			<!-- {#if canvasManifest && editionManifest}
+				{@const metadata = getMetadata(canvasManifest)}
+				{@const editionMetadata = getMetadata(editionManifest)}
+				{@const collectionId =
+					'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
+				{@const manifestId = editionManifest.id}
+				{@const homepageUrl = editionManifest.rendering[0].id}
+
+				<ul class="pt-1 text-[12px] text-[#eef]">
+					<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+						<i class="font-[600] opacity-50">Bladtitel:</i>
+						<span class="font-[500]">{historicMap.label}</span>
+					</li>
+					{#each metadata as [label, value]}
+						<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">
+							<i class="font-[600] opacity-50">{label}:</i>
+							<span class="font-[500]">{value}</span>
+						</li>
+					{/each}
+				</ul>
+			{/if} -->
 		</div>
 	</div>
 {/if}
@@ -343,7 +365,7 @@
 
 	<div
 		transition:fly={{ y: 20, duration: 250 }}
-		class="fixed bottom-16 left-35 z-1003 w-80 rounded-lg bg-[#333366] p-3 shadow-lg"
+		class="fixed bottom-16 left-35 z-1003 w-auto rounded-lg bg-[#333366] p-2 text-[12px] shadow-lg"
 	>
 		<ul class="text-[#eef]">
 			<li class="rounded-[4px] px-2 py-0.5 odd:bg-[#eeeeff11]">

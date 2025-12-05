@@ -26,7 +26,7 @@ export function basemapStyle(
   return {
     version: 8,
     glyphs:
-      glyphs || 'https://fonts.allmaps.org/maplibre/{fontstack}/{range}.pbf',
+      glyphs || '/fonts/{fontstack}/{range}.pbf',
     sprite:
       sprite || 'https://protomaps.github.io/basemaps-assets/sprites/v4/light',
     sources: {
