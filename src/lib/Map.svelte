@@ -1123,19 +1123,45 @@
 
 	function parseURL() {
 		const q = new URLSearchParams(window.location.search);
-		console.log(q);
+
+		const num = (v: string | null, fallback: number) => {
+			const n = parseFloat(v ?? '');
+			return Number.isFinite(n) ? n : fallback;
+		};
+
+		const int = (v: string | null, fallback: number) => {
+			const n = parseInt(v ?? '');
+			return Number.isFinite(n) ? n : fallback;
+		};
+
+		if (window.location.hash.startsWith('#/')) {
+			return {
+				zoom: 7,
+				lat: 51.75,
+				lng: 5,
+				yearStart: 1865,
+				yearEnd: 1983,
+				edition: 'All',
+				bis: false,
+				type: undefined,
+				selectedSheetId: null
+			};
+		}
 
 		return {
-			zoom: parseFloat(q.get('z')),
-			lat: parseFloat(q.get('lat')),
-			lng: parseFloat(q.get('lng')),
-			yearStart: parseInt(q.get('ys')),
-			yearEnd: parseInt(q.get('ye')),
-			edition: q.get('e'),
+			zoom: num(q.get('z'), 7),
+			lat: num(q.get('lat'), 51.75),
+			lng: num(q.get('lng'), 5),
+
+			yearStart: int(q.get('ys'), 1865),
+			yearEnd: int(q.get('ye'), 1983),
+
+			edition: q.get('e') ?? 'All',
 			bis: q.get('bis') === '1',
-			type:q.get('type') ?? undefined,
-			selectedSheetId: q.get('sheet')
-		}
+
+			type: q.get('type') ?? undefined,
+			selectedSheetId: q.get('sheet') ?? null
+		};
 	}
 
 	function zoomIn() {
