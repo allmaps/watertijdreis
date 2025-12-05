@@ -270,7 +270,7 @@
 		{onwheel}
 		bind:clientWidth={width}
 		bind:clientHeight={height}
-		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-[url('wave_pattern.png')] bg-size-[32px]"
+		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-size-[32px]"
 	>
 		<div
 			class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"

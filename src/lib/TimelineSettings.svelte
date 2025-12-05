@@ -117,7 +117,6 @@
 				e.stopPropagation();
 			}}
 			class="fixed right-2 bottom-34 w-80 rounded-lg bg-white px-3 py-3 shadow-lg transition-all duration-200"
-			onclick={(e) => e.stopPropagation()}
 			transition:scale={{ duration: 250, y: 10 }}
 		>
 			<ul class="flex flex-col gap-2 text-sm font-[500] text-[#333366]">

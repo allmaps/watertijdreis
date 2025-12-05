@@ -10,7 +10,7 @@
 		openOnHover = true
 	} = $props();
 
-	let slotEl;
+	let slotEl = $state(null);
 	let expandedWidth = $state(0);
 
 	$effect(() => {

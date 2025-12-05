@@ -46,8 +46,7 @@
 
 	let historicMap = $derived.by(() => {
 		return (
-			selectedHistoricMap ||
-			clickedHistoricMap 
+			selectedHistoricMap || clickedHistoricMap
 			// ||
 			// (visibleHistoricMapsInViewport.size == 1
 			// 	? visibleHistoricMapsInViewport.values().next().value
@@ -240,17 +239,17 @@
 	}
 
 	$effect(() => {
-		if(!clickedHistoricMap) sheetInformationVisible = false;
-	})
+		if (!clickedHistoricMap) sheetInformationVisible = false;
+	});
 </script>
 
 {#if historicMap}
 	<div
 		class="
 			fixed right-2 bottom-2 left-2
-			z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] sm:bg-transparent sm:bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
+			z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg sm:bg-transparent sm:bg-linear-to-r
 		"
-		style:background-color={selectedHistoricMap ? "#336" : ""}
+		style:background-color={selectedHistoricMap ? '#336' : ''}
 		transition:fade={{ duration: 250 }}
 	>
 		<div
@@ -358,7 +357,12 @@
 				</li>
 			{/each}
 		</ul>
-		<a class="mt-4 px-2 text-[#f4a] hover:underline">
+		<a
+			href={homepageUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="mt-4 px-2 text-[#f4a] hover:underline"
+		>
 			<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
 			Externe links
 		</a>

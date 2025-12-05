@@ -63,14 +63,14 @@
 		>
 			<EnvelopeSimple size="32" color="#f4a" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
 		</a>
-		<a class="mx-4">
+		<a class="mx-4" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
 			<LinkedinLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"></LinkedinLogo>
 		</a>
-		<a>
+		<a class="mx-2" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
 			<InstagramLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"
 			></InstagramLogo>
 		</a>
-		<a class="mx-4">
+		<a class="mx-4" href="https://www.reddit.com/" target="_blank" rel="noopener noreferrer">
 			<RedditLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"></RedditLogo>
 		</a>
 	</div>
