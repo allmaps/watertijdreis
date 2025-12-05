@@ -17,16 +17,15 @@
 		setGridVisibility
 	} = $props();
 
-	$effect(() => {
-		if (filter.yearEnd - Math.floor(selectedYear)) {
-			filter.yearEnd = Math.floor(selectedYear);
-			applyFilter(filter);
-		}
-	});
+	// $effect(() => {
+	// 	if (filter.yearEnd - Math.floor(selectedYear)) {
+	// 		filter.yearEnd = Math.floor(selectedYear);
+	// 		applyFilter(filter);
+	// 	}
+	// });
 
 	let width = $state(0);
 	let height = $state(120);
-	let selectedYear = $state(1980);
 	let pixelsPerYear = $state(50);
 	let backgroundOffsetX = $state(0);
 	let backgroundVelocity = $state(0);
@@ -45,18 +44,20 @@
 
 	let view = new Spring(
 		{
-			start: 1977,
-			end: 1983
+			start: filter.yearEnd - 10,
+			end: filter.yearEnd + 10
 		},
 		{ stiffness: 0.1, damping: 0.5 }
 	);
+
+	// $effect(() => setSelectedYear(filter.yearEnd));
 
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
 			view.set({
-				start: selectedYear - halfRange,
-				end: selectedYear + halfRange
+				start: filter.yearEnd - halfRange,
+				end: filter.yearEnd + halfRange
 			});
 		}
 	});
@@ -115,10 +116,16 @@
 			const currentRange = view.current.end - view.current.start;
 			const yearDelta = (dx / width) * currentRange;
 
-			selectedYear = Math.min(
-				Math.max(selectedYear + yearDelta, minHistoricMapYear - 1),
+
+			const selectedYear = Math.min(
+				Math.max(filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
-			);
+			)
+			if(Math.floor(selectedYear) - filter.yearEnd) {
+				// applyFilter(filter);
+			}
+			filter.yearEnd = selectedYear;
+
 			backgroundOffsetX += dx * -0.5;
 			backgroundVelocity = dx * -0.2;
 
@@ -137,7 +144,11 @@
 			if (remainingPointer) lastX = remainingPointer.clientX;
 		}
 		if (pointerCache.size === 0) {
-			selectedYear = Math.round(selectedYear);
+			const selectedYear = Math.round(filter.yearEnd);
+			if(Math.floor(selectedYear) - filter.yearEnd) {
+				applyFilter(filter);
+			}
+			filter.yearEnd = selectedYear;
 
 			if (momentumTimeout) clearTimeout(momentumTimeout);
 			let elapsed = 0;
@@ -238,8 +249,8 @@
 	});
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
-	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : selectedYear);
-	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : selectedYear);
+	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : filter.yearEnd);
+	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : filter.yearEnd);
 </script>
 
 <svelte:window
@@ -253,7 +264,7 @@
 	class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
 	transition:fly={{ y: 200, duration: 250 }}
 >
-	<TimelinePointer year={Math.ceil(selectedYear)}></TimelinePointer>
+	<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>
 	<div
 		{onpointerdown}
 		{onwheel}
@@ -279,7 +290,7 @@
 						{pixelsPerYear}
 						{mapsInViewport}
 						{getHistoricMapThumbnail}
-						{selectedYear}
+						selectedYear={filter.yearEnd}
 					></MapStack>
 					<!-- <div
 						class="absolute h-10 w-10 bg-[#f00]"
@@ -346,7 +357,6 @@
 
 	<TimelineSettings
 		bind:filter
-		bind:selectedYear
 		{applyFilter}
 		minYear={minHistoricMapYear}
 		maxYear={maxHistoricMapYear}

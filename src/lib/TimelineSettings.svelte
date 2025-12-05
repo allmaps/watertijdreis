@@ -5,7 +5,6 @@
 
 	let {
 		filter = $bindable(),
-		selectedYear = $bindable(),
 		applyFilter,
 		minYear,
 		maxYear
@@ -141,7 +140,7 @@
 						type="number"
 						min={filter.yearStart}
 						max={maxYear + 1}
-						bind:value={selectedYear}
+						bind:value={filter.yearEnd}
 						onchange={() => {
 							applyFilter(filter);
 						}}

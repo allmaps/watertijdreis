@@ -22,6 +22,7 @@
 	import type { HistoricMap } from './types/historicmap';
 	import Button from './Button.svelte';
 	import { MagnifyingGlass, MapPinSimple } from 'phosphor-svelte';
+	import { goto } from '$app/navigation';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
@@ -122,7 +123,7 @@
 
 	let filter: Filter = $state({
 		yearStart: 1865,
-		yearEnd: 1991,
+		yearEnd: 1983,
 		edition: 'All',
 		bis: false,
 		type: undefined
@@ -183,10 +184,10 @@
 	function applyFilter(filter: Filter) {
 		if (!historicMapsByNumber) return;
 
+		updateURL();
+
 		const mapsToColor: string[] = [];
 		const mapsToDesaturate: string[] = [];
-
-		toastContent = `${filter.yearStart} - ${filter.yearEnd}`;
 
 		historicMapsByNumber.forEach((sheets) => {
 			let x1, y1, x2, y2;
@@ -277,7 +278,7 @@
 			}
 		});
 
-		toastContent = `Je ziet nu kaarten uit de periode <code style="font-weight: 600">${filter.yearStart}</code> en <code style="font-weight: 600">${filter.yearEnd}</code>`;
+		toastContent = `Je ziet nu kaarten van <i class="font-[700]">${Math.ceil(filter.yearEnd)}</i> en ouder`;
 
 		console.log('Applied filter');
 	}
@@ -395,9 +396,16 @@
 	}
 
 	function initMaplibre() {
-		const urlView = getViewFromUrl();
-		const initialCenter = urlView ? [urlView.lng, urlView.lat] : [5, 51.75];
-		const initialZoom = urlView ? urlView.zoom : 7;
+		const urlParams = parseURL();
+
+		const initialCenter = urlParams ? [urlParams.lng, urlParams.lat] : [5, 51.75];
+		const initialZoom = urlParams ? urlParams.zoom : 7;
+
+		if(urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
+		if(urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
+		if(urlParams && urlParams.edition) filter.edition = urlParams.edition;
+		if(urlParams && urlParams.bis) filter.bis = urlParams.bis;
+		if(urlParams && urlParams.type) filter.type = urlParams.type;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -464,16 +472,24 @@
 					'circle-opacity': 0.8
 				}
 			});
-
+			
 			await loadHistoricMaps(ANNOTATION_URL);
-
 			addOutlineLayers();
+
 
 			map.on('move', updateViewport);
 			updateViewport();
-			map.on('moveend', updateUrl);
+			map.on('moveend', updateURL);
 			map.on('mousemove', 'map-outlines-fill', handleMapMouseMove);
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
+
+			// setTimeout(() => {
+				if(urlParams.selectedSheetId) {
+					console.log(urlParams.selectedSheetId);
+					const historicMap = historicMapsById.get(urlParams.selectedSheetId);
+					if(historicMap) setHistoricMapView(historicMap);
+				}
+			// }, 2000);
 		});
 	}
 
@@ -1081,29 +1097,45 @@
 		};
 	}
 
-	function updateUrl() {
-		if (!map) return;
+	function updateURL() {
+		if(!maplibreLoaded || !historicMapsLoaded) return;
+		const params = new URLSearchParams();
 
-		const period = `${filter.yearStart}-${filter.yearEnd}`;
-		const center = map.getCenter();
-		const zoom = map.getZoom().toFixed(2);
-		const lat = center.lat.toFixed(4);
-		const lon = center.lng.toFixed(4);
-		window.history.replaceState(null, '', `#/${zoom}/${lat}/${lon}/${period}`);
+		const center = map!.getCenter();
+
+		params.set('z', map!.getZoom().toFixed(2));
+		params.set('lat', center.lat.toFixed(4));
+		params.set('lng', center.lng.toFixed(4));
+
+		params.set('ys', String(filter.yearStart));
+		params.set('ye', String(Math.round(filter.yearEnd)));
+		params.set('e', String(filter.edition));
+		params.set('bis', filter.bis ? '1' : '0');
+
+		if (filter.type) params.set('type', filter.type);
+		if (selectedHistoricMap) params.set('sheet', selectedHistoricMap.id);
+
+		goto(`?${params.toString()}`, {
+			replaceState: true,
+			noScroll: true
+		});
 	}
 
-	function getViewFromUrl() {
-		if (window.location.hash.length < 2) return null;
-		const parts = window.location.hash.substring(2).split('/');
-		if (parts.length === 4) {
-			return {
-				zoom: parseFloat(parts[0]),
-				lat: parseFloat(parts[1]),
-				lng: parseFloat(parts[2]),
-				period: parseFloat(parts[3])
-			};
+	function parseURL() {
+		const q = new URLSearchParams(window.location.search);
+		console.log(q);
+
+		return {
+			zoom: parseFloat(q.get('z')),
+			lat: parseFloat(q.get('lat')),
+			lng: parseFloat(q.get('lng')),
+			yearStart: parseInt(q.get('ys')),
+			yearEnd: parseInt(q.get('ye')),
+			edition: q.get('e'),
+			bis: q.get('bis') === '1',
+			type:q.get('type') ?? undefined,
+			selectedSheetId: q.get('sheet')
 		}
-		return null;
 	}
 
 	function zoomIn() {
