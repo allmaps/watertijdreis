@@ -116,12 +116,11 @@
 			const currentRange = view.current.end - view.current.start;
 			const yearDelta = (dx / width) * currentRange;
 
-
 			const selectedYear = Math.min(
 				Math.max(filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
-			)
-			if(Math.floor(selectedYear) - filter.yearEnd) {
+			);
+			if (Math.floor(selectedYear) - filter.yearEnd) {
 				// applyFilter(filter);
 			}
 			filter.yearEnd = selectedYear;
@@ -145,7 +144,7 @@
 		}
 		if (pointerCache.size === 0) {
 			const selectedYear = Math.round(filter.yearEnd);
-			if(Math.floor(selectedYear) - filter.yearEnd) {
+			if (Math.floor(selectedYear) - filter.yearEnd) {
 				applyFilter(filter);
 			}
 			filter.yearEnd = selectedYear;
@@ -260,106 +259,119 @@
 />
 
 {#if visible}
-<div
-	class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
-	transition:fly={{ y: 200, duration: 250 }}
->
-	<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>
 	<div
-		{onpointerdown}
-		{onwheel}
-		bind:clientWidth={width}
-		bind:clientHeight={height}
-		class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-size-[32px]"
+		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto touch-none select-none"
+		transition:fly={{ y: 200, duration: 250 }}
 	>
+		<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>
 		<div
-			class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
-			style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
-		></div>
-		<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
-		<div
-			class="absolute inset-0 z-1 h-[200px] w-full"
-			style="perspective: 1000px; transform-style: preserve-3d;"
+			{onpointerdown}
+			{onwheel}
+			bind:clientWidth={width}
+			bind:clientHeight={height}
+			class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-size-[32px]"
 		>
-			{#each yearsWithMaps as year}
-				{#if year >= startYearInt && year <= endYearInt}
-					{@const x = getX(year)}
-					<MapStack
-						{x}
-						maps={mapsByYear[year]}
-						{pixelsPerYear}
-						{mapsInViewport}
-						{getHistoricMapThumbnail}
-						selectedYear={filter.yearEnd}
-					></MapStack>
-					<!-- <div
+			<div
+				class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
+				style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
+			></div>
+			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
+			<div
+				class="absolute inset-0 z-1 h-[200px] w-full"
+				style="perspective: 1000px; transform-style: preserve-3d;"
+			>
+				{#each yearsWithMaps as year}
+					{#if year >= startYearInt && year <= endYearInt}
+						{@const x = getX(year)}
+						<div
+							class="absolute"
+							style={`left: ${x - pixelsPerYear / 2}px; top: 40px; width: ${pixelsPerYear}px; height: 120px; cursor: pointer;`}
+							onclick={() => (filter.yearEnd = year)}
+						></div>
+						<div onclick={() => (filter.yearEnd = year)} style="cursor: pointer;">
+							<MapStack
+								{x}
+								maps={mapsByYear[year]}
+								{pixelsPerYear}
+								{mapsInViewport}
+								{getHistoricMapThumbnail}
+								selectedYear={filter.yearEnd}
+							></MapStack>
+						</div>
+						<!-- <div
 						class="absolute h-10 w-10 bg-[#f00]"
 						style="
 							transform: translateX({x}px) translateY({60}px) rotateX(60deg) rotateZ({0}deg);
 						"
 					></div> -->
+					{/if}
+				{/each}
+			</div>
+			<svg class="pointer-events-none absolute inset-0 z-999 h-full w-full cursor-grab">
+				{#if pixelsPerYear > 3}
+					<path
+						d={ticks.minor}
+						stroke={timelineTickColor}
+						stroke-width="1"
+						opacity={1 - (5 - pixelsPerYear) / 2}
+					/>
 				{/if}
-			{/each}
+
+				{#if pixelsPerYear > 7}
+					<path
+						d={ticks.medium}
+						stroke={timelineTickColor}
+						stroke-width="1"
+						opacity={1 - (9 - pixelsPerYear) / 2}
+					/>
+				{/if}
+
+				<path d={ticks.major} stroke={timelineTickColor} stroke-width="1" />
+
+				{#each { length: endYearInt - startYearInt + 1 } as _, i}
+					{@const year = startYearInt + i}
+					{@const x = getX(year)}
+
+					{#if year % 25 === 0}
+						<text
+							x={x - 15}
+							y={ticksOnTop ? 22 : height - 12}
+							font-size="12"
+							font-weight="700"
+							fill={timelineTickColor}
+							onclick={() => (filter.yearEnd = year)}
+							style="cursor: pointer; pointer-events: auto;">{year}</text
+						>
+					{:else if year % 5 === 0 && pixelsPerYear > 7}
+						<text
+							x={x - 15}
+							y={ticksOnTop ? 22 : height - 12}
+							font-size="12"
+							fill={timelineTickColor}
+							opacity={1 - (9 - pixelsPerYear) / 2}
+							onclick={() => (filter.yearEnd = year)}
+							style="cursor: pointer; pointer-events: auto;">{year}</text
+						>
+					{:else if pixelsPerYear > 35}
+						<text
+							x={x - 15}
+							y={ticksOnTop ? 22 : height - 12}
+							font-size="12"
+							fill={timelineTickColor}
+							opacity={1 - (38 - pixelsPerYear) / 3}
+							onclick={() => (filter.yearEnd = year)}
+							style="cursor: pointer; pointer-events: auto;">{year}</text
+						>
+					{/if}
+				{/each}
+			</svg>
 		</div>
-		<svg class="absolute inset-0 z-999 h-full w-full cursor-grab">
-			{#if pixelsPerYear > 3}
-				<path
-					d={ticks.minor}
-					stroke={timelineTickColor}
-					stroke-width="1"
-					opacity={1 - (5 - pixelsPerYear) / 2}
-				/>
-			{/if}
 
-			{#if pixelsPerYear > 7}
-				<path
-					d={ticks.medium}
-					stroke={timelineTickColor}
-					stroke-width="1"
-					opacity={1 - (9 - pixelsPerYear) / 2}
-				/>
-			{/if}
-
-			<path d={ticks.major} stroke={timelineTickColor} stroke-width="1" />
-
-			{#each { length: endYearInt - startYearInt + 1 } as _, i}
-				{@const year = startYearInt + i}
-				{@const x = getX(year)}
-
-				{#if year % 25 === 0}
-					<text
-						x={x - 15}
-						y={ticksOnTop ? 22 : height - 12}
-						font-size="12"
-						font-weight="700"
-						fill={timelineTickColor}>{year}</text
-					>
-				{:else if year % 5 === 0 && pixelsPerYear > 7}
-					<text
-						x={x - 15}
-						y={ticksOnTop ? 22 : height - 12}
-						font-size="12"
-						fill={timelineTickColor}
-						opacity={1 - (9 - pixelsPerYear) / 2}>{year}</text
-					>
-				{:else if pixelsPerYear > 35}
-					<text
-						x={x - 15}
-						y={ticksOnTop ? 22 : height - 12}
-						font-size="12"
-						fill={timelineTickColor}
-						opacity={1 - (38 - pixelsPerYear) / 3}>{year}</text
-					>
-				{/if}
-			{/each}
-		</svg>
+		<TimelineSettings
+			bind:filter
+			{applyFilter}
+			minYear={minHistoricMapYear}
+			maxYear={maxHistoricMapYear}
+		></TimelineSettings>
 	</div>
-
-	<TimelineSettings
-		bind:filter
-		{applyFilter}
-		minYear={minHistoricMapYear}
-		maxYear={maxHistoricMapYear}
-	></TimelineSettings>
-</div>
 {/if}
