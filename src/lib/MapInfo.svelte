@@ -202,7 +202,6 @@
 			}
 		};
 
-		console.log(id);
 		await warpedMapLayer.addGeoreferencedMap(annotation);
 		const warpedMap = warpedMapLayer.getWarpedMap(id);
 		const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
@@ -249,9 +248,9 @@
 	<div
 		class="
 			fixed right-2 bottom-2 left-2
-			z-[1000] h-30 overflow-hidden rounded-[8px] bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
+			z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] sm:bg-transparent sm:bg-linear-to-r from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg
 		"
-		style:background-color={selectedHistoricMap ? "#336" : "transparent"}
+		style:background-color={selectedHistoricMap ? "#336" : ""}
 		transition:fade={{ duration: 250 }}
 	>
 		<div
