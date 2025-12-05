@@ -285,6 +285,11 @@
 				style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
 			></div>
 			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
+
+			<div
+				class="pointer-events-none absolute top-0 left-0 z-1000 h-full w-10 bg-gradient-to-r from-[#336] to-transparent"
+			></div>
+
 			<div
 				class="absolute inset-0 z-1 h-[200px] w-full"
 				style="perspective: 1000px; transform-style: preserve-3d;"
