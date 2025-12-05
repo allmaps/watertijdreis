@@ -1219,6 +1219,7 @@
 			setGridVisibility(true, { lng: 5.63, lat: 52.16 }, 100, 150);
 			spaceKeyDown = true;
 		}
+		if(e.key == 'Escape' && selectedHistoricMap) restoreView();
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
