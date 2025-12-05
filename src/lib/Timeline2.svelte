@@ -39,6 +39,8 @@
 
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
+	const MIN_YEAR = 1600;
+	const MAX_YEAR = 2300;
 	const timelineTickColor = '#eef';
 	const ticksOnTop = true;
 
@@ -55,9 +57,16 @@
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
+			const newStart = filter.yearEnd - halfRange;
+			const newEnd = filter.yearEnd + halfRange;
+
+			// Clamp to min/max year range
+			const clampedStart = Math.max(newStart, MIN_YEAR);
+			const clampedEnd = Math.min(newEnd, MAX_YEAR);
+
 			view.set({
-				start: filter.yearEnd - halfRange,
-				end: filter.yearEnd + halfRange
+				start: clampedStart,
+				end: clampedEnd
 			});
 		}
 	});
@@ -286,9 +295,20 @@
 						<div
 							class="absolute"
 							style={`left: ${x - pixelsPerYear / 2}px; top: 40px; width: ${pixelsPerYear}px; height: 120px; cursor: pointer;`}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 						></div>
-						<div onclick={() => (filter.yearEnd = year)} style="cursor: pointer;">
+						<div
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
+							style="cursor: pointer;"
+						>
 							<MapStack
 								{x}
 								maps={mapsByYear[year]}
@@ -339,7 +359,11 @@
 							font-size="12"
 							font-weight="700"
 							fill={timelineTickColor}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{:else if year % 5 === 0 && pixelsPerYear > 7}
@@ -349,7 +373,11 @@
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (9 - pixelsPerYear) / 2}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{:else if pixelsPerYear > 35}
@@ -359,7 +387,11 @@
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (38 - pixelsPerYear) / 3}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{/if}
