@@ -39,6 +39,8 @@
 
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
+	const MIN_YEAR = 1600;
+	const MAX_YEAR = 2300;
 	const timelineTickColor = '#eef';
 	const ticksOnTop = true;
 
@@ -55,9 +57,16 @@
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
+			const newStart = filter.yearEnd - halfRange;
+			const newEnd = filter.yearEnd + halfRange;
+
+			// Clamp to min/max year range
+			const clampedStart = Math.max(newStart, MIN_YEAR);
+			const clampedEnd = Math.min(newEnd, MAX_YEAR);
+
 			view.set({
-				start: filter.yearEnd - halfRange,
-				end: filter.yearEnd + halfRange
+				start: clampedStart,
+				end: clampedEnd
 			});
 		}
 	});
@@ -91,7 +100,6 @@
 		}
 
 		setLabelVisibility(true);
-		setGridVisibility(true);
 	}
 
 	function onWindowPointerMove(e: PointerEvent) {
@@ -275,6 +283,11 @@
 				style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
 			></div>
 			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
+
+			<div
+				class="pointer-events-none absolute top-0 left-0 z-1000 h-full w-10 bg-gradient-to-r from-[#336] to-transparent"
+			></div>
+
 			<div
 				class="absolute inset-0 z-1 h-[200px] w-full"
 				style="perspective: 1000px; transform-style: preserve-3d;"
@@ -282,21 +295,14 @@
 				{#each yearsWithMaps as year}
 					{#if year >= startYearInt && year <= endYearInt}
 						{@const x = getX(year)}
-						<div
-							class="absolute"
-							style={`left: ${x - pixelsPerYear / 2}px; top: 40px; width: ${pixelsPerYear}px; height: 120px; cursor: pointer;`}
-							onclick={() => (filter.yearEnd = year)}
-						></div>
-						<div onclick={() => (filter.yearEnd = year)} style="cursor: pointer;">
-							<MapStack
-								{x}
-								maps={mapsByYear[year]}
-								{pixelsPerYear}
-								{mapsInViewport}
-								{getHistoricMapThumbnail}
-								selectedYear={filter.yearEnd}
-							></MapStack>
-						</div>
+						<MapStack
+							{x}
+							maps={mapsByYear[year]}
+							{pixelsPerYear}
+							{mapsInViewport}
+							{getHistoricMapThumbnail}
+							selectedYear={filter.yearEnd}
+						></MapStack>
 						<!-- <div
 						class="absolute h-10 w-10 bg-[#f00]"
 						style="
@@ -310,8 +316,8 @@
 				{#if pixelsPerYear > 3}
 					<path
 						d={ticks.minor}
-						stroke={timelineTickColor}
-						stroke-width="1"
+						stroke="#eeeeff88"
+						stroke-width="1.5"
 						opacity={1 - (5 - pixelsPerYear) / 2}
 					/>
 				{/if}
@@ -319,13 +325,13 @@
 				{#if pixelsPerYear > 7}
 					<path
 						d={ticks.medium}
-						stroke={timelineTickColor}
-						stroke-width="1"
+						stroke="#eeeeff88"
+						stroke-width="1.5"
 						opacity={1 - (9 - pixelsPerYear) / 2}
 					/>
 				{/if}
 
-				<path d={ticks.major} stroke={timelineTickColor} stroke-width="1" />
+				<path d={ticks.major} stroke="#eeeeff88" stroke-width="1.5" />
 
 				{#each { length: endYearInt - startYearInt + 1 } as _, i}
 					{@const year = startYearInt + i}
@@ -333,32 +339,47 @@
 
 					{#if year % 25 === 0}
 						<text
-							x={x - 15}
+							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
+							font-family="ivypresto-display"
 							font-size="12"
 							font-weight="700"
 							fill={timelineTickColor}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{:else if year % 5 === 0 && pixelsPerYear > 7}
 						<text
-							x={x - 15}
+							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
+							font-family="ivypresto-display"
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (9 - pixelsPerYear) / 2}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{:else if pixelsPerYear > 35}
 						<text
-							x={x - 15}
+							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
+							font-family="ivypresto-display"
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (38 - pixelsPerYear) / 3}
-							onclick={() => (filter.yearEnd = year)}
+							onclick={() => {
+								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
+									filter.yearEnd = year;
+								}
+							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
 						>
 					{/if}

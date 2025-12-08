@@ -33,7 +33,7 @@
 		} else if (clickedHistoricMap && !selectedHistoricMap) {
 			setHistoricMapView(clickedHistoricMap);
 		} else {
-			setGridVisibility(true)
+			setGridVisibility(true);
 		}
 	}
 
@@ -47,11 +47,11 @@
 
 <div
 	class="
-        group fixed top-24 left-2 sm:left-5 z-1000 my-3 flex flex-shrink-0 cursor-pointer
-        items-center justify-center rounded-[9px] border-2 border-[#33336611]
-        bg-[#33336611] font-[500]
-        text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
-        backdrop-blur-md duration-500
+        group fixed top-24 left-2 z-1000 my-3 flex flex-shrink-0 cursor-pointer items-center
+        justify-center rounded-[9px] border-2 border-[#33336611] bg-[#33336611]
+        font-[500] text-[#336]
+        shadow-[0_2px_2px_rgba(0,0,0,0.05)] backdrop-blur-md
+        duration-500 sm:left-5
     "
 >
 	<span
@@ -61,7 +61,7 @@
 	></span>
 	<button
 		bind:clientWidth={leftBtnWidth}
-		class="z-2 cursor-pointer rounded-[7px] px-3 py-1 transition-[background] duration-300"
+		class="z-2 cursor-pointer rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
 		onclick={leftBtnClick}
 	>
 		<MapTrifold
@@ -73,7 +73,7 @@
 	</button>
 	<button
 		bind:clientWidth={rightBtnWidth}
-		class="z-2 max-w-50 cursor-pointer truncate rounded-[7px] px-3 py-1 transition-[background] duration-300"
+		class="z-2 max-w-50 cursor-pointer truncate rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
 		onclick={rightBtnClick}
 	>
 		<FileText

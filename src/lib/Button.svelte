@@ -23,7 +23,7 @@
 		else if (slotEl) slotEl.style.width = expandedWidth + 'px';
 	});
 
-	let dark = $state(true);
+	let dark = $state(false);
 </script>
 
 {#if dark}

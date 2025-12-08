@@ -1,14 +1,18 @@
 <script lang="ts">
-	import { ShareFat, Info } from 'phosphor-svelte';
+	import { ShareFat, Info, MagnifyingGlass, Waves } from 'phosphor-svelte';
 	import SharePanel from './SharePanel.svelte';
 	import Button from './Button.svelte';
 	import Modal from './Modal.svelte';
+
+	let { historicMapsLoaded } = $props();
 
 	let aboutPanelVisible = $state(false);
 	let sharePanelVisible = $state(false);
 
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);
+
+	let searchBarVisible = $state(false);
 </script>
 
 <Modal title="Over Watertijdreis" bind:visible={aboutPanelVisible}>
@@ -18,23 +22,23 @@
 <SharePanel bind:visible={sharePanelVisible}></SharePanel>
 
 <div
-	class="absolute top-5 left-2 z-999 flex items-center gap-2 rounded-[8px] bg-white p-4 text-[#336] shadow-lg sm:left-5"
+	class="absolute top-5 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-[#33336611] p-4 text-[#336] shadow-lg backdrop-blur-md sm:left-5"
 	onmouseenter={() => (buttonCollapse = false)}
 	onmouseleave={() => (buttonCollapse = true)}
 	role="button"
 	tabindex="0"
 >
-	<!-- <Waves
-		size={20}
-		weight="bold"
-		color="#33336688"
-		class={`relative -top-2 mx-1 inline-block transform ${wavesFlipped ? '-scale-x-100' : ''}`}
-	></Waves> -->
 	<h1
-		class="flex inline cursor-pointer gap-[1px] text-[16px] font-[700] sm:text-[16px] md:text-[20px]"
+		class="mr-1 flex inline cursor-pointer gap-[1px] text-[16px] font-[700] text-shadow-[2px_2px_0_#eef] sm:text-[16px] md:text-[20px]"
 	>
 		{#each 'Watertijdreis'.split('') as letter, i}
-			<span class="wave-letter inline-block" style="animation-delay: {i * 60}ms">
+			<span
+				class="inline-block will-change-[transform,text-shadow,color]"
+				class:wave={historicMapsLoaded}
+				class:wave-loading={!historicMapsLoaded}
+				style:animation=""
+				style:animation-delay={i * 60 + 'ms'}
+			>
 				{letter}
 			</span>
 		{/each}
@@ -109,18 +113,33 @@
 </div>
 
 <style>
-	.wave-letter {
-		display: inline-block;
+	.wave {
 		animation: wave 600ms ease-in-out infinite alternate;
+	}
+
+	.wave-loading {
+		animation: wave-loading 600ms ease-in-out infinite alternate;
+	}
+
+	@keyframes wave-loading {
+		0% {
+			color: #33a;
+			opacity: 0;
+		}
+		100% {
+			color: #336;
+			opacity: 1;
+		}
 	}
 
 	@keyframes wave {
 		0% {
 			transform: translateY(0px);
 			color: #33a;
+			text-shadow: 1px 1px 0 #aaf;
 		}
 		100% {
-			transform: translateY(-2px);
+			transform: translateY(-2.1px);
 			color: #336;
 		}
 	}

@@ -96,11 +96,51 @@
 		{width}
 		{height}
 		viewBox={viewBox.join(' ')}
-		class="transition-scale absolute bottom-22.5 -left-6 z-998 origin-top-right scale-80 duration-300 hover:scale-100 sm:right-8"
+		class="transition-scale absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
 		style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
+			{#each polygons as poly}
+				{@const previewed =
+					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
+				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
+				{@const fill = previewed || clicked ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
+				<polygon
+					points={getProjectedPoints(poly.geometry.coordinates[0])}
+					{fill}
+					stroke="#ff44aa"
+					stroke-width={(viewBox[2] / width) * 1.33}
+				/>
+			{/each}
+			{#if viewport && !selectedHistoricMap}
+				<!-- <polygon
+					points={getClippedProjectedPoints(viewport.geometry.coordinates[0])}
+					fill="none"
+					stroke="#33336666"
+					stroke-width={(viewBox[2] / width) * 4}
+					rx="4"
+					ry="4"
+				/> -->
+				{@const {
+					x,
+					y,
+					width: w,
+					height: h
+				} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
+				<rect
+					{x}
+					{y}
+					width={w}
+					height={h}
+					fill="none"
+					stroke="#33336644"
+					stroke-width={(viewBox[2] / width) * 4}
+					rx={(viewBox[2] / width) * 2}
+					ry={(viewBox[2] / width) * 2}
+				></rect>
+			{/if}
 			{#if clickedHistoricMap || selectedHistoricMap}
 				<g out:fade={{ duration: 250 }}>
 					{#key clickedHistoricMap || selectedHistoricMap}
@@ -150,46 +190,6 @@
 						/>
 					{/key}
 				</g>
-			{/if}
-			{#each polygons as poly}
-				{@const previewed =
-					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
-				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
-				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
-				{@const fill = previewed || clicked ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
-				<polygon
-					points={getProjectedPoints(poly.geometry.coordinates[0])}
-					{fill}
-					stroke="#ff44aa"
-					stroke-width={(viewBox[2] / width) * 1.33}
-				/>
-			{/each}
-			{#if viewport && !selectedHistoricMap}
-				<!-- <polygon
-					points={getClippedProjectedPoints(viewport.geometry.coordinates[0])}
-					fill="none"
-					stroke="#33336666"
-					stroke-width={(viewBox[2] / width) * 4}
-					rx="4"
-					ry="4"
-				/> -->
-				{@const {
-					x,
-					y,
-					width: w,
-					height: h
-				} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
-				<rect
-					{x}
-					{y}
-					width={w}
-					height={h}
-					fill="none"
-					stroke="#33336644"
-					stroke-width={(viewBox[2] / width) * 4}
-					rx={(viewBox[2] / width) * 2}
-					ry={(viewBox[2] / width) * 2}
-				></rect>
 			{/if}
 		</g>
 	</svg>

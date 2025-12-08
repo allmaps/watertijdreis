@@ -25,13 +25,17 @@ html, body {
 
 /* optional: scalebar visuals */
 .maplibregl-ctrl-scale {
+    opacity: 0;
     background: transparent !important;
-    border: 2px solid #f4a !important;
+    border: 2px solid #33336688 !important;
+    box-shadow: 1px 2px 0 #eef;
     border-radius: 0 0 4px 4px !important;
     border-top: none !important;
-    color: #336 !important;
+    color: #333366 !important;
+    text-shadow: 1px 1px 0 #eef;
     font-size: 14px !important;
     font-weight: 600;
     padding: 4px 6px;
     margin-left: 25px !important;
+    text-align: right;
 }

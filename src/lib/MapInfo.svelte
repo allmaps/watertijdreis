@@ -250,12 +250,9 @@
 			z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg sm:bg-transparent sm:bg-linear-to-r
 		"
 		style:background-color={selectedHistoricMap ? '#336' : ''}
-		transition:fade={{ duration: 250 }}
+		transition:fade={{ duration: 500 }}
 	>
-		<div
-			class="flex h-full items-stretch gap-3 transition-opacity duration-300"
-			style:opacity={!historicMap ? 0 : 1}
-		>
+		<div class="flex h-full items-stretch gap-3">
 			{#key historicMap}
 				<div
 					class="flex-shrink-0 p-4 pr-1"
@@ -263,7 +260,7 @@
 				>
 					<div
 						bind:this={thumbnailEl}
-						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500"
+						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
 						<img
