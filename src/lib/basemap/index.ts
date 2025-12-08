@@ -3,6 +3,7 @@ import mlcontour from 'maplibre-contour'
 import * as maplibregl from 'maplibre-gl'
 import * as StyleSpec from '@maplibre/maplibre-gl-style-spec'
 import { ALLMAPS_FLAVOR, TERRAIN_COLORS } from '$lib/basemap/colors'
+import { PUBLIC_PROTOMAPS_KEY } from '$env/static/public';
 
 export function basemapStyle(
   lang: string,
@@ -34,7 +35,7 @@ export function basemapStyle(
         type: 'vector',
         url:
           tileJson ||
-          'https://api.protomaps.com/tiles/v4.json?key=ca7652ec836f269a',
+          `https://api.protomaps.com/tiles/v4.json?key=${PUBLIC_PROTOMAPS_KEY}`,
         attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
       }
     },
