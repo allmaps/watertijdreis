@@ -31,6 +31,7 @@
 	let warpedMapLayer: WarpedMapLayer | null = $state(null);
 	let maplibreLoaded: boolean = $state(false);
 	let userLocationActive: boolean = $state(false);
+	let userLocationTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	$effect(() => {
 		if (!map) initMaplibre();
@@ -461,15 +462,18 @@
 			});
 
 			map.addLayer({
-				id: 'user-location-layer',
+				id: 'user-location',
 				type: 'circle',
 				source: 'user-location',
 				paint: {
-					'circle-radius': 10,
+					'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 6, 22, 20],
 					'circle-color': '#f4a',
+					'circle-opacity': 0,
+					'circle-stroke-color': '#ffffff',
 					'circle-stroke-width': 4,
-					'circle-stroke-color': '#fff',
-					'circle-opacity': 0.8
+
+					'circle-opacity-transition': { duration: 400 },
+					'circle-radius-transition': { duration: 400 }
 				}
 			});
 
@@ -650,7 +654,7 @@
 			type: 'fill',
 			source: 'map-outlines',
 			paint: {
-				'fill-color': '#ff44aa',
+				'fill-color': '#f4a',
 				'fill-opacity': ['coalesce', ['feature-state', 'animated-fill-opacity'], 0]
 			}
 		});
@@ -667,39 +671,65 @@
 		});
 
 		let clickedMapTimeout = null;
-		map.doubleClickZoom.disable();
-		map.on('click', 'map-outlines-fill', (e) => {
-			setGridVisibility(true, e.lngLat);
+		let gridResetTimer = null;
+		let currentFillId = null;
+		let fillFadeOutTimer = null;
+		const activeAnimations = {};
+		const featureTimeouts = {};
 
+		map.doubleClickZoom.disable();
+
+		map.on('click', 'map-outlines-fill', (e) => {
+			const clickedLngLat = e.lngLat;
+			const feature = e.features?.[0];
+			const featureId = feature?.id;
+			const mapId = feature?.properties?.id;
+
+			setGridVisibility(true, clickedLngLat);
+
+			if (gridResetTimer) clearTimeout(gridResetTimer);
 			gridResetTimer = setTimeout(() => {
-				setGridVisibility(false, e.lngLat);
+				setGridVisibility(false, clickedLngLat);
 			}, 1500);
 
-			if (clickedFeature && clickedFeature.properties?.id === e.features?.[0]?.properties?.id) {
-				const id = e.features?.[0]?.properties?.id;
-				if (id) setHistoricMapView(historicMapsById.get(id));
+			if (feature) {
+				map!.flyTo({
+					center: clickedLngLat,
+					speed: 0.8,
+					curve: 1,
+					essential: true
+				});
 			}
 
-			clickedFeature = e.features?.[0];
-			const newId = clickedFeature?.id;
+			if (clickedFeature && clickedFeature.properties?.id === mapId) {
+				if (mapId) setHistoricMapView(historicMapsById.get(mapId));
+			}
 
-			if (newId !== undefined && newId !== currentFillId) {
-				if (currentFillId !== null) {
-					animateFeatureOpacity(currentFillId, 'animated-fill-opacity', 0, 300);
+			clickedFeature = feature;
+
+			if (featureId !== undefined) {
+				// A: Clicked a NEW polygon while an OLD one was still active
+				if (currentFillId !== null && currentFillId !== featureId) {
+					if (fillFadeOutTimer) clearTimeout(fillFadeOutTimer);
+					animateFeatureOpacity(currentFillId, 'animated-fill-opacity', 0, 50);
 				}
 
-				currentFillId = newId;
-				if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
-				animateFeatureOpacity(newId, 'animated-fill-opacity', 0.25, 300, () => {
-					setTimeout(() => {
-						if (currentFillId === newId) {
-							animateFeatureOpacity(newId, 'animated-fill-opacity', 0, 500);
-							currentFillId = null;
-						}
-					}, 1000);
+				// B: NEW polygon
+				if (currentFillId !== featureId) {
+					currentFillId = featureId;
 
+					animateFeatureOpacity(featureId, 'animated-fill-opacity', 0.25, 300, () => {
+						fillFadeOutTimer = setTimeout(() => {
+							if (currentFillId === featureId) {
+								animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 500);
+								currentFillId = null;
+							}
+						}, 1000);
+					});
+
+					if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
 					clickedMapTimeout = setTimeout(() => (clickedFeature = null), 2500);
-				});
+				}
 			}
 		});
 	}
@@ -729,10 +759,9 @@
 		const hoverFillOpacity = isVisible ? 0.1 : 0;
 
 		map.setPaintProperty('map-outlines-fill', 'fill-opacity', [
-			'case',
-			['boolean', ['feature-state', 'hover'], false],
-			hoverFillOpacity,
-			0
+			'max',
+			['coalesce', ['feature-state', 'animated-fill-opacity'], 0],
+			['case', ['boolean', ['feature-state', 'hover'], false], hoverFillOpacity, 0]
 		]);
 
 		allFeatures.forEach((feature) => {
@@ -789,7 +818,7 @@
 
 			const currentVal = startVal + (endVal - startVal) * progress;
 
-			map.setFeatureState({ source: 'map-outlines', id: id }, { [prop]: currentVal });
+			map.setFeatureState({ source: 'map-outlines', id }, { [prop]: currentVal });
 
 			if (progress < 1) {
 				activeAnimations[animKey] = requestAnimationFrame(frame);
@@ -894,20 +923,6 @@
 
 	async function flyToUserLocation() {
 		try {
-			if (userLocationActive) {
-				userLocationActive = false;
-				if (map) {
-					const source = map.getSource('user-location') as maplibregl.GeoJSONSource;
-					if (source) {
-						source.setData({
-							type: 'FeatureCollection',
-							features: []
-						});
-					}
-				}
-				return;
-			}
-
 			const loc = await getUserLocation().catch(async () => {
 				return await getFallbackIPLocation();
 			});
@@ -935,6 +950,9 @@
 							}
 						]
 					});
+
+					map.setPaintProperty('user-location', 'circle-opacity', 1);
+					map.setPaintProperty('user-location', 'circle-radius', 10);
 				}
 			}
 
@@ -949,6 +967,21 @@
 					label: 'Your location'
 				}
 			});
+
+			if (userLocationTimeout) clearTimeout(userLocationTimeout);
+			userLocationTimeout = setTimeout(() => {
+				map.setPaintProperty('user-location', 'circle-opacity', 0);
+				map.setPaintProperty('user-location', 'circle-radius', 6);
+
+				setTimeout(() => {
+					const source = map?.getSource('user-location');
+					if (source) {
+						source.setData({ type: 'FeatureCollection', features: [] });
+					}
+					userLocationActive = false;
+					userLocationTimeout = null;
+				}, 400);
+			}, 2500);
 		} catch (err) {
 			console.error(err);
 			alert('Kon locatie niet bepalen.');
@@ -1236,17 +1269,20 @@
 	{restoreView}
 ></MapSheetToggle>
 
-<MapButtons
-	visible={!selectedHistoricMap}
-	{flyToFeature}
-	{flyToUserLocation}
-	{setGridVisibility}
-	{zoomIn}
-	{zoomOut}
-	bind:layerOptions
-	bind:userLocationActive
-/>
-<Header />
+{#if maplibreLoaded}
+	<MapButtons
+		visible={!selectedHistoricMap}
+		{flyToFeature}
+		{flyToUserLocation}
+		{setGridVisibility}
+		{zoomIn}
+		{zoomOut}
+		bind:layerOptions
+		bind:userLocationActive
+	/>
+{/if}
+
+<Header {historicMapsLoaded} />
 
 <!-- <Timeline
 	bind:filter
