@@ -104,9 +104,9 @@ export const ALLMAPS_FLAVOR = {
   address_label: '#5c5c5c',
   address_label_halo: 'rgba(250, 240, 220, 1)',
 
-  regular: 'Roboto Regular',
-  bold: 'Roboto Medium',
-  italic: 'Roboto Italic',
+  regular: 'Metropolis Semi Bold',
+  bold: 'Metropolis Bold',
+  italic: 'Metropolis Semi Bold Italic',
 
   landcover: {
     grassland: 'rgba(255, 249, 236, 1)',  // warmer geelgroen
