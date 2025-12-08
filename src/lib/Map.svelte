@@ -313,6 +313,8 @@
 	$effect(() => {
 		if (!maplibreLoaded) return;
 
+		updateURL();
+
 		setProtomapsVisiblity(layerOptions.baseMap === 'protomaps');
 		if (layerOptions.baseMap === 'protomaps')
 			setProtomapsWaterInFront(layerOptions.protoMapsWaterInFront);
@@ -486,13 +488,19 @@
 			map.on('mousemove', 'map-outlines-fill', handleMapMouseMove);
 			map.on('mouseleave', 'map-outlines-fill', handleMapMouseLeave);
 
-			// setTimeout(() => {
+			if (urlParams && urlParams.baseMap) layerOptions.baseMap = urlParams.baseMap;
+			if (urlParams && urlParams.protoMapsWaterInFront)
+				layerOptions.protoMapsWaterInFront = urlParams.protoMapsWaterInFront;
+			if (urlParams && urlParams.protoMapsLabelsInFront)
+				layerOptions.protoMapsLabelsInFront = urlParams.protoMapsLabelsInFront;
+			if (urlParams && urlParams.historicMapsOpacity)
+				layerOptions.historicMapsOpacity = urlParams.historicMapsOpacity;
+
 			if (urlParams.selectedSheetId) {
 				console.log(urlParams.selectedSheetId);
 				const historicMap = historicMapsById.get(urlParams.selectedSheetId);
 				if (historicMap) setHistoricMapView(historicMap);
 			}
-			// }, 2000);
 		});
 	}
 
@@ -695,7 +703,7 @@
 			if (feature) {
 				map!.flyTo({
 					center: clickedLngLat,
-					speed: 0.8,
+					speed: 0.5,
 					curve: 1,
 					essential: true
 				});
@@ -988,6 +996,11 @@
 		}
 	}
 
+	function setSheetIndexVisibility(visible = true) {
+		setGridVisibility(visible, { lng: 5.63, lat: 52.16 }, 100, 150);
+		map?.setPaintProperty('map-outlines-numbers', 'text-opacity', +visible);
+	}
+
 	function setLabelVisibility(visible = true) {
 		if (!maplibreLoaded) return;
 
@@ -1173,6 +1186,11 @@
 		if (filter.type) params.set('type', filter.type);
 		if (selectedHistoricMap) params.set('sheet', selectedHistoricMap.id);
 
+		params.set('bm', String(layerOptions.baseMap));
+		params.set('pwf', layerOptions.protoMapsWaterInFront ? '1' : '0');
+		params.set('plf', layerOptions.protomapsLabelsInFront ? '1' : '0');
+		params.set('hmo', String(layerOptions.historicMapsOpacity));
+
 		goto(`?${params.toString()}`, {
 			replaceState: true,
 			noScroll: true
@@ -1202,7 +1220,11 @@
 				edition: 'All',
 				bis: false,
 				type: undefined,
-				selectedSheetId: null
+				selectedSheetId: null,
+				baseMap: 'none',
+				protoMapsWaterInFront: false,
+				protoMapsLabelsInFront: false,
+				historicMapsOpacity: 100
 			};
 		}
 
@@ -1218,7 +1240,12 @@
 			bis: q.get('bis') === '1',
 
 			type: q.get('type') ?? undefined,
-			selectedSheetId: q.get('sheet') ?? null
+			selectedSheetId: q.get('sheet') ?? null,
+
+			baseMap: q.get('bm') ?? 'none',
+			protoMapsWaterInFront: q.get('pwf') === '1',
+			protoMapsLabelsInFront: q.get('plf') === '1',
+			historicMapsOpacity: int(q.get('hmo'), 100)
 		};
 	}
 
@@ -1335,16 +1362,14 @@
 <svelte:window
 	onkeydown={(e) => {
 		if (e.key == ' ' && !spaceKeyDown) {
-			setGridVisibility(true, { lng: 5.63, lat: 52.16 }, 100, 150);
-			map?.setPaintProperty('map-outlines-numbers', 'text-opacity', 1);
+			setSheetIndexVisibility(true);
 			spaceKeyDown = true;
 		}
 		if (e.key == 'Escape' && selectedHistoricMap) restoreView();
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
-			setGridVisibility(false, { lng: 5.63, lat: 52.16 }, 100, 150);
-			map?.setPaintProperty('map-outlines-numbers', 'text-opacity', 0);
+			setSheetIndexVisibility(false);
 			spaceKeyDown = false;
 		}
 	}}
