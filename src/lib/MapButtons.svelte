@@ -16,6 +16,7 @@
 	import LayersPanel from './LayersPanel.svelte';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
+	import LayersPanel2 from './LayersPanel2.svelte';
 
 	let {
 		visible = true,
@@ -36,6 +37,7 @@
 
 	let searchBarVisible = $state(false);
 	let layersPanelVisible = $state(false);
+	let layersPanelVisible2 = $state(false);
 	let gridVisible = $state(false);
 
 	let buttonCollapse: boolean = $state(false);
@@ -58,7 +60,7 @@
 		}
 
 		if (e.key.toLowerCase() === 'l') {
-			layersPanelVisible = !layersPanelVisible;
+			layersPanelVisible2 = !layersPanelVisible2;
 		}
 	}}
 />
@@ -69,23 +71,29 @@
 	providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}
 ></Geocoder>
 
-<LayersPanel bind:visible={layersPanelVisible} bind:layerOptions></LayersPanel>
+<LayersPanel2 bind:visible={layersPanelVisible2} bind:layerOptions></LayersPanel2>
 
-<div class="fixed top-25 right-2 flex flex-col items-end gap-4">
+<!-- <div class="fixed top-25 right-2 flex flex-col items-end gap-4">
 	<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
 		Zoek plaats ...
 	</Button>
-</div>
+</div> -->
 
-<div class="fixed right-2 bottom-36 flex flex-col items-end gap-4">
-	<div class="mt-5">
-		<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible = !layersPanelVisible)}
-			>Lagen</Button
-		>
+<div class="fixed right-2 bottom-36 flex flex-col items-end gap-2">
+	<div>
+		<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
+			Zoek plaats ...
+		</Button>
 	</div>
 
 	<div>
 		<Button Icon={GpsFix} onclick={flyToUserLocation}>Mijn locatie tonen</Button>
+	</div>
+
+	<div>
+		<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
+			>Lagen</Button
+		>
 	</div>
 
 	<div
@@ -101,8 +109,8 @@
 			class={`
 			group flex cursor-pointer
 			items-center justify-center border-b-2
-			border-[#33336611] p-2
-			transition-colors duration-200 hover:bg-[#eef]
+			border-[#33336611] px-2.25 py-2
+			transition-colors duration-200 hover:bg-[#eeeeff88]
 			`}
 			title="Zoom In"
 		>
@@ -117,7 +125,7 @@
 			class={`
 			group flex cursor-pointer
 			items-center justify-center p-2
-			transition-colors duration-200 hover:bg-[#eef]
+			transition-colors duration-200 hover:bg-[#eeeeff88]
 			`}
 			title="Zoom Out"
 		>
@@ -130,7 +138,7 @@
 
 	<div
 		style:width={scaleWidth + 'px'}
-		class="mt-2 h-2 rounded-b-[4px] border-2 border-t-0 border-[#333366aa] text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
+		class="mt-4 h-2 rounded-b-[4px] border-2 border-t-0 border-[#333366aa] text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
 	>
 		<span class="relative -top-4 p-2 text-[12px] font-[600] text-[#336]">{scaleText}</span>
 	</div>

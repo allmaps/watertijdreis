@@ -2,7 +2,7 @@
 	import { X } from 'phosphor-svelte';
 	import { fade, fly } from 'svelte/transition';
 
-	let { visible = $bindable(), title, children } = $props();
+	let { visible = $bindable(), title, children, opacity = 100 } = $props();
 
 	function close() {
 		visible = false;
@@ -18,7 +18,8 @@
 
 {#if visible}
 	<div
-		class="fixed inset-0 z-1000 flex items-center justify-center"
+		class="fixed inset-0 z-1000 flex items-center justify-center transition-opacity duration-500"
+		style:opacity={opacity + '%'}
 		role="dialog"
 		aria-modal="true"
 	>
