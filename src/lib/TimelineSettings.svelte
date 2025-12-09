@@ -27,6 +27,7 @@
 		selectedBIS = false;
 		selectedHWP = false;
 		selectedWVE = false;
+		setEdition('All');
 	}
 
 	function toggleRegulier(v: boolean) {

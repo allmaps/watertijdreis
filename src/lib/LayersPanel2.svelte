@@ -12,7 +12,7 @@
 		Camera,
 		EyeSlash
 	} from 'phosphor-svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fly, fade, scale } from 'svelte/transition';
 	import Modal from './Modal.svelte';
 	import Button from './Button.svelte';
 	import Select from './Select.svelte';
@@ -110,6 +110,7 @@
 
 {#if backgroundVisible}
 	<div
+		transition:scale={{ duration: 150, start: 1.1 }}
 		class="fixed z-1100 rounded-[8px] bg-white p-4 shadow-lg"
 		style="
 			position: fixed;
