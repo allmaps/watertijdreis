@@ -73,6 +73,7 @@
 		if (!clickedFeature) return null;
 		return historicMapsById.get(clickedFeature.properties?.id) || null;
 	});
+	let pinnedHistoricMap: HistoricMap | null = $state(null);
 	let selectedHistoricMap: HistoricMap | null = $state(null);
 
 	$effect(() => {
@@ -513,6 +514,11 @@
 				if (urlParams.selectedSheetId) {
 					const historicMap = historicMapsById.get(urlParams.selectedSheetId);
 					if (historicMap) setHistoricMapView(historicMap);
+				}
+
+				if (urlParams.pinnedSheetId) {
+					const historicMap = historicMapsById.get(urlParams.pinnedSheetId);
+					if (historicMap) pinnedHistoricMap = historicMap;
 				}
 			}, 500);
 		});
@@ -1243,6 +1249,7 @@
 
 		if (filter.type) params.set('type', filter.type);
 		if (selectedHistoricMap) params.set('sheet', selectedHistoricMap.id);
+		if (pinnedHistoricMap) params.set('pinned', pinnedHistoricMap.id);
 
 		params.set('bm', String(layerOptions.baseMap));
 		params.set('pwf', layerOptions.protoMapsWaterInFront ? '1' : '0');
@@ -1279,6 +1286,7 @@
 				bis: false,
 				type: undefined,
 				selectedSheetId: null,
+				pinnedSheetId: null,
 				baseMap: 'none',
 				protoMapsWaterInFront: false,
 				protoMapsLabelsInFront: false,
@@ -1300,6 +1308,7 @@
 
 			type: q.get('type') ?? undefined,
 			selectedSheetId: q.get('sheet') ?? null,
+			pinnedSheetId: q.get('pinned') ?? null,
 
 			baseMap: q.get('bm') ?? 'none',
 			protoMapsWaterInFront: q.get('pwf') === '1',
@@ -1344,7 +1353,7 @@
 <Toast content={toastContent}></Toast>
 
 <MapSheetToggle
-	{hoveredHistoricMap}
+	bind:pinnedHistoricMap
 	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{setHistoricMapView}

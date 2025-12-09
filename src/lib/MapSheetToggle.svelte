@@ -4,7 +4,7 @@
 	import Toast from './Toast.svelte';
 
 	let {
-		hoveredHistoricMap,
+		pinnedHistoricMap = $bindable(),
 		clickedHistoricMap,
 		selectedHistoricMap,
 		setHistoricMapView,
@@ -18,7 +18,6 @@
 	let leftBtnWidth = $state(86);
 	let rightBtnWidth = $state(0);
 
-	let pinnedHistoricMap = $state(null);
 	let pinnedView = $state(null);
 
 	function leftBtnClick() {
