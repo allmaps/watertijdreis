@@ -25,8 +25,7 @@
 	class="absolute top-2 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-[#ffffff] p-4 text-[#336] shadow-lg sm:top-5 sm:left-5"
 	onmouseenter={() => (buttonCollapse = false)}
 	onmouseleave={() => (buttonCollapse = true)}
-	role="button"
-	tabindex="0"
+	role="group"
 >
 	<h1
 		class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]"
@@ -45,8 +44,12 @@
 	</h1>
 
 	<!-- <div class="ml-2 inline"> -->
-	<Button onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}>Over</Button>
-	<Button onclick={() => (sharePanelVisible = !sharePanelVisible)} Icon={ShareFat}>Delen</Button>
+	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}
+		>Over</Button
+	>
+	<Button tabindex="2" onclick={() => (sharePanelVisible = !sharePanelVisible)} Icon={ShareFat}
+		>Delen</Button
+	>
 	<!-- <button
 			onclick={() => (aboutPanelVisible = !aboutPanelVisible)}
 			class={`

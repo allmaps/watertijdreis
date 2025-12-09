@@ -82,18 +82,28 @@
 <div class="fixed right-2 bottom-36 flex flex-col items-end gap-2">
 	{#if !selectedHistoricMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
+			<Button
+				tabindex="5"
+				Icon={MagnifyingGlass}
+				kbd="⌘K"
+				onclick={() => (searchBarVisible = true)}
+			>
 				Zoek plaats ...
 			</Button>
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button Icon={NavigationArrow} onclick={flyToUserLocation}>Mijn locatie tonen</Button>
+			<Button tabindex="6" Icon={NavigationArrow} onclick={flyToUserLocation}
+				>Mijn locatie tonen</Button
+			>
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
-				>Lagen</Button
+			<Button
+				tabindex="7"
+				Icon={Stack}
+				kbd="L"
+				onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}>Lagen</Button
 			>
 		</div>
 	{/if}
@@ -115,6 +125,7 @@
 			transition-colors duration-200 hover:bg-[#eeeeff88]
 			`}
 			title="Zoom In"
+			tabindex="8"
 		>
 			<MagnifyingGlassPlus
 				color="#f4a"
@@ -130,6 +141,7 @@
 			transition-colors duration-200 hover:bg-[#eeeeff88]
 			`}
 			title="Zoom Out"
+			tabindex="9"
 		>
 			<MagnifyingGlassMinus
 				color="#f4a"

@@ -442,6 +442,11 @@
 		map.touchZoomRotate.disableRotation();
 		map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
 
+		const canvas = map.getCanvas();
+		if (canvas) {
+			canvas.removeAttribute('tabindex');
+		}
+
 		map.on('load', async () => {
 			maplibreLoaded = true;
 
@@ -1406,3 +1411,12 @@
 		}
 	}}
 />
+
+<style>
+	#map-container canvas {
+		outline: none !important;
+	}
+	#map-container canvas:focus {
+		outline: none !important;
+	}
+</style>

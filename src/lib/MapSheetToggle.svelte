@@ -102,6 +102,7 @@
 		bind:clientWidth={leftBtnWidth}
 		class="z-2 flex cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
 		onclick={leftBtnClick}
+		tabindex="3"
 	>
 		<MapTrifold
 			size="18"
@@ -114,6 +115,7 @@
 		bind:clientWidth={rightBtnWidth}
 		class="z-2 flex max-w-50 cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
 		onclick={rightBtnClick}
+		tabindex="4"
 	>
 		<FileText
 			size="18"

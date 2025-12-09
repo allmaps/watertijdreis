@@ -7,7 +7,8 @@
 		collapsed = true,
 		collapseAfterRender = false,
 		collapseAfterRenderDelay = 2000,
-		openOnHover = true
+		openOnHover = true,
+		tabindex = undefined
 	} = $props();
 
 	let slotEl = $state(null);
@@ -46,6 +47,7 @@
 <button
 	bind:this={buttonEl}
 	{onclick}
+	{tabindex}
 	class="
 		group relative cursor-pointer
 		rounded-[9px] font-[500]
