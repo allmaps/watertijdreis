@@ -4,8 +4,8 @@
 		kbd = undefined,
 		children = '',
 		onclick,
-		collapsed = false,
-		collapseAfterRender = true,
+		collapsed = true,
+		collapseAfterRender = false,
 		collapseAfterRenderDelay = 2000,
 		openOnHover = true
 	} = $props();
@@ -22,18 +22,37 @@
 		if (collapsed && slotEl) slotEl.style.width = '0px';
 		else if (slotEl) slotEl.style.width = expandedWidth + 'px';
 	});
+
+	let isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+	let buttonEl = $state();
+	let mousePos = $state({ x: -1000, y: -1000 });
 </script>
 
+<svelte:body
+	onpointermove={(e) => {
+		const rect = buttonEl.getBoundingClientRect();
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
+
+		if (x >= -100 && x <= rect.width + 100 && y >= -100 && y <= rect.height + 100) {
+			mousePos = { x, y };
+		} else {
+			mousePos = { x: -1000, y: -1000 };
+		}
+	}}
+/>
+
 <button
+	bind:this={buttonEl}
 	{onclick}
-	onmouseleave={() => (collapsed = collapsed || openOnHover)}
-	onmouseenter={() => (collapsed = collapsed && !openOnHover)}
 	class="
-	group relative cursor-pointer
-	rounded-[9px] bg-linear-to-bl from-[#33336622] to-[#ffffff8] font-[500]
-	text-[#336] backdrop-blur-sm transition-all
-	duration-500 ease-out active:scale-95 active:outline-3
-	"
+		group relative cursor-pointer
+		rounded-[9px] font-[500]
+		text-[#336] backdrop-blur-sm transition-all
+		duration-500 ease-out active:scale-95 active:outline-3
+		"
+	style:background={`radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, #33f 0%,#ffffff08 80%)`}
 >
 	<div class="m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg">
 		<Icon
@@ -70,3 +89,5 @@
 		</div>
 	</div>
 </button>
+
+<!-- </div> -->

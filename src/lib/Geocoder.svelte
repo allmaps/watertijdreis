@@ -185,9 +185,9 @@
 									type="button"
 									id="geo-item-{i}"
 									class="
-										group flex w-full items-center justify-between px-4 py-3
-										text-left text-[16px] transition-colors duration-75
-										focus:outline-none
+										group flex w-full cursor-pointer items-center justify-between px-4
+										py-3 text-left text-[16px] transition-colors
+										duration-75 focus:outline-none
 										{i === selectedFeatureIndex ? 'bg-[#eeeeff88] underline' : ''}
 									"
 									onmouseenter={() => (selectedFeatureIndex = i)}

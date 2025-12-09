@@ -3,12 +3,7 @@
 	import { Label, Switch } from 'bits-ui';
 	import { Gear } from 'phosphor-svelte';
 
-	let {
-		filter = $bindable(),
-		applyFilter,
-		minYear,
-		maxYear
-	} = $props();
+	let { filter = $bindable(), applyFilter, minYear, maxYear } = $props();
 
 	let showSettings = $state(false);
 
@@ -132,7 +127,7 @@
 						onchange={() => {
 							applyFilter(filter);
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-sm font-[600]"
+						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600]"
 					/>
 					tot
 					<input
@@ -143,7 +138,7 @@
 						onchange={() => {
 							applyFilter(filter);
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-sm font-[600]"
+						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600]"
 					/>
 				</li>
 				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
@@ -152,6 +147,7 @@
 					<Switch.Root
 						checked={selectedRegulier}
 						onCheckedChange={toggleRegulier}
+						disabled={selectedRegulier}
 						class="
 		relative inline-flex h-[22px]
 		w-[40px] cursor-pointer

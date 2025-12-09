@@ -13,16 +13,8 @@
 		getHistoricMapThumbnail,
 		filter = $bindable(),
 		applyFilter,
-		setLabelVisibility,
-		setGridVisibility
+		setLabelVisibility
 	} = $props();
-
-	// $effect(() => {
-	// 	if (filter.yearEnd - Math.floor(selectedYear)) {
-	// 		filter.yearEnd = Math.floor(selectedYear);
-	// 		applyFilter(filter);
-	// 	}
-	// });
 
 	let width = $state(0);
 	let height = $state(120);
@@ -52,15 +44,12 @@
 		{ stiffness: 0.1, damping: 0.5 }
 	);
 
-	// $effect(() => setSelectedYear(filter.yearEnd));
-
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
 			const newStart = filter.yearEnd - halfRange;
 			const newEnd = filter.yearEnd + halfRange;
 
-			// Clamp to min/max year range
 			const clampedStart = Math.max(newStart, MIN_YEAR);
 			const clampedEnd = Math.min(newEnd, MAX_YEAR);
 
@@ -285,7 +274,10 @@
 			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>
 
 			<div
-				class="pointer-events-none absolute top-0 left-0 z-1000 h-full w-10 bg-gradient-to-r from-[#336] to-transparent"
+				class="pointer-events-none absolute top-0 left-0 z-1000 h-full w-1/6 bg-gradient-to-r from-[#225] to-transparent"
+			></div>
+			<div
+				class="pointer-events-none absolute top-0 right-0 z-1000 h-full w-1/6 bg-gradient-to-l from-[#225] to-transparent"
 			></div>
 
 			<div

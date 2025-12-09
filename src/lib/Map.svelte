@@ -497,7 +497,6 @@
 				layerOptions.historicMapsOpacity = urlParams.historicMapsOpacity;
 
 			if (urlParams.selectedSheetId) {
-				console.log(urlParams.selectedSheetId);
 				const historicMap = historicMapsById.get(urlParams.selectedSheetId);
 				if (historicMap) setHistoricMapView(historicMap);
 			}
@@ -678,7 +677,6 @@
 			}
 		});
 
-		let clickedMapTimeout = null;
 		let gridResetTimer = null;
 		let currentFillId = null;
 		let fillFadeOutTimer = null;
@@ -746,6 +744,13 @@
 	const featureTimeouts = {};
 	let gridResetTimer = null;
 	let currentFillId = null;
+	let clickedMapTimeout = null;
+
+	function extendClickedMapTimeout(delay = 2500) {
+		console.log(clickedMapTimeout);
+		if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
+		clickedMapTimeout = setTimeout(() => (clickedFeature = null), delay);
+	}
 
 	function setGridVisibility(
 		isVisible,
@@ -1168,7 +1173,12 @@
 		};
 	}
 
-	function updateURL() {
+	$effect(() => {
+		if (selectedHistoricMap) updateURL({ push: true });
+		else updateURL({ push: true });
+	});
+
+	function updateURL({ push = false } = {}) {
 		if (!maplibreLoaded || !historicMapsLoaded) return;
 		const params = new URLSearchParams();
 
@@ -1192,7 +1202,7 @@
 		params.set('hmo', String(layerOptions.historicMapsOpacity));
 
 		goto(`?${params.toString()}`, {
-			replaceState: true,
+			replaceState: !push,
 			noScroll: true
 		});
 	}
@@ -1268,8 +1278,6 @@
 		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
 		if (bottomRight) bottomRight.style.setProperty('bottom', offset + 'px', 'important');
 	});
-
-	let spaceKeyDown = $state(false);
 </script>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
@@ -1291,7 +1299,8 @@
 	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{setHistoricMapView}
-	{setGridVisibility}
+	{setSheetIndexVisibility}
+	{extendClickedMapTimeout}
 	{saveMapView}
 	{restoreView}
 ></MapSheetToggle>
@@ -1360,22 +1369,19 @@
 ></MapInfo>
 
 <svelte:window
-	onkeydown={(e) => {
-		if (e.key == ' ' && !spaceKeyDown) {
-			setSheetIndexVisibility(true);
-			spaceKeyDown = true;
-		}
-		if (e.key == 'Escape' && selectedHistoricMap) restoreView();
-	}}
-	onkeyup={(e) => {
-		if (e.key == ' ') {
-			setSheetIndexVisibility(false);
-			spaceKeyDown = false;
-		}
-	}}
 	onkeypress={(e) => {
 		if (e.key.toLowerCase() == 'w' && layerOptions.baseMap == 'protomaps') {
 			layerOptions.protoMapsWaterInFront = !layerOptions.protoMapsWaterInFront;
+		}
+		if (e.key.toLowerCase() == 't' && layerOptions.baseMap == 'protomaps') {
+			layerOptions.protomapsLabelsInFront = !layerOptions.protomapsLabelsInFront;
+		}
+	}}
+	onpopstate={() => {
+		const urlParams = parseURL();
+		if (urlParams.selectedSheetId) {
+			const historicMap = historicMapsById.get(urlParams.selectedSheetId);
+			if (historicMap) setHistoricMapView(historicMap);
 		}
 	}}
 />

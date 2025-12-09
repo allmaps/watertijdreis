@@ -61,6 +61,7 @@
 		"clsx": "^2.1.1",
 		"feather-icons": "^4.29.2",
 		"lodash-es": "^4.17.21",
+		"lz-string": "^1.5.0",
 		"maplibre-contour": "^0.1.0",
 		"maplibre-gl": "^5.8.0",
 		"maplibre-transition": "^0.8.0",
