@@ -1,20 +1,20 @@
 export const ALLMAPS_FLAVOR = {
-  background: 'rgba(250, 240, 220, 1)', // warmer, zandiger
-  earth: 'rgba(255, 243, 236, 1)',
+  background: 'rgba(255, 255, 255, 1)', // laden achtergrond
+  earth: 'rgba(242, 248, 225, 1)', // alles behalve groen en bebouwing, vanaf medium zoom
 
-  park_a: '#e3e9c8',   // iets warmer, minder mint, zachter olijf-groen
-  park_b: '#e3e9c8',
+  park_a: '#ecf0dbff', // weinig zichtbaar
+  park_b: '#e9eed5ff', // ingezoomd park
 
-  hospital: 'rgba(255, 238, 238, 1)',
-  industrial: 'rgba(252, 245, 230, 1)',
-  school: 'rgba(255, 242, 225, 1)',
+  hospital: 'rgba(233, 233, 233, 1)',
+  industrial: 'rgba(224, 224, 224, 1)',
+  school: 'rgba(231, 231, 231, 1)',
 
-  wood_a: '#fff3caff',  // olijfgroen bos
-  wood_b: '#b8c87a',
+  wood_a: '#fff5d3ff',  // weinig zichtbaar
+  wood_b: '#e1e9c4ff', // ingezoomd groen
 
-  pedestrian: '#fffaf3',
-  scrub_a: '#e8e3b8', // warmer, meer droog-gras vibe
-  scrub_b: '#e8e3b8',
+  pedestrian: '#f1f1f1ff',
+  scrub_a: '#fffbeaff', // weinig zichtbaar
+  scrub_b: '#e3e2b6ff', // bosjes/parkjes
 
   glacier: '#ffffff',
   sand: 'rgba(255, 236, 205, 1)',
@@ -22,10 +22,10 @@ export const ALLMAPS_FLAVOR = {
   aerodrome: 'rgba(245, 245, 248, 1)',
   runway: 'rgba(193, 195, 217, 1)',
 
-  water: '#8080d1ff', // onveranderd paarse water
+  water: '#cbe5fcff', 
 
   pier: '#d6f4f3',
-  zoo: 'rgba(236, 247, 229, 1)',
+  zoo: 'rgba(141, 172, 138, 1)',
   military: 'rgba(248, 242, 228, 1)',
 
   tunnel_other_casing: 'rgba(250, 240, 220, 1)',
@@ -109,13 +109,13 @@ export const ALLMAPS_FLAVOR = {
   italic: 'Metropolis Semi Bold Italic',
 
   landcover: {
-    grassland: 'rgba(255, 249, 236, 1)',  // warmer geelgroen
-    barren: 'rgba(245, 232, 195, 1)',     // zandiger & warmer
-    urban_area: 'rgba(255, 248, 236, 1)',
-    farmland: 'rgba(228, 236, 195, 1)',   // warm licht-olijfgroen
-    glacier: 'rgba(255, 249, 235, 1)',
-    scrub: 'rgba(235, 227, 172, 1)',      // droog gras tint
-    forest: 'rgba(228, 236, 195, 1)'      // diepere olijfgroen bos
+    grassland: 'rgba(228, 237, 208, 1)',  // uitgezoomd overig land
+    barren: 'rgba(0, 40, 140, 1)',     
+    urban_area: 'rgba(231, 231, 231, 1)', // uitgezoomd steden
+    farmland: 'rgba(244, 251, 217, 1)', // uitgezoomd farmland   
+    glacier: 'rgba(255, 249, 235, 1)', 
+    scrub: 'rgba(255, 236, 29, 1)',    
+    forest: 'rgba(229, 237, 198, 1)'      // uitgezoomd bos
   }
 }
 
