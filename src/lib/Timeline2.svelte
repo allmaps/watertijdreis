@@ -29,6 +29,9 @@
 	let pointerCache = new Map<number, PointerEvent>();
 	let prevDiff = -1;
 	let lastX = 0;
+	let pointerDownX = 0;
+	let pointerDownY = 0;
+	let hasMoved = false;
 
 	const FILTER_UPDATES_PER_SEC = 4;
 	const MIN_ZOOM = 5;
@@ -89,17 +92,22 @@
 
 		if (pointerCache.size === 1) {
 			lastX = e.clientX;
+			pointerDownX = e.clientX;
+			pointerDownY = e.clientY;
+			hasMoved = false;
 		} else if (pointerCache.size === 2) {
 			prevDiff = getCacheDiff();
 		}
+<<<<<<< HEAD
 
 		filterUpdateInterval = setInterval(() => {
 			if (scheduledFilterUpdate) scheduledFilterUpdate();
 		}, 1000 / FILTER_UPDATES_PER_SEC);
 
 		setLabelVisibility(true);
+=======
+>>>>>>> 12d67e6eb96cf7d72be7018dbcd6f68a674a664d
 	}
-
 	function onWindowPointerMove(e: PointerEvent) {
 		if (!pointerCache.has(e.pointerId)) return;
 
@@ -119,6 +127,13 @@
 			prevDiff = curDiff;
 		} else if (pointerCache.size === 1) {
 			const dx = lastX - e.clientX;
+			const dy = pointerDownY - e.clientY;
+
+			if (Math.abs(e.clientX - pointerDownX) > 5 || Math.abs(dy) > 5) {
+				hasMoved = true;
+				setLabelVisibility(true);
+			}
+
 			const currentRange = view.current.end - view.current.start;
 			const yearDelta = (dx / width) * currentRange;
 
@@ -126,10 +141,17 @@
 				Math.max(filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
 			);
+<<<<<<< HEAD
 			if (Math.floor(selectedYear) - filter.yearEnd) {
 				scheduledFilterUpdate = applyFilter.bind(this, filter);
 			}
+=======
+
+>>>>>>> 12d67e6eb96cf7d72be7018dbcd6f68a674a664d
 			filter.yearEnd = selectedYear;
+			// if (hasMoved) {
+			// 	applyFilter(filter);
+			// }
 
 			backgroundOffsetX += dx * -0.5;
 			backgroundVelocity = dx * -0.2;
@@ -351,6 +373,26 @@
 					</filter>
 				</defs>
 
+				<rect
+					x="0"
+					y="0"
+					{width}
+					{height}
+					fill="transparent"
+					style="cursor: pointer; pointer-events: auto;"
+					onclick={(e) => {
+						if (hasMoved) return;
+
+						const rect = e.currentTarget.getBoundingClientRect();
+						const clickX = e.clientX - rect.left;
+						const clickedYear =
+							view.current.start + (clickX / width) * (view.current.end - view.current.start);
+						const roundedYear = Math.round(clickedYear);
+						if (roundedYear >= minHistoricMapYear && roundedYear <= maxHistoricMapYear) {
+							filter.yearEnd = roundedYear;
+						}
+					}}
+				/>
 				{#if pixelsPerYear > 3}
 					<path
 						d={ticks.minor}
@@ -425,7 +467,7 @@
 
 				{#if editions}
 					{#each editions as ed, i}
-						{@const height = i % 2 == 0 ? 114 : 108}
+						{@const height = i % 2 == 0 ? 110 : 108}
 						{@const start = getX(ed.yearStart)}
 						{@const middle = getX((ed.yearStart + ed.yearEnd) / 2)}
 						{@const end = getX(ed.yearEnd)}
@@ -437,6 +479,7 @@
 								y2={height - 5}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<line
 								x1={start}
@@ -445,6 +488,7 @@
 								y2={height}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<line
 								x1={middle + 25}
@@ -453,6 +497,7 @@
 								y2={height}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<text
 								x={middle}
@@ -461,6 +506,7 @@
 								font-weight="600"
 								fill="#eeeeff88"
 								text-anchor="middle"
+								style="text-shadow: black; pointer-events: none; "
 							>
 								{ed.name}</text
 							>
@@ -471,6 +517,7 @@
 								y2={height - 5}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 						</g>
 					{/each}

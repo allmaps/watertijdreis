@@ -301,6 +301,7 @@
 					</p>
 					<button
 						onclick={toggleSheetInformation}
+						tabindex="10"
 						class={`
 						group pointer-events-auto my-1 flex flex-shrink-0
 						cursor-pointer items-center justify-center rounded-lg

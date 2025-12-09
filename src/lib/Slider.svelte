@@ -35,6 +35,42 @@
 		value = Math.round((px / rect.width) * 100);
 		onchange(value);
 	}
+
+	let sliderElement = $state();
+	let hasFocus = $state(false);
+
+	function handleKeyDown(e) {
+		if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			value = Math.max(0, value - 5);
+			onchange(value);
+		} else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			value = Math.min(100, value + 5);
+			onchange(value);
+		} else if (e.key === 'Tab') {
+			hasFocus = false;
+			return;
+		} else if (e.key !== 'Escape') {
+			e.stopPropagation();
+		}
+	}
+
+	function handleFocus() {
+		hasFocus = true;
+	}
+
+	function handleBlur() {
+		hasFocus = false;
+	}
+
+	$effect(() => {
+		if (hasFocus && sliderElement && document.activeElement !== sliderElement) {
+			sliderElement.focus();
+		}
+	});
 </script>
 
 <div class="flex flex-col gap-0 select-none">
@@ -44,12 +80,22 @@
 	</div>
 
 	<div
+		bind:this={sliderElement}
 		class="
 			group rounded-[12px]px-2 relative flex
 			h-6 cursor-pointer items-center
 			active:scale-[0.99]
 		"
 		onpointerdown={onPointerDown}
+		onkeydown={handleKeyDown}
+		onfocus={handleFocus}
+		onblur={handleBlur}
+		tabindex="0"
+		role="slider"
+		aria-valuenow={value}
+		aria-valuemin="0"
+		aria-valuemax="100"
+		aria-label="Doorzichtigheid"
 	>
 		<div bind:this={trackEl} class="relative h-2 w-full rounded-full bg-[#00000022]">
 			<div

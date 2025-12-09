@@ -4,6 +4,10 @@
 
 	let { visible = $bindable(), title, children, opacity = 100 } = $props();
 
+	let modalElement = $state<HTMLDivElement>();
+	let firstFocusableElement = $state<HTMLElement>();
+	let lastFocusableElement = $state<HTMLElement>();
+
 	function close() {
 		visible = false;
 	}
@@ -12,9 +16,50 @@
 		if (!visible) return;
 		if (e.key === 'Escape') close();
 	}
+
+	function updateFocusableElements() {
+		if (!modalElement) return;
+
+		const focusableSelectors =
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+		const focusableElements = modalElement.querySelectorAll(focusableSelectors);
+
+		if (focusableElements.length > 0) {
+			firstFocusableElement = focusableElements[0] as HTMLElement;
+			lastFocusableElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+		}
+	}
+
+	function trapFocus(e: KeyboardEvent) {
+		if (!visible) return;
+
+		if (e.key !== 'Tab') return;
+
+		if (e.shiftKey) {
+			if (document.activeElement === firstFocusableElement) {
+				e.preventDefault();
+				lastFocusableElement?.focus();
+			}
+		} else {
+			if (document.activeElement === lastFocusableElement) {
+				e.preventDefault();
+				firstFocusableElement?.focus();
+			}
+		}
+	}
+
+	$effect(() => {
+		if (visible && modalElement) {
+			updateFocusableElements();
+			setTimeout(() => {
+				firstFocusableElement?.focus();
+			}, 100);
+		}
+	});
 </script>
 
 <svelte:window onkeydown={handleKey} />
+<svelte:document onkeydown={trapFocus} />
 
 {#if visible}
 	<div
@@ -32,6 +77,7 @@
 		></button>
 
 		<div
+			bind:this={modalElement}
 			class="
 				relative z-10 flex
 				w-[90vw] max-w-120

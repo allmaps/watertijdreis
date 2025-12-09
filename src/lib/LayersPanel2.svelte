@@ -35,6 +35,12 @@
 	let sliderPos = $state({ top: 0, left: 0, width: 0 });
 	let backgroundVisible = $state(false);
 
+	$effect(() => {
+		if (visible) {
+			setTimeout(() => {}, 100);
+		}
+	});
+
 	function showBackground() {
 		if (!sliderEl) return;
 

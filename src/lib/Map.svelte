@@ -465,7 +465,6 @@
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
 
-			// Add user location source and layer
 			map.addSource('user-location', {
 				type: 'geojson',
 				data: {
@@ -483,13 +482,15 @@
 					'circle-color': '#f4a',
 					'circle-opacity': 0,
 					'circle-stroke-color': '#ffffff',
-					'circle-stroke-width': 4,
+					'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 0, 0, 22, 6],
+					'circle-stroke-opacity': 0,
 
 					'circle-opacity-transition': { duration: 400 },
-					'circle-radius-transition': { duration: 400 }
+					'circle-radius-transition': { duration: 400 },
+					'circle-stroke-width-transition': { duration: 700 },
+					'circle-stroke-opacity-transition': { duration: 400 }
 				}
 			});
-
 			await loadHistoricMaps(ANNOTATION_URL);
 			addOutlineLayers();
 
@@ -978,12 +979,12 @@
 					});
 
 					map.setPaintProperty('user-location', 'circle-opacity', 1);
+					map.setPaintProperty('user-location', 'circle-stroke-opacity', 1);
 					map.setPaintProperty('user-location', 'circle-radius', 10);
 				}
 			}
 
 			userLocationActive = true;
-
 			flyToFeature({
 				geometry: {
 					type: 'Point',
@@ -997,6 +998,7 @@
 			if (userLocationTimeout) clearTimeout(userLocationTimeout);
 			userLocationTimeout = setTimeout(() => {
 				map.setPaintProperty('user-location', 'circle-opacity', 0);
+				map.setPaintProperty('user-location', 'circle-stroke-opacity', 0);
 				map.setPaintProperty('user-location', 'circle-radius', 6);
 
 				setTimeout(() => {
