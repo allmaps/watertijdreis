@@ -297,10 +297,11 @@
 					</p>
 					<button
 						onclick={toggleSheetInformation}
+						tabindex="10"
 						class={`
 						group my-1 flex flex-shrink-0 
 						cursor-pointer items-center justify-center bg-[#3a3a6a]
-						py-1 
+						py-1
 						text-[14px] font-[500] text-[#eef] 
 						shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2 outline-[#eeeeff22] transition-all
 						

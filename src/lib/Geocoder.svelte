@@ -28,6 +28,10 @@
 	let featuresByProviderIndex: GeocoderGeoJsonFeature[][] = $state([]);
 	let selectedFeatureIndex: number = $state(0);
 
+	let dialogElement = $state<HTMLDivElement>();
+	let firstFocusableElement = $state<HTMLElement>();
+	let lastFocusableElement = $state<HTMLElement>();
+
 	let features: GeocoderGeoJsonFeature[] = $derived(featuresByProviderIndex.flat(1));
 
 	const THROTTLE_WAIT_MS = 200;
@@ -72,7 +76,10 @@
 		if (visible) {
 			// A small timeout helps mobile browsers open up the keyboard correctly
 			inputEl?.focus();
-			setTimeout(() => inputEl?.focus(), 50);
+			setTimeout(() => {
+				inputEl?.focus();
+				updateFocusableElements();
+			}, 50);
 		} else {
 			inputValue = '';
 			featuresByProviderIndex = [];
@@ -123,10 +130,44 @@
 	function close() {
 		visible = false;
 	}
+
+	function updateFocusableElements() {
+		if (!dialogElement) return;
+
+		const focusableSelectors =
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+		const focusableElements = dialogElement.querySelectorAll(focusableSelectors);
+
+		if (focusableElements.length > 0) {
+			firstFocusableElement = focusableElements[0] as HTMLElement;
+			lastFocusableElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+		}
+	}
+
+	function trapFocus(e: KeyboardEvent) {
+		if (!visible || e.key !== 'Tab') return;
+
+		if (e.shiftKey) {
+			// Shift + Tab
+			if (document.activeElement === firstFocusableElement) {
+				e.preventDefault();
+				lastFocusableElement?.focus();
+			}
+		} else {
+			// Tab
+			if (document.activeElement === lastFocusableElement) {
+				e.preventDefault();
+				firstFocusableElement?.focus();
+			}
+		}
+	}
 </script>
+
+<svelte:document onkeydown={trapFocus} />
 
 {#if visible}
 	<div
+		bind:this={dialogElement}
 		class="fixed inset-0 z-1000 flex items-center justify-center"
 		role="dialog"
 		aria-modal="true"
