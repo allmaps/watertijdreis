@@ -38,26 +38,26 @@
 	let isDismissing = $state(false);
 	let hintTimeout: ReturnType<typeof setTimeout> | null = null;
 	let handIconType = $state<'swipe' | 'grab'>('swipe');
-	let handAnimationState = $state<'still' | 'oscillate' | 'slide'>('still');
+	let handAnimationState = $state<'slideIn' | 'oscillate' | 'slide'>('slideIn');
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
 			showHint = true;
 			handIconType = 'swipe';
-			handAnimationState = 'still';
+			handAnimationState = 'slideIn';
 
 			const grabTimeout = setTimeout(() => {
 				handIconType = 'grab';
 				handAnimationState = 'oscillate';
-			}, 3000);
+			}, 4000);
 
 			const slideTimeout = setTimeout(() => {
 				handAnimationState = 'slide';
-			}, 5000);
+			}, 8000);
 
 			hintTimeout = setTimeout(() => {
 				dismissHint();
-			}, 8000);
+			}, 11000);
 
 			return () => {
 				clearTimeout(grabTimeout);
@@ -367,18 +367,16 @@
 
 		{#if showHint}
 			<div class="pointer-events-none absolute inset-0 z-[10001] flex items-center justify-center">
-				<div
-					class="absolute top-1/2 left-0 -translate-y-1/2"
-					in:fly={{ y: 20, duration: 200 }}
-					out:fade={{ duration: 190 }}
-				>
+				<div class="absolute top-[40%] left-[20%] -translate-y-1/2" out:fade={{ duration: 190 }}>
 					<div
 						class="text-[#336]"
-						style="animation: {handAnimationState === 'oscillate'
-							? 'oscillate 4s ease-in-out forwards'
-							: handAnimationState === 'slide'
-								? 'slideAcross 3s ease-in-out forwards'
-								: 'none'};"
+						style="animation: {handAnimationState === 'slideIn'
+							? 'slideIn 2s ease-out forwards'
+							: handAnimationState === 'oscillate'
+								? 'oscillate 4s ease-in-out forwards'
+								: handAnimationState === 'slide'
+									? 'slideAcross 3s ease-in-out forwards'
+									: 'none'};"
 					>
 						{#if handIconType === 'swipe'}
 							<HandSwipeRight size={32} color="#eef" weight="duotone" />
@@ -389,7 +387,7 @@
 				</div>
 
 				<div
-					class="translate-y-8 rounded-[8px] border-2 border-[#33336611] bg-[#eef]/70 px-4 py-2 text-center text-[14px] font-[500] text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)] shadow-lg backdrop-blur-md"
+					class=" rounded-[8px] border-2 border-[#33336611] bg-[#eef]/70 px-4 py-2 text-center text-[14px] font-[500] text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)] shadow-lg backdrop-blur-md"
 					in:fly={{ y: 20, duration: 250 }}
 					out:fly={{ y: 20, duration: 250 }}
 				>
@@ -613,6 +611,17 @@
 
 <style>
 	:global {
+		@keyframes slideIn {
+			0% {
+				transform: translateX(-100px);
+				opacity: 0;
+			}
+			100% {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
 		@keyframes oscillate {
 			0% {
 				transform: translateX(0);
