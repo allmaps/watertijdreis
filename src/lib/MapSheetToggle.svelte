@@ -30,7 +30,7 @@
 
 	function rightBtnClick() {
 		rightBtnSelected = true;
-		if (pinnedHistoricMap) {
+		if (pinnedHistoricMap && !selectedHistoricMap) {
 			extendClickedMapTimeout();
 			setHistoricMapView(pinnedHistoricMap, pinnedView);
 		} else if (clickedHistoricMap && !selectedHistoricMap) {

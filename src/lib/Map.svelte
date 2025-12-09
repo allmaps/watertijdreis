@@ -762,8 +762,8 @@
 	let clickedMapTimeout = null;
 
 	function extendClickedMapTimeout(delay = 2500) {
-		console.log(clickedMapTimeout);
-		if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
+		if (!clickedMapTimeout) return;
+		clearTimeout(clickedMapTimeout);
 		clickedMapTimeout = setTimeout(() => (clickedFeature = null), delay);
 	}
 
