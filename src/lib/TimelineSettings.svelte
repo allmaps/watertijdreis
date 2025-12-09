@@ -96,6 +96,9 @@
 		}
 		selectedEdition = v;
 	}
+
+	let yearStart = $derived(filter.yearStart);
+	let yearEnd = $derived(filter.yearEnd);
 </script>
 
 <svelte:window onpointerdown={handleWindowClick} />
@@ -121,7 +124,7 @@
 	{#if showSettings}
 		<div
 			onpointerdown={(e) => {
-				e.stopPropagation();
+				e.stopImmediatePropagation();
 			}}
 			class="fixed right-2 bottom-34 w-80 rounded-lg bg-white px-3 py-3 shadow-lg transition-all duration-200"
 			transition:scale={{ duration: 250, y: 10 }}
@@ -135,9 +138,14 @@
 						type="number"
 						min={minYear - 1}
 						max={filter.yearEnd}
-						bind:value={filter.yearStart}
+						bind:value={yearStart}
 						onchange={() => {
+							yearStart = Math.max(minYear, Math.min(filter.yearEnd - 1, yearStart));
+							filter.yearStart = yearStart;
 							applyFilter(filter);
+						}}
+						oninput={() => {
+							if (yearStart >= minYear && yearStart < filter.yearEnd) filter.yearStart = yearStart;
 						}}
 						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
 					/>
@@ -146,9 +154,14 @@
 						type="number"
 						min={filter.yearStart}
 						max={maxYear + 1}
-						bind:value={filter.yearEnd}
+						bind:value={yearEnd}
 						onchange={() => {
+							yearEnd = Math.max(minYear, Math.min(maxYear, yearEnd));
+							filter.yearEnd = yearEnd;
 							applyFilter(filter);
+						}}
+						oninput={() => {
+							if (yearEnd >= minYear && yearEnd <= maxYear) filter.yearEnd = yearEnd;
 						}}
 						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
 					/>

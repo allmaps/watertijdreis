@@ -5,6 +5,8 @@
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapStack from './MapStack.svelte';
 	import TimelineSettings from './TimelineSettings.svelte';
+	import { onMount } from 'svelte';
+	import { point } from '@turf/turf';
 
 	let {
 		visible,
@@ -304,7 +306,9 @@
 	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : filter.yearEnd);
 	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : filter.yearEnd);
 
-	let showHint = $state(true);
+	let showHint = $state(false);
+
+	onMount(() => (showHint = true));
 </script>
 
 <svelte:window

@@ -8,10 +8,10 @@
 	style="z-index: 1000"
 >
 	<div class="absolute top-0 left-[-1px] h-100 w-[2px] bg-[#eef]"></div>
-	<div class="absolute top-0 left-[-25px] h-[20px] w-[55px] rounded-sm bg-[#eef]"></div>
+	<div class="absolute top-0 left-[-20px] h-[20px] w-[50px] rounded-sm bg-[#eef]"></div>
 
 	<div
-		class="absolute top-[0px] left-[-38px] h-[20px] w-[15px] bg-[#eef] shadow-md"
+		class="absolute top-[0px] left-[-33px] h-[20px] w-[15px] bg-[#eef] shadow-md"
 		style="clip-path: polygon(0% 50%, 100% 0%, 100% 100%);"
 	></div>
 
