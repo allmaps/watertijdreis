@@ -98,15 +98,12 @@
 		} else if (pointerCache.size === 2) {
 			prevDiff = getCacheDiff();
 		}
-<<<<<<< HEAD
 
 		filterUpdateInterval = setInterval(() => {
 			if (scheduledFilterUpdate) scheduledFilterUpdate();
 		}, 1000 / FILTER_UPDATES_PER_SEC);
 
 		setLabelVisibility(true);
-=======
->>>>>>> 12d67e6eb96cf7d72be7018dbcd6f68a674a664d
 	}
 	function onWindowPointerMove(e: PointerEvent) {
 		if (!pointerCache.has(e.pointerId)) return;
@@ -141,13 +138,9 @@
 				Math.max(filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
 			);
-<<<<<<< HEAD
 			if (Math.floor(selectedYear) - filter.yearEnd) {
 				scheduledFilterUpdate = applyFilter.bind(this, filter);
 			}
-=======
-
->>>>>>> 12d67e6eb96cf7d72be7018dbcd6f68a674a664d
 			filter.yearEnd = selectedYear;
 			// if (hasMoved) {
 			// 	applyFilter(filter);
