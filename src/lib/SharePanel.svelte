@@ -25,7 +25,6 @@
 	let copySuccess: boolean = $state(false);
 	let currentUrl = $state('');
 
-	// Update URL when modal becomes visible
 	$effect(() => {
 		if (visible && typeof window !== 'undefined') {
 			currentUrl = window.location.href;
