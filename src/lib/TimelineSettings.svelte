@@ -6,6 +6,7 @@
 	let { filter = $bindable(), applyFilter, minYear, maxYear } = $props();
 
 	let showSettings = $state(false);
+	let settingsPanel: HTMLDivElement | undefined = $state();
 
 	function toggleSettings() {
 		showSettings = !showSettings;
@@ -13,6 +14,34 @@
 
 	function handleWindowClick() {
 		showSettings = false;
+	}
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (!showSettings) return;
+
+		if (e.key === 'Tab') {
+			const focusableElements = settingsPanel?.querySelectorAll(
+				'button, input, [tabindex]:not([tabindex="-1"])'
+			);
+			if (!focusableElements || focusableElements.length === 0) return;
+
+			const firstElement = focusableElements[0] as HTMLElement;
+			const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+			if (e.shiftKey) {
+				if (document.activeElement === firstElement) {
+					e.preventDefault();
+					lastElement.focus();
+				}
+			} else {
+				if (document.activeElement === lastElement) {
+					e.preventDefault();
+					firstElement.focus();
+				}
+			}
+		} else if (e.key === 'Escape') {
+			showSettings = false;
+		}
 	}
 
 	let selectedRegulier = $state(!filter.type);
@@ -72,7 +101,6 @@
 			toggleRegulier(true);
 		}
 	}
-
 	function toggleWVE(v: boolean) {
 		if (selectedWVE !== v) {
 			filter.type = 'WVE';
@@ -101,13 +129,20 @@
 	let yearEnd = $derived(filter.yearEnd);
 </script>
 
-<svelte:window onpointerdown={handleWindowClick} />
+<svelte:window onpointerdown={handleWindowClick} onkeydown={handleKeyDown} />
 
 <div class="pointer-events-auto absolute top-2 right-2 z-[50000] select-none">
 	<button
 		onpointerdown={(e) => {
 			e.stopPropagation();
 			toggleSettings();
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				e.stopPropagation();
+				toggleSettings();
+			}
 		}}
 		title="Instellingen"
 		class="
@@ -123,6 +158,7 @@
 
 	{#if showSettings}
 		<div
+			bind:this={settingsPanel}
 			onpointerdown={(e) => {
 				e.stopImmediatePropagation();
 			}}
