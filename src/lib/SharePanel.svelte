@@ -56,7 +56,7 @@
 	});
 </script>
 
-<Modal title="Deel jouw tijdreis" bind:visible>
+<Modal title="Deel jouw Watertijdreis" bind:visible>
 	<p class="w-full text-center">Deel het kaartgedeelte dat jij nu bekijkt.</p>
 	<div class="mt-4 flex items-center">
 		<input
