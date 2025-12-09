@@ -97,16 +97,19 @@
 		{height}
 		viewBox={viewBox.join(' ')}
 		class="transition-scale absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
-		style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));"
+		style="filter: drop-shadow( 1px 1px 0px #33336666);"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#each polygons as poly}
 				{@const previewed =
 					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const selected = selectedHistoricMap && poly.properties.id == selectedHistoricMap.id}
 				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
-				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
-				{@const fill = previewed || clicked ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
+				{@const visible =
+					!selectedHistoricMap && visibleHistoricMapsInViewport.has(poly.properties.id)}
+				{@const fill =
+					previewed || clicked || selected ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
 					points={getProjectedPoints(poly.geometry.coordinates[0])}
 					{fill}
