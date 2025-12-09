@@ -80,6 +80,10 @@
 		return structure.items.map((i) => editionManifest.items.find((j) => j.id == i.id));
 	});
 
+	$effect(() => {
+		console.log(variants);
+	});
+
 	// TODO: dit kan makkelijker?
 	let mainSheet = $derived.by(() => {
 		if (!variants) return null;
@@ -179,19 +183,19 @@
 			gcps: [
 				{
 					resource: [0, 0],
-					geo: [minLng, maxLat]
+					geo: [minLng + 0.5, maxLat]
 				},
 				{
 					resource: [width, 0],
-					geo: [maxLng, maxLat]
+					geo: [maxLng + 0.5, maxLat]
 				},
 				{
 					resource: [width, height],
-					geo: [maxLng, minLat]
+					geo: [maxLng + 0.5, minLat]
 				},
 				{
 					resource: [0, height],
-					geo: [minLng, minLat]
+					geo: [minLng + 0.5, minLat]
 				}
 			],
 			resourceMask: [
@@ -251,8 +255,8 @@
 	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, 256)}
 	<div
 		class="
-			fixed right-2 bottom-2 left-2
-			z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] from-[#333366] from-[300px] to-[#33336600] to-50% shadow-lg sm:bg-transparent sm:bg-linear-to-r
+			pointer-events-none
+			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px] bg-[#336] from-[#333366] from-[275px] to-[#33336600] to-[calc(50%-30px)] shadow-lg sm:bg-transparent sm:bg-linear-to-r
 		"
 		style:background-color={selectedHistoricMap ? '#336' : ''}
 		transition:fade={{ duration: 500 }}
@@ -284,7 +288,7 @@
 
 			{#key historicMap}
 				<div
-					class="flex flex-1 flex-col items-start justify-center gap-1 pr-4"
+					class="flex w-max flex-shrink-0 flex-col items-start justify-center gap-1"
 					in:fly|global={{ x: -20 }}
 				>
 					<h1 class="text-[16px] font-bold text-[#eef]">
@@ -298,21 +302,20 @@
 					<button
 						onclick={toggleSheetInformation}
 						class={`
-						group my-1 flex flex-shrink-0 
-						cursor-pointer items-center justify-center bg-[#3a3a6a]
-						py-1 
-						text-[14px] font-[500] text-[#eef] 
-						shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2 outline-[#eeeeff22] transition-all
-						
+						group pointer-events-auto my-1 flex flex-shrink-0
+						cursor-pointer items-center justify-center rounded-lg
+						bg-[#3a3a6a] 
+						px-2 py-1 text-[14px] 
+						font-[500] text-[#eef] shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2
+						outline-[#eeeeff22] transition-all
 						duration-500 hover:bg-[#eeeeff22]
-						${false ? 'rounded-lg px-2' : 'rounded-lg px-2.5'}
 					`}
 					>
 						<Info
 							color="#eef"
 							class={`
-						relative -top-px inline h-[22px]
-						w-[22px] flex-shrink-0 opacity-70 group-hover:opacity-100
+						inline h-[20px]
+						w-[20px] flex-shrink-0 opacity-70 group-hover:opacity-100
 						`}
 						/>
 
@@ -328,6 +331,60 @@
 					</button>
 				</div>
 			{/key}
+
+			{#if selectedHistoricMap && canvasManifest && editionManifest}
+				{@const metadata = getMetadata(canvasManifest)}
+				<div
+					in:fly|global={{ x: -20 }}
+					class="pointer-events-auto w-auto flex-shrink-0 p-1 text-[12px]"
+				>
+					<h3 class="text-[14px] font-[600] text-[#eef]">Bladinformatie</h3>
+					<ul class="m-0.5 h-full overflow-y-auto text-[#eef]">
+						<li class="rounded-[4px] px-1 py-0.5 odd:bg-[#eeeeff11]">
+							<i class="font-[600] opacity-50">Bladtitel:</i>
+							<span class="font-[500]">{historicMap.label}</span>
+						</li>
+						{#each metadata as [label, value]}
+							<li class="rounded-[4px] px-1 py-0.5 odd:bg-[#eeeeff11]">
+								<i class="font-[600] opacity-50">{label}:</i>
+								<span class="font-[500]">{value}</span>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
+
+			{#if selectedHistoricMap && variants}
+				<div class="pointer-events-auto flex flex-col p-1">
+					<h3 class="text-[14px] font-[600] text-[#eef]">Bijbladen</h3>
+					{#each variants as variant}
+						{@const metadata = getMetadata(variant)}
+						{@const type =
+							metadata.find((i) => i[0] === 'Type')?.[1] ||
+							(canvasManifest.id == variant.id ? 'Voorkant' : 'Achterkant')}
+						{@const src = variant.items[0].items[0].body.service[0].id + '/full/128,/0/default.jpg'}
+						{#if type !== 'Voorkant'}
+							<div
+								onclick={() => {
+									const historicMap = historicMapsById
+										.values()
+										.find((m) => m.manifestId == variant.id);
+									if (historicMap) changeHistoricMapView(historicMap);
+									else addFakeGeoreferencedMap(variant);
+								}}
+								class="m-0.5 flex cursor-pointer items-center gap-2 rounded-[4px]"
+							>
+								<div class="h-6 overflow-hidden shadow-md">
+									<img {src} class="block h-full w-auto scale-[1.04] object-cover" />
+								</div>
+								<p class="max-h-8 w-max max-w-32 truncate text-[12px] font-[600] text-[#eef]">
+									{type}
+								</p>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{/if}
 
 			<!-- {#if canvasManifest && editionManifest}
 				{@const metadata = getMetadata(canvasManifest)}
