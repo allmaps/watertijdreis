@@ -30,6 +30,7 @@
 	let prevDiff = -1;
 	let lastX = 0;
 
+	const FILTER_UPDATES_PER_SEC = 4;
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
 	const MIN_YEAR = 1600;
@@ -78,6 +79,9 @@
 		return Math.hypot(dx, dy);
 	}
 
+	let filterUpdateInterval = null;
+	let scheduledFilterUpdate = null;
+
 	function onpointerdown(e: PointerEvent) {
 		e.preventDefault();
 
@@ -88,6 +92,10 @@
 		} else if (pointerCache.size === 2) {
 			prevDiff = getCacheDiff();
 		}
+
+		filterUpdateInterval = setInterval(() => {
+			if (scheduledFilterUpdate) scheduledFilterUpdate();
+		}, 1000 / FILTER_UPDATES_PER_SEC);
 
 		setLabelVisibility(true);
 	}
@@ -119,7 +127,7 @@
 				maxHistoricMapYear + 1
 			);
 			if (Math.floor(selectedYear) - filter.yearEnd) {
-				// applyFilter(filter);
+				scheduledFilterUpdate = applyFilter.bind(this, filter);
 			}
 			filter.yearEnd = selectedYear;
 
@@ -143,9 +151,12 @@
 		if (pointerCache.size === 0) {
 			const selectedYear = Math.round(filter.yearEnd);
 			if (Math.floor(selectedYear) - filter.yearEnd) {
-				applyFilter(filter);
+				scheduledFilterUpdate = applyFilter.bind(this, filter);
 			}
 			filter.yearEnd = selectedYear;
+
+			if (scheduledFilterUpdate) scheduledFilterUpdate();
+			if (filterUpdateInterval) clearInterval(filterUpdateInterval);
 
 			if (momentumTimeout) clearTimeout(momentumTimeout);
 			let elapsed = 0;
@@ -286,7 +297,6 @@
 {#if visible}
 	<div
 		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none"
-		transition:fly={{ y: 200, duration: 250 }}
 	>
 		<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>
 		<div
