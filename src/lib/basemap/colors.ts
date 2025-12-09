@@ -113,6 +113,7 @@ export const ALLMAPS_FLAVOR = {
     barren: 'rgba(0, 40, 140, 1)',     
     urban_area: 'rgba(242, 240, 237, 1)', // uitgezoomd steden
     farmland: 'rgba(246, 248, 237, 1)', // uitgezoomd farmland 
+    glacier: 'rgba(255, 249, 235, 1)', 
     scrub: 'rgba(255, 236, 29, 1)',    
     forest: 'rgba(236, 240, 225, 1)'      // uitgezoomd bos 
   }
