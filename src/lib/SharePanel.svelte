@@ -5,7 +5,9 @@
 		EnvelopeSimple,
 		InstagramLogo,
 		LinkedinLogo,
-		RedditLogo
+		RedditLogo,
+		WhatsappLogo,
+		ChatCircle
 	} from 'phosphor-svelte';
 	import Modal from './Modal.svelte';
 	let { visible = $bindable() } = $props();
@@ -61,17 +63,44 @@
 			href="mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A{window
 				.location.href}"
 		>
-			<EnvelopeSimple size="32" color="#f4a" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
+			<EnvelopeSimple size="30" color="#f4a" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
 		</a>
-		<a class="mx-4" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
-			<LinkedinLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"></LinkedinLogo>
+		<a
+			class="mx-4"
+			href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<LinkedinLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"></LinkedinLogo>
 		</a>
 		<a class="mx-2" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-			<InstagramLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"
+			<InstagramLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"
 			></InstagramLogo>
 		</a>
 		<a class="mx-4" href="https://www.reddit.com/" target="_blank" rel="noopener noreferrer">
-			<RedditLogo size="32" color="#f4a" class="relative -top-1 mt-6 mr-2 inline"></RedditLogo>
+			<RedditLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"></RedditLogo>
+		</a>
+
+		<a
+			class="mx-2"
+			href={`https://wa.me/?text=${encodeURIComponent(
+				'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
+					window.location.href
+			)}`}
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<WhatsappLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
+		</a>
+
+		<a
+			class="mx-4"
+			href={`signal://send?text=${encodeURIComponent(
+				'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
+					window.location.href
+			)}`}
+		>
+			<ChatCircle size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
 		</a>
 	</div>
 </Modal>
