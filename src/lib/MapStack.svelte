@@ -39,24 +39,28 @@
 </script>
 
 <div class="absolute" style={containerStyle}>
-	{#each maps.filter((m) => mapsInViewport.has(m.id)) as map, index (map.id)}
+	{#each maps as map, index (map.id)}
 		<!-- {@const isVisible = visibleMapIds.has(map.id)} -->
-		{@const isVisible = true}
+		{@const visible = mapsInViewport.has(map.id)}
 
 		<div
 			class="absolute h-10 w-10 origin-bottom shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
-			style:background-color={mapColors[index]}
+			style:background-color={visible ? mapColors[index] : 'transparent'}
 			style="
                 transform: 
                     translateZ({index * Z_DEPTH}px)
                     rotateZ({mapRotations[index]}deg);
                 transition: opacity 0.5s;
             "
-			style:border={hoveredHistoricMap && map.id == hoveredHistoricMap.id ? '2px solid #f4a' : ''}
-			transition:scale={{ duration: 200 }}
+			style:border={visible ? '' : '1px solid #eeeeff22'}
 		>
-			{#if selectedYear + 0.5 > map.yearEnd}
-				<img src={mapImages[index]} alt="" class="h-full w-full object-cover object-center" />
+			{#if selectedYear + 0.5 > map.yearEnd && visible}
+				<img
+					transition:scale={{ duration: 200 }}
+					src={mapImages[index]}
+					alt=""
+					class="h-full w-full object-cover object-center"
+				/>
 			{/if}
 		</div>
 	{/each}
