@@ -192,7 +192,7 @@
 
 	function onwheel(e: WheelEvent) {
 		e.preventDefault();
-		const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.02), 0.02);
+		const zoom = 1 + Math.min(Math.max(e.deltaY / 100, -0.08), 0.08);
 		let newPixelsPerYear = pixelsPerYear / zoom;
 		newPixelsPerYear = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newPixelsPerYear));
 		pixelsPerYear = newPixelsPerYear;
