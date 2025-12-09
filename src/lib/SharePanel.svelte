@@ -22,6 +22,20 @@
 		copySuccess = true;
 	}
 
+	async function shareToSignal() {
+		if (navigator.share) {
+			try {
+				await navigator.share({
+					title: 'Watertijdreis',
+					text: 'Watertijdreis - Reis door de tijd!',
+					url: currentUrl
+				});
+			} catch (err) {
+				console.log('Share cancelled or failed');
+			}
+		}
+	}
+
 	let copySuccess: boolean = $state(false);
 	let currentUrl = $state('');
 
@@ -87,7 +101,12 @@
 			></InstagramLogo>
 		</a> -->
 
-		<a class="mx-4" href="https://www.reddit.com/" target="_blank" rel="noopener noreferrer">
+		<a
+			class="mx-4"
+			href={`https://reddit.com/submit?url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent('Watertijdreis - Reis door de tijd!')}`}
+			target="_blank"
+			rel="noopener noreferrer"
+		>
 			<RedditLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"></RedditLogo>
 		</a>
 
@@ -105,10 +124,7 @@
 
 		<a
 			class="mx-4"
-			href={`signal://send?text=${encodeURIComponent(
-				'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
-					currentUrl
-			)}`}
+			href={`sgnl://send?text=${encodeURIComponent('Watertijdreis - Reis door de tijd!\n' + currentUrl)}`}
 		>
 			<ChatCircle size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
 		</a>
