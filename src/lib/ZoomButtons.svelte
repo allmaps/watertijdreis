@@ -1,16 +1,16 @@
 <script>
+	import { MagnifyingGlassMinus, MagnifyingGlassPlus } from 'phosphor-svelte';
 	import { mousePosition } from './mousePosition.svelte';
 	let {
-		Icon,
-		kbd = undefined,
 		children = '',
-		onclick,
 		collapsed = false,
 		collapseAfterRender = true,
 		collapseAfterRenderDelay = 2000,
 		openOnHover = true,
 		tabindex = undefined
 	} = $props();
+
+	let kbd = '+';
 
 	let buttonEl = $state();
 	let slotEl = $state(null);
@@ -78,12 +78,10 @@
 	});
 </script>
 
-<button
+<div
 	bind:this={buttonEl}
-	{onclick}
 	onmouseenter={() => openOnHover && (collapsed = false)}
 	onmouseleave={() => openOnHover && (collapsed = true)}
-	{tabindex}
 	class="
         group relative cursor-pointer
         rounded-[9px] font-[500]
@@ -98,12 +96,16 @@
 		style:background="radial-gradient(circle at var(--x, 50%) var(--y, 50%), #33f 0%, #eeeeff88 70%)"
 	></div>
 
-	<div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg">
-		<Icon
+	<button
+		onclick={() => console.log('+')}
+		{tabindex}
+		class="relative z-10 m-0.5 flex items-center rounded-t-[8px] bg-[#fff] px-2 py-2 shadow-lg"
+	>
+		<MagnifyingGlassPlus
 			color="#ff44aa"
 			weight="regular"
 			class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"
-		></Icon>
+		></MagnifyingGlassPlus>
 
 		<div
 			class="ease-[cubic-bezier(0.3, 0.8, 0.3, 2.3)] overflow-hidden transition-[width] duration-300"
@@ -117,9 +119,7 @@
 				style:opacity={collapsed ? 0 : 1}
 				style:padding={collapsed ? '0px' : '0 4px'}
 			>
-				<span class="ml-1">
-					{@render children?.()}
-				</span>
+				<span class="ml-1"> Inzoomen &nbsp; </span>
 
 				{#if kbd}
 					<kbd
@@ -129,10 +129,47 @@
                     shadow-[0px_2px_0px_0px_#cce] select-none
                     "
 					>
-						<span>{kbd}</span>
+						<span>+</span>
 					</kbd>
 				{/if}
 			</div>
 		</div>
-	</div>
-</button>
+	</button>
+	<button
+		onclick={() => console.log('+')}
+		{tabindex}
+		class="relative z-10 m-0.5 flex items-center rounded-b-[8px] bg-[#fff] px-2 py-2 shadow-lg"
+	>
+		<MagnifyingGlassMinus
+			color="#ff44aa"
+			weight="regular"
+			class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"
+		></MagnifyingGlassMinus>
+
+		<div
+			class="ease-[cubic-bezier(0.3, 0.8, 0.3, 2.3)] overflow-hidden transition-[width] duration-300"
+			style:width="{collapsed ? 0 : expandedWidth}px"
+		>
+			<div
+				bind:this={slotEl}
+				class="flex origin-left items-center whitespace-nowrap transition-all delay-100 duration-300 ease-out"
+				style:width="max-content"
+				style:transform={`translateX(${collapsed ? -6 : 0}px) scaleX(${collapsed ? 85 : 100}%)`}
+				style:opacity={collapsed ? 0 : 1}
+				style:padding={collapsed ? '0px' : '0 4px'}
+			>
+				<span class="ml-1"> Uitzoomen </span>
+
+				<kbd
+					class="
+                ml-1 flex items-center rounded-[4px] border border-[#eef] bg-white
+                px-1 font-sans text-[12px] text-[#cce]
+                shadow-[0px_2px_0px_0px_#cce] select-none
+                "
+				>
+					<span>-</span>
+				</kbd>
+			</div>
+		</div>
+	</button>
+</div>

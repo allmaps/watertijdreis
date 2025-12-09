@@ -17,6 +17,7 @@
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import LayersPanel2 from './LayersPanel2.svelte';
+	import ZoomButtons from './ZoomButtons.svelte';
 
 	let {
 		selectedHistoricMap,
@@ -110,13 +111,15 @@
 
 	<div
 		class={`
-			flex w-fit flex-col items-center
+			flex w-fit flex-col items-end
 			justify-center overflow-hidden rounded-lg
-			bg-white
-			shadow-[0_2px_2px_rgba(0,0,0,0.05)] outline-2 outline-[#33336611]
 		`}
 	>
-		<button
+		<Button Icon={MagnifyingGlassPlus} onclick={zoomIn} kbd="+">Inzoomen&nbsp;</Button>
+		<div class="relative -top-[2px]">
+			<Button Icon={MagnifyingGlassMinus} onclick={zoomOut} kbd="-">Uitzoomen</Button>
+		</div>
+		<!-- <button
 			onclick={zoomIn}
 			class={`
 			group flex cursor-pointer
@@ -147,7 +150,7 @@
 				color="#f4a"
 				class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
 			/>
-		</button>
+		</button> -->
 	</div>
 
 	<div
