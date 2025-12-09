@@ -80,10 +80,6 @@
 		return structure.items.map((i) => editionManifest.items.find((j) => j.id == i.id));
 	});
 
-	$effect(() => {
-		console.log(variants);
-	});
-
 	// TODO: dit kan makkelijker?
 	let mainSheet = $derived.by(() => {
 		if (!variants) return null;

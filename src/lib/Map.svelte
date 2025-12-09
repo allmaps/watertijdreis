@@ -319,7 +319,7 @@
 	};
 
 	$effect(() => {
-		if (!maplibreLoaded) return;
+		if (!maplibreLoaded || selectedHistoricMap) return;
 
 		setProtomapsVisiblity(layerOptions.baseMap === 'protomaps');
 		if (layerOptions.baseMap === 'protomaps')
@@ -464,6 +464,7 @@
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
+			warpedMapLayer.getWarpedMapList().options.animatedOptions.push('opacity');
 
 			map.addSource('user-location', {
 				type: 'geojson',
@@ -1049,9 +1050,17 @@
 	}
 
 	function restoreView(view = savedMapViews.pop(), options = { duration: 500 }) {
-		if (!map || !view) return;
+		if (!map || !view || !warpedMapLayer) return;
 		const { center, zoom, bearing, pitch } = view;
 		map.easeTo({ center, zoom, bearing, pitch, ...options });
+
+		const optionsByMapId = new Map();
+		optionsByMapId.set(selectedHistoricMap?.id, {
+			visible: false,
+			transformationType: 'thinPlateSpline',
+			applyMask: true
+		});
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId);
 
 		if (savedLayerVisibility) {
 			for (const layerId in savedLayerVisibility) {
@@ -1130,6 +1139,8 @@
 			}
 		}
 
+		warpedMapLayer.setLayerOptions({ opacity: 1 });
+
 		const { id } = historicMap;
 		const mapsToHide = visibleHistoricMaps
 			.keys()
@@ -1142,6 +1153,7 @@
 			visible: true,
 			transformationType: 'straight',
 			saturation: 1,
+			opacity: 1,
 			applyMask: false
 		});
 

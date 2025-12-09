@@ -37,7 +37,7 @@
 
 	$effect(() => {
 		if (visible) {
-			setTimeout(() => {}, 100);
+			setTimeout(() => {}, 250);
 		}
 	});
 
@@ -116,8 +116,7 @@
 
 {#if backgroundVisible}
 	<div
-		transition:scale={{ duration: 150, start: 1.1 }}
-		class="fixed z-1100 rounded-[8px] bg-white p-4 shadow-lg"
+		class="fixed z-1100 box-content -translate-x-4 -translate-y-4 rounded-[8px] bg-white p-4 shadow-lg"
 		style="
 			position: fixed;
 			top: {sliderPos.top - 16}px;
