@@ -79,7 +79,6 @@
 			</div>
 			<button
 				onclick={() => changeHistoricMapView(sortedMaps[selectedHistoricMapIndex + 1])}
-				tabindex="13"
 				class={`
                     group inline-flex flex-shrink-0 cursor-pointer 
                     items-center justify-center border-2 border-[#33336611]

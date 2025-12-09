@@ -293,7 +293,13 @@
 					</p>
 					<button
 						onclick={toggleSheetInformation}
-						tabindex="10"
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								toggleSheetInformation();
+							}
+						}}
+						tabindex={selectedHistoricMap ? '14' : '10'}
 						class={`
 						group pointer-events-auto my-1 flex flex-shrink-0
 						cursor-pointer items-center justify-center rounded-lg
@@ -318,6 +324,7 @@
 						transition-[max-width,margin,opacity] duration-500 ease-in-out
 						${false ? 'ml-0 max-w-0 opacity-0' : 'ml-1.5 opacity-100'}
 					`}
+							tabindex="15"
 						>
 							Bladinformatie
 						</span>
@@ -357,7 +364,7 @@
 							(canvasManifest.id == variant.id ? 'Voorkant' : 'Achterkant')}
 						{@const src = variant.items[0].items[0].body.service[0].id + '/full/128,/0/default.jpg'}
 						{#if type !== 'Voorkant'}
-							<div
+							<button
 								onclick={() => {
 									const historicMap = historicMapsById
 										.values()
@@ -365,7 +372,18 @@
 									if (historicMap) changeHistoricMapView(historicMap);
 									else addFakeGeoreferencedMap(variant);
 								}}
-								class="m-0.5 flex cursor-pointer items-center gap-2 rounded-[4px]"
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										const historicMap = historicMapsById
+											.values()
+											.find((m) => m.manifestId == variant.id);
+										if (historicMap) changeHistoricMapView(historicMap);
+										else addFakeGeoreferencedMap(variant);
+									}
+								}}
+								tabindex="15"
+								class="m-0.5 flex cursor-pointer items-center gap-2 rounded-[4px] hover:bg-[#eeeeff11]"
 							>
 								<div class="h-6 overflow-hidden shadow-md">
 									<img {src} class="block h-full w-auto scale-[1.04] object-cover" />
@@ -373,7 +391,7 @@
 								<p class="max-h-8 w-max max-w-32 truncate text-[12px] font-[600] text-[#eef]">
 									{type}
 								</p>
-							</div>
+							</button>
 						{/if}
 					{/each}
 				</div>
