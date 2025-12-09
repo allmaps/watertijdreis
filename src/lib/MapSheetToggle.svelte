@@ -133,7 +133,8 @@
 				class="cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
-					pinnedHistoricMap = selectedHistoricMap;
+					if (pinnedHistoricMap) pinnedHistoricMap = null;
+					else pinnedHistoricMap = selectedHistoricMap;
 				}}
 			>
 				{#if pinnedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id}
