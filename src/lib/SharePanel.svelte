@@ -25,9 +25,11 @@
 	let copySuccess: boolean = $state(false);
 	let currentUrl = $state('');
 
+	// Update URL when modal becomes visible
 	$effect(() => {
-		if (typeof window !== 'undefined') {
+		if (visible && typeof window !== 'undefined') {
 			currentUrl = window.location.href;
+			console.log('SharePanel URL updated:', currentUrl);
 		}
 	});
 
