@@ -90,7 +90,7 @@
 		onkeydown={handleKeyDown}
 		onfocus={handleFocus}
 		onblur={handleBlur}
-		tabindex="0"
+		tabindex="-1"
 		role="slider"
 		aria-valuenow={value}
 		aria-valuemin="0"
