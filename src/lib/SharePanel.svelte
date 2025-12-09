@@ -32,6 +32,12 @@
 	});
 
 	$effect(() => {
+		if (visible && typeof window !== 'undefined') {
+			currentUrl = window.location.href;
+		}
+	});
+
+	$effect(() => {
 		if (copySuccess) {
 			const timeout = setTimeout(() => {
 				copySuccess = false;
