@@ -11,6 +11,11 @@
 	<div class="absolute top-0 left-[-30px] h-[20px] w-[60px] rounded-sm bg-[#eef]"></div>
 
 	<div
+		class="absolute top-[0px] left-[-43px] h-[20px] w-[15px] bg-[#eef] shadow-md"
+		style="clip-path: polygon(0% 50%, 100% 0%, 100% 100%);"
+	></div>
+
+	<div
 		class="absolute top-[20px] left-[-7px] h-[8px] w-[14px] bg-[#eef]"
 		style="clip-path: polygon(0% 0%, 100% 0%, 50% 100%);"
 	></div>
