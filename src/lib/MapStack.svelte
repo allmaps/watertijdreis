@@ -4,7 +4,15 @@
 
 	type HistoricMap = { id: string; year: number; thumbnailUrl: string };
 
-	let { maps, x, pixelsPerYear, mapsInViewport, getHistoricMapThumbnail, selectedYear } = $props<{
+	let {
+		maps,
+		x,
+		pixelsPerYear,
+		mapsInViewport,
+		hoveredHistoricMap,
+		getHistoricMapThumbnail,
+		selectedYear
+	} = $props<{
 		maps: HistoricMap[];
 		x: number;
 		pixelsPerYear: number;
@@ -31,7 +39,7 @@
 </script>
 
 <div class="absolute" style={containerStyle}>
-	{#each maps as map, index (map.id)}
+	{#each maps.filter((m) => mapsInViewport.has(m.id)) as map, index (map.id)}
 		<!-- {@const isVisible = visibleMapIds.has(map.id)} -->
 		{@const isVisible = true}
 
@@ -44,6 +52,7 @@
                     rotateZ({mapRotations[index]}deg);
                 transition: opacity 0.5s;
             "
+			style:border={hoveredHistoricMap && map.id == hoveredHistoricMap.id ? '2px solid #f4a' : ''}
 			transition:scale={{ duration: 200 }}
 		>
 			{#if selectedYear + 0.5 > map.yearEnd}

@@ -52,7 +52,7 @@
 		text-[#336] backdrop-blur-sm transition-all
 		duration-500 ease-out active:scale-95 active:outline-3
 		"
-	style:background={`radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, #33f 0%,#ffffff08 80%)`}
+	style:background={`radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, #33f 0%,#eeeeff88 70%)`}
 >
 	<div class="m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg">
 		<Icon

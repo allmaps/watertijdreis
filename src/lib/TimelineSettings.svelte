@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, scale, fly } from 'svelte/transition';
 	import { Label, Switch } from 'bits-ui';
-	import { Gear } from 'phosphor-svelte';
+	import { ArrowElbowDownRight, Gear } from 'phosphor-svelte';
 
 	let { filter = $bindable(), applyFilter, minYear, maxYear } = $props();
 
@@ -15,10 +15,11 @@
 		showSettings = false;
 	}
 
-	let selectedRegulier = $state(true);
-	let selectedBIS = $state(false);
-	let selectedHWP = $state(false);
-	let selectedWVE = $state(false);
+	let selectedRegulier = $state(!filter.type);
+	let selectedEdition = $state(filter.edition);
+	let selectedBIS = $state(filter.bis);
+	let selectedHWP = $state(filter.type === 'HWP');
+	let selectedWVE = $state(filter.type === 'WVE');
 	let selectedOption = $state('');
 
 	function clearAll() {
@@ -84,6 +85,16 @@
 			toggleRegulier(true);
 		}
 	}
+
+	function setEdition(v: 'All' | 1 | 2 | 3 | 4 | 5) {
+		if (selectedEdition !== v) {
+			filter.edition = v;
+
+			filter.yearEnd = maxYear;
+			applyFilter(filter);
+		}
+		selectedEdition = v;
+	}
 </script>
 
 <svelte:window onpointerdown={handleWindowClick} />
@@ -127,7 +138,7 @@
 						onchange={() => {
 							applyFilter(filter);
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600]"
+						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
 					/>
 					tot
 					<input
@@ -138,7 +149,7 @@
 						onchange={() => {
 							applyFilter(filter);
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600]"
+						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
 					/>
 				</li>
 				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
@@ -169,17 +180,50 @@
 					</Switch.Root>
 				</li>
 
+				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+					Edities:
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 'All' ? 'background: #336; color: #eef;' : ''}
+						onclick={() => setEdition('All')}>Alle</button
+					>
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 1 ? 'background: #336; color: #eef' : ''}
+						onclick={() => setEdition(1)}>1</button
+					>
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 2 ? 'background: #336; color: #eef' : ''}
+						onclick={() => setEdition(2)}>2</button
+					>
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 3 ? 'background: #336; color: #eef' : ''}
+						onclick={() => setEdition(3)}>3</button
+					>
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 4 ? 'background: #336; color: #eef' : ''}
+						onclick={() => setEdition(4)}>4</button
+					>
+					<button
+						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
+						style={selectedEdition == 5 ? 'background: #336; color: #eef' : ''}
+						onclick={() => setEdition(5)}>5</button
+					>
+				</li>
+
 				<li
 					class="
-		flex cursor-pointer items-center justify-between rounded-md px-2 py-1
+		flex cursor-pointer items-center justify-start gap-2 rounded-md px-2 py-1
 		pl-5 transition
 		{selectedRegulier
 						? 'text-[#333366] hover:bg-gray-100'
 						: 'cursor-not-allowed text-gray-300 opacity-80'}
 	"
 				>
-					BIS-edities
-
+					<ArrowElbowDownRight></ArrowElbowDownRight>
 					<label
 						class="
 			flex items-center gap-2
@@ -198,6 +242,7 @@
 							"
 						/>
 					</label>
+					BIS-edities tonen
 				</li>
 
 				<li

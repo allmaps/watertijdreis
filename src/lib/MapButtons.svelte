@@ -19,7 +19,7 @@
 	import LayersPanel2 from './LayersPanel2.svelte';
 
 	let {
-		visible = true,
+		selectedHistoricMap,
 		flyToFeature,
 		flyToUserLocation,
 		setGridVisibility,
@@ -80,21 +80,23 @@
 </div> -->
 
 <div class="fixed right-2 bottom-36 flex flex-col items-end gap-2">
-	<div>
-		<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
-			Zoek plaats ...
-		</Button>
-	</div>
+	{#if !selectedHistoricMap}
+		<div transition:fly={{ x: 100, duration: 250 }}>
+			<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
+				Zoek plaats ...
+			</Button>
+		</div>
 
-	<div>
-		<Button Icon={GpsFix} onclick={flyToUserLocation}>Mijn locatie tonen</Button>
-	</div>
+		<div transition:fly={{ x: 100, duration: 250 }}>
+			<Button Icon={NavigationArrow} onclick={flyToUserLocation}>Mijn locatie tonen</Button>
+		</div>
 
-	<div>
-		<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
-			>Lagen</Button
-		>
-	</div>
+		<div transition:fly={{ x: 100, duration: 250 }}>
+			<Button Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
+				>Lagen</Button
+			>
+		</div>
+	{/if}
 
 	<div
 		class={`

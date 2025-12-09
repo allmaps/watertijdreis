@@ -27,7 +27,7 @@
 			opacity = layerOptions.historicMapsOpacity;
 			opacityUpdateInterval = setInterval(() => {
 				layerOptions.historicMapsOpacity = opacity;
-			}, 50);
+			}, 200);
 		} else clearInterval(opacityUpdateInterval);
 	});
 
@@ -110,7 +110,7 @@
 
 {#if backgroundVisible}
 	<div
-		class="fixed z-1100 drop-shadow-[1px_1px_0_#eef] drop-shadow-[#eef]"
+		class="fixed z-1100 rounded-[8px] bg-white p-4 shadow-lg"
 		style="
 			position: fixed;
 			top: {sliderPos.top - 16}px;

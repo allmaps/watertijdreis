@@ -10,6 +10,7 @@
 		historicMapsLoaded,
 		historicMapsById,
 		mapsInViewport,
+		hoveredHistoricMap,
 		getHistoricMapThumbnail,
 		filter = $bindable(),
 		applyFilter,
@@ -230,17 +231,45 @@
 		return { major, medium, minor };
 	});
 
-	let mapsByYear = $derived.by(() => {
-		if (!historicMapsLoaded) return {};
-		const mapsByYear: Record<number, HistoricMap[]> = {};
-		const filteredMaps = historicMapsById
+	let filteredMaps = $derived(
+		historicMapsById
 			.values()
 			// .toArray()
 			// .toSorted((a,b) => a.bis - b.bis)
+			.filter((map) => filter.edition === 'All' || filter.edition === map.edition)
 			.filter((map) => filter.bis || !map.bis)
-			.filter((map) => filter.type == map.type);
+			.filter((map) => filter.type == map.type)
+			.toArray()
+	);
+
+	let mapsByYear = $derived.by(() => {
+		if (!historicMapsLoaded) return {};
+		const mapsByYear: Record<number, HistoricMap[]> = {};
 		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);
 		return mapsByYear;
+	});
+
+	let editions = $derived.by(() => {
+		if (!historicMapsLoaded) return;
+		const editionMap = new Map<string, Edition>();
+		for (const map of filteredMaps) {
+			const key = `${map.edition}-${map.bis}`;
+			let ed = editionMap.get(key);
+			if (!ed) {
+				ed = {
+					name: `Editie ${map.edition}` + (map.bis ? ' (bis)' : ''),
+					edition: map.edition,
+					bis: map.bis,
+					yearStart: map.yearEnd,
+					yearEnd: map.yearEnd
+				};
+				editionMap.set(key, ed);
+			} else {
+				ed.yearStart = Math.min(map.yearEnd, ed.yearStart);
+				ed.yearEnd = Math.max(map.yearEnd, ed.yearEnd);
+			}
+		}
+		return Array.from(editionMap.values());
 	});
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
@@ -293,6 +322,7 @@
 							{pixelsPerYear}
 							{mapsInViewport}
 							{getHistoricMapThumbnail}
+							{hoveredHistoricMap}
 							selectedYear={filter.yearEnd}
 						></MapStack>
 						<!-- <div
@@ -305,6 +335,12 @@
 				{/each}
 			</div>
 			<svg class="pointer-events-none absolute inset-0 z-999 h-full w-full cursor-grab">
+				<defs>
+					<filter id="hardShadow" x="-50%" y="-50%" width="200%" height="200%">
+						<feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="1" />
+					</filter>
+				</defs>
+
 				{#if pixelsPerYear > 3}
 					<path
 						d={ticks.minor}
@@ -376,6 +412,59 @@
 						>
 					{/if}
 				{/each}
+
+				{#if editions}
+					{#each editions as ed, i}
+						{@const height = i % 2 == 0 ? 114 : 108}
+						{@const start = getX(ed.yearStart)}
+						{@const middle = getX((ed.yearStart + ed.yearEnd) / 2)}
+						{@const end = getX(ed.yearEnd)}
+						<g filter="url(#hardShadow)">
+							<line
+								x1={start}
+								y1={height}
+								x2={start}
+								y2={height - 5}
+								stroke="#eeeeff88"
+								stroke-width="1"
+							></line>
+							<line
+								x1={start}
+								y1={height}
+								x2={middle - 25}
+								y2={height}
+								stroke="#eeeeff88"
+								stroke-width="1"
+							></line>
+							<line
+								x1={middle + 25}
+								y1={height}
+								x2={end}
+								y2={height}
+								stroke="#eeeeff88"
+								stroke-width="1"
+							></line>
+							<text
+								x={middle}
+								y={height + 4}
+								font-size="12"
+								font-weight="600"
+								fill="#eeeeff88"
+								text-anchor="middle"
+							>
+								{ed.name}</text
+							>
+							<line
+								x1={end}
+								y1={height}
+								x2={end}
+								y2={height - 5}
+								stroke="#eeeeff88"
+								stroke-width="1"
+							></line>
+						</g>
+					{/each}
+				{/if}
 			</svg>
 		</div>
 

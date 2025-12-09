@@ -46,11 +46,11 @@
 
 	let historicMap = $derived.by(() => {
 		return (
-			selectedHistoricMap || clickedHistoricMap
-			// ||
-			// (visibleHistoricMapsInViewport.size == 1
-			// 	? visibleHistoricMapsInViewport.values().next().value
-			// 	: null)
+			selectedHistoricMap ||
+			clickedHistoricMap ||
+			(visibleHistoricMapsInViewport.size == 1
+				? visibleHistoricMapsInViewport.values().next().value
+				: null)
 		);
 	});
 
@@ -67,6 +67,10 @@
 			? editionManifest.items.find((i) => i.id == historicMap.manifestId)
 			: null
 	);
+
+	$effect(() => {
+		if (editionManifest) console.log(editionManifest);
+	});
 
 	let variants = $derived.by(() => {
 		if (!canvasManifest || !editionManifest) return [];
@@ -244,6 +248,7 @@
 </script>
 
 {#if historicMap}
+	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, 256)}
 	<div
 		class="
 			fixed right-2 bottom-2 left-2
@@ -260,14 +265,10 @@
 				>
 					<div
 						bind:this={thumbnailEl}
-						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
+						class="aspect-[1.2426791958/1] h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
-						<img
-							alt=""
-							class="block h-full w-auto scale-[1.04] object-cover"
-							src="https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/11/18/38/111838154470798873696440689860241541701.jp2/full/256,/0/default.jpg"
-						/>
+						<img alt="" class="block h-full w-auto scale-[1.04] object-cover" src={imageSrc} />
 						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
 								getViewportRectWithinHistoricMap(historicMap)}
