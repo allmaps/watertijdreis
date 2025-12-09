@@ -18,9 +18,12 @@
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import { basemapStyle } from './basemap';
 
+	import { mousePosition } from './mousePosition.svelte';
+
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
@@ -31,8 +34,15 @@
 	let userLocationActive: boolean = $state(false);
 	let userLocationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-	$effect(() => {
+	onMount(() => {
 		if (!map) initMaplibre();
+	});
+
+	onMount(() => {
+		document.addEventListener('pointermove', (e) => {
+			mousePosition.x = e.x;
+			mousePosition.y = e.y;
+		});
 	});
 
 	$effect(() => {
@@ -279,7 +289,7 @@
 
 		toastContent = `Je ziet nu kaarten van <i class="font-[700]">${Math.round(filter.yearEnd)}</i> en ouder`;
 
-		console.log('Applied filter');
+		// map.triggerRepaint();
 	}
 
 	type LayerOptions = {
