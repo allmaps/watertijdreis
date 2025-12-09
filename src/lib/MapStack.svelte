@@ -32,7 +32,7 @@
 	const containerStyle = $derived(`
         transform: 
             translateX(${x - mapWidth / 2}px) 
-            translateY(${80}px)
+            translateY(${75}px)
             rotateX(60deg);
         transform-style: preserve-3d;
     `);

@@ -415,7 +415,7 @@
 
 				{#if editions}
 					{#each editions as ed, i}
-						{@const height = i % 2 == 0 ? 114 : 108}
+						{@const height = i % 2 == 0 ? 110 : 108}
 						{@const start = getX(ed.yearStart)}
 						{@const middle = getX((ed.yearStart + ed.yearEnd) / 2)}
 						{@const end = getX(ed.yearEnd)}
@@ -427,6 +427,7 @@
 								y2={height - 5}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<line
 								x1={start}
@@ -435,6 +436,7 @@
 								y2={height}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<line
 								x1={middle + 25}
@@ -443,6 +445,7 @@
 								y2={height}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 							<text
 								x={middle}
@@ -451,6 +454,7 @@
 								font-weight="600"
 								fill="#eeeeff88"
 								text-anchor="middle"
+								style="text-shadow: black; pointer-events: none; "
 							>
 								{ed.name}</text
 							>
@@ -461,6 +465,7 @@
 								y2={height - 5}
 								stroke="#eeeeff88"
 								stroke-width="1"
+								opacity="0.4"
 							></line>
 						</g>
 					{/each}
