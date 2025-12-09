@@ -23,19 +23,21 @@
 
 	function leftBtnClick() {
 		rightBtnSelected = false;
-		setSheetIndexVisibility(false);
+		if (pinnedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id)
+			pinnedView = saveMapView(false);
 		restoreView();
-		if (pinnedHistoricMap) pinnedView = saveMapView();
+		setSheetIndexVisibility(false);
 	}
 
 	function rightBtnClick() {
 		rightBtnSelected = true;
-		if (pinnedHistoricMap && !selectedHistoricMap) {
-			extendClickedMapTimeout();
-			setHistoricMapView(pinnedHistoricMap, pinnedView);
-		} else if (clickedHistoricMap && !selectedHistoricMap) {
+
+		if (clickedHistoricMap && !selectedHistoricMap) {
 			extendClickedMapTimeout();
 			setHistoricMapView(clickedHistoricMap);
+		} else if (pinnedHistoricMap && !selectedHistoricMap) {
+			extendClickedMapTimeout();
+			setHistoricMapView(pinnedHistoricMap, pinnedView);
 		} else {
 			setSheetIndexVisibility(true);
 		}
@@ -79,7 +81,7 @@
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
-			leftBtnClick();
+			if (!selectedHistoricMap) leftBtnClick();
 		}
 	}}
 />
@@ -122,7 +124,25 @@
 			color={rightBtnSelected ? '#f4a' : '#336'}
 			class="shrink-0 transition-[fill] duration-500"
 		/>
-		{#if pinnedHistoricMap}
+
+		{#if selectedHistoricMap}
+			<span class="truncate">{selectedHistoricMap.label}</span>
+			<span
+				role="button"
+				tabindex="0"
+				class="cursor-pointer"
+				onclick={(e) => {
+					e.stopPropagation();
+					pinnedHistoricMap = selectedHistoricMap;
+				}}
+			>
+				{#if pinnedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id}
+					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
+				{:else}
+					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="regular"></PushPin>
+				{/if}
+			</span>
+		{:else if pinnedHistoricMap && !clickedHistoricMap}
 			<span class="truncate">{pinnedHistoricMap.label}</span>
 			<span
 				role="button"
@@ -134,19 +154,6 @@
 				}}
 			>
 				<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
-			</span>
-		{:else if selectedHistoricMap}
-			<span class="truncate">{selectedHistoricMap.label}</span>
-			<span
-				role="button"
-				tabindex="0"
-				class="cursor-pointer"
-				onclick={(e) => {
-					e.stopPropagation();
-					pinnedHistoricMap = selectedHistoricMap;
-				}}
-			>
-				<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="regular"></PushPin>
 			</span>
 		{:else}
 			<span class="truncate">

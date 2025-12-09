@@ -1038,14 +1038,14 @@
 	let savedMapViews: MapView[] = $state([]);
 	let savedLayerVisibility: Record<string, 'visible' | 'none'> | null = null;
 
-	function saveMapView() {
+	function saveMapView(push = true) {
 		const view = {
 			center: map.getCenter(),
 			zoom: map.getZoom(),
 			bearing: map.getBearing(),
 			pitch: map.getPitch()
 		};
-		savedMapViews.push(view);
+		if (push) savedMapViews.push(view);
 		return view;
 	}
 
