@@ -56,7 +56,7 @@
 	});
 </script>
 
-<Modal title="Deel jouw tijdreis" bind:visible>
+<Modal title="Deel jouw Watertijdreis" bind:visible>
 	<p class="w-full text-center">Deel het kaartgedeelte dat jij nu bekijkt.</p>
 	<div class="mt-4 flex items-center">
 		<input
@@ -122,11 +122,11 @@
 			<WhatsappLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
 		</a>
 
-		<a
+		<!-- <a
 			class="mx-4"
 			href={`sgnl://send?text=${encodeURIComponent('Watertijdreis - Reis door de tijd!\n' + currentUrl)}`}
 		>
 			<ChatCircle size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
-		</a>
+		</a> -->
 	</div>
 </Modal>
