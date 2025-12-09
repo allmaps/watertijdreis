@@ -34,51 +34,6 @@
 	let pointerDownY = 0;
 	let hasMoved = false;
 
-	let showHint = $state(false);
-	let isDismissing = $state(false);
-	let hintTimeout: ReturnType<typeof setTimeout> | null = null;
-	let handIconType = $state<'swipe' | 'grab'>('swipe');
-	let handAnimationState = $state<'slideIn' | 'oscillate' | 'slide'>('slideIn');
-
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			showHint = true;
-			handIconType = 'swipe';
-			handAnimationState = 'slideIn';
-
-			const grabTimeout = setTimeout(() => {
-				handIconType = 'grab';
-				handAnimationState = 'oscillate';
-			}, 4000);
-
-			const slideTimeout = setTimeout(() => {
-				handAnimationState = 'slide';
-			}, 8000);
-
-			hintTimeout = setTimeout(() => {
-				dismissHint();
-			}, 11000);
-
-			return () => {
-				clearTimeout(grabTimeout);
-				clearTimeout(slideTimeout);
-				if (hintTimeout) clearTimeout(hintTimeout);
-			};
-		}
-	});
-
-	function dismissHint() {
-		if (hintTimeout) {
-			clearTimeout(hintTimeout);
-			hintTimeout = null;
-		}
-		isDismissing = true;
-		setTimeout(() => {
-			showHint = false;
-			isDismissing = false;
-		}, 500);
-	}
-
 	const FILTER_UPDATES_PER_SEC = 4;
 	const MIN_ZOOM = 5;
 	const MAX_ZOOM = 200;
@@ -133,10 +88,6 @@
 
 	function onpointerdown(e: PointerEvent) {
 		e.preventDefault();
-
-		if (showHint) {
-			dismissHint();
-		}
 
 		pointerCache.set(e.pointerId, e);
 
@@ -206,6 +157,7 @@
 	}
 
 	function onWindowPointerUp(e: PointerEvent) {
+		if (pointerCache.size === 0) return;
 		pointerCache.delete(e.pointerId);
 
 		if (pointerCache.size < 2) prevDiff = -1;
@@ -351,6 +303,8 @@
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
 	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : filter.yearEnd);
 	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : filter.yearEnd);
+
+	let showHint = $state(true);
 </script>
 
 <svelte:window
@@ -363,38 +317,24 @@
 	<div
 		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none"
 	>
-		<TimelinePointer year={Math.ceil(filter.yearEnd)}></TimelinePointer>
-
 		{#if showHint}
-			<div class="pointer-events-none absolute inset-0 z-[10001] flex items-center justify-center">
-				<div class="absolute top-[40%] left-[20%] -translate-y-1/2" out:fade={{ duration: 190 }}>
-					<div
-						class="text-[#336]"
-						style="animation: {handAnimationState === 'slideIn'
-							? 'slideIn 2s ease-out forwards'
-							: handAnimationState === 'oscillate'
-								? 'oscillate 4s ease-in-out forwards'
-								: handAnimationState === 'slide'
-									? 'slideAcross 3s ease-in-out forwards'
-									: 'none'};"
-					>
-						{#if handIconType === 'swipe'}
-							<HandSwipeRight size={32} color="#eef" weight="duotone" />
-						{:else}
-							<HandGrabbing size={32} color="#eef" weight="duotone" />
-						{/if}
-					</div>
+			<div
+				class="absolute inset-0 z-2000 flex flex-col items-center justify-center bg-linear-to-b from-transparent to-[#336]"
+				onpointerenter={() => (showHint = false)}
+				transition:fade={{ duration: 500 }}
+			>
+				<div class="hand-animation">
+					<HandGrabbing size={25} color="#fff" class="drop-shadow-[1px_1px_0_#333366]"
+					></HandGrabbing>
 				</div>
-
-				<div
-					class=" rounded-[8px] border-2 border-[#33336611] bg-[#eef]/70 px-4 py-2 text-center text-[14px] font-[500] text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)] shadow-lg backdrop-blur-md"
-					in:fly={{ y: 20, duration: 250 }}
-					out:fly={{ y: 20, duration: 250 }}
-				>
-					<span>Sleep de tijdlijn om door de tijd te reizen!</span>
-				</div>
+				<p class="mt-4 text-[14px] font-[600] text-[#eef] text-shadow-[1px_1px_0_#000]">
+					Sleep de tijdlijn om door de tijd te reizen
+				</p>
 			</div>
 		{/if}
+
+		<TimelinePointer year={Math.ceil((view.current.start + view.current.end) / 2)}
+		></TimelinePointer>
 
 		<div
 			{onpointerdown}
@@ -610,48 +550,28 @@
 {/if}
 
 <style>
-	:global {
-		@keyframes slideIn {
-			0% {
-				transform: translateX(-100px);
-				opacity: 0;
-			}
-			100% {
-				transform: translateX(0);
-				opacity: 1;
-			}
+	@keyframes wiggle {
+		0% {
+			transform: translateX(0);
 		}
+		20% {
+			transform: translateX(-50px);
+		}
+		40% {
+			transform: translateX(50px);
+		}
+		60% {
+			transform: translateX(-50px);
+		}
+		80% {
+			transform: translateX(50px);
+		}
+		100% {
+			transform: translateX(0);
+		}
+	}
 
-		@keyframes oscillate {
-			0% {
-				transform: translateX(0);
-			}
-			25% {
-				transform: translateX(80px);
-			}
-			50% {
-				transform: translateX(0);
-			}
-			75% {
-				transform: translateX(80px);
-			}
-			100% {
-				transform: translateX(0);
-			}
-		}
-
-		@keyframes slideAcross {
-			0% {
-				transform: translateX(0);
-				opacity: 1;
-			}
-			90% {
-				opacity: 1;
-			}
-			100% {
-				transform: translateX(100vw);
-				opacity: 0;
-			}
-		}
+	.hand-animation {
+		animation: wiggle 4s ease-in-out infinite;
 	}
 </style>

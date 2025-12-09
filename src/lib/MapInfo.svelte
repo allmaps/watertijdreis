@@ -68,10 +68,6 @@
 			: null
 	);
 
-	$effect(() => {
-		if (editionManifest) console.log(editionManifest);
-	});
-
 	let variants = $derived.by(() => {
 		if (!canvasManifest || !editionManifest) return [];
 		const structure = editionManifest.structures.find((s) =>

@@ -290,7 +290,7 @@
 
 		toastContent = `Je ziet nu kaarten van <i class="font-[700]">${Math.round(filter.yearEnd)}</i> en ouder`;
 
-		// map.triggerRepaint();
+		map.triggerRepaint(); // TODO: weghalen
 	}
 
 	type LayerOptions = {
