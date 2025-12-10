@@ -10,7 +10,8 @@
 		Info,
 		ShareFat,
 		ArrowBendDownRight,
-		ArrowBendDownLeft
+		ArrowBendDownLeft,
+		X
 	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 	import type { HistoricMap } from './types/historicmap';
@@ -240,12 +241,21 @@
 		sheetInformationVisible = !sheetInformationVisible;
 	}
 
-	// Only show panel when a map is actually selected (entered), not just clicked
+	let isMobile = $state(false);
+	$effect(() => {
+		isMobile = window.innerWidth < 768;
+		const handleResize = () => {
+			isMobile = window.innerWidth < 768;
+		};
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	});
+
 	$effect(() => {
 		if (!selectedHistoricMap) {
 			sheetInformationVisible = false;
 		} else {
-			sheetInformationVisible = true;
+			sheetInformationVisible = !isMobile;
 		}
 	});
 </script>
@@ -256,7 +266,7 @@
 	<div
 		class="
 			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px] shadow-lg
-			md:right-auto md:w-auto md:max-w-[400px] md:min-w-[300px]
+			md:right-auto md:w-auto md:max-w-[400px] md:min-w-[330px]
 		"
 		class:bg-[#336]={selectedHistoricMap}
 		class:bg-gradient-to-r={!selectedHistoricMap}
@@ -317,7 +327,7 @@
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-2 rounded-lg bg-[#3a3a6a] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="mt-2 flex items-center gap-2 rounded-lg border-[#eef] bg-[#3a3a6a] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							<Info color="#eef" size={18} />
 							<span>Bladinformatie</span>
@@ -336,32 +346,43 @@
 		{@const homepageUrl = editionManifest.rendering[0].id}
 
 		<div
-			class="fixed top-10 bottom-70 z-[1001] flex w-80 flex-col gap-4 overflow-y-auto rounded-lg bg-[#333366] shadow-lg transition-all duration-300"
-			style="right: {sheetInformationVisible ? '8px' : '-272px'};"
-			out:fly={{ x: 400, duration: 100 }}
+			class="fixed z-[1001] flex flex-col gap-4 overflow-y-auto rounded-lg bg-[#333366] shadow-lg transition-all duration-300"
+			class:top-20={!isMobile}
+			class:bottom-40={!isMobile}
+			class:w-80={!isMobile}
+			style={isMobile
+				? sheetInformationVisible
+					? 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; width: 400px; opacity: 1; pointer-events: auto;'
+					: 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; width: 400px; opacity: 0; pointer-events: none;'
+				: `right: ${sheetInformationVisible ? '8px' : '-272px'}; width: 20rem;`}
+			out:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 20 : 0, duration: 100 }}
 		>
-			<button
-				onclick={toggleSheetInformation}
-				onkeydown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						e.preventDefault();
-						toggleSheetInformation();
-					}
-				}}
-				class="absolute top-1/2 -left-12 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-l-lg bg-[#3a3a6a] shadow-lg transition-colors hover:bg-[#4a4a7a]"
-			>
-				{#if sheetInformationVisible}
-					<ArrowBendDownRight color="#eef" size={24} class="hover:cursor-pointer" />
-				{:else}
-					<ArrowBendDownLeft color="#eef" size={24} class="hover:cursor-pointer" />
-				{/if}
-			</button>
+			{#if !isMobile}
+				<button
+					onclick={toggleSheetInformation}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							toggleSheetInformation();
+						}
+					}}
+					class="absolute top-1/2 bottom-50 -left-12 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-l-lg bg-[#3a3a6a] shadow-lg transition-colors hover:bg-[#4a4a7a]"
+				>
+					{#if sheetInformationVisible}
+						<ArrowBendDownRight color="#eef" size={24} class="hover:cursor-pointer" />
+					{:else}
+						<ArrowBendDownLeft color="#eef" size={24} class="hover:cursor-pointer" />
+					{/if}
+				</button>
+			{/if}
 			<div class="p-4">
 				<button
 					onclick={toggleSheetInformation}
 					class="mb-2 flex w-full items-center gap-2 text-left transition-opacity hover:opacity-80"
 				>
-					{#if sheetInformationVisible}
+					{#if isMobile}
+						<X color="#eef" size={24} class="hover:cursor-pointer" />
+					{:else if sheetInformationVisible}
 						<ArrowBendDownRight color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
 					{:else}
 						<ArrowBendDownLeft color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
