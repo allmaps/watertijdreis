@@ -255,7 +255,8 @@
 
 	<div
 		class="
-			fixed bottom-2 left-2 z-[1000] h-30 w-[25%] max-w-[400px] overflow-hidden rounded-[8px] shadow-lg
+			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px] shadow-lg
+			md:right-auto md:w-auto md:max-w-[400px] md:min-w-[300px]
 		"
 		class:bg-[#336]={selectedHistoricMap}
 		class:bg-gradient-to-r={!selectedHistoricMap}

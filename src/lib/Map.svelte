@@ -14,7 +14,7 @@
 	import Timeline2 from './Timeline2.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';
-	import SheetControls from './SheetControls.svelte';
+	// import SheetControls from './SheetControls.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import { basemapStyle } from './basemap';
 
