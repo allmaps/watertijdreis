@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
+
 	import {
 		ImagesSquare,
 		ArrowSquareOut,
@@ -7,22 +8,29 @@
 		Check,
 		CaretCircleDown,
 		CaretDown,
+		CaretUp, // Added CaretUp
 		Info,
 		ShareFat,
 		ArrowBendDownRight,
 		ArrowBendDownLeft,
 		X
 	} from 'phosphor-svelte';
+
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
+
+	import { cubicInOut } from 'svelte/easing';
+
 	import type { HistoricMap } from './types/historicmap';
 	import MapThumbnail from './MapThumbnail.svelte';
 
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
+
 	let manifestCollection: any | null = $state(null);
 
 	$effect(() => {
 		fetch(MANIFEST_URL)
 			.then((res) => res.json())
+
 			.then((data) => (manifestCollection = data));
 	});
 
@@ -30,21 +38,31 @@
 		if (!manifestCollection) return null;
 
 		const label = `Editie ${edition}${bis ? ' BIS' : ''}`;
+
 		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
 
 		const response = await fetch(manifestUrl);
+
 		const result = await response.json();
+
 		return result;
 	}
 
 	let {
 		warpedMapLayer,
+
 		historicMapsById,
+
 		visibleHistoricMapsInViewport,
+
 		viewportPolygon,
+
 		clickedHistoricMap,
+
 		selectedHistoricMap,
+
 		changeHistoricMapView,
+
 		getHistoricMapThumbnail
 	} = $props();
 
@@ -61,9 +79,11 @@
 	let preview = $derived(!selectedHistoricMap);
 
 	let prevEdition: number | null = null;
+
 	let prevBis: boolean | null = null;
 
 	let editionManifest = $state(null);
+
 	let editionManifestLoading = $state(null);
 
 	let canvasManifest = $derived(
@@ -74,28 +94,35 @@
 
 	let variants = $derived.by(() => {
 		if (!canvasManifest || !editionManifest) return [];
+
 		const structure = editionManifest.structures.find((s) =>
 			s.items.find((i) => i.id == canvasManifest.id)
 		);
+
 		return structure.items.map((i) => editionManifest.items.find((j) => j.id == i.id));
 	});
 
-	// TODO: dit kan makkelijker?
 	let mainSheet = $derived.by(() => {
 		if (!variants) return null;
+
 		const mainVariant = variants.find((i) => !getMetadata(i).flat().includes('Type'));
+
 		if (!mainVariant) return null;
+
 		return historicMapsById.values().find((i) => i.manifestId == mainVariant.id);
 	});
 
 	$effect(() => {
 		if (!historicMap) return;
+
 		if (historicMap.edition !== prevEdition || historicMap.bis !== prevBis) {
 			prevEdition = historicMap.edition;
+
 			prevBis = historicMap.bis;
 
 			editionManifestLoading = getEditionManifest(historicMap.edition).then((data) => {
 				editionManifestLoading = null;
+
 				editionManifest = data || null;
 			});
 		}
@@ -104,6 +131,7 @@
 	function getMetadata(m = canvasManifest, lang = 'nl') {
 		return m.metadata.map((i) => {
 			const label = i.label[lang] ?? i.label.en ?? i.label.none;
+
 			const value = i.value[lang] ?? i.value.en ?? i.value.none;
 
 			return [label?.[0], value?.[0]];
@@ -116,40 +144,54 @@
 		const [minX, minY, maxX, maxY] = historicMap.geoFullMaskBbox;
 
 		const vpBbox = turf.bbox(viewportPolygon);
+
 		const [vMinX, vMinY, vMaxX, vMaxY] = vpBbox;
 
 		const width = maxX - minX;
+
 		const height = maxY - minY;
 
 		const left = (vMinX - minX) / width;
+
 		const top = (maxY - vMaxY) / height;
+
 		const right = (vMaxX - minX) / width;
+
 		const bottom = (maxY - vMinY) / height;
 
 		return {
 			leftPct: left * 100,
+
 			topPct: top * 100,
+
 			widthPct: (right - left) * 100,
+
 			heightPct: (bottom - top) * 100
 		};
 	}
 
 	async function setClipboard(text) {
 		const type = 'text/plain';
+
 		const clipboardItemData = {
 			[type]: text
 		};
+
 		const clipboardItem = new ClipboardItem(clipboardItemData);
+
 		await navigator.clipboard.write([clipboardItem]);
+
 		copySuccess = true;
 	}
 
 	let copySuccess: boolean = $state(false);
+
 	$effect(() => {
 		if (copySuccess) {
 			const timeout = setTimeout(() => {
 				copySuccess = false;
 			}, 1000);
+
 			return () => clearTimeout(timeout);
 		}
 	});
@@ -158,109 +200,139 @@
 		const { id, height, width } = canvasManifest;
 
 		const mainWarpedMap = warpedMapLayer.getWarpedMap(mainSheet.id);
+
 		const [minLng, minLat, maxLng, maxLat] = mainWarpedMap.geoFullMaskBbox;
+
 		const annotation = {
 			'@context': 'https://schemas.allmaps.org/map/2/context.json',
+
 			type: 'GeoreferencedMap',
+
 			id: id,
+
 			resource: {
 				id: canvasManifest.items[0]?.items[0]?.body?.service[0]?.id,
+
 				width: width,
+
 				height: height,
+
 				type: 'ImageService2',
+
 				tiles: [
 					{
 						width: 256,
+
 						height: 256,
+
 						scaleFactors: [1, 2, 4, 8, 16, 32]
 					}
 				]
 			},
+
 			gcps: [
 				{
 					resource: [0, 0],
+
 					geo: [minLng + 0.5, maxLat]
 				},
+
 				{
 					resource: [width, 0],
+
 					geo: [maxLng + 0.5, maxLat]
 				},
+
 				{
 					resource: [width, height],
+
 					geo: [maxLng + 0.5, minLat]
 				},
+
 				{
 					resource: [0, height],
+
 					geo: [minLng + 0.5, minLat]
 				}
 			],
+
 			resourceMask: [
 				[0, height],
+
 				[width, height],
+
 				[width, 0],
+
 				[0, 0]
 			],
+
 			transformation: {
 				type: 'straight'
 			}
 		};
 
 		await warpedMapLayer.addGeoreferencedMap(annotation);
+
 		const warpedMap = warpedMapLayer.getWarpedMap(id);
+
 		const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
+
 		const historicMap: HistoricMap = {
 			...mainSheet,
+
 			id,
+
 			manifestId: id,
+
 			polygon: {
 				type: 'Polygon',
+
 				coordinates
 			},
+
 			type: 'Achterkant',
+
 			geoFullMaskBbox: warpedMap?.geoFullMaskBbox
 		};
+
 		historicMapsById.set(id, historicMap);
 
 		changeHistoricMapView(historicMap);
 	}
 
-	let closed = $state(false);
-
-	let visible = $derived(clickedHistoricMap || selectedHistoricMap);
+	let sheetInformationVisible = $state(false);
 
 	let thumbnailEl = $state(null);
+
 	$effect(() => {
 		if (historicMap && thumbnailEl) {
 			thumbnailEl.style.transform = `scale(${historicMap ? 100 : 25}%) translate(${historicMap ? 0 : -30}px,0px) rotateX(${historicMap ? 0 : 60}deg) rotateY(${historicMap ? 0 : 0}deg)`;
+
 			thumbnailEl.style.opacity = 1;
 		}
 	});
-
-	let sheetInformationVisible = $state(true);
 
 	function toggleSheetInformation() {
 		sheetInformationVisible = !sheetInformationVisible;
 	}
 
 	let isMobile = $state(false);
+
 	$effect(() => {
 		isMobile = window.innerWidth < 768;
+
 		const handleResize = () => {
 			isMobile = window.innerWidth < 768;
 		};
+
 		window.addEventListener('resize', handleResize);
+
 		return () => window.removeEventListener('resize', handleResize);
 	});
-
-	let panelInitialized = $state(false);
 
 	$effect(() => {
 		if (!selectedHistoricMap) {
 			sheetInformationVisible = false;
-			panelInitialized = false;
-		} else if (!panelInitialized) {
-			sheetInformationVisible = !isMobile;
-			panelInitialized = true;
 		}
 	});
 </script>
@@ -270,18 +342,29 @@
 
 	<div
 		class="
-			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px]
-			shadow-lg md:right-auto md:w-auto md:max-w-[400px]
-			md:min-w-[330px]
-		"
-		class:bg-[#336]={selectedHistoricMap}
-		class:bg-gradient-to-r={!selectedHistoricMap}
-		class:from-[#336]={!selectedHistoricMap}
-		class:from-70%={!selectedHistoricMap}
-		class:to-transparent={!selectedHistoricMap}
+
+fixed z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
+
+md:w-[380px]
+
+"
+		class:left-2={isMobile}
+		class:right-2={isMobile}
+		class:bottom-2={isMobile}
+		class:md:left-2={!isMobile}
+		class:md:right-auto={!isMobile}
+		class:md:bottom-2={!isMobile}
+		class:md:top-auto={!isMobile}
+		class:md:left-4={!isMobile}
+		class:bg-[#333366]={sheetInformationVisible || selectedHistoricMap}
+		class:bg-gradient-to-r={!sheetInformationVisible && !selectedHistoricMap}
+		class:from-[#336]={!sheetInformationVisible && !selectedHistoricMap}
+		class:from-70%={!sheetInformationVisible && !selectedHistoricMap}
+		class:to-transparent={!sheetInformationVisible && !selectedHistoricMap}
+		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '80vh') : '120px'}
 		transition:fade={{ duration: 500 }}
 	>
-		<div class="flex h-full items-stretch gap-3">
+		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
 			{#key historicMap}
 				<div
 					class="pointer-events-none flex-shrink-0 p-4 pr-1"
@@ -313,12 +396,13 @@
 
 			{#key historicMap}
 				<div
-					class="flex w-max flex-shrink-0 flex-col items-start justify-center gap-1"
+					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
 				>
-					<h1 class="text-[16px] font-bold text-[#eef]">
+					<h1 class="line-clamp-2 text-[16px] font-bold text-[#eef]">
 						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
+
 					<p class="text-[14px] font-[500] text-[#eeeeff]">
 						{historicMap?.yearEnd} &middot; Editie {historicMap?.edition}{historicMap?.bis
 							? ' BIS'
@@ -331,237 +415,204 @@
 							onkeydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
+
 									toggleSheetInformation();
 								}
 							}}
 							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
-							<Info color="#eef" size={18} />
-							<span>Bladinformatie</span>
+							{#if sheetInformationVisible}
+								<CaretDown color="#eef" size={18} weight="bold" />
+
+								<span>Bladinformatie sluiten</span>
+							{:else}
+								<CaretUp color="#eef" size={18} />
+
+								<span>Bladinformatie openen</span>
+							{/if}
 						</button>
 					{/if}
 				</div>
 			{/key}
 		</div>
-	</div>
 
-	{#if selectedHistoricMap && canvasManifest && editionManifest}
-		{@const metadata = getMetadata(canvasManifest)}
-		{@const editionMetadata = getMetadata(editionManifest)}
-		{@const collectionId = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
-		{@const manifestId = editionManifest.id}
-		{@const homepageUrl = editionManifest.rendering[0].id}
+		{#if sheetInformationVisible && selectedHistoricMap && canvasManifest && editionManifest}
+			{@const metadata = getMetadata(canvasManifest)}
 
-		<div
-			class="fixed z-[1001] flex flex-col gap-4 overflow-y-auto rounded-lg bg-[#333366] shadow-lg transition-all duration-300"
-			class:top-20={!isMobile}
-			class:bottom-40={!isMobile}
-			class:w-80={!isMobile}
-			style={isMobile
-				? sheetInformationVisible
-					? 'top: 100px; left: 60px; right: 60px;  bottom: 160px; max-width: 600px; opacity: 1; pointer-events: auto;'
-					: 'top: 100px; left: 60px; right: 60px; bottom: 160px; max-width: 600px; opacity: 0; pointer-events: none;'
-				: `right: ${sheetInformationVisible ? '8px' : '-280px'}; width: 20rem;`}
-			out:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 20 : 0, duration: 200 }}
-		>
-			{#if !isMobile}
-				<button
-					onclick={toggleSheetInformation}
-					onkeydown={(e) => {
-						if (e.key === 'Enter' || e.key === ' ') {
-							e.preventDefault();
-							toggleSheetInformation();
-						}
-					}}
-					class="absolute top-1/2 bottom-50 -left-12 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-l-lg bg-[#3a3a6a] shadow-lg transition-colors hover:bg-[#4a4a7a]"
-				>
-					{#if sheetInformationVisible}
-						<ArrowBendDownRight color="#eef" size={24} class="hover:cursor-pointer" />
-					{:else}
-						<ArrowBendDownLeft color="#eef" size={24} class="hover:cursor-pointer" />
-					{/if}
-				</button>
-			{/if}
+			{@const collectionId =
+				'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
 
-			<div class="sticky top-0 z-10 bg-[#333366] p-3 pb-0 shadow-xs">
-				<div class="mb-2 flex w-full items-center gap-2">
-					{#if !isMobile}
-						<button
-							onclick={toggleSheetInformation}
-							class="flex items-center gap-2 text-left transition-opacity hover:opacity-80"
-						>
-							{#if sheetInformationVisible}
-								<ArrowBendDownRight
-									color="#eef"
-									size={18}
-									class="opacity-70 hover:cursor-pointer"
-								/>
-							{:else}
-								<ArrowBendDownLeft color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
-							{/if}
-							<h3 class="text-[18px] font-[600] text-[#eef] hover:cursor-pointer">
-								Bladinformatie
-							</h3>
-						</button>
-					{:else}
-						<h3 class="flex-1 px-4 text-[18px] font-[600] text-[#eef]">Bladinformatie</h3>
-						<button
-							onclick={toggleSheetInformation}
-							class="flex h-8 w-8 items-center justify-center rounded bg-[#eeeeff60] shadow-md transition-opacity hover:opacity-80"
-						>
-							<X color="#336" size={20} weight="bold" />
-						</button>
-					{/if}
-				</div>
-			</div>
-			<div class="min-h-30">
-				<div class="px-6 pb-2">
-					<ul class="text-[14px] text-[#eef]">
-						<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
-							<i class="font-[600] opacity-50">Bladtitel:</i>
-							<span class="font-[500]">{historicMap.label}</span>
-						</li>
-						{#each metadata as [label, value]}
+			{@const manifestId = editionManifest.id}
+
+			{@const homepageUrl = editionManifest.rendering[0].id}
+
+			<div
+				transition:slide={{ duration: 300, easing: cubicInOut }}
+				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
+				style="max-height: calc({isMobile ? '50vh' : '80vh'} - 120px);"
+			>
+				<div class="min-h-30 pt-4">
+					<div class="px-6 pb-0">
+						<ul class="text-[14px] text-[#eef]">
 							<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
-								<i class="font-[600] opacity-50">{label}:</i>
-								{#if value == 'Watervoorzieningseenheden'}
-									<span class="font-[500]">
-										Watervoorzienings-<br />eenheden
-									</span>
-								{:else}
-									<span class="font-[500]">{value}</span>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				</div>
-			</div>
+								<i class="font-[600] opacity-50">Bladtitel:</i>
 
-			{#if variants && variants.length > 1}
-				<div class="px-6 pb-4">
-					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
-					<div class="flex flex-col gap-2">
-						{#each variants as variant}
-							{@const metadata = getMetadata(variant)}
-							{@const type =
-								metadata
-									.find((i) => i[0] === 'Type')?.[1]
-									.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
-								'Voorkant blad'}
-							{@const imageService =
-								variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
-								variant.items?.[0]?.items?.[0]?.body?.id}
-							{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
-							{@const isCurrentSheet = canvasManifest.id === variant.id}
-							{#if src}
-								<button
-									onclick={() => {
-										const historicMap = historicMapsById
-											.values()
-											.find((m) => m.manifestId == variant.id);
-										if (historicMap) changeHistoricMapView(historicMap);
-										else addFakeGeoreferencedMap(variant);
-									}}
-									onkeydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											const historicMap = historicMapsById
-												.values()
-												.find((m) => m.manifestId == variant.id);
-											if (historicMap) changeHistoricMapView(historicMap);
-											else addFakeGeoreferencedMap(variant);
-										}
-									}}
-									tabindex="15"
-									class="flex cursor-pointer items-center gap-3 rounded-[4px] p-1 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
-										? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
-										: ''}"
-								>
-									<div
-										class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
-									>
-										<img {src} alt={type} class="block h-full w-full object-cover" />
-									</div>
-									<div class="flex flex-1 items-center text-left">
-										<p class="text-[12px] font-[600] text-[#eef]">
-											{@html type}
-										</p>
-									</div>
-								</button>
-							{/if}
-						{/each}
+								<span class="font-[500]">{historicMap.label}</span>
+							</li>
+
+							{#each metadata as [label, value]}
+								<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
+									<i class="font-[600] opacity-50">{label}:</i>
+
+									<span class="font-[500]">{value}</span>
+								</li>
+							{/each}
+						</ul>
 					</div>
 				</div>
-			{/if}
 
-			<div class="px-6 pb-4">
-				<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
-				<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
-					<a
-						href={homepageUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-[#f4a] hover:underline"
-					>
-						<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
-						Utrecht Universiteit Library
-					</a>
+				{#if variants && variants.length > 1}
+					<div class="px-6 pb-0">
+						<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
 
-					<a
-						href={`https://theseus-viewer.netlify.app/?iiif-content=${manifestId}&collection=${collectionId}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-[#f4a] hover:underline"
-					>
-						<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
-						Open in Theseus
-					</a>
+						<div class="flex flex-col gap-2">
+							{#each variants as variant}
+								{@const metadata = getMetadata(variant)}
 
-					{#if canvasManifest.annotations}
-						{@const annotationUrl = canvasManifest.annotations[0].id}
+								{@const type = metadata.find((i) => i[0] === 'Type')?.[1] || 'Voorkant blad'}
 
+								{@const imageService =
+									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
+									variant.items?.[0]?.items?.[0]?.body?.id}
+
+								{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
+
+								{@const isCurrentSheet = canvasManifest.id === variant.id}
+
+								{#if src}
+									<button
+										onclick={() => {
+											const historicMap = historicMapsById
+
+												.values()
+
+												.find((m) => m.manifestId == variant.id);
+
+											if (historicMap) changeHistoricMapView(historicMap);
+											else addFakeGeoreferencedMap(variant);
+										}}
+										onkeydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+
+												const historicMap = historicMapsById
+
+													.values()
+
+													.find((m) => m.manifestId == variant.id);
+
+												if (historicMap) changeHistoricMapView(historicMap);
+												else addFakeGeoreferencedMap(variant);
+											}
+										}}
+										tabindex="15"
+										class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
+											? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
+											: ''}"
+									>
+										<div
+											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
+										>
+											<img {src} alt={type} class="block h-full w-full object-cover" />
+										</div>
+
+										<div class="flex flex-1 items-center text-left">
+											<p class="text-[12px] font-[600] text-[#eef]">
+												{type}
+											</p>
+										</div>
+									</button>
+								{/if}
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<div class="px-6 pb-6">
+					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
+
+					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
 						<a
-							href="https://viewer.allmaps.org/?url={annotationUrl}"
+							href={homepageUrl}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
 						>
 							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
-							Open in Allmaps Viewer
+
+							Utrecht Universiteit Library
 						</a>
 
-						<button
-							onclick={() =>
-								setClipboard(
-									`https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
-								)}
-							class="cursor-pointer text-left text-[#f4a] hover:underline"
-						>
-							{#if copySuccess}
-								<Check size="15" color="#f4a" class="relative inline" />
-								XYZ tile URL gekopieerd
-							{:else}
-								<Copy size="15" color="#f4a" class="relative inline" />
-								Kopiëer XYZ tile URL
-							{/if}
-						</button>
-
 						<a
-							href={`https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson`}
+							href={`https://theseus-viewer.netlify.app/?iiif-content=${manifestId}&collection=${collectionId}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
 						>
 							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
-							Open in geojson.io
+
+							Open in Theseus
 						</a>
-					{/if}
+
+						{#if canvasManifest.annotations}
+							{@const annotationUrl = canvasManifest.annotations[0].id}
+
+							<a
+								href="https://viewer.allmaps.org/?url={annotationUrl}"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-[#f4a] hover:underline"
+							>
+								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+								Open in Allmaps Viewer
+							</a>
+
+							<button
+								onclick={() =>
+									setClipboard(
+										`https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
+									)}
+								class="cursor-pointer text-left text-[#f4a] hover:underline"
+							>
+								{#if copySuccess}
+									<Check size="15" color="#f4a" class="relative inline" />
+
+									XYZ tile URL gekopieerd
+								{:else}
+									<Copy size="15" color="#f4a" class="relative inline" />
+
+									Kopiëer XYZ tile URL
+								{/if}
+							</button>
+
+							<a
+								href={`https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson`}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-[#f4a] hover:underline"
+							>
+								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+								Open in geojson.io
+							</a>
+						{/if}
+					</div>
 				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 {/if}
-
 {#if false}
 	<!-- TODO: get from spritesheet -->
 	{@const thumbnailHeight = 64}
