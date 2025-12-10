@@ -338,24 +338,17 @@
 </script>
 
 {#if historicMap}
-	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, 256)}
-
 	<div
 		class="
-
-fixed bottom-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
-
-md:w-[400px]
+		fixed bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
+		md:w-[400px]
 
 "
-		class:left-2={isMobile}
 		class:right-2={isMobile}
 		class:bottom-2={isMobile}
-		class:md:left-2={!isMobile}
 		class:md:right-auto={!isMobile}
 		class:md:bottom-2={!isMobile}
 		class:md:top-auto={!isMobile}
-		class:md:left-4={!isMobile}
 		class:bg-[#333366]={sheetInformationVisible || selectedHistoricMap}
 		class:bg-gradient-to-r={!sheetInformationVisible && !selectedHistoricMap}
 		class:from-[#336]={!sheetInformationVisible && !selectedHistoricMap}
