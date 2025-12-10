@@ -1172,8 +1172,6 @@
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'visible');
 		setSheetIndexVisibility(false);
 
-		applyFilter(filter);
-
 		if (selectedHistoricMap) {
 			warpedMapLayer?.setMapOptions(selectedHistoricMap?.id, {
 				transformationType: 'thinPlateSpline',
@@ -1181,6 +1179,8 @@
 			});
 			selectedHistoricMap = null;
 		}
+
+		applyFilter(filter);
 	}
 
 	function changeHistoricMapView(historicMap: HistoricMap) {
