@@ -105,6 +105,7 @@
 
 	function handleKeydown(e: KeyboardEvent) {
 		e.stopPropagation();
+		e.stopImmediatePropagation();
 
 		if (e.key === 'Escape') {
 			visible = false;

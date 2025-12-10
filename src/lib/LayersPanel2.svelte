@@ -62,7 +62,7 @@
 
 	let baseMapOptions = [
 		{ value: 'none', label: 'Geen achtergrond', icon: EyeSlash },
-		{ value: 'protomaps', label: 'Standaardkaart', icon: MapTrifold },
+		{ value: 'protomaps', label: 'OpenStreetMap', icon: MapTrifold },
 		{ value: 'satelliet', label: 'Sattelietbeeld', icon: Camera },
 		{ value: 'ahn', label: 'Hoogtekaart (AHN)', icon: Mountains }
 	];

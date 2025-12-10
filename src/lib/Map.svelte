@@ -289,8 +289,6 @@
 		});
 
 		toastContent = `Je ziet nu kaarten van <i class="font-[700]">${Math.round(filter.yearEnd)}</i> en ouder`;
-
-		map.triggerRepaint(); // TODO: weghalen
 	}
 
 	type LayerOptions = {
@@ -1428,7 +1426,13 @@
 ></MapInfo>
 
 <svelte:window
-	onkeypress={(e) => {
+	onkeydown={(e) => {
+		if (e.key.toLowerCase() == '=') {
+			zoomIn();
+		}
+		if (e.key.toLowerCase() == '-') {
+			zoomOut();
+		}
 		if (e.key.toLowerCase() == 'w' && layerOptions.baseMap == 'protomaps') {
 			layerOptions.protoMapsWaterInFront = !layerOptions.protoMapsWaterInFront;
 		}
