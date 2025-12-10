@@ -28,12 +28,14 @@
 	let opacityUpdateInterval;
 	let opacity = $state(layerOptions.historicMapsOpacity);
 	$effect(() => {
+		clearInterval(opacityUpdateInterval);
 		if (visible) {
 			opacity = layerOptions.historicMapsOpacity;
 			opacityUpdateInterval = setInterval(() => {
+				console.log('update');
 				layerOptions.historicMapsOpacity = opacity;
 			}, 200);
-		} else clearInterval(opacityUpdateInterval);
+		}
 	});
 
 	let sliderEl;
