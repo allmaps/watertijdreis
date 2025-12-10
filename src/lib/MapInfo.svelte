@@ -419,16 +419,16 @@ md:w-[400px]
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="mt-2 flex items-center gap-1.5 rounded-lg bg-[#eeeeff30] px-2 py-1.5 text-[10px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a] sm:gap-2 sm:px-4 sm:py-2 sm:text-[12px]"
 						>
 							{#if sheetInformationVisible}
 								<CaretDown color="#eef" size={18} weight="bold" />
 
-								<span>Bladinformatie sluiten</span>
+								<span class="whitespace-nowrap">Bladinformatie sluiten</span>
 							{:else}
 								<CaretUp color="#eef" size={18} />
 
-								<span>Bladinformatie openen</span>
+								<span class="whitespace-nowrap">Bladinformatie openen</span>
 							{/if}
 						</button>
 					{/if}
@@ -473,9 +473,9 @@ md:w-[400px]
 
 				{#if variants && variants.length > 1}
 					<div class="px-6 pb-0">
-						<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
+						<h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
 
-						<div class="flex flex-col gap-2">
+						<div class="flex flex-col gap-1">
 							{#each variants as variant}
 								{@const metadata = getMetadata(variant)}
 
@@ -516,7 +516,7 @@ md:w-[400px]
 											}
 										}}
 										tabindex="15"
-										class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
+										class="flex cursor-pointer items-center gap-1 rounded-[4px] p-1.5 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
 											? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
 											: ''}"
 									>
@@ -527,7 +527,7 @@ md:w-[400px]
 										</div>
 
 										<div class="flex flex-1 items-center text-left">
-											<p class="text-[12px] font-[600] text-[#eef]">
+											<p class="px-2 text-[12px] font-[600] text-[#eef]">
 												{type}
 											</p>
 										</div>
