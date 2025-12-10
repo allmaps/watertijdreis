@@ -107,7 +107,12 @@
 		}, 1000 / FILTER_UPDATES_PER_SEC);
 
 		setLabelVisibility(true);
+
+		if (showHint) {
+			hideHint();
+		}
 	}
+
 	function onWindowPointerMove(e: PointerEvent) {
 		if (!pointerCache.has(e.pointerId)) return;
 
@@ -145,9 +150,6 @@
 				scheduledFilterUpdate = applyFilter.bind(this, filter);
 			}
 			filter.yearEnd = selectedYear;
-			// if (hasMoved) {
-			// 	applyFilter(filter);
-			// }
 
 			backgroundOffsetX += dx * -0.5;
 			backgroundVelocity = dx * -0.2;
@@ -305,9 +307,22 @@
 	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : filter.yearEnd);
 	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : filter.yearEnd);
 
+	const HINT_KEY = 'timeline_hint_shown';
 	let showHint = $state(false);
 
-	onMount(() => (showHint = true));
+	function hideHint() {
+		showHint = false;
+
+		localStorage.setItem(HINT_KEY, 'true');
+	}
+
+	onMount(() => {
+		if (typeof window !== 'undefined' && !localStorage.getItem(HINT_KEY)) {
+			showHint = true;
+
+			setTimeout(hideHint, 8000);
+		}
+	});
 </script>
 
 <svelte:window
@@ -323,7 +338,9 @@
 		{#if showHint}
 			<div
 				class="absolute inset-0 z-2000 flex flex-col items-center justify-center bg-linear-to-b from-transparent to-[#336]"
-				onpointerenter={() => (showHint = false)}
+				onpointerenter={hideHint}
+				onmousedown={hideHint}
+				onwheel={hideHint}
 				transition:fade={{ duration: 500 }}
 			>
 				<div class="hand-animation">
@@ -375,12 +392,6 @@
 							{hoveredHistoricMap}
 							selectedYear={filter.yearEnd}
 						></MapStack>
-						<!-- <div
-						class="absolute h-10 w-10 bg-[#f00]"
-						style="
-							transform: translateX({x}px) translateY({60}px) rotateX(60deg) rotateZ({0}deg);
-						"
-					></div> -->
 					{/if}
 				{/each}
 			</div>
