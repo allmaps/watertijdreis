@@ -27,6 +27,7 @@
 		zoomIn,
 		zoomOut,
 		layerOptions = $bindable(),
+		overlayOptions = $bindable(),
 		userLocationActive = $bindable()
 	} = $props();
 
@@ -72,7 +73,8 @@
 	providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}
 ></Geocoder>
 
-<LayersPanel2 bind:visible={layersPanelVisible2} bind:layerOptions></LayersPanel2>
+<LayersPanel2 bind:visible={layersPanelVisible2} bind:layerOptions bind:overlayOptions
+></LayersPanel2>
 
 <!-- <div class="fixed top-25 right-2 flex flex-col items-end gap-4">
 	<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>

@@ -325,6 +325,13 @@
 		historicMapsOpacity: 100
 	});
 
+	type overlayOptions = {
+		overlayMap: 'none' | 'waterschapsgrenzen' | 'gemeentegrenzen';
+	};
+	let overlayOptions = $state<overlayOptions>({
+		overlayMap: 'none'
+	});
+
 	const EMPTY_STYLE = {
 		version: 8,
 		sources: {},
@@ -359,6 +366,24 @@
 			const visibility = layerOptions.historicMapsOpacity < 100 ? 'none' : 'visible';
 			map.setLayoutProperty('map-outlines-skeleton', 'visibility', visibility);
 		}
+	});
+
+	$effect(() => {
+		if (!maplibreLoaded) return;
+
+		const all = ['overlay-waterschapsgrenzen', 'overlay-gemeentegrenzen'];
+		all.forEach((id) => {
+			if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+		});
+
+		if (overlayOptions.overlayMap === 'waterschapsgrenzen') {
+			map.setLayoutProperty('overlay-waterschapsgrenzen', 'visibility', 'visible');
+		}
+		if (overlayOptions.overlayMap === 'gemeentegrenzen') {
+			map.setLayoutProperty('overlay-gemeentegrenzen', 'visibility', 'visible');
+		}
+		// if (overlayOptions.overlayMap === 'dijken') {
+		// 	map.setLayoutProperty('overlay-dijken', 'visibility', 'visible');
 	});
 
 	function setProtomapsVisiblity(visible: boolean) {
@@ -483,6 +508,7 @@
 			addBackgroundLayers();
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
+			addOverlayLayers();
 			warpedMapLayer.setLayerOptions({ visible: false });
 			warpedMapLayer.getWarpedMapList().options.animatedOptions.push('opacity');
 
@@ -934,6 +960,84 @@
 			},
 			paint: {}
 		});
+	}
+
+	function addOverlayLayers() {
+		if (!map) return;
+		map.addSource('pdok-waterschapsgrenzen', {
+			type: 'raster',
+			tiles: [
+				'https://service.pdok.nl/hwh/waterschappen-waterschapsgrenzen-imso/wms/v2_0?' +
+					'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
+					'&LAYERS=waterschap' +
+					'&STYLES=' +
+					'&FORMAT=image/png' +
+					'&TRANSPARENT=true' +
+					'&CRS=EPSG:3857' +
+					'&WIDTH=256&HEIGHT=256' +
+					'&BBOX={bbox-epsg-3857}'
+			],
+			tileSize: 256
+		});
+
+		map.addSource('pdok-gemeentegrenzen', {
+			type: 'raster',
+			tiles: [
+				'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wms/v1_0?' +
+					'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
+					'&LAYERS=Gemeentegebied' +
+					'&STYLES=' +
+					'&FORMAT=image/png' +
+					'&TRANSPARENT=true' +
+					'&CRS=EPSG:3857' +
+					'&WIDTH=256&HEIGHT=256' +
+					'&BBOX={bbox-epsg-3857}'
+			],
+			tileSize: 256
+		});
+
+		// map.addSource('rce-dijken', {
+		// 	type: 'raster',
+		// 	tiles: [
+		// 		'https://services.rce.geovoorziening.nl/dijken/ows?' +
+		// 			'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
+		// 			'&FORMAT=image/png&TRANSPARENT=true' +
+		// 			'&CRS=EPSG:3857' +
+		// 			'&LAYERS=dijklijnenkaart_rce' +
+		// 			'&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'
+		// 	],
+		// 	tileSize: 256
+		// });
+
+		map.addLayer(
+			{
+				id: 'overlay-waterschapsgrenzen',
+				type: 'raster',
+				source: 'pdok-waterschapsgrenzen',
+				layout: { visibility: 'none' }
+			},
+			'warped-map-layer'
+		);
+
+		map.addLayer(
+			{
+				id: 'overlay-gemeentegrenzen',
+				type: 'raster',
+				source: 'pdok-gemeentegrenzen',
+				layout: { visibility: 'none' }
+			},
+			'warped-map-layer'
+		);
+
+		// map.addLayer(
+		// 	{
+		// 		id: 'overlay-dijken',
+		// 		type: 'raster',
+		// 		source: 'rce-dijken',
+		// 		layout: { visibility: 'none' }
+		// 	},
+		// 	'warped-map-layer'
+		// );
 	}
 
 	function flyToFeature(feature) {
@@ -1400,6 +1504,7 @@
 		{zoomIn}
 		{zoomOut}
 		bind:layerOptions
+		bind:overlayOptions
 		bind:userLocationActive
 	/>
 {/if}
