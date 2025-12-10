@@ -175,7 +175,6 @@
 	}, 100);
 
 	$effect(() => {
-		// To make sure that warpedMaps that were still loading are added to visibleHistoricMapsInViewport when the viewport isn't moving
 		if (warpedMapLayer) {
 			warpedMapLayer.renderer?.tileCache?.addEventListener(
 				WarpedMapEventType.MAPTILELOADED,
@@ -227,28 +226,24 @@
 					year >= filter.yearStart && year <= filter.yearEnd ? mapsToColor : mapsToDesaturate;
 
 				if (x1 === undefined) {
-					// Get first sheet
 					stack.push(id);
 					[x1, y1] = [x, y];
-					// Stop if no other sheets
+
 					if (!x1 && !y1) break;
 				} else if (y1 && x === x1 && y === -y1) {
-					// Get optional North or South sheet
 					stack.push(id);
 					y1 = 0;
-					// Stop if no East or West sheets
+
 					if (!x1) break;
 				} else if (x1 && !x2 && x === -x1) {
-					// Get first East or West sheet
 					stack.push(id);
 					[x2, y2] = [x, y];
-					// Stop if no more North or South sheets
+
 					if (!y1 && !y) break;
 				} else if (y2 && x === x2 && y === -y2) {
-					// Get optional second East or West sheet
 					stack.push(id);
 					y2 = 0;
-					// Stop if no more North or South sheet
+
 					if (!y1) break;
 				}
 			}
@@ -355,16 +350,33 @@
 	$effect(() => {
 		if (!maplibreLoaded) return;
 
-		const all = ['overlay-waterschapsgrenzen', 'overlay-gemeentegrenzen'];
-		all.forEach((id) => {
-			if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
-		});
+		if (layerOptions.overlay !== 'waterschapsgrenzen') {
+			if (map.getLayer('overlay-waterschapsgrenzen')) {
+				map.removeLayer('overlay-waterschapsgrenzen');
+			}
+			if (map.getSource('pdok-waterschapsgrenzen')) {
+				map.removeSource('pdok-waterschapsgrenzen');
+			}
+		}
+
+		if (layerOptions.overlay !== 'gemeentegrenzen') {
+			if (map.getLayer('overlay-gemeentegrenzen')) {
+				map.removeLayer('overlay-gemeentegrenzen');
+			}
+			if (map.getSource('pdok-gemeentegrenzen')) {
+				map.removeSource('pdok-gemeentegrenzen');
+			}
+		}
 
 		if (layerOptions.overlay === 'waterschapsgrenzen') {
-			map.setLayoutProperty('overlay-waterschapsgrenzen', 'visibility', 'visible');
+			if (!map.getSource('pdok-waterschapsgrenzen')) {
+				addWaterschapsgrenzenLayer();
+			}
 		}
 		if (layerOptions.overlay === 'gemeentegrenzen') {
-			map.setLayoutProperty('overlay-gemeentegrenzen', 'visibility', 'visible');
+			if (!map.getSource('pdok-gemeentegrenzen')) {
+				addGemeentegrenzenLayer();
+			}
 		}
 		// if (layerOptions.overlay === 'dijken') {
 		// 	map.setLayoutProperty('overlay-dijken', 'visibility', 'visible');
@@ -492,7 +504,6 @@
 			addBackgroundLayers();
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
-			addOverlayLayers();
 			warpedMapLayer.setLayerOptions({ visible: false });
 			warpedMapLayer.getWarpedMapList().options.animatedOptions.push('opacity');
 
@@ -772,13 +783,11 @@
 			clickedFeature = feature;
 
 			if (featureId !== undefined) {
-				// A: Clicked a NEW polygon while an OLD one was still active
 				if (currentFillId !== null && currentFillId !== featureId) {
 					if (fillFadeOutTimer) clearTimeout(fillFadeOutTimer);
 					animateFeatureOpacity(currentFillId, 'animated-fill-opacity', 0, 50);
 				}
 
-				// B: NEW polygon
 				if (currentFillId !== featureId) {
 					currentFillId = featureId;
 
@@ -945,8 +954,8 @@
 		});
 	}
 
-	function addOverlayLayers() {
-		if (!map) return;
+	function addWaterschapsgrenzenLayer() {
+		if (!map || map.getSource('pdok-waterschapsgrenzen')) return;
 
 		map.addSource('pdok-waterschapsgrenzen', {
 			type: 'raster',
@@ -964,23 +973,27 @@
 			tileSize: 256
 		});
 
+		map.addLayer({
+			id: 'overlay-waterschapsgrenzen',
+			type: 'raster',
+			source: 'pdok-waterschapsgrenzen',
+			layout: { visibility: 'visible' }
+		});
+	}
+
+	function addGemeentegrenzenLayer() {
+		if (!map || map.getSource('pdok-gemeentegrenzen')) return;
+
 		map.addSource('pdok-gemeentegrenzen', {
 			type: 'geojson',
 			data: 'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wfs/v1_0?service=WFS&version=2.0.0&request=GetFeature&typeName=Gemeentegebied&outputFormat=application/json&srsName=EPSG:4326'
 		});
 
 		map.addLayer({
-			id: 'overlay-waterschapsgrenzen',
-			type: 'raster',
-			source: 'pdok-waterschapsgrenzen',
-			layout: { visibility: 'none' }
-		});
-
-		map.addLayer({
 			id: 'overlay-gemeentegrenzen',
 			type: 'line',
 			source: 'pdok-gemeentegrenzen',
-			layout: { visibility: 'none' },
+			layout: { visibility: 'visible' },
 			paint: {
 				'line-color': '#33a',
 				'line-width': 1,
