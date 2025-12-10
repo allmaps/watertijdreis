@@ -12,7 +12,7 @@
 		setInterval(() => {
 			const link = document.querySelector("link[rel='icon']");
 			if (link) {
-				link.href = icons[i % icons.length] + '?v=' + Date.now();
+				link.href = icons[i % icons.length]; //+ '?v=' + Date.now();
 				i++;
 			}
 		}, 1000);

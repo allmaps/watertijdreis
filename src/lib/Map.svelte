@@ -1264,6 +1264,8 @@
 	function setHistoricMapView(historicMap: HistoricMap, view: MapView | undefined) {
 		if (!map || !warpedMapLayer) return;
 
+		clickedFeature = null;
+
 		savedLayerVisibility = {};
 		const layers = map.getStyle().layers;
 
