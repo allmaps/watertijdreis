@@ -76,7 +76,9 @@
 		if (e.key == ' ' && !spaceKeyDown) {
 			rightBtnClick();
 		}
-		if (e.key == 'Escape' && selectedHistoricMap) restoreView();
+		if (e.key == 'Escape' && selectedHistoricMap) {
+			restoreView();
+		}
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {

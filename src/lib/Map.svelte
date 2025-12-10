@@ -1170,6 +1170,7 @@
 		}
 
 		map.setLayoutProperty('map-outlines-skeleton', 'visibility', 'visible');
+		setSheetIndexVisibility(false);
 
 		applyFilter(filter);
 
@@ -1226,6 +1227,7 @@
 		if (!map || !warpedMapLayer) return;
 
 		clickedFeature = null;
+		setSheetIndexVisibility(false);
 
 		savedLayerVisibility = {};
 		const layers = map.getStyle().layers;
@@ -1655,6 +1657,10 @@
 		}
 		if (e.key.toLowerCase() == 't' && layerOptions.baseMap == 'protomaps') {
 			layerOptions.protomapsLabelsInFront = !layerOptions.protomapsLabelsInFront;
+		}
+		if (e.key == 'Escape') {
+			clickedFeature = null;
+			setGridVisibility(false);
 		}
 	}}
 	onpopstate={() => {

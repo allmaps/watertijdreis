@@ -63,14 +63,14 @@
 
 {#if visible}
 	<div
-		class="fixed inset-0 z-1000 flex items-center justify-center"
+		class="fixed inset-0 z-2000 flex items-center justify-center"
 		style:opacity={opacity + '%'}
 		role="dialog"
 		aria-modal="true"
 	>
 		<button
 			type="button"
-			class="fixed inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
+			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
 			aria-label="Sluit venster"
 			onclick={close}
 			transition:fly={{ y: -5, duration: 250 }}
@@ -81,8 +81,8 @@
 			class="
 				relative z-10
 				flex max-h-[90vh] w-[90vw]
-				max-w-120 flex-col items-center overflow-auto
-				rounded-[8px] border border-gray-200 bg-white px-4 py-8 shadow-lg
+				max-w-120 flex-col items-center
+				rounded-[8px] border border-gray-200 bg-white shadow-lg
 			"
 			transition:fly={{ y: -20, duration: 250 }}
 		>
@@ -95,12 +95,14 @@
 				<X size="24" color="#f4a" weight="bold" />
 			</button>
 
-			{#if title}
-				<h1 class="text-[22px] font-[700] text-[#336]">{title}</h1>
-			{/if}
+			<div class="flex h-full w-full flex-col items-center overflow-auto overflow-x-hidden py-8">
+				{#if title}
+					<h1 class="w-full text-center text-[22px] font-[700] text-[#336]">{title}</h1>
+				{/if}
 
-			<div class="mt-2 p-8 text-[#336]">
-				{@render children?.()}
+				<div class="mt-2 p-8 text-[#336]">
+					{@render children?.()}
+				</div>
 			</div>
 		</div>
 	</div>
