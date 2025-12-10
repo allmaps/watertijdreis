@@ -268,6 +268,7 @@
 			.filter((map) => filter.edition === 'All' || filter.edition === map.edition)
 			.filter((map) => filter.bis || !map.bis)
 			.filter((map) => filter.type == map.type)
+			.toArray()
 	);
 
 	let mapsByYear = $derived.by(() => {

@@ -289,7 +289,7 @@
 				>
 					<div
 						bind:this={thumbnailEl}
-						class="aspect-[1.2426791958/1] h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
+						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
 						<!-- {#await getHistoricMapThumbnail(historicMap.id, 256)}
@@ -297,7 +297,7 @@
 						{:then src}
 							<img alt="" class="block h-full w-auto scale-[1.04] object-cover" {src} />
 						{/await} -->
-						<MapThumbnail id={historicMap.id}></MapThumbnail>
+						<MapThumbnail id={historicMap.id} className="block h-full object-cover"></MapThumbnail>
 						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
 								getViewportRectWithinHistoricMap(historicMap)}

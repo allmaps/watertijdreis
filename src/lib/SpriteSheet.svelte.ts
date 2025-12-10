@@ -29,6 +29,8 @@ export class SpriteSheet {
 	async init() {
 		if (this.initialized) return;
 
+		// await (ms => new Promise(res => setTimeout(res, ms)))(4000);
+
 		this.loading = true;
 		this.error = null;
 

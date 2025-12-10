@@ -62,7 +62,7 @@
                 transition: opacity 0.5s;
             "
 		>
-			{#if showContent}
+			{#if false}
 				<div transition:scale={{ duration: 200 }} class="h-full w-full">
 					{#await getHistoricMapThumbnail(map.id)}
 						<div
