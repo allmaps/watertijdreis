@@ -25,6 +25,25 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	import { SpriteSheet } from './getMapThumbnailFromSpriteSheet.svelte';
+
+	let spriteSheet = null;
+	let spriteSheetLoaded = false;
+	let specialSpriteSheet = null;
+	let specialSpriteSheetLoaded = false;
+	$effect(() => {
+		spriteSheet = new SpriteSheet(
+			'./sprites/regular-sheets-128.json',
+			'./sprites/regular-sheets-128.jpg'
+		);
+		spriteSheet.init().then(() => (spriteSheetLoaded = true));
+		specialSpriteSheet = new SpriteSheet(
+			'./sprites/special-sheets-128.json',
+			'./sprites/special-sheets-128.jpg'
+		);
+		specialSpriteSheet.init().then(() => (specialSpriteSheetLoaded = true));
+	});
+
 	const containerId = 'map-container';
 	const ANNOTATION_URL = 'maps-sorted-by-edition.json';
 
@@ -185,7 +204,9 @@
 
 	let gridVisible: boolean = $state(false);
 
-	function getHistoricMapThumbnail(id, size = 128) {
+	async function getHistoricMapThumbnail(id) {
+		return spriteSheet.getThumbnailUrl(id);
+
 		const warpedMap = warpedMapLayer?.getWarpedMap(id);
 		if (!map) return '';
 		return warpedMap?.georeferencedMap.resource.id + `/full/${size},/0/default.jpg`;
