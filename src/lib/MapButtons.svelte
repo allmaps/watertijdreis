@@ -51,6 +51,21 @@
 		scaleWidth = scaleEl.clientWidth;
 		scaleText = scaleEl.innerText;
 	}, 250);
+
+	let isMobile = $state(false);
+	$effect(() => {
+		isMobile = window.innerWidth < 768;
+		const handleResize = () => {
+			isMobile = window.innerWidth < 768;
+		};
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	});
+
+	let bottomPosition = $derived.by(() => {
+		if (isMobile) return '144px';
+		return selectedHistoricMap ? '16px' : '144px';
+	});
 </script>
 
 <svelte:window
@@ -81,8 +96,8 @@
 </div> -->
 
 <div
-	style:bottom={selectedHistoricMap ? '8px' : '144px'}
-	class="transition-bottom fixed right-2 flex flex-col items-end gap-2 duration-250"
+	class="fixed right-2 flex flex-col items-end gap-2 transition-all duration-300"
+	style:bottom={bottomPosition}
 >
 	{#if !selectedHistoricMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>

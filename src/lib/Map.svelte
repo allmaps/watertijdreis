@@ -1545,7 +1545,7 @@
 	$effect(() => {
 		// TODO: moet anders kunnen
 		if (!maplibreLoaded) return;
-		const offset = selectedHistoricMap ? 20 : 140;
+		const offset = selectedHistoricMap ? 10 : 140;
 		const bottomLeft = document.querySelector('.maplibregl-ctrl-bottom-left');
 		const bottomRight = document.querySelector('.maplibregl-ctrl-bottom-right');
 		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
