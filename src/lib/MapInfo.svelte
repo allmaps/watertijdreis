@@ -345,7 +345,7 @@
 
 fixed bottom-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
 
-md:w-[380px]
+md:w-[400px]
 
 "
 		class:left-2={isMobile}
@@ -419,7 +419,7 @@ md:w-[380px]
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							{#if sheetInformationVisible}
 								<CaretDown color="#eef" size={18} weight="bold" />

@@ -316,7 +316,7 @@
 	onpointercancel={onWindowPointerUp}
 />
 
-{#if true}
+{#if visible}
 	<div
 		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none"
 	>
