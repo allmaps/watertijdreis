@@ -356,10 +356,10 @@
 			class:w-80={!isMobile}
 			style={isMobile
 				? sheetInformationVisible
-					? 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; max-width: 400px; opacity: 1; pointer-events: auto;'
-					: 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; max-width: 400px; opacity: 0; pointer-events: none;'
+					? 'top: 100px; left: 60px; right: 60px;  bottom: 160px; max-width: 600px; opacity: 1; pointer-events: auto;'
+					: 'top: 100px; left: 60px; right: 60px; bottom: 160px; max-width: 600px; opacity: 0; pointer-events: none;'
 				: `right: ${sheetInformationVisible ? '8px' : '-280px'}; width: 20rem;`}
-			out:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 20 : 0, duration: 100 }}
+			out:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 20 : 0, duration: 200 }}
 		>
 			{#if !isMobile}
 				<button
