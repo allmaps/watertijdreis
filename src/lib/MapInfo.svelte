@@ -15,6 +15,7 @@
 	} from 'phosphor-svelte';
 	import { fly, scale, draw, fade, slide } from 'svelte/transition';
 	import type { HistoricMap } from './types/historicmap';
+	import MapThumbnail from './MapThumbnail.svelte';
 
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
 	let manifestCollection: any | null = $state(null);
@@ -269,8 +270,9 @@
 
 	<div
 		class="
-			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px] shadow-lg
-			md:right-auto md:w-auto md:max-w-[400px] md:min-w-[330px]
+			fixed right-2 bottom-2 left-2 z-[1000] h-30 overflow-hidden rounded-[8px]
+			shadow-lg md:right-auto md:w-auto md:max-w-[400px]
+			md:min-w-[330px]
 		"
 		class:bg-[#336]={selectedHistoricMap}
 		class:bg-gradient-to-r={!selectedHistoricMap}
@@ -290,11 +292,12 @@
 						class="aspect-[1.2426791958/1] h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
-						{#await getHistoricMapThumbnail(historicMap.id, 256)}
+						<!-- {#await getHistoricMapThumbnail(historicMap.id, 256)}
 							<div class="scale block h-full w-auto bg-[hsl(44deg,46%,90%)]"></div>
 						{:then src}
 							<img alt="" class="block h-full w-auto scale-[1.04] object-cover" {src} />
-						{/await}
+						{/await} -->
+						<MapThumbnail id={historicMap.id}></MapThumbnail>
 						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
 								getViewportRectWithinHistoricMap(historicMap)}
@@ -421,7 +424,13 @@
 						{#each metadata as [label, value]}
 							<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
 								<i class="font-[600] opacity-50">{label}:</i>
-								<span class="font-[500]">{value}</span>
+								{#if value == 'Watervoorzieningseenheden'}
+									<span class="font-[500]">
+										Watervoorzienings-<br />eenheden
+									</span>
+								{:else}
+									<span class="font-[500]">{value}</span>
+								{/if}
 							</li>
 						{/each}
 					</ul>
@@ -434,7 +443,11 @@
 					<div class="flex flex-col gap-2">
 						{#each variants as variant}
 							{@const metadata = getMetadata(variant)}
-							{@const type = metadata.find((i) => i[0] === 'Type')?.[1] || 'Voorkant blad'}
+							{@const type =
+								metadata
+									.find((i) => i[0] === 'Type')?.[1]
+									.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
+								'Voorkant blad'}
 							{@const imageService =
 								variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
 								variant.items?.[0]?.items?.[0]?.body?.id}
@@ -460,18 +473,18 @@
 										}
 									}}
 									tabindex="15"
-									class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
+									class="flex cursor-pointer items-center gap-3 rounded-[4px] p-1 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
 										? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
 										: ''}"
 								>
 									<div
-										class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
+										class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
 									>
 										<img {src} alt={type} class="block h-full w-full object-cover" />
 									</div>
 									<div class="flex flex-1 items-center text-left">
 										<p class="text-[12px] font-[600] text-[#eef]">
-											{type}
+											{@html type}
 										</p>
 									</div>
 								</button>

@@ -3,6 +3,7 @@
 	import SharePanel from './SharePanel.svelte';
 	import Button from './Button.svelte';
 	import Modal from './Modal.svelte';
+	import MapThumbnail from './MapThumbnail.svelte';
 
 	let { historicMapsLoaded, resetState } = $props();
 

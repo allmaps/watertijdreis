@@ -25,23 +25,10 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	import { SpriteSheet } from './getMapThumbnailFromSpriteSheet.svelte';
+	import { spriteStore } from './SpriteSheet.svelte';
 
-	let spriteSheet = null;
-	let spriteSheetLoaded = false;
-	let specialSpriteSheet = null;
-	let specialSpriteSheetLoaded = false;
 	$effect(() => {
-		spriteSheet = new SpriteSheet(
-			'./sprites/regular-sheets-128.json',
-			'./sprites/regular-sheets-128.jpg'
-		);
-		spriteSheet.init().then(() => (spriteSheetLoaded = true));
-		specialSpriteSheet = new SpriteSheet(
-			'./sprites/special-sheets-128.json',
-			'./sprites/special-sheets-128.jpg'
-		);
-		specialSpriteSheet.init().then(() => (specialSpriteSheetLoaded = true));
+		spriteStore.init();
 	});
 
 	const containerId = 'map-container';
@@ -69,7 +56,7 @@
 	});
 
 	$effect(() => {
-		if (historicMapsLoaded) console.log('historische kaarten geladen: ', warpedMapLayer);
+		if (historicMapsLoaded) console.log('historische kaarten geladen: ', historicMapsById);
 	});
 
 	let historicMapsLoaded: boolean = $state(false);
@@ -205,8 +192,8 @@
 	let gridVisible: boolean = $state(false);
 
 	async function getHistoricMapThumbnail(id) {
+		return '';
 		id = id.replace('-b', '');
-		if (specialSpriteSheet.has(id)) return specialSpriteSheet.getThumbnailUrl(id);
 		return spriteSheet.getThumbnailUrl(id);
 
 		const warpedMap = warpedMapLayer?.getWarpedMap(id);
@@ -1349,6 +1336,7 @@
 
 	function resetState() {
 		if (!maplibreLoaded || !historicMapsLoaded) return;
+		restoreView();
 
 		map!.easeTo({
 			center: [defaultState.lng, defaultState.lat],

@@ -64,7 +64,7 @@
 
 	let bottomPosition = $derived.by(() => {
 		if (isMobile) return '144px';
-		return selectedHistoricMap ? '16px' : '144px';
+		return selectedHistoricMap ? '8px' : '144px';
 	});
 </script>
 
@@ -96,7 +96,7 @@
 </div> -->
 
 <div
-	class="fixed right-2 flex flex-col items-end gap-2 transition-all duration-300"
+	class="fixed right-2 z-1200 flex flex-col items-end gap-2 transition-all duration-300"
 	style:bottom={bottomPosition}
 >
 	{#if !selectedHistoricMap}
