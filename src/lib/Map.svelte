@@ -217,7 +217,7 @@
 	let toastContent: string = $state('');
 
 	function applyFilter(filter: Filter) {
-		if (!historicMapsByNumber) return;
+		if (!historicMapsByNumber || selectedHistoricMap) return;
 
 		const mapsToColor: string[] = [];
 		const mapsToDesaturate: string[] = [];
