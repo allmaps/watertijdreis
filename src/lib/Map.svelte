@@ -594,12 +594,16 @@
 
 		await Promise.all(loadPromises);
 
-		const spriteJson = await fetch('/sprites/regular-sheets-128.json').then((resp) => resp.json());
-		warpedMapLayer.addSprites(
-			spriteJson,
-			window.location.origin + '/sprites/regular-sheets-128.jpg',
-			[3072, 3078]
-		);
+		// TODO: tijdelijk uitgezet
+		// const spriteJson = await fetch('/sprites/regular-sheets-128.json').then((resp) => resp.json());
+		// warpedMapLayer.addSprites(
+		// 	spriteJson,
+		// 	window.location.origin + '/sprites/regular-sheets-128.jpg',
+		// 	[3072, 3078]
+		// );
+
+		historicMapsLoaded = true;
+		applyFilter(filter);
 
 		map.addSource('map-outlines', {
 			type: 'geojson',
@@ -988,25 +992,19 @@
 		// 	tileSize: 256
 		// });
 
-		map.addLayer(
-			{
-				id: 'overlay-waterschapsgrenzen',
-				type: 'raster',
-				source: 'pdok-waterschapsgrenzen',
-				layout: { visibility: 'none' }
-			},
-			'warped-map-layer'
-		);
+		map.addLayer({
+			id: 'overlay-waterschapsgrenzen',
+			type: 'raster',
+			source: 'pdok-waterschapsgrenzen',
+			layout: { visibility: 'none' }
+		});
 
-		map.addLayer(
-			{
-				id: 'overlay-gemeentegrenzen',
-				type: 'raster',
-				source: 'pdok-gemeentegrenzen',
-				layout: { visibility: 'none' }
-			},
-			'warped-map-layer'
-		);
+		map.addLayer({
+			id: 'overlay-gemeentegrenzen',
+			type: 'raster',
+			source: 'pdok-gemeentegrenzen',
+			layout: { visibility: 'none' }
+		});
 
 		// map.addLayer(
 		// 	{
