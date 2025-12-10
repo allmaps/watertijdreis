@@ -80,7 +80,10 @@
 	</Button>
 </div> -->
 
-<div class="fixed right-2 bottom-36 flex flex-col items-end gap-2">
+<div
+	style:bottom={selectedHistoricMap ? '8px' : '144px'}
+	class="transition-bottom fixed right-2 flex flex-col items-end gap-2 duration-250"
+>
 	{#if !selectedHistoricMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
 			<Button

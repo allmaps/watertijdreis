@@ -1618,7 +1618,7 @@
 	{setGridVisibility}
 ></Timeline2>
 
-<SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls>
+<!-- <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls> -->
 
 <Minimap
 	{visibleHistoricMaps}
