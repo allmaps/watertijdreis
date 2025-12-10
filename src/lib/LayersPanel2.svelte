@@ -10,7 +10,8 @@
 		Aperture,
 		Mountains,
 		Camera,
-		EyeSlash
+		EyeSlash,
+		Waves
 	} from 'phosphor-svelte';
 	import { fly, fade, scale } from 'svelte/transition';
 	import Modal from './Modal.svelte';
@@ -18,7 +19,11 @@
 	import Select from './Select.svelte';
 	import Slider from './Slider.svelte';
 
-	let { visible = $bindable(), layerOptions = $bindable() } = $props();
+	let {
+		visible = $bindable(),
+		layerOptions = $bindable(),
+		overlayOptions = $bindable()
+	} = $props();
 
 	let opacityUpdateInterval;
 	let opacity = $state(layerOptions.historicMapsOpacity);
@@ -66,6 +71,13 @@
 		{ value: 'satelliet', label: 'Sattelietbeeld', icon: Camera },
 		{ value: 'ahn', label: 'Hoogtekaart (AHN)', icon: Mountains }
 	];
+
+	let overlayLayerOptions = [
+		{ value: 'none', label: 'Geen overlegkaart', icon: EyeSlash },
+		{ value: 'waterschapsgrenzen', label: 'Waterschapsgrenzen', icon: Waves },
+		{ value: 'gemeentegrenzen', label: 'Gemeentegrenzen', icon: MapPin }
+		// { value: 'dijken', label: 'Dijken', icon: Aperture }
+	];
 </script>
 
 <Modal bind:visible title="Lagen" opacity={backgroundVisible ? 0 : 100}>
@@ -112,6 +124,14 @@
 			}}
 		></Slider>
 	</div>
+
+	<p class="mt-4 text-[12px] opacity-50">Overlaygkaart</p>
+	<Select
+		Icon={MapPin}
+		options={overlayLayerOptions}
+		value={overlayOptions.overlayMap}
+		onchange={(opt) => (overlayOptions.overlayMap = opt.value)}
+	/>
 </Modal>
 
 {#if backgroundVisible}
