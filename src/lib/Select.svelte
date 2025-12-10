@@ -67,7 +67,7 @@
 				/>
 			{/if}
 
-			<div class="min-w-40 whitespace-nowrap">
+			<div class="max-w-45 min-w-45 break-words">
 				<span class="ml-1">{selectedOption.label}</span>
 			</div>
 
