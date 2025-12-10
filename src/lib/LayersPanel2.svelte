@@ -19,11 +19,7 @@
 	import Select from './Select.svelte';
 	import Slider from './Slider.svelte';
 
-	let {
-		visible = $bindable(),
-		layerOptions = $bindable(),
-		overlayOptions = $bindable()
-	} = $props();
+	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 
 	let opacityUpdateInterval;
 	let opacity = $state(layerOptions.historicMapsOpacity);
@@ -131,8 +127,8 @@
 	<Select
 		Icon={MapPin}
 		options={overlayLayerOptions}
-		value={overlayOptions.overlayMap}
-		onchange={(opt) => (overlayOptions.overlayMap = opt.value)}
+		value={layerOptions.overlay}
+		onchange={(opt) => (layerOptions.overlay = opt.value)}
 	/>
 </Modal>
 

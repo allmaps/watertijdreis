@@ -319,19 +319,14 @@
 		protoMapsWaterInFront: boolean;
 		protomapsLabelsInFront: boolean;
 		historicMapsOpacity: number;
+		overlay: 'none' | 'waterschapsgrenzen' | 'gemeentegrenzen';
 	};
 	let layerOptions = $state<LayerOptions>({
 		baseMap: 'none',
 		protoMapsWaterInFront: false,
 		protomapsLabelsInFront: false,
-		historicMapsOpacity: 100
-	});
-
-	type overlayOptions = {
-		overlayMap: 'none' | 'waterschapsgrenzen' | 'gemeentegrenzen';
-	};
-	let overlayOptions = $state<overlayOptions>({
-		overlayMap: 'none'
+		historicMapsOpacity: 100,
+		overlay: 'none'
 	});
 
 	const EMPTY_STYLE = {
@@ -378,13 +373,13 @@
 			if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
 		});
 
-		if (overlayOptions.overlayMap === 'waterschapsgrenzen') {
+		if (layerOptions.overlay === 'waterschapsgrenzen') {
 			map.setLayoutProperty('overlay-waterschapsgrenzen', 'visibility', 'visible');
 		}
-		if (overlayOptions.overlayMap === 'gemeentegrenzen') {
+		if (layerOptions.overlay === 'gemeentegrenzen') {
 			map.setLayoutProperty('overlay-gemeentegrenzen', 'visibility', 'visible');
 		}
-		// if (overlayOptions.overlayMap === 'dijken') {
+		// if (layerOptions.overlay === 'dijken') {
 		// 	map.setLayoutProperty('overlay-dijken', 'visibility', 'visible');
 	});
 
@@ -1010,25 +1005,19 @@
 		// 	tileSize: 256
 		// });
 
-		map.addLayer(
-			{
-				id: 'overlay-waterschapsgrenzen',
-				type: 'raster',
-				source: 'pdok-waterschapsgrenzen',
-				layout: { visibility: 'none' }
-			},
-			'warped-map-layer'
-		);
+		map.addLayer({
+			id: 'overlay-waterschapsgrenzen',
+			type: 'raster',
+			source: 'pdok-waterschapsgrenzen',
+			layout: { visibility: 'none' }
+		});
 
-		map.addLayer(
-			{
-				id: 'overlay-gemeentegrenzen',
-				type: 'raster',
-				source: 'pdok-gemeentegrenzen',
-				layout: { visibility: 'none' }
-			},
-			'warped-map-layer'
-		);
+		map.addLayer({
+			id: 'overlay-gemeentegrenzen',
+			type: 'raster',
+			source: 'pdok-gemeentegrenzen',
+			layout: { visibility: 'none' }
+		});
 
 		// map.addLayer(
 		// 	{
@@ -1624,7 +1613,6 @@
 		{zoomIn}
 		{zoomOut}
 		bind:layerOptions
-		bind:overlayOptions
 		bind:userLocationActive
 	/>
 {/if}
