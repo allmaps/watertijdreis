@@ -15,7 +15,7 @@
 	let previewHistoricMap = $derived.by(() => {
 		if (visibleHistoricMapsInViewport.size == 1)
 			return visibleHistoricMapsInViewport.values().next().value;
-		else return hoveredHistoricMap;
+		return null;
 	});
 
 	let polygons = $derived.by(() => {
@@ -144,10 +144,10 @@
 					ry={(viewBox[2] / width) * 2}
 				></rect>
 			{/if}
-			{#if clickedHistoricMap || selectedHistoricMap}
+			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
 				<g out:fade={{ duration: 250 }}>
-					{#key clickedHistoricMap || selectedHistoricMap}
-						{@const historicMap = clickedHistoricMap || selectedHistoricMap}
+					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+						{@const historicMap = previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates

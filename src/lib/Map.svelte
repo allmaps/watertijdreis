@@ -995,8 +995,8 @@
 			source: 'pdok-gemeentegrenzen',
 			layout: { visibility: 'none' },
 			paint: {
-				'line-color': '#336',
-				'line-width': 2,
+				'line-color': '#33a',
+				'line-width': 1,
 				'line-opacity': 0.8
 			}
 		});

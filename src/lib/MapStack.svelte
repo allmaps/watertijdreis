@@ -54,7 +54,7 @@
 		<div
 			class="absolute h-10 w-10 origin-bottom shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
 			style:background-color={visible ? style.color : 'transparent'}
-			style:border={visible ? '' : '1px solid #eeeeff22'}
+			style:border={visible ? '' : '1px solid #eeeeff44'}
 			style="
                 transform: 
                     translateZ({index * Z_DEPTH}px)

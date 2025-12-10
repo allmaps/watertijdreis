@@ -70,7 +70,7 @@
 	>
 		<button
 			type="button"
-			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
+			class="fixed inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
 			aria-label="Sluit venster"
 			onclick={close}
 			transition:fly={{ y: -5, duration: 250 }}
