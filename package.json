@@ -24,6 +24,7 @@
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.46.4",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.8",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
@@ -51,8 +52,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@allmaps/maplibre": "1.0.0-beta.40",
-		"@allmaps/render": "1.0.0-beta.79",
+		"@allmaps/maplibre": "1.0.0-beta.41",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@maplibre/maplibre-gl-style-spec": "^24.3.1",
 		"@protomaps/basemaps": "^5.7.0",
@@ -62,6 +62,7 @@
 		"clsx": "^2.1.1",
 		"feather-icons": "^4.29.2",
 		"lodash-es": "^4.17.21",
+		"lz-string": "^1.5.0",
 		"maplibre-contour": "^0.1.0",
 		"maplibre-gl": "^5.8.0",
 		"maplibre-transition": "^0.8.0",

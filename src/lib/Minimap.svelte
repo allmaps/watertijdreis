@@ -9,13 +9,13 @@
 		hoveredHistoricMap,
 		clickedHistoricMap,
 		selectedHistoricMap,
-		historicMapsLoaded,
+		historicMapsLoaded
 	} = $props();
 
 	let previewHistoricMap = $derived.by(() => {
 		if (visibleHistoricMapsInViewport.size == 1)
 			return visibleHistoricMapsInViewport.values().next().value;
-		else return hoveredHistoricMap;
+		return null;
 	});
 
 	let polygons = $derived.by(() => {
@@ -32,8 +32,8 @@
 			}));
 	});
 
-	let width: number = $state(160 * .8);
-	let height: number = $state(200 * .8);
+	let width: number = $state(160);
+	let height: number = $state(200);
 
 	let viewBox = $derived.by(() => {
 		const bbox = turf.bbox({
@@ -92,60 +92,24 @@
 </script>
 
 {#if visibleHistoricMaps.size}
-	<svg {width} {height} viewBox={viewBox.join(' ')} class="absolute top-2 z-998 right-2 sm:right-8" style="filter: drop-shadow( 0px 0px 4px rgba(51, 51, 102, .5));">
+	<svg
+		{width}
+		{height}
+		viewBox={viewBox.join(' ')}
+		class="transition-scale absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
+		style="filter: drop-shadow( 1px 1px 0px #33336666);"
+	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
-			{#if clickedHistoricMap}
-				{@const hovered = polygons.find((p) => p.properties.id == clickedHistoricMap.id)}
-				{@const centerPoint = hovered ? turf.centerOfMass(hovered).geometry.coordinates : [0, 0]}
-
-				{@const x1 = centerPoint[0]}
-				{@const y1 = centerPoint[1]}
-				{@const x2 = viewBox[0] + viewBox[2] / 2}
-				{@const y2 = viewBox[1] - viewBox[3] * 0.03}
-
-				{@const strokeWidth = (viewBox[2] / width) * 2}
-
-				{@const angle = Math.atan2(y2 - y1, x2 - x1)}
-				{@const ah = strokeWidth * 5}
-
-				{@const leftX = x2 - ah * Math.cos(angle) + ah * 0.5 * Math.sin(angle)}
-				{@const leftY = y2 - ah * Math.sin(angle) - ah * 0.5 * Math.cos(angle)}
-
-				{@const rightX = x2 - ah * Math.cos(angle) - ah * 0.5 * Math.sin(angle)}
-				{@const rightY = y2 - ah * Math.sin(angle) + ah * 0.5 * Math.cos(angle)}
-
-				<path
-					in:draw={{ duration: 250 }}
-					out:fade={{ duration: 250 }}
-					fill="none"
-					stroke="#33a"
-					stroke-width={strokeWidth}
-					d={`
-						M ${x1} ${y1}
-						L ${x2} ${y2}
-						L ${leftX} ${leftY}
-					`}
-				/>
-				<path
-					in:draw={{ duration: 250 }}
-					out:fade={{ duration: 250 }}
-					fill="none"
-					stroke="#33a"
-					stroke-width={strokeWidth}
-					d={`
-						M ${x1} ${y1}
-						L ${x2} ${y2}
-						L ${rightX} ${rightY}
-					`}
-				/>
-			{/if}
 			{#each polygons as poly}
 				{@const previewed =
 					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const selected = selectedHistoricMap && poly.properties.id == selectedHistoricMap.id}
 				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
-				{@const visible = visibleHistoricMapsInViewport.has(poly.properties.id)}
-				{@const fill = previewed || clicked ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
+				{@const visible =
+					!selectedHistoricMap && visibleHistoricMapsInViewport.has(poly.properties.id)}
+				{@const fill =
+					previewed || clicked || selected ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
 					points={getProjectedPoints(poly.geometry.coordinates[0])}
 					{fill}
@@ -179,6 +143,56 @@
 					rx={(viewBox[2] / width) * 2}
 					ry={(viewBox[2] / width) * 2}
 				></rect>
+			{/if}
+			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+				<g out:fade={{ duration: 250 }}>
+					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+						{@const historicMap = previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
+						{@const centerPoint = hovered
+							? turf.centerOfMass(hovered).geometry.coordinates
+							: [0, 0]}
+
+						{@const x1 = centerPoint[0]}
+						{@const y1 = centerPoint[1]}
+						{@const x2 = viewBox[0] + viewBox[2] / 2}
+						{@const y2 = viewBox[1] - viewBox[3] * 0.03}
+
+						{@const strokeWidth = (viewBox[2] / width) * 2}
+
+						{@const angle = Math.atan2(y2 - y1, x2 - x1)}
+						{@const ah = strokeWidth * 5}
+
+						{@const leftX = x2 - ah * Math.cos(angle) + ah * 0.5 * Math.sin(angle)}
+						{@const leftY = y2 - ah * Math.sin(angle) - ah * 0.5 * Math.cos(angle)}
+
+						{@const rightX = x2 - ah * Math.cos(angle) - ah * 0.5 * Math.sin(angle)}
+						{@const rightY = y2 - ah * Math.sin(angle) + ah * 0.5 * Math.cos(angle)}
+
+						<path
+							in:draw|global={{ duration: 250 }}
+							fill="none"
+							stroke="#33a"
+							stroke-width={strokeWidth}
+							d={`
+								M ${x1} ${y1}
+								L ${x2} ${y2}
+								L ${leftX} ${leftY}
+							`}
+						/>
+						<path
+							in:draw|global={{ duration: 250 }}
+							fill="none"
+							stroke="#33a"
+							stroke-width={strokeWidth}
+							d={`
+								M ${x1} ${y1}
+								L ${x2} ${y2}
+								L ${rightX} ${rightY}
+							`}
+						/>
+					{/key}
+				</g>
 			{/if}
 		</g>
 	</svg>

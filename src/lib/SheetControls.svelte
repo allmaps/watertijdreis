@@ -22,6 +22,7 @@
 		<div class="flex items-end gap-3">
 			<button
 				onclick={() => changeHistoricMapView(sortedMaps[selectedHistoricMapIndex - 1])}
+				tabindex="11"
 				class={`
                     group inline-flex flex-shrink-0 cursor-pointer 
                     items-center justify-center border-2 border-[#33336611]
@@ -60,6 +61,7 @@
 							}
 						}}
 						name="sheets"
+						tabindex="12"
 						class="w-55 truncate rounded-lg border-2 border-[#33336611] bg-[#333366aa] py-2.5 pr-16 pl-10 text-base font-medium text-[#eef] shadow-[0_2px_2px_rgba(0,0,0,0.05)] focus:outline-none"
 					>
 						{#each sortedMaps as historicMap}
@@ -68,7 +70,6 @@
 							>
 						{/each}
 					</select>
-
 					<!-- <span
                         class="pointer-events-none absolute top-1/2 right-8 flex h-6 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-[#eef] text-center text-sm font-semibold text-[#336]"
                     >

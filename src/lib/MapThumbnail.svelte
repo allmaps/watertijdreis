@@ -1,38 +1,71 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
+	import { spriteStore } from './SpriteSheet.svelte';
 
-	const { x, y, src } = $props();
+	let { id, className = '' }: { id: string; className?: string } = $props();
 
-	let imageLoaded = $state(false);
+	let sprite = $derived.by(() => {
+		if (spriteStore.loading) return null;
+		return spriteStore.getSprite(id);
+	});
 
-	let rotation = (Math.random() - 0.5) * 10;
+	let styleString = $derived.by(() => {
+		if (!sprite) return '';
+
+		return [
+			`width: ${sprite.width}px`,
+			`height: ${sprite.height}px`,
+			`background-image: url('${sprite.sourceImageUrl}')`,
+			`background-position: -${sprite.x}px -${sprite.y}px`
+		].join(';');
+	});
 </script>
 
-<!-- {#if imageLoaded} -->
-<div
-	transition:scale
-	class="absolute h-[42px] w-[42px] origin-bottom
-        overflow-hidden
-    "
-	style="
-        left: {x}px;
-        top: {y}px;
-        transform: rotateX(60deg) rotateZ({rotation}deg);
-        z-index: {100 - y}
-    "
->
-	<img
-		{src}
-		alt=""
-		class="
-            h-[calc(100%)] w-[calc(100%)]
-            -translate-x-[4px] -translate-y-[4px]
-            object-cover object-center shadow-[0_6px_6px_rgba(0,0,0,0.1)] transition-[filter]
-            duration-300
-        "
-		style:filter={`grayscale(0%)`}
-	/>
+<div class="thumbnail-wrapper {className}">
+	{#if spriteStore.loading}
+		<div class="placeholder loading"></div>
+	{:else if sprite}
+		<div class="sprite-image" style={styleString} role="img" aria-label="Kaart thumbnail"></div>
+	{:else}
+		<div class="placeholder error" title="Kaart niet gevonden">?</div>
+	{/if}
 </div>
-<!-- {/if} -->
 
-<img style:opacity={0} {src} loading="lazy" alt="" onload={() => (imageLoaded = true)} />
+<style>
+	.thumbnail-wrapper {
+		display: inline-block;
+		overflow: hidden;
+		background-color: #f0f0f0;
+	}
+
+	.sprite-image {
+		display: block;
+		background-repeat: no-repeat;
+		image-rendering: -webkit-optimize-contrast;
+	}
+
+	.placeholder {
+		width: 128px;
+		height: 104px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+	}
+
+	.loading {
+		background-color: #e0e0e0;
+		animation: pulse 1.5s infinite ease-in-out;
+	}
+
+	@keyframes pulse {
+		0% {
+			opacity: 0.6;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0.6;
+		}
+	}
+</style>

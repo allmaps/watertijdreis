@@ -11,11 +11,6 @@
 	import type { GeojsonPoint } from '@allmaps/types';
 	import { fade, scale, slide, fly } from 'svelte/transition';
 
-	type Item<T> = {
-		value: T;
-		label?: string;
-	};
-
 	type GeocoderGeoJsonFeature = {
 		geometry: GeojsonPoint;
 		properties: {
@@ -27,117 +22,246 @@
 
 	let { providers, visible = $bindable(), flyToFeature } = $props();
 
-	let inputEl: HTMLElement;
+	let inputEl: HTMLInputElement | undefined = $state();
+	let listEl: HTMLUListElement | undefined = $state();
 	let inputValue = $state('');
-	let featuresByProviderIndex: GeocoderGeoJsonFeature[][] = $state([[]]);
+	let featuresByProviderIndex: GeocoderGeoJsonFeature[][] = $state([]);
+	let selectedFeatureIndex: number = $state(0);
+
+	let dialogElement = $state<HTMLDivElement>();
+	let firstFocusableElement = $state<HTMLElement>();
+	let lastFocusableElement = $state<HTMLElement>();
+
 	let features: GeocoderGeoJsonFeature[] = $derived(featuresByProviderIndex.flat(1));
-	let selectedFeature: number = $state(0);
 
 	const THROTTLE_WAIT_MS = 200;
-	const THROTTLE_OPTIONS = {
-		leading: true,
-		trailing: true
-	};
 
-	const throttledGetFeatures = throttle(getFeatures, THROTTLE_WAIT_MS, THROTTLE_OPTIONS);
+	const throttledGetFeatures = throttle(
+		async (text: string) => {
+			if (!text || text.length < 2) {
+				featuresByProviderIndex = [];
+				return;
+			}
+
+			const promises = providers.map(async (provider, index) => {
+				try {
+					const results = await provider.getFeatures(text);
+					// Clean de labels direct bij binnenkomst
+					return results.slice(0, 5).map((feature: any) => ({
+						...feature,
+						properties: {
+							...feature.properties,
+							provider: provider.name,
+							label: cleanLabel(feature.properties.label)
+						}
+					}));
+				} catch (e) {
+					console.error(e);
+					return [];
+				}
+			});
+
+			featuresByProviderIndex = await Promise.all(promises);
+			selectedFeatureIndex = 0;
+		},
+		THROTTLE_WAIT_MS,
+		{ leading: true, trailing: true }
+	);
 
 	$effect(() => {
 		throttledGetFeatures(inputValue);
 	});
 
-	function getFeatures(text: string): void {
-		selectedFeature = 0;
-		for (let [index, provider] of providers.entries()) {
-			provider.getFeatures(text).then((features) => {
-				featuresByProviderIndex[index] = features.slice(0, 5).map((feature) => ({
-					...feature,
-					properties: {
-						...feature.properties,
-						provider: provider.name
-					}
-				}));
-			});
+	$effect(() => {
+		if (visible) {
+			// A small timeout helps mobile browsers open up the keyboard correctly
+			inputEl?.focus();
+			setTimeout(() => {
+				inputEl?.focus();
+				updateFocusableElements();
+			}, 50);
+		} else {
+			inputValue = '';
+			featuresByProviderIndex = [];
+		}
+	});
+
+	function cleanLabel(label: string): string {
+		return label.replace(/,\s*(nederland|the netherlands)$/i, '');
+	}
+
+	function confirmSelection(feature: GeocoderGeoJsonFeature) {
+		flyToFeature(feature);
+		visible = false;
+	}
+
+	function scrollSelectedIntoView(index: number) {
+		if (!listEl) return;
+		const selectedEl = listEl.children[index] as HTMLElement;
+		if (selectedEl) {
+			selectedEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 		}
 	}
 
-	$effect(() => {
-		if (visible) inputEl.focus();
-		else inputValue = '';
-	});
+	function handleKeydown(e: KeyboardEvent) {
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+
+		if (e.key === 'Escape') {
+			visible = false;
+			return;
+		}
+
+		if (features.length === 0) return;
+
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			confirmSelection(features[selectedFeatureIndex]);
+		} else if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			selectedFeatureIndex = Math.min(selectedFeatureIndex + 1, features.length - 1);
+			scrollSelectedIntoView(selectedFeatureIndex);
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			selectedFeatureIndex = Math.max(selectedFeatureIndex - 1, 0);
+			scrollSelectedIntoView(selectedFeatureIndex);
+		}
+	}
+
+	function close() {
+		visible = false;
+	}
+
+	function updateFocusableElements() {
+		if (!dialogElement) return;
+
+		const focusableSelectors =
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+		const focusableElements = dialogElement.querySelectorAll(focusableSelectors);
+
+		if (focusableElements.length > 0) {
+			firstFocusableElement = focusableElements[0] as HTMLElement;
+			lastFocusableElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+		}
+	}
+
+	function trapFocus(e: KeyboardEvent) {
+		if (!visible || e.key !== 'Tab') return;
+
+		if (e.shiftKey) {
+			// Shift + Tab
+			if (document.activeElement === firstFocusableElement) {
+				e.preventDefault();
+				lastFocusableElement?.focus();
+			}
+		} else {
+			// Tab
+			if (document.activeElement === lastFocusableElement) {
+				e.preventDefault();
+				firstFocusableElement?.focus();
+			}
+		}
+	}
 </script>
+
+<svelte:document onkeydown={trapFocus} />
 
 {#if visible}
 	<div
-		class="fixed top-0 left-0 z-1000 h-full w-full bg-[#33336688]"
-		onclick={() => (visible = false)}
-		transition:fade
-	></div>
-	<div
-		class="
-			fixed top-1/4 left-1/2 z-1001
-			w-[90vw] max-w-120 -translate-x-1/2
-			overflow-hidden rounded-[8px] border-gray-200 bg-white shadow-lg"
-		transition:fly={{ y: -20, duration: 250 }}
+		bind:this={dialogElement}
+		class="fixed inset-0 z-1000 flex items-center justify-center"
+		role="dialog"
+		aria-modal="true"
 	>
-		<div class="relative w-full">
-			<input
-				bind:this={inputEl}
-				bind:value={inputValue}
-				onkeydown={(e) => {
-					e.stopPropagation();
-					if (e.key == 'Escape') visible = false;
-					else if (e.key == 'Enter' && features) {
-						flyToFeature(features[selectedFeature]);
-						visible = false;
-					} else if (e.key == 'ArrowDown')
-						selectedFeature = Math.min(++selectedFeature, features.length - 1);
-					else if (e.key == 'ArrowUp') selectedFeature = Math.max(--selectedFeature, 0);
-				}}
-				class="w-full rounded-[16px] px-4 py-4 pr-2 pl-10 pl-14 text-[20px] font-[500] focus:z-10 focus:outline-none"
-				type="search"
-				spellcheck="false"
-				autocomplete="off"
-				autofocus
-				placeholder="Zoek een locatie..."
-			/>
+		<button
+			type="button"
+			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
+			aria-label="Sluit venster"
+			onclick={close}
+			transition:fly={{ y: -5, duration: 250 }}
+		></button>
 
-			<div class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-gray-400">
-				<MagnifyingGlass size="24" color="#f4a"></MagnifyingGlass>
+		<div
+			class="
+				absolute top-10 z-10 flex
+				w-[94vw]
+				flex-col overflow-hidden
+				rounded-[8px] border-gray-200
+				bg-white shadow-lg sm:top-1/4 sm:w-[600px] sm:max-w-[90vw]"
+			transition:fly={{ y: -20, duration: 250 }}
+		>
+			<div class="relative w-full border-b border-[#eef]">
+				<div class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+					<MagnifyingGlass size="24" color="#f4a"></MagnifyingGlass>
+				</div>
+
+				<input
+					bind:this={inputEl}
+					bind:value={inputValue}
+					onkeydown={handleKeydown}
+					class="
+						focus-ring-0 w-full bg-transparent px-4 py-4 pr-12
+						pl-12 text-[18px] font-[500] text-[#336]
+						placeholder:text-[#88a] focus:outline-none sm:text-[20px]
+					"
+					type="search"
+					enterkeyhint="search"
+					spellcheck="false"
+					autocomplete="off"
+					placeholder="Zoek een locatie..."
+				/>
 			</div>
-		</div>
 
-		{#if inputValue !== ''}
-			<ul transition:slide class="relative top-full left-0 z-20 w-full overflow-hidden text-[#336]">
-				{#if features.length > 0}
-					{#each features as feature, i}
-						<li
-							class="flex cursor-pointer items-center justify-between px-4 py-3 text-[16px] font-[500] hover:bg-[#eef]"
-							style:background={i == selectedFeature ? '#eef' : 'transparent'}
-						>
-							<!-- <MapPinSimple size="20" class="inline"></MapPinSimple> -->
-							<div class="truncate">
-								{feature.properties.label}
-								{#if feature.properties.alt}
-									<span class="text-gray-500 before:mx-1 before:content-['·']">
-										{feature.properties.alt}
-									</span>
-								{/if}
-							</div>
-
-							{#if i == selectedFeature}
-								<kbd
-									class="bg-background-alt text-xxs pointer-events-none flex inline items-center gap-1 rounded-sm border px-1 font-sans font-medium opacity-50 shadow-[0px_2px_0px_0px_#59595b] select-none dark:border-[rgba(0,_0,_0,_0.10)] dark:bg-white dark:shadow-[0px_2px_0px_0px_#B8B8B8]"
+			{#if inputValue !== ''}
+				<ul
+					bind:this={listEl}
+					transition:slide={{ duration: 200 }}
+					class="
+						relative max-h-[50vh] w-full overflow-y-auto
+						bg-white text-[#336] sm:max-h-[60vh]"
+				>
+					{#if features.length > 0}
+						{#each features as feature, i}
+							<li class="w-full">
+								<button
+									type="button"
+									id="geo-item-{i}"
+									class="
+										group flex w-full cursor-pointer items-center justify-between px-4
+										py-3 text-left text-[16px] transition-colors
+										duration-75 focus:outline-none
+										{i === selectedFeatureIndex ? 'bg-[#eeeeff88] underline' : ''}
+									"
+									onmouseenter={() => (selectedFeatureIndex = i)}
+									onclick={() => confirmSelection(feature)}
 								>
-									<span class="text-foreground-alt text-[12px]">Enter</span>
-									<ArrowElbowDownLeft size="16" class="inline"></ArrowElbowDownLeft>
-								</kbd>
-							{/if}
+									<div class="flex min-w-0 flex-col">
+										<span class="truncate leading-tight font-medium">
+											{feature.properties.label}
+										</span>
+										{#if feature.properties.alt}
+											<span class="truncate text-[13px] text-gray-500">
+												{feature.properties.alt}
+											</span>
+										{/if}
+									</div>
+								</button>
+							</li>
+						{/each}
+					{:else}
+						<li class="px-4 py-8 text-center text-sm text-gray-500">
+							Geen resultaten gevonden voor "{inputValue}"
 						</li>
-					{/each}
-				{:else}
-					<li class="px-4 py-3 text-sm text-[#33336688]">Geen resultaten gevonden</li>
-				{/if}
-			</ul>
-		{/if}
+					{/if}
+				</ul>
+			{/if}
+		</div>
 	</div>
 {/if}
+
+<style>
+	input[type='search']::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+</style>
