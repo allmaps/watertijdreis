@@ -4,7 +4,7 @@
 	import Button from './Button.svelte';
 	import Modal from './Modal.svelte';
 
-	let { historicMapsLoaded } = $props();
+	let { historicMapsLoaded, resetState } = $props();
 
 	let aboutPanelVisible = $state(false);
 	let sharePanelVisible = $state(false);
@@ -27,21 +27,23 @@
 	onmouseleave={() => (buttonCollapse = true)}
 	role="group"
 >
-	<h1
-		class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]"
-	>
-		{#each 'Watertijdreis'.split('') as letter, i}
-			<span
-				class="inline-block will-change-[transform,text-shadow,color]"
-				class:wave={historicMapsLoaded}
-				class:wave-loading={!historicMapsLoaded}
-				style:animation=""
-				style:animation-delay={i * 60 + 'ms'}
-			>
-				{letter}
-			</span>
-		{/each}
-	</h1>
+	<button onclick={resetState}>
+		<h1
+			class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]"
+		>
+			{#each 'Watertijdreis'.split('') as letter, i}
+				<span
+					class="inline-block will-change-[transform,text-shadow,color]"
+					class:wave={historicMapsLoaded}
+					class:wave-loading={!historicMapsLoaded}
+					style:animation=""
+					style:animation-delay={i * 60 + 'ms'}
+				>
+					{letter}
+				</span>
+			{/each}
+		</h1>
+	</button>
 
 	<!-- <div class="ml-2 inline"> -->
 	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}
