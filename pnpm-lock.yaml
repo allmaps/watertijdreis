@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@allmaps/maplibre':
-        specifier: 1.0.0-beta.40
-        version: 1.0.0-beta.40
+        specifier: 1.0.0-beta.41
+        version: 1.0.0-beta.41
       '@fortawesome/fontawesome-free':
         specifier: ^6.7.2
         version: 6.7.2
@@ -184,14 +184,14 @@ packages:
   '@allmaps/iiif-parser@1.0.0-beta.47':
     resolution: {integrity: sha512-GG9Oz2MIzdB4B8x/t2UuNx1Lc0Im7oHnGZoFLjNUeSuzq53m1/wLTEgvxQKabH4JVUMSXlPVZHc7BzO+eE7r0Q==}
 
-  '@allmaps/maplibre@1.0.0-beta.40':
-    resolution: {integrity: sha512-QA8oTMpBlH/vXlRfr26gEypj1GombPtK9GChFUOtbkb+Yrr7NaYTbIuNyUJYb/YrKGp9zOyzuCs1zZtVmYiD+w==}
+  '@allmaps/maplibre@1.0.0-beta.41':
+    resolution: {integrity: sha512-noV6osoj20mozv48KEOn2+jtO1J1wjOkCuRNDAv/PNnmGJYyFbBBsWtIcM7lMxdydn27lDJh9P46uTrXgFq7Ew==}
 
   '@allmaps/project@1.0.0-beta.7':
     resolution: {integrity: sha512-943HbutFKXHU8iXB8eSq4TQC6P64yzzgnvSFkYauI7QTp0EaInx+MduZdVvHKAMx3kQpk51+78bR9r6nrjgeRQ==}
 
-  '@allmaps/render@1.0.0-beta.80':
-    resolution: {integrity: sha512-AYXNHXaA2D/MVKX1d4C2U7ezpQbe39xvLYvdJ+7fWrrlpQknPvSeMdclvRGoD13nD6M9hmrq0sOrm5hDA5bKjg==}
+  '@allmaps/render@1.0.0-beta.81':
+    resolution: {integrity: sha512-A9SNjtEB+KDnSqhVwTMQRx5UatT9Sd8GXTTYe6FekXV3eTJc/psGF37sM0mrNkvhh2ilyQxwkW6BKuDjpo/JeQ==}
 
   '@allmaps/stdlib@1.0.0-beta.39':
     resolution: {integrity: sha512-vX2r9f/MGDvQQRXPrkKvlo2MhrG7rOkrJDoh6TAYPCDN+kwoXMAaDd0uJkl9FqfbdYCfu444of6XJUrlZ/aITA==}
@@ -208,8 +208,8 @@ packages:
   '@allmaps/types@1.0.0-beta.22':
     resolution: {integrity: sha512-93XNs2YoKoxzlx9eGsu4+h67pZ39QE5/N2OWdWjsrqcfOLJw3vWb9x2LjoMrWEl7hkB2raY71gbyqtkoGIfKiw==}
 
-  '@allmaps/warpedmaplayer@1.0.0-beta.40':
-    resolution: {integrity: sha512-7yiXRAOgJYKC08m1C6RuXtyYpJpzOwjOLEu1odgTrtdebson9eY4ItJ/6F9ZiRJ4Ap8cSaDteqFOs2DPgSWj1w==}
+  '@allmaps/warpedmaplayer@1.0.0-beta.41':
+    resolution: {integrity: sha512-ZHiBkCpQChP10Ofw1NBJ9MvelXOi4VeZaDoxlMDIhooqVADcoH8WwcC6vzI2Wkr4WBTvBBwMAuQdD7X068qcgg==}
 
   '@asamuzakjp/css-color@3.1.1':
     resolution: {integrity: sha512-hpRD68SV2OMcZCsrbdkccTw5FXjNDLo5OuqSHyHZfwweGsDWZwDJ2+gONyNAbazZclobMirACLw0lk8WVxIqxA==}
@@ -3301,12 +3301,12 @@ snapshots:
     dependencies:
       zod: 3.24.2
 
-  '@allmaps/maplibre@1.0.0-beta.40':
+  '@allmaps/maplibre@1.0.0-beta.41':
     dependencies:
       '@allmaps/project': 1.0.0-beta.7
-      '@allmaps/render': 1.0.0-beta.80
+      '@allmaps/render': 1.0.0-beta.81
       '@allmaps/stdlib': 1.0.0-beta.39
-      '@allmaps/warpedmaplayer': 1.0.0-beta.40
+      '@allmaps/warpedmaplayer': 1.0.0-beta.41
       maplibre-gl: 4.7.1
 
   '@allmaps/project@1.0.0-beta.7':
@@ -3315,7 +3315,7 @@ snapshots:
       '@allmaps/transform': 1.0.0-beta.50
       proj4: 2.20.2
 
-  '@allmaps/render@1.0.0-beta.80':
+  '@allmaps/render@1.0.0-beta.81':
     dependencies:
       '@allmaps/annotation': 1.0.0-beta.36
       '@allmaps/id': 1.0.0-beta.37
@@ -3362,10 +3362,10 @@ snapshots:
 
   '@allmaps/types@1.0.0-beta.22': {}
 
-  '@allmaps/warpedmaplayer@1.0.0-beta.40':
+  '@allmaps/warpedmaplayer@1.0.0-beta.41':
     dependencies:
       '@allmaps/project': 1.0.0-beta.7
-      '@allmaps/render': 1.0.0-beta.80
+      '@allmaps/render': 1.0.0-beta.81
       '@allmaps/stdlib': 1.0.0-beta.39
 
   '@asamuzakjp/css-color@3.1.1':

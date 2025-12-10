@@ -543,6 +543,11 @@
 		const res = await fetch(url);
 		const data = await res.json();
 
+		map.on('maptilesloadedfromsprites', () => {
+			historicMapsLoaded = true;
+			applyFilter(filter);
+		});
+
 		const imageInfos = data.map(getInfoJson);
 		warpedMapLayer.addImageInfos(imageInfos);
 
@@ -565,8 +570,12 @@
 
 		await Promise.all(loadPromises);
 
-		historicMapsLoaded = true;
-		applyFilter(filter);
+		const spriteJson = await fetch('/sprites/regular-sheets-128.json').then((resp) => resp.json());
+		warpedMapLayer.addSprites(
+			spriteJson,
+			window.location.origin + '/sprites/regular-sheets-128.jpg',
+			[3072, 3078]
+		);
 
 		map.addSource('map-outlines', {
 			type: 'geojson',
