@@ -343,7 +343,7 @@
 	<div
 		class="
 
-fixed z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
+fixed bottom-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
 
 md:w-[380px]
 
@@ -361,7 +361,7 @@ md:w-[380px]
 		class:from-[#336]={!sheetInformationVisible && !selectedHistoricMap}
 		class:from-70%={!sheetInformationVisible && !selectedHistoricMap}
 		class:to-transparent={!sheetInformationVisible && !selectedHistoricMap}
-		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '80vh') : '120px'}
+		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
@@ -375,7 +375,7 @@ md:w-[380px]
 						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
-						<!-- {#await getHistoricMapThumbnail(historicMap.id, 256)}
+						{#await getHistoricMapThumbnail(historicMap.id, 256)}
 							<div class="scale block h-full w-auto bg-[hsl(44deg,46%,90%)]"></div>
 						{:then src}
 							<img alt="" class="block h-full w-auto scale-[1.04] object-cover" {src} />
@@ -449,7 +449,7 @@ md:w-[380px]
 			<div
 				transition:slide={{ duration: 300, easing: cubicInOut }}
 				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
-				style="max-height: calc({isMobile ? '50vh' : '80vh'} - 120px);"
+				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="min-h-30 pt-4">
 					<div class="px-6 pb-0">
@@ -613,6 +613,7 @@ md:w-[380px]
 		{/if}
 	</div>
 {/if}
+
 {#if false}
 	<!-- TODO: get from spritesheet -->
 	{@const thumbnailHeight = 64}
