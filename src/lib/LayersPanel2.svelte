@@ -76,8 +76,8 @@
 
 	let overlayLayerOptions = [
 		{ value: 'none', label: 'Geen overlegkaart', icon: EyeSlash },
-		{ value: 'waterschapsgrenzen', label: 'Waterschapsgrenzen', icon: Waves },
-		{ value: 'gemeentegrenzen', label: 'Gemeentegrenzen', icon: MapPin }
+		{ value: 'waterschapsgrenzen', label: 'Waterschapsgrenzen (PDOK)', icon: Waves },
+		{ value: 'gemeentegrenzen', label: 'Gemeentegrenzen (PDOK)', icon: MapPin }
 		// { value: 'dijken', label: 'Dijken', icon: Aperture }
 	];
 </script>
