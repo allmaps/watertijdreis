@@ -205,6 +205,7 @@
 	let gridVisible: boolean = $state(false);
 
 	async function getHistoricMapThumbnail(id) {
+		if (specialSpriteSheet.has(id)) return specialSpriteSheet.getThumbnailUrl(id);
 		return spriteSheet.getThumbnailUrl(id);
 
 		const warpedMap = warpedMapLayer?.getWarpedMap(id);

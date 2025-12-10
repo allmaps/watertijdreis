@@ -24,6 +24,14 @@ export class SpriteSheet {
 		private imageUrl: string = './sprites/regular-sheets-128.jpg'
 	) {}
 
+	has(id) {
+		return this.spriteMap.has(id);
+	}
+
+	hasCached(id) {
+		return this.blobCache.has(id);
+	}
+
 	async init(): Promise<void> {
 		this.loading = true;
 		this.error = null;
