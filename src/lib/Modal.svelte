@@ -79,10 +79,10 @@
 		<div
 			bind:this={modalElement}
 			class="
-				relative z-10 flex
-				w-[90vw] max-w-120
-				flex-col items-center overflow-auto rounded-[8px]
-				border border-gray-200 bg-white px-4 py-8 shadow-lg
+				relative z-10
+				flex max-h-[90vh] w-[90vw]
+				max-w-120 flex-col items-center overflow-auto
+				rounded-[8px] border border-gray-200 bg-white px-4 py-8 shadow-lg
 			"
 			transition:fly={{ y: -20, duration: 250 }}
 		>
