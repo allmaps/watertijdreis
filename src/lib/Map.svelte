@@ -205,6 +205,7 @@
 	let gridVisible: boolean = $state(false);
 
 	async function getHistoricMapThumbnail(id) {
+		id = id.replace('-b', '');
 		if (specialSpriteSheet.has(id)) return specialSpriteSheet.getThumbnailUrl(id);
 		return spriteSheet.getThumbnailUrl(id);
 
@@ -453,14 +454,14 @@
 	function initMaplibre() {
 		const urlParams = parseURL();
 
-		const initialCenter = urlParams ? [urlParams.lng, urlParams.lat] : [5, 51.75];
-		const initialZoom = urlParams ? urlParams.zoom : 7;
+		const initialCenter = [urlParams.lng, urlParams.lat];
+		const initialZoom = urlParams.zoom;
 
-		if (urlParams && urlParams.yearStart) filter.yearStart = urlParams.yearStart;
-		if (urlParams && urlParams.yearEnd) filter.yearEnd = urlParams.yearEnd;
-		if (urlParams && urlParams.edition) filter.edition = urlParams.edition;
-		if (urlParams && urlParams.bis) filter.bis = urlParams.bis;
-		if (urlParams && urlParams.type) filter.type = urlParams.type;
+		filter.yearStart = urlParams.yearStart;
+		filter.yearEnd = urlParams.yearEnd;
+		filter.edition = urlParams.edition;
+		filter.bis = urlParams.bis;
+		filter.type = urlParams.type;
 
 		const protocol = new pmtiles.Protocol();
 		maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -553,8 +554,7 @@
 				layerOptions.protoMapsWaterInFront = urlParams.protoMapsWaterInFront;
 			if (urlParams && urlParams.protoMapsLabelsInFront)
 				layerOptions.protoMapsLabelsInFront = urlParams.protoMapsLabelsInFront;
-			if (urlParams && urlParams.historicMapsOpacity)
-				layerOptions.historicMapsOpacity = urlParams.historicMapsOpacity;
+			layerOptions.historicMapsOpacity = urlParams.historicMapsOpacity;
 
 			setTimeout(() => {
 				if (urlParams.selectedSheetId) {
@@ -1361,36 +1361,116 @@
 	}
 
 	$effect(() => {
-		if (selectedHistoricMap) updateURL({ push: true });
-		else updateURL({ push: true });
+		if (selectedHistoricMap) updateURL();
+		else updateURL();
 	});
 
-	function updateURL({ push = false } = {}) {
+	const defaultState = {
+		zoom: 6.5,
+		lat: 51.75,
+		lng: 5.5,
+		yearStart: 1865,
+		yearEnd: 1983,
+		edition: 'All',
+		bis: false,
+		type: undefined,
+		selectedSheetId: null,
+		pinnedSheetId: null,
+		baseMap: 'none',
+		protoMapsWaterInFront: false,
+		protoMapsLabelsInFront: false,
+		historicMapsOpacity: 100
+	};
+
+	function resetState() {
+		if (!maplibreLoaded || !historicMapsLoaded) return;
+
+		map!.easeTo({
+			center: [defaultState.lng, defaultState.lat],
+			zoom: defaultState.zoom,
+			pitch: 0,
+			bearing: 0
+		});
+
+		layerOptions.historicMapsOpacity = defaultState.historicMapsOpacity;
+	}
+
+	function updateURL() {
 		if (!maplibreLoaded || !historicMapsLoaded) return;
 		const params = new URLSearchParams();
-
 		const center = map!.getCenter();
 
-		params.set('z', map!.getZoom().toFixed(2));
-		params.set('lat', center.lat.toFixed(4));
-		params.set('lng', center.lng.toFixed(4));
+		const setIfChanged = (key: string, currentValue: any, defaultValue: any) => {
+			if (currentValue !== defaultValue) {
+				params.set(key, String(currentValue));
+			}
+		};
 
-		params.set('ys', String(filter.yearStart));
-		params.set('ye', String(Math.round(filter.yearEnd)));
-		params.set('e', String(filter.edition));
-		params.set('bis', filter.bis ? '1' : '0');
+		const currentZoom = map!.getZoom();
+		const currentLat = center.lat;
+		const currentLng = center.lng;
+
+		const currentLatFixed = currentLat.toFixed(3);
+		const currentLngFixed = currentLng.toFixed(3);
+		const defaultLatFixed = defaultState.lat.toFixed(3);
+		const defaultLngFixed = defaultState.lng.toFixed(3);
+
+		const isLatDefault = currentLatFixed === defaultLatFixed;
+		const isLngDefault = currentLngFixed === defaultLngFixed;
+
+		if (!isLatDefault || !isLngDefault) {
+			const latPart = isLatDefault ? '' : currentLatFixed;
+			const lngPart = isLngDefault ? '' : currentLngFixed;
+
+			const centerParam = `${latPart}_${lngPart}`;
+			params.set('c', centerParam);
+		}
+
+		setIfChanged('zoom', currentZoom.toFixed(2), defaultState.zoom.toFixed(2));
+
+		const yearStartStr = String(filter.yearStart);
+		const yearEndStr = String(Math.round(filter.yearEnd));
+
+		const isYearStartDefault = filter.yearStart === defaultState.yearStart;
+		const isYearEndDefault = Math.round(filter.yearEnd) === defaultState.yearEnd;
+
+		if (!isYearStartDefault || !isYearEndDefault) {
+			let yearParam: string;
+			if (isYearStartDefault) {
+				yearParam = `_${yearEndStr}`;
+			} else if (isYearEndDefault) {
+				yearParam = `${yearStartStr}_`;
+			} else {
+				yearParam = `${yearStartStr}_${yearEndStr}`;
+			}
+			params.set('period', yearParam);
+		}
+
+		setIfChanged('editie', String(filter.edition), String(defaultState.edition));
+
+		const bisValue = filter.bis ? '1' : '0';
+		setIfChanged('bis', bisValue, defaultState.bis ? '1' : '0');
 
 		if (filter.type) params.set('type', filter.type);
-		if (selectedHistoricMap) params.set('sheet', selectedHistoricMap.id);
+		if (selectedHistoricMap) params.set('blad', selectedHistoricMap.id);
 		if (pinnedHistoricMap) params.set('pinned', pinnedHistoricMap.id);
 
-		params.set('bm', String(layerOptions.baseMap));
-		params.set('pwf', layerOptions.protoMapsWaterInFront ? '1' : '0');
-		params.set('plf', layerOptions.protomapsLabelsInFront ? '1' : '0');
-		params.set('hmo', String(layerOptions.historicMapsOpacity));
+		setIfChanged('achtergrondkaart', String(layerOptions.baseMap), String(defaultState.baseMap));
+
+		const pwfValue = layerOptions.protoMapsWaterInFront ? '1' : '0';
+		setIfChanged('pwf', pwfValue, defaultState.protoMapsWaterInFront ? '1' : '0');
+
+		const plfValue = layerOptions.protomapsLabelsInFront ? '1' : '0';
+		setIfChanged('plf', plfValue, defaultState.protoMapsLabelsInFront ? '1' : '0');
+
+		setIfChanged(
+			'opacity',
+			String(layerOptions.historicMapsOpacity),
+			String(defaultState.historicMapsOpacity)
+		);
 
 		goto(`?${params.toString()}`, {
-			replaceState: !push,
+			replaceState: true,
 			noScroll: true
 		});
 	}
@@ -1408,45 +1488,84 @@
 			return Number.isFinite(n) ? n : fallback;
 		};
 
+		const getOrDefault = <T,>(key: string, converter: (v: string) => T, defaultValue: T): T => {
+			const v = q.get(key);
+			return v === null ? defaultValue : converter(v);
+		};
+
 		if (window.location.hash.startsWith('#/')) {
-			return {
-				zoom: 7,
-				lat: 51.75,
-				lng: 5,
-				yearStart: 1865,
-				yearEnd: 1983,
-				edition: 'All',
-				bis: false,
-				type: undefined,
-				selectedSheetId: null,
-				pinnedSheetId: null,
-				baseMap: 'none',
-				protoMapsWaterInFront: false,
-				protoMapsLabelsInFront: false,
-				historicMapsOpacity: 100
-			};
+			return defaultState;
 		}
 
-		const ed = q.get('e') ?? 'All';
+		let lat: number = defaultState.lat;
+		let lng: number = defaultState.lng;
+
+		const centerParam = q.get('c');
+		if (centerParam) {
+			const [latStr, lngStr] = centerParam.split('_');
+
+			const parsedLat = parseFloat(latStr);
+			if (latStr && Number.isFinite(parsedLat)) {
+				lat = parsedLat;
+			}
+
+			const parsedLng = parseFloat(lngStr);
+			if (lngStr && Number.isFinite(parsedLng)) {
+				lng = parsedLng;
+			}
+		}
+
+		let yearStart: number = defaultState.yearStart;
+		let yearEnd: number = defaultState.yearEnd;
+
+		const yearParam = q.get('period');
+		if (yearParam) {
+			const [ys, ye] = yearParam.split('_');
+
+			const parsedYearStart = parseInt(ys);
+			if (ys && Number.isFinite(parsedYearStart)) {
+				yearStart = parsedYearStart;
+			}
+
+			const parsedYearEnd = parseInt(ye);
+			if (ye && Number.isFinite(parsedYearEnd)) {
+				yearEnd = parsedYearEnd;
+			}
+		}
+
+		const parseNumOrDefault = (key: string, def: number) => num(q.get(key), def);
+		const parseIntOrDefault = (key: string, def: number) => int(q.get(key), def);
+
+		const ed = q.get('editie');
+		const edition = ed === 'All' || ed === null ? 'All' : Number(ed);
+
 		return {
-			zoom: num(q.get('z'), 7),
-			lat: num(q.get('lat'), 51.75),
-			lng: num(q.get('lng'), 5),
+			zoom: parseNumOrDefault('zoom', defaultState.zoom),
+			lat: lat,
+			lng: lng,
 
-			yearStart: int(q.get('ys'), 1865),
-			yearEnd: int(q.get('ye'), 1983),
+			yearStart: yearStart,
+			yearEnd: yearEnd,
 
-			edition: ed == 'All' ? 'All' : Number(ed),
-			bis: q.get('bis') === '1',
+			edition: edition,
+			bis: getOrDefault('bis', (v) => v === '1', defaultState.bis),
 
-			type: q.get('type') ?? undefined,
-			selectedSheetId: q.get('sheet') ?? null,
-			pinnedSheetId: q.get('pinned') ?? null,
+			type: q.get('type') ?? defaultState.type,
+			selectedSheetId: q.get('blad') ?? defaultState.selectedSheetId,
+			pinnedSheetId: q.get('pinned') ?? defaultState.pinnedSheetId,
 
-			baseMap: q.get('bm') ?? 'none',
-			protoMapsWaterInFront: q.get('pwf') === '1',
-			protoMapsLabelsInFront: q.get('plf') === '1',
-			historicMapsOpacity: int(q.get('hmo'), 100)
+			baseMap: q.get('achtergrondkaart') ?? defaultState.baseMap,
+			protoMapsWaterInFront: getOrDefault(
+				'pwf',
+				(v) => v === '1',
+				defaultState.protoMapsWaterInFront
+			),
+			protoMapsLabelsInFront: getOrDefault(
+				'plf',
+				(v) => v === '1',
+				defaultState.protoMapsLabelsInFront
+			),
+			historicMapsOpacity: parseIntOrDefault('opacity', defaultState.historicMapsOpacity)
 		};
 	}
 
@@ -1510,7 +1629,7 @@
 	/>
 {/if}
 
-<Header {historicMapsLoaded} />
+<Header {historicMapsLoaded} {resetState} />
 
 <!-- <Timeline
 	bind:filter
