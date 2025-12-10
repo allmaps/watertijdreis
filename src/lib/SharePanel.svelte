@@ -12,7 +12,7 @@
 	import Modal from './Modal.svelte';
 	let { visible = $bindable() } = $props();
 
-	async function setClipboard(text) {
+	async function setClipboard(text: string) {
 		const type = 'text/plain';
 		const clipboardItemData = {
 			[type]: text
@@ -22,29 +22,7 @@
 		copySuccess = true;
 	}
 
-	async function shareToSignal() {
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					title: 'Watertijdreis',
-					text: 'Watertijdreis - Reis door de tijd!',
-					url: currentUrl
-				});
-			} catch (err) {
-				console.log('Share cancelled or failed');
-			}
-		}
-	}
-
 	let copySuccess: boolean = $state(false);
-	let currentUrl = $state('');
-
-	$effect(() => {
-		if (visible && typeof window !== 'undefined') {
-			currentUrl = window.location.href;
-			console.log('SharePanel URL updated:', currentUrl);
-		}
-	});
 
 	$effect(() => {
 		if (copySuccess) {
@@ -62,11 +40,11 @@
 		<input
 			type="text"
 			readonly
-			value={currentUrl}
+			value={typeof window !== 'undefined' ? window.location.href : ''}
 			class="h-12 w-2/3 rounded-[6px] border-2 border-[#eef] bg-[#ff44aa11] px-2 py-1 text-[16px] font-[500] text-[#336]"
 		/>
 		<button
-			onclick={() => setClipboard(currentUrl)}
+			onclick={() => setClipboard(window.location.href)}
 			class="ml-4 h-12 w-42 cursor-pointer rounded-[6px] bg-[#336] px-4 py-1 font-[600] text-white transition-colors hover:bg-[#558]"
 		>
 			{#if copySuccess}
@@ -82,51 +60,48 @@
 
 	<div class="mt-4 text-center">
 		<a
-			class="mx-2"
-			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${currentUrl}`}
+			class="mx-4"
+			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${typeof window !== 'undefined' ? window.location.href : ''}`}
 		>
 			<EnvelopeSimple size="30" color="#f4a" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
 		</a>
 		<a
 			class="mx-4"
-			href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`}
+			href={`https://www.linkedin.com/sharing/share-offsite/?url=dev.watertijdreis.nl`}
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<LinkedinLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"></LinkedinLogo>
+			<LinkedinLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"></LinkedinLogo>
 		</a>
 
-		<!-- <a class="mx-2" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-			<InstagramLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"
+		<!-- <a class="mx-4" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+			<InstagramLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"
 			></InstagramLogo>
 		</a> -->
 
 		<a
 			class="mx-4"
-			href={`https://reddit.com/submit?url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent('Watertijdreis - Reis door de tijd!')}`}
+			href={`https://reddit.com/submit?url=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}&title=${encodeURIComponent('Watertijdreis - Reis door de tijd!')}`}
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<RedditLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline"></RedditLogo>
+			<RedditLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"></RedditLogo>
 		</a>
 
 		<a
-			class="mx-2"
-			href={`https://wa.me/?text=${encodeURIComponent(
-				'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
-					currentUrl
-			)}`}
+			class="mx-4"
+			href={`https://wa.me/?text=${
+				typeof window !== 'undefined'
+					? encodeURIComponent(
+							'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
+								window.location.href
+						)
+					: ''
+			}`}
 			target="_blank"
 			rel="noopener noreferrer"
 		>
 			<WhatsappLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
 		</a>
-
-		<!-- <a
-			class="mx-4"
-			href={`sgnl://send?text=${encodeURIComponent('Watertijdreis - Reis door de tijd!\n' + currentUrl)}`}
-		>
-			<ChatCircle size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
-		</a> -->
 	</div>
 </Modal>
