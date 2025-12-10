@@ -12,9 +12,15 @@ export interface SpriteData {
 export interface SpriteSheetSource {
 	jsonUrl: string;
 	imageUrl: string;
+	sheetWidth: number;
+	sheetHeight: number;
 }
 
-type MappedSprite = SpriteData & { sourceImageUrl: string };
+type MappedSprite = SpriteData & {
+	sourceImageUrl: string;
+	sheetWidth: number;
+	sheetHeight: number;
+};
 
 export class SpriteSheet {
 	loading = $state(false);
@@ -48,12 +54,14 @@ export class SpriteSheet {
 			);
 
 			jsonArrays.forEach((sprites, index) => {
-				const sourceImageUrl = this.sources[index].imageUrl;
+				const source = this.sources[index];
 
 				for (const sprite of sprites) {
 					this.sprites.set(sprite.allmapsId, {
 						...sprite,
-						sourceImageUrl
+						sourceImageUrl: source.imageUrl,
+						sheetWidth: source.sheetWidth,
+						sheetHeight: source.sheetHeight
 					});
 				}
 			});
@@ -76,11 +84,15 @@ export class SpriteSheet {
 const sources: SpriteSheetSource[] = [
 	{
 		jsonUrl: './sprites/regular-sheets-128.json',
-		imageUrl: './sprites/regular-sheets-128.jpg'
+		imageUrl: './sprites/regular-sheets-128.jpg',
+		sheetWidth: 3072,
+		sheetHeight: 3078
 	},
 	{
 		jsonUrl: './sprites/special-sheets-128.json',
-		imageUrl: './sprites/special-sheets-128.jpg'
+		imageUrl: './sprites/special-sheets-128.jpg',
+		sheetWidth: 1792,
+		sheetHeight: 1951
 	}
 ];
 
