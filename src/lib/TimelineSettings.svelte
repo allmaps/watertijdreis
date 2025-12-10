@@ -90,7 +90,9 @@
 
 	function toggleHWP(v: boolean) {
 		if (selectedHWP !== v) {
+			setEdition('All');
 			filter.type = 'HWP';
+			filter.yearEnd = maxYear;
 			applyFilter(filter);
 		}
 		if (v) {
@@ -103,7 +105,9 @@
 	}
 	function toggleWVE(v: boolean) {
 		if (selectedWVE !== v) {
+			setEdition('All');
 			filter.type = 'WVE';
+			filter.yearEnd = maxYear;
 			applyFilter(filter);
 		}
 		if (v) {
@@ -116,6 +120,8 @@
 	}
 
 	function setEdition(v: 'All' | 1 | 2 | 3 | 4 | 5) {
+		if (!selectedRegulier) return;
+
 		if (selectedEdition !== v) {
 			filter.edition = v;
 
@@ -230,7 +236,11 @@
 					</Switch.Root>
 				</li>
 
-				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
+				<li
+					class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
+					style:opacity={selectedRegulier ? '100%' : '50%'}
+					style:pointer-events={selectedRegulier ? 'auto' : 'none'}
+				>
 					Edities:
 					<button
 						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
