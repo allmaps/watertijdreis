@@ -251,11 +251,15 @@
 		return () => window.removeEventListener('resize', handleResize);
 	});
 
+	let panelInitialized = $state(false);
+
 	$effect(() => {
 		if (!selectedHistoricMap) {
 			sheetInformationVisible = false;
-		} else {
+			panelInitialized = false;
+		} else if (!panelInitialized) {
 			sheetInformationVisible = !isMobile;
+			panelInitialized = true;
 		}
 	});
 </script>
@@ -310,7 +314,7 @@
 					in:fly|global={{ x: -20 }}
 				>
 					<h1 class="text-[16px] font-bold text-[#eef]">
-						{historicMap ? historicMap.label : '...'}
+						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
 					<p class="text-[14px] font-[500] text-[#eeeeff]">
 						{historicMap?.yearEnd} &middot; Editie {historicMap?.edition}{historicMap?.bis
@@ -327,7 +331,7 @@
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-2 rounded-lg border-[#eef] bg-[#3a3a6a] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[14px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							<Info color="#eef" size={18} />
 							<span>Bladinformatie</span>
@@ -352,9 +356,9 @@
 			class:w-80={!isMobile}
 			style={isMobile
 				? sheetInformationVisible
-					? 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; width: 400px; opacity: 1; pointer-events: auto;'
-					: 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; width: 400px; opacity: 0; pointer-events: none;'
-				: `right: ${sheetInformationVisible ? '8px' : '-272px'}; width: 20rem;`}
+					? 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; max-width: 400px; opacity: 1; pointer-events: auto;'
+					: 'top: 100px; left: 50%; transform: translateX(-50%); bottom: 160px; max-width: 400px; opacity: 0; pointer-events: none;'
+				: `right: ${sheetInformationVisible ? '8px' : '-280px'}; width: 20rem;`}
 			out:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 20 : 0, duration: 100 }}
 		>
 			{#if !isMobile}
@@ -375,22 +379,41 @@
 					{/if}
 				</button>
 			{/if}
-			<div class="p-4">
-				<button
-					onclick={toggleSheetInformation}
-					class="mb-2 flex w-full items-center gap-2 text-left transition-opacity hover:opacity-80"
-				>
-					{#if isMobile}
-						<X color="#eef" size={24} class="hover:cursor-pointer" />
-					{:else if sheetInformationVisible}
-						<ArrowBendDownRight color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
+
+			<div class="sticky top-0 z-10 bg-[#333366] p-3 pb-0 shadow-xs">
+				<div class="mb-2 flex w-full items-center gap-2">
+					{#if !isMobile}
+						<button
+							onclick={toggleSheetInformation}
+							class="flex items-center gap-2 text-left transition-opacity hover:opacity-80"
+						>
+							{#if sheetInformationVisible}
+								<ArrowBendDownRight
+									color="#eef"
+									size={18}
+									class="opacity-70 hover:cursor-pointer"
+								/>
+							{:else}
+								<ArrowBendDownLeft color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
+							{/if}
+							<h3 class="text-[18px] font-[600] text-[#eef] hover:cursor-pointer">
+								Bladinformatie
+							</h3>
+						</button>
 					{:else}
-						<ArrowBendDownLeft color="#eef" size={18} class="opacity-70 hover:cursor-pointer" />
+						<h3 class="flex-1 px-4 text-[18px] font-[600] text-[#eef]">Bladinformatie</h3>
+						<button
+							onclick={toggleSheetInformation}
+							class="flex h-8 w-8 items-center justify-center rounded bg-[#eeeeff60] shadow-md transition-opacity hover:opacity-80"
+						>
+							<X color="#336" size={20} weight="bold" />
+						</button>
 					{/if}
-					<h3 class="text-[18px] font-[600] text-[#eef] hover:cursor-pointer">Bladinformatie</h3>
-				</button>
-				<div class="h-[100px] overflow-y-auto">
-					<ul class="text-[12px] text-[#eef]">
+				</div>
+			</div>
+			<div class="min-h-30">
+				<div class="px-6 pb-2">
+					<ul class="text-[14px] text-[#eef]">
 						<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
 							<i class="font-[600] opacity-50">Bladtitel:</i>
 							<span class="font-[500]">{historicMap.label}</span>
@@ -406,63 +429,59 @@
 			</div>
 
 			{#if variants && variants.length > 1}
-				<div class="px-4">
-					<div>
-						<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
-						<div class="flex flex-col gap-2">
-							{#each variants as variant}
-								{@const metadata = getMetadata(variant)}
-								{@const type =
-									metadata.find((i) => i[0] === 'Type')?.[1] ||
-									(canvasManifest.id == variant.id ? 'Voorkant' : 'Achterkant')}
-								{@const imageService =
-									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
-									variant.items?.[0]?.items?.[0]?.body?.id}
-								{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
-								{@const isCurrentSheet = canvasManifest.id === variant.id}
-								{#if src}
-									<button
-										onclick={() => {
+				<div class="px-6 pb-4">
+					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
+					<div class="flex flex-col gap-2">
+						{#each variants as variant}
+							{@const metadata = getMetadata(variant)}
+							{@const type = metadata.find((i) => i[0] === 'Type')?.[1] || 'Voorkant blad'}
+							{@const imageService =
+								variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
+								variant.items?.[0]?.items?.[0]?.body?.id}
+							{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
+							{@const isCurrentSheet = canvasManifest.id === variant.id}
+							{#if src}
+								<button
+									onclick={() => {
+										const historicMap = historicMapsById
+											.values()
+											.find((m) => m.manifestId == variant.id);
+										if (historicMap) changeHistoricMapView(historicMap);
+										else addFakeGeoreferencedMap(variant);
+									}}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
 											const historicMap = historicMapsById
 												.values()
 												.find((m) => m.manifestId == variant.id);
 											if (historicMap) changeHistoricMapView(historicMap);
 											else addFakeGeoreferencedMap(variant);
-										}}
-										onkeydown={(e) => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												e.preventDefault();
-												const historicMap = historicMapsById
-													.values()
-													.find((m) => m.manifestId == variant.id);
-												if (historicMap) changeHistoricMapView(historicMap);
-												else addFakeGeoreferencedMap(variant);
-											}
-										}}
-										tabindex="15"
-										class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
-											? 'text-color-[#f4a] rounded-[4px] border-1 border-[#f4a] bg-[#eeeeff11]'
-											: ''}"
+										}
+									}}
+									tabindex="15"
+									class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
+										? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
+										: ''}"
+								>
+									<div
+										class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
 									>
-										<div
-											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
-										>
-											<img {src} alt={type} class="block h-full w-full object-cover" />
-										</div>
-										<div class="flex flex-1 items-center text-left">
-											<p class="text-[12px] font-[600] text-[#eef]">
-												{type}
-											</p>
-										</div>
-									</button>
-								{/if}
-							{/each}
-						</div>
+										<img {src} alt={type} class="block h-full w-full object-cover" />
+									</div>
+									<div class="flex flex-1 items-center text-left">
+										<p class="text-[12px] font-[600] text-[#eef]">
+											{type}
+										</p>
+									</div>
+								</button>
+							{/if}
+						{/each}
 					</div>
 				</div>
 			{/if}
 
-			<div class="px-4 pb-4">
+			<div class="px-6 pb-4">
 				<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
 				<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
 					<a
