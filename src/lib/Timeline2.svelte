@@ -364,7 +364,7 @@
 			class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-size-[32px]"
 		>
 			<div
-				class="absolute inset-0 bg-[url(wave_pattern8.png)] bg-size-[auto_11px]"
+				class="absolute inset-0 bg-[url(/wave_pattern8.png)] bg-size-[auto_11px]"
 				style="background-position: {backgroundOffsetX}px 0; opacity: {backgroundOpacity}; pointer-events: none;"
 			></div>
 			<div class="absolute top-0 left-1/2 z-998 h-full w-1/2 bg-black/33 backdrop-blur-xs"></div>

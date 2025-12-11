@@ -6,7 +6,7 @@
 		MagnifyingGlass,
 		MapPinSimple
 	} from 'phosphor-svelte';
-	import { throttle } from 'lodash-es';
+	import { debounce } from 'lodash-es';
 	import type { GeocoderProvider } from '$lib/geocoder/provider';
 	import type { GeojsonPoint } from '@allmaps/types';
 	import { fade, scale, slide, fly } from 'svelte/transition';
@@ -32,22 +32,44 @@
 	let firstFocusableElement = $state<HTMLElement>();
 	let lastFocusableElement = $state<HTMLElement>();
 
-	let features: GeocoderGeoJsonFeature[] = $derived(featuresByProviderIndex.flat(1));
+	let features: GeocoderGeoJsonFeature[] = $derived(
+		dedupeFeatures(featuresByProviderIndex.flat(1))
+	);
 
-	const THROTTLE_WAIT_MS = 200;
+	function dedupeFeatures(features: GeocoderGeoJsonFeature[]) {
+		const seen = new Map<string, GeocoderGeoJsonFeature>();
 
-	const throttledGetFeatures = throttle(
+		for (const f of features) {
+			const key = [
+				f.properties.label
+					.toLowerCase()
+					.normalize('NFD')
+					.replace(/\p{Diacritic}/gu, ''),
+				Math.round(f.geometry.coordinates[0] * 1e5),
+				Math.round(f.geometry.coordinates[1] * 1e5)
+			].join('|');
+
+			if (!seen.has(key)) {
+				seen.set(key, f);
+			}
+		}
+
+		return Array.from(seen.values());
+	}
+
+	const DEBOUNCE_WAIT_MS = 200;
+
+	const getFeatures = debounce(
 		async (text: string) => {
 			if (!text || text.length < 2) {
 				featuresByProviderIndex = [];
 				return;
 			}
 
-			const promises = providers.map(async (provider, index) => {
+			const promises = providers.map(async (provider) => {
 				try {
 					const results = await provider.getFeatures(text);
-					// Clean de labels direct bij binnenkomst
-					return results.slice(0, 5).map((feature: any) => ({
+					return results.map((feature) => ({
 						...feature,
 						properties: {
 							...feature.properties,
@@ -64,12 +86,12 @@
 			featuresByProviderIndex = await Promise.all(promises);
 			selectedFeatureIndex = 0;
 		},
-		THROTTLE_WAIT_MS,
+		DEBOUNCE_WAIT_MS,
 		{ leading: true, trailing: true }
 	);
 
 	$effect(() => {
-		throttledGetFeatures(inputValue);
+		getFeatures(inputValue);
 	});
 
 	$effect(() => {
@@ -175,7 +197,7 @@
 	>
 		<button
 			type="button"
-			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('wave_pattern.png')] bg-size-[32px]"
+			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('/wave_pattern.png')] bg-size-[32px]"
 			aria-label="Sluit venster"
 			onclick={close}
 			transition:fly={{ y: -5, duration: 250 }}
