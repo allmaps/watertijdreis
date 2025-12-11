@@ -1057,7 +1057,7 @@
 
 			map?.flyTo({
 				center: [lng, lat],
-				zoom: 13,
+				zoom: 12,
 				speed: 0.8,
 				curve: 1.4,
 				essential: true,
