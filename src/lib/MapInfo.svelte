@@ -343,6 +343,7 @@
 		style:background-color={selectedHistoricMap ? '#336' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
+		style:pointer-events={selectedHistoricMap ? 'auto' : 'none'}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
 			{#key historicMap.id}
@@ -385,7 +386,7 @@
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
 				>
-					<h1 class="line-clamp-2 text-[16px] font-bold text-[#eef]">
+					<h1 class="line-clamp-2 max-w-50 truncate text-[16px] font-bold text-[#eef]">
 						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
 
@@ -431,12 +432,18 @@
 
 			{@const manifestId = editionManifest.id}
 
+			{@const canvasId = canvasManifest.id}
+
+			{@const canvasIndex = canvasId.match(/\/p(\d*)$/)?.[1]}
+
+			{@const imageId = canvasManifest.items[0]?.items[0]?.body?.service[0]?.id}
+
 			{@const homepageUrl = editionManifest.rendering[0].id}
 
 			<div
 				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
-				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
+				class="flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="pt-2">
@@ -520,7 +527,7 @@
 											{#if !type.toLowerCase().includes('achterkant')}
 												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
 											{:else}
-												<img {src} alt={type} class="block h-full w-full object-cover" />
+												<img {src} alt={type} class="block h-full w-auto object-cover" />
 											{/if}
 										</div>
 
@@ -541,7 +548,7 @@
 
 					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
 						<a
-							href={homepageUrl}
+							href={`${homepageUrl}?page=${canvasIndex}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
@@ -552,7 +559,7 @@
 						</a>
 
 						<a
-							href={`https://theseus-viewer.netlify.app/?iiif-content=${manifestId}&collection=${collectionId}`}
+							href={`https://theseus-viewer.netlify.app/embed?iiif-content=${manifestId}&canvas=${canvasId}&collection=${collectionId}&panel=navPlace`}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
@@ -574,6 +581,17 @@
 								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
 
 								Open in Allmaps Viewer
+							</a>
+
+							<a
+								href={annotationUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-[#f4a] hover:underline"
+							>
+								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+								Open Georeference Annotation
 							</a>
 
 							<button
@@ -605,6 +623,16 @@
 								Open in geojson.io
 							</a>
 						{/if}
+						<a
+							href={`${imageId}/full/max/0/default.png`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-[#f4a] hover:underline"
+						>
+							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+							Download PNG
+						</a>
 					</div>
 				</div>
 			</div>

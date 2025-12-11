@@ -51,13 +51,13 @@
 		});
 	});
 
-	$effect(() => {
-		if (maplibreLoaded) console.log('maplibre geladen: ', map);
-	});
+	// $effect(() => {
+	// 	if (maplibreLoaded) console.log('maplibre geladen: ', map);
+	// });
 
-	$effect(() => {
-		if (historicMapsLoaded) console.log('historische kaarten geladen: ', historicMapsById);
-	});
+	// $effect(() => {
+	// 	if (historicMapsLoaded) console.log('historische kaarten geladen: ', historicMapsById);
+	// });
 
 	let historicMapsLoaded: boolean = $state(false);
 	let historicMapsById: Map<string, HistoricMap> = $state(new SvelteMap());
@@ -747,7 +747,7 @@
 			source: 'map-outlines',
 			paint: {
 				'line-color': '#f4a',
-				'line-width': 1.5,
+				'line-width': 1,
 				'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
 			}
 		});
@@ -778,18 +778,18 @@
 				setGridVisibility(false, clickedLngLat);
 			}, 1500);
 
-			if (feature) {
-				setTimeout(
-					() =>
-						map!.flyTo({
-							center: clickedLngLat,
-							speed: 0.5,
-							curve: 1,
-							essential: true
-						}),
-					250
-				);
-			}
+			// if (feature) {
+			// 	setTimeout(
+			// 		() =>
+			// 			map!.flyTo({
+			// 				center: clickedLngLat,
+			// 				speed: 0.5,
+			// 				curve: 1,
+			// 				essential: true
+			// 			}),
+			// 		250
+			// 	);
+			// }
 
 			if (clickedFeature && clickedFeature.properties?.id === mapId) {
 				if (mapId) setHistoricMapView(historicMapsById.get(mapId));
@@ -840,6 +840,7 @@
 		rippleScale = 3,
 		speed = 300
 	) {
+		if (sheetIndexVisible && !isVisible) return;
 		const source = map.getSource('map-outlines');
 		if (!source || !source._data) return;
 		const allFeatures = source._data.features;
@@ -1005,8 +1006,26 @@
 		if (!map || map.getSource('pdok-gemeentegrenzen')) return;
 
 		map.addSource('pdok-gemeentegrenzen', {
-			type: 'geojson',
-			data: 'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wfs/v1_0?service=WFS&version=2.0.0&request=GetFeature&typeName=Gemeentegebied&outputFormat=application/json&srsName=EPSG:4326'
+			type: 'raster',
+			tiles: [
+				'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wms/v1_0?' +
+					'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
+					'&LAYERS=Gemeentegebied' +
+					'&STYLES=' +
+					'&FORMAT=image/png' +
+					'&TRANSPARENT=true' +
+					'&CRS=EPSG:3857' +
+					'&WIDTH=256&HEIGHT=256' +
+					'&BBOX={bbox-epsg-3857}'
+			],
+			tileSize: 256
+		});
+
+		map.addLayer({
+			id: 'overlay-gemeentegrenzen',
+			type: 'raster',
+			source: 'pdok-gemeentegrenzen',
+			layout: { visibility: 'visible' }
 		});
 
 		// map.addLayer({
@@ -1310,7 +1329,7 @@
 								[minX, minY],
 								[maxX, maxY]
 							],
-							{ padding: 100, speed: 2, curve: 1.8, essential: true }
+							{ padding: 88, speed: 2, curve: 1.8, essential: true }
 						),
 					250
 				);

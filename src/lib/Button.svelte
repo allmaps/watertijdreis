@@ -13,6 +13,8 @@
 	} = $props();
 
 	const isTouch = typeof window !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+	if (!isApplePlatform && kbd) kbd = kbd.replace('⌘', 'Ctrl ');
 
 	let buttonEl = $state();
 	let slotEl = $state(null);
@@ -112,7 +114,7 @@
 	></div>
 
 	<div
-		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffee]"
+		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"
 	>
 		<Icon
 			color="#3333aa"

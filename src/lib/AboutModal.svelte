@@ -41,7 +41,7 @@
 		</p>
 		<p>Voor vragen, feedback en suggesties neem contact op met:</p>
 		<blockquote>
-			<a href="mailto:waterenklimaat@cultureelerfgoed.nl">waterenklimaat@cultureelerfgoed.nl</a>.
+			<a href="mailto:waterenklimaat@cultureelerfgoed.nl">waterenklimaat@cultureelerfgoed.nl</a>
 		</blockquote>
 		<hr />
 		<i>Meer informatie:</i>
