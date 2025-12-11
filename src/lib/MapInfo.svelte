@@ -343,6 +343,7 @@
 		style:background-color={selectedHistoricMap ? '#336' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
+		style:pointer-events={selectedHistoricMap ? 'auto' : 'none'}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
 			{#key historicMap.id}
@@ -385,7 +386,7 @@
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
 				>
-					<h1 class="line-clamp-2 text-[16px] font-bold text-[#eef]">
+					<h1 class="line-clamp-2 max-w-50 truncate text-[16px] font-bold text-[#eef]">
 						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
 

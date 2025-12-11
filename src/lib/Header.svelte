@@ -37,7 +37,7 @@
 					class:wave={historicMapsLoaded}
 					class:wave-loading={!historicMapsLoaded}
 					style:animation=""
-					style:animation-delay={i * 60 + 'ms'}
+					style:animation-delay={i * 100 + 'ms'}
 				>
 					{letter}
 				</span>
@@ -119,7 +119,7 @@
 
 <style>
 	.wave {
-		animation: wave 600ms ease-in-out infinite alternate;
+		animation: wave 1000ms ease-in-out infinite alternate;
 	}
 
 	.wave-loading {
