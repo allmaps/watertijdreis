@@ -1050,7 +1050,7 @@
 					[minLng, minLat],
 					[maxLng, maxLat]
 				],
-				{ padding: 40, maxZoom: 15, duration: 250 }
+				{ padding: 40, maxZoom: 12, duration: 250 }
 			);
 		} else if (geometry?.type === 'Point') {
 			const [lng, lat] = geometry.coordinates;
