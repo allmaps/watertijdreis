@@ -36,9 +36,21 @@
 			scaleH = targetHeightNumber / originalHeight;
 		}
 
-		let scaleFactor = 1;
-		if (scaleW > 0 || scaleH > 0) {
-			scaleFactor = Math.max(scaleW, scaleH);
+		const validScales: number[] = [];
+
+		if (scaleW > 0) {
+			validScales.push(scaleW);
+		}
+		if (scaleH > 0) {
+			validScales.push(scaleH);
+		}
+
+		let scaleFactor: number;
+
+		if (validScales.length === 0) {
+			scaleFactor = 1;
+		} else {
+			scaleFactor = Math.min(...validScales);
 		}
 
 		const finalWidthNumber = originalWidth * scaleFactor;

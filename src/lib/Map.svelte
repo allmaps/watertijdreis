@@ -205,6 +205,9 @@
 	function applyFilter(filter: Filter) {
 		if (!historicMapsByNumber || selectedHistoricMap) return;
 
+		let maxYear = 0;
+		filter.yearStart = Math.min(filter.yearEnd - 1, filter.yearStart);
+
 		const mapsToColor: string[] = [];
 		const mapsToDesaturate: string[] = [];
 
@@ -214,6 +217,7 @@
 
 			for (const sheet of sheets) {
 				const { x, y, yearEnd: year, edition, bis, type, id } = sheet;
+				maxYear = Math.max(maxYear, year);
 				const maxYearFilter = filter.yearEnd > firstEdYearEnd ? filter.yearEnd : firstEdYearEnd;
 				const periodFilter = filter.edition !== 'All' || year <= maxYearFilter;
 				const editionFilter = filter.edition === 'All' || edition === filter.edition;
@@ -248,6 +252,8 @@
 				}
 			}
 		});
+
+		filter.yearEnd = Math.min(maxYear, filter.yearEnd);
 
 		const mapsToShow = mapsToColor.concat(mapsToDesaturate);
 		const visibleHistoricMapIds = visibleHistoricMaps.keys().toArray();
@@ -760,6 +766,11 @@
 			const featureId = feature?.id;
 			const mapId = feature?.properties?.id;
 
+			if (sheetIndexVisible && mapId) {
+				setHistoricMapView(historicMapsById.get(mapId));
+				return;
+			}
+
 			setGridVisibility(true, clickedLngLat);
 
 			if (gridResetTimer) clearTimeout(gridResetTimer);
@@ -1117,7 +1128,9 @@
 		}
 	}
 
+	let sheetIndexVisible = $state(false);
 	function setSheetIndexVisibility(visible = true) {
+		sheetIndexVisible = visible;
 		setGridVisibility(visible, { lng: 5.63, lat: 52.16 }, 100, 150);
 		map?.setPaintProperty('map-outlines-numbers', 'text-opacity', +visible);
 	}
@@ -1280,7 +1293,7 @@
 						[minX, minY],
 						[maxX, maxY]
 					],
-					{ padding: 50, speed: 2, curve: 1.8 }
+					{ padding: 100, speed: 2, curve: 1.8 }
 				);
 			}
 		}
@@ -1568,7 +1581,9 @@
 	`}
 ></div>
 
-<Toast content={toastContent}></Toast>
+{#if !selectedHistoricMap}
+	<Toast content={toastContent}></Toast>
+{/if}
 
 <MapSheetToggle
 	bind:pinnedHistoricMap

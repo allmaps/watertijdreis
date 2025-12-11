@@ -323,6 +323,8 @@
 			sheetInformationVisible = false;
 		}
 	});
+
+	let sheetInformationEl = $state(null);
 </script>
 
 {#if historicMap}
@@ -350,7 +352,17 @@
 						class="h-22 w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
-						<MapThumbnail id={historicMap.id} height={88}></MapThumbnail>
+						{#if canvasManifest && getMetadata(canvasManifest).flat().includes('Achterkant')}
+							{@const imageService =
+								canvasManifest.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
+								canvasManifest.items?.[0]?.items?.[0]?.body?.id}
+
+							{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
+
+							<img alt="" class="block h-full w-auto object-cover" {src} />
+						{:else}
+							<MapThumbnail id={historicMap.id} height={88}></MapThumbnail>
+						{/if}
 
 						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
@@ -408,7 +420,7 @@
 			{/key}
 		</div>
 
-		{#if sheetInformationVisible && selectedHistoricMap && canvasManifest && editionManifest}
+		{#if sheetInformationVisible}
 			{@const metadata = getMetadata(canvasManifest)}
 
 			{@const collectionId =
@@ -419,11 +431,12 @@
 			{@const homepageUrl = editionManifest.rendering[0].id}
 
 			<div
+				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
 				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
-				<div class="min-h-30 pt-4">
+				<div class="pt-2">
 					<!-- <h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bladinformatie</h3> -->
 					<div class="px-4 pb-0">
 						<ul class="text-[14px] text-[#eef]">
@@ -448,7 +461,7 @@
 					<div class="px-4 pb-0">
 						<h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
 
-						<div class="flex flex-col gap-1">
+						<div class="flex flex-col">
 							{#each variants as variant}
 								{@const metadata = getMetadata(variant)}
 
@@ -458,6 +471,10 @@
 										.replace('Achterkant', 'Hoofdblad (achterkant)')
 										.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
 									'Hoofdblad (voorkant)'}
+
+								{@const historicMap = historicMapsById
+									.values()
+									.find((m) => m.manifestId == variant.id)}
 
 								{@const imageService =
 									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
@@ -470,14 +487,10 @@
 								{#if src}
 									<button
 										onclick={() => {
-											const historicMap = historicMapsById
-
-												.values()
-
-												.find((m) => m.manifestId == variant.id);
-
 											if (historicMap) changeHistoricMapView(historicMap);
 											else addFakeGeoreferencedMap(variant);
+
+											if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
 										}}
 										onkeydown={(e) => {
 											if (e.key === 'Enter' || e.key === ' ') {
@@ -499,9 +512,13 @@
 											: ''}"
 									>
 										<div
-											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
+											class="h-14 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
 										>
-											<img {src} alt={type} class="block h-full w-full object-cover" />
+											{#if !type.toLowerCase().includes('achterkant')}
+												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
+											{:else}
+												<img {src} alt={type} class="block h-full w-full object-cover" />
+											{/if}
 										</div>
 
 										<div class="flex flex-1 items-center text-left">
