@@ -328,11 +328,14 @@
 {#if historicMap}
 	<div
 		class="
-			transition-inset fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg
-			duration-500 md:top-auto md:bg-gradient-to-r md:from-[#336] md:from-[270px] md:to-transparent md:to-[calc(50%-30px)]
+			fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] bg-gradient-to-r from-[#336]
+			from-[270px] to-[#336] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
 			{sheetInformationVisible || selectedHistoricMap ? 'bg-[#336]' : ''}
-			{sheetInformationVisible || selectedHistoricMap ? 'w-auto sm:w-100' : ''}
+			{sheetInformationVisible || selectedHistoricMap
+			? 'w-auto sm:w-87'
+			: 'w-auto sm:w-[calc(100vh-16px)]'}
 		"
+		style:background-color={selectedHistoricMap ? '#336' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
 	>
@@ -362,7 +365,7 @@
 				</div>
 			{/key}
 
-			{#key historicMap}
+			{#key historicMap.id}
 				<div
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
@@ -379,6 +382,7 @@
 
 					{#if selectedHistoricMap}
 						<button
+							transition:slide={{ duration: 300 }}
 							onclick={toggleSheetInformation}
 							onkeydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
@@ -387,7 +391,7 @@
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-1.5 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a] sm:gap-2 sm:text-[12px]"
+							class="mt-2 flex items-center gap-1.5 rounded-lg border-2 border-[#eeeeff22] bg-[#eeeeff11] px-3 py-1.5 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							{#if sheetInformationVisible}
 								<Info class="inline" size="18" />
@@ -415,12 +419,13 @@
 			{@const homepageUrl = editionManifest.rendering[0].id}
 
 			<div
-				transition:slide={{ duration: 300, easing: cubicInOut }}
+				transition:slide={{ duration: 300 }}
 				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="min-h-30 pt-4">
-					<div class="px-6 pb-0">
+					<!-- <h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bladinformatie</h3> -->
+					<div class="px-4 pb-0">
 						<ul class="text-[14px] text-[#eef]">
 							<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
 								<i class="font-[600] opacity-50">Bladtitel:</i>
@@ -440,14 +445,19 @@
 				</div>
 
 				{#if variants && variants.length > 1}
-					<div class="px-6 pb-0">
+					<div class="px-4 pb-0">
 						<h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
 
 						<div class="flex flex-col gap-1">
 							{#each variants as variant}
 								{@const metadata = getMetadata(variant)}
 
-								{@const type = metadata.find((i) => i[0] === 'Type')?.[1] || 'Voorkant blad'}
+								{@const type =
+									metadata
+										.find((i) => i[0] === 'Type')?.[1]
+										.replace('Achterkant', 'Hoofdblad (achterkant)')
+										.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
+									'Hoofdblad (voorkant)'}
 
 								{@const imageService =
 									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
@@ -489,14 +499,14 @@
 											: ''}"
 									>
 										<div
-											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
+											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
 										>
 											<img {src} alt={type} class="block h-full w-full object-cover" />
 										</div>
 
 										<div class="flex flex-1 items-center text-left">
 											<p class="px-2 text-[12px] font-[600] text-[#eef]">
-												{type}
+												{@html type}
 											</p>
 										</div>
 									</button>
@@ -506,7 +516,7 @@
 					</div>
 				{/if}
 
-				<div class="px-6 pb-6">
+				<div class="px-4 pb-6">
 					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
 
 					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
