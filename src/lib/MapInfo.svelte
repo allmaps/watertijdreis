@@ -443,7 +443,7 @@
 			<div
 				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
-				class="flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t border-[#eeeeff10]"
+				class="scrollable flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="pt-2">
@@ -639,3 +639,25 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.scrollable::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	.scrollable::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.scrollable::-webkit-scrollbar-thumb {
+		background-color: #eeeeff88;
+		border-radius: 10px;
+	}
+	.scrollable::-webkit-scrollbar-thumb:hover {
+		background-color: #eeeeff;
+	}
+	.scrollable {
+		scrollbar-color: #eeeeff88 transparent;
+		scrollbar-width: thin;
+	}
+</style>
