@@ -988,6 +988,11 @@
 			tileSize: 256
 		});
 
+		// map.addSource('pdok-gemeentegrenzen', {
+		// 	type: 'geojson',
+		// 	data: 'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wfs/v1_0?service=WFS&version=2.0.0&request=GetFeature&typeName=Gemeentegebied&outputFormat=application/json&srsName=EPSG:4326'
+		// });
+
 		map.addLayer({
 			id: 'overlay-waterschapsgrenzen',
 			type: 'raster',
@@ -1004,17 +1009,17 @@
 			data: 'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wfs/v1_0?service=WFS&version=2.0.0&request=GetFeature&typeName=Gemeentegebied&outputFormat=application/json&srsName=EPSG:4326'
 		});
 
-		map.addLayer({
-			id: 'overlay-gemeentegrenzen',
-			type: 'line',
-			source: 'pdok-gemeentegrenzen',
-			layout: { visibility: 'visible' },
-			paint: {
-				'line-color': '#33a',
-				'line-width': 1,
-				'line-opacity': 0.8
-			}
-		});
+		// map.addLayer({
+		// 	id: 'overlay-gemeentegrenzen',
+		// 	type: 'line',
+		// 	source: 'pdok-gemeentegrenzen',
+		// 	layout: { visibility: 'none' },
+		// 	paint: {
+		// 		'line-color': '#33a',
+		// 		'line-width': 1,
+		// 		'line-opacity': 0.8
+		// 	}
+		// });
 	}
 
 	function flyToFeature(feature) {
