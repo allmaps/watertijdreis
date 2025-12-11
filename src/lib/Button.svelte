@@ -85,8 +85,11 @@
 <button
 	bind:this={buttonEl}
 	{onclick}
-	onmouseenter={() =>
-		!isTouch && openOnHover && (hoverdelay = setTimeout(() => (collapsed = false), 500))}
+	onmouseenter={() => {
+		if (!isTouch && openOnHover) {
+			hoverdelay = setTimeout(() => (collapsed = false), 500);
+		}
+	}}
 	onmouseleave={() => {
 		if (!isTouch && openOnHover) {
 			collapsed = true;
