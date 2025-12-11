@@ -779,12 +779,16 @@
 			}, 1500);
 
 			if (feature) {
-				map!.flyTo({
-					center: clickedLngLat,
-					speed: 0.5,
-					curve: 1,
-					essential: true
-				});
+				setTimeout(
+					() =>
+						map!.flyTo({
+							center: clickedLngLat,
+							speed: 0.5,
+							curve: 1,
+							essential: true
+						}),
+					250
+				);
 			}
 
 			if (clickedFeature && clickedFeature.properties?.id === mapId) {
@@ -1288,12 +1292,16 @@
 			});
 			if (bbox) {
 				const [minX, minY, maxX, maxY] = bbox;
-				map.fitBounds(
-					[
-						[minX, minY],
-						[maxX, maxY]
-					],
-					{ padding: 100, speed: 2, curve: 1.8 }
+				setTimeout(
+					() =>
+						map.fitBounds(
+							[
+								[minX, minY],
+								[maxX, maxY]
+							],
+							{ padding: 100, speed: 2, curve: 1.8 }
+						),
+					250
 				);
 			}
 		}
