@@ -50,19 +50,14 @@
 
 	let {
 		warpedMapLayer,
-
 		historicMapsById,
-
 		visibleHistoricMapsInViewport,
-
 		viewportPolygon,
-
+		sheetIndexVisible,
+		hoveredHistoricMap,
 		clickedHistoricMap,
-
 		selectedHistoricMap,
-
 		changeHistoricMapView,
-
 		getHistoricMapThumbnail
 	} = $props();
 
@@ -70,6 +65,7 @@
 		return (
 			selectedHistoricMap ||
 			clickedHistoricMap ||
+			(sheetIndexVisible && hoveredHistoricMap) ||
 			(visibleHistoricMapsInViewport.size == 1
 				? visibleHistoricMapsInViewport.values().next().value
 				: null)
@@ -148,15 +144,10 @@
 		const [vMinX, vMinY, vMaxX, vMaxY] = vpBbox;
 
 		const width = maxX - minX;
-
 		const height = maxY - minY;
-
 		const left = (vMinX - minX) / width;
-
 		const top = (maxY - vMaxY) / height;
-
 		const right = (vMaxX - minX) / width;
-
 		const bottom = (maxY - vMinY) / height;
 
 		return {
@@ -335,52 +326,47 @@
 			sheetInformationVisible = false;
 		}
 	});
+
+	let sheetInformationEl = $state(null);
 </script>
 
 {#if historicMap}
-	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, 256)}
-
 	<div
 		class="
-
-fixed bottom-2 z-[1000] overflow-hidden rounded-[8px] shadow-lg transition-all duration-500
-
-md:w-[400px]
-
-"
-		class:left-2={isMobile}
-		class:right-2={isMobile}
-		class:bottom-2={isMobile}
-		class:md:left-2={!isMobile}
-		class:md:right-auto={!isMobile}
-		class:md:bottom-2={!isMobile}
-		class:md:top-auto={!isMobile}
-		class:md:left-4={!isMobile}
-		class:bg-[#333366]={sheetInformationVisible || selectedHistoricMap}
-		class:bg-gradient-to-r={!sheetInformationVisible && !selectedHistoricMap}
-		class:from-[#336]={!sheetInformationVisible && !selectedHistoricMap}
-		class:from-70%={!sheetInformationVisible && !selectedHistoricMap}
-		class:to-transparent={!sheetInformationVisible && !selectedHistoricMap}
+			fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] bg-gradient-to-r from-[#336]
+			from-[270px] to-[#336] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
+			{sheetInformationVisible || selectedHistoricMap ? 'bg-[#336]' : ''}
+			{sheetInformationVisible || selectedHistoricMap
+			? 'w-auto sm:w-87'
+			: 'w-auto sm:w-[calc(100vh-16px)]'}
+		"
+		style:background-color={selectedHistoricMap ? '#336' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
-			{#key historicMap}
+			{#key historicMap.id}
 				<div
 					class="pointer-events-none flex-shrink-0 p-4 pr-1"
 					style="transform-style: preserve-3d; perspective: 100px"
 				>
 					<div
 						bind:this={thumbnailEl}
-						class="h-full w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
+						class="h-22 w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
-						{#await getHistoricMapThumbnail(historicMap.id, 256)}
-							<div class="scale block h-full w-auto bg-[hsl(44deg,46%,90%)]"></div>
-						{:then src}
-							<img alt="" class="block h-full w-auto scale-[1.04] object-cover" {src} />
-						{/await} -->
-						<MapThumbnail id={historicMap.id} className="block h-full object-cover"></MapThumbnail>
+						{#if canvasManifest && getMetadata(canvasManifest).flat().includes('Achterkant')}
+							{@const imageService =
+								canvasManifest.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
+								canvasManifest.items?.[0]?.items?.[0]?.body?.id}
+
+							{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ''}
+
+							<img alt="" class="block h-full w-auto object-cover" {src} />
+						{:else}
+							<MapThumbnail id={historicMap.id} height={88}></MapThumbnail>
+						{/if}
+
 						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
 								getViewportRectWithinHistoricMap(historicMap)}
@@ -394,7 +380,7 @@ md:w-[400px]
 				</div>
 			{/key}
 
-			{#key historicMap}
+			{#key historicMap.id}
 				<div
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
@@ -411,6 +397,7 @@ md:w-[400px]
 
 					{#if selectedHistoricMap}
 						<button
+							transition:slide={{ duration: 300 }}
 							onclick={toggleSheetInformation}
 							onkeydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
@@ -419,16 +406,16 @@ md:w-[400px]
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-2 rounded-lg bg-[#eeeeff30] px-4 py-2 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="mt-2 flex items-center gap-1.5 rounded-lg border-2 border-[#eeeeff22] bg-[#eeeeff11] px-3 py-1.5 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							{#if sheetInformationVisible}
+								<Info class="inline" size="18" />
+								<span class="whitespace-nowrap">Sluiten</span>
 								<CaretDown color="#eef" size={18} weight="bold" />
-
-								<span>Bladinformatie sluiten</span>
 							{:else}
+								<Info class="inline" size="18" />
+								<span class="whitespace-nowrap">Openen</span>
 								<CaretUp color="#eef" size={18} />
-
-								<span>Bladinformatie openen</span>
 							{/if}
 						</button>
 					{/if}
@@ -436,7 +423,7 @@ md:w-[400px]
 			{/key}
 		</div>
 
-		{#if sheetInformationVisible && selectedHistoricMap && canvasManifest && editionManifest}
+		{#if sheetInformationVisible}
 			{@const metadata = getMetadata(canvasManifest)}
 
 			{@const collectionId =
@@ -447,12 +434,14 @@ md:w-[400px]
 			{@const homepageUrl = editionManifest.rendering[0].id}
 
 			<div
-				transition:slide={{ duration: 300, easing: cubicInOut }}
+				bind:this={sheetInformationEl}
+				transition:slide={{ duration: 300 }}
 				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
-				<div class="min-h-30 pt-4">
-					<div class="px-6 pb-0">
+				<div class="pt-2">
+					<!-- <h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bladinformatie</h3> -->
+					<div class="px-4 pb-0">
 						<ul class="text-[14px] text-[#eef]">
 							<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
 								<i class="font-[600] opacity-50">Bladtitel:</i>
@@ -472,14 +461,23 @@ md:w-[400px]
 				</div>
 
 				{#if variants && variants.length > 1}
-					<div class="px-6 pb-0">
-						<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
+					<div class="px-4 pb-0">
+						<h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
 
-						<div class="flex flex-col gap-2">
+						<div class="flex flex-col">
 							{#each variants as variant}
 								{@const metadata = getMetadata(variant)}
 
-								{@const type = metadata.find((i) => i[0] === 'Type')?.[1] || 'Voorkant blad'}
+								{@const type =
+									metadata
+										.find((i) => i[0] === 'Type')?.[1]
+										.replace('Achterkant', 'Hoofdblad (achterkant)')
+										.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
+									'Hoofdblad (voorkant)'}
+
+								{@const historicMap = historicMapsById
+									.values()
+									.find((m) => m.manifestId == variant.id)}
 
 								{@const imageService =
 									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
@@ -492,14 +490,10 @@ md:w-[400px]
 								{#if src}
 									<button
 										onclick={() => {
-											const historicMap = historicMapsById
-
-												.values()
-
-												.find((m) => m.manifestId == variant.id);
-
 											if (historicMap) changeHistoricMapView(historicMap);
 											else addFakeGeoreferencedMap(variant);
+
+											if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
 										}}
 										onkeydown={(e) => {
 											if (e.key === 'Enter' || e.key === ' ') {
@@ -516,19 +510,23 @@ md:w-[400px]
 											}
 										}}
 										tabindex="15"
-										class="flex cursor-pointer items-center gap-3 rounded-[4px] p-2 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
+										class="flex cursor-pointer items-center gap-1 rounded-[4px] p-1.5 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
 											? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
 											: ''}"
 									>
 										<div
-											class="h-14 w-20 flex-shrink-0 overflow-hidden rounded bg-[#eeeeff11] shadow-md"
+											class="h-14 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
 										>
-											<img {src} alt={type} class="block h-full w-full object-cover" />
+											{#if !type.toLowerCase().includes('achterkant')}
+												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
+											{:else}
+												<img {src} alt={type} class="block h-full w-full object-cover" />
+											{/if}
 										</div>
 
 										<div class="flex flex-1 items-center text-left">
-											<p class="text-[12px] font-[600] text-[#eef]">
-												{type}
+											<p class="px-2 text-[12px] font-[600] text-[#eef]">
+												{@html type}
 											</p>
 										</div>
 									</button>
@@ -538,7 +536,7 @@ md:w-[400px]
 					</div>
 				{/if}
 
-				<div class="px-6 pb-6">
+				<div class="px-4 pb-6">
 					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
 
 					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
@@ -607,194 +605,6 @@ md:w-[400px]
 								Open in geojson.io
 							</a>
 						{/if}
-					</div>
-				</div>
-			</div>
-		{/if}
-	</div>
-{/if}
-
-{#if false}
-	<!-- TODO: get from spritesheet -->
-	{@const thumbnailHeight = 64}
-	{@const imageSrc = getHistoricMapThumbnail(historicMap.id, thumbnailHeight)}
-	<div
-		class="absolute top-45 right-5 z-998
-			rounded-[8px] bg-white/90 p-3 text-[15px] font-[500] text-[#336] shadow-lg
-			backdrop-blur-md transition-opacity duration-150 select-text"
-		style="box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);"
-		transition:fly={{ y: -10, duration: 500, delay: 200 }}
-	>
-		<h1
-			class="w-full text-center font-bold text-[#336] transition-all duration-200
-    					{preview ? 'truncate text-[14px]' : 'text-[18px] leading-tight whitespace-normal'}"
-		>
-			{historicMap.label}
-		</h1>
-		<div class="mt-1 flex items-center gap-4">
-			<div>
-				{#if preview}
-					<p class="text-gray-500">{historicMap.yearEnd}</p>
-					<p class="opacity-67">
-						Editie {historicMap.edition}{historicMap.bis ? ' BIS' : ''}
-					</p>
-				{/if}
-			</div>
-			<div class="ml-auto">
-				<div
-					class="transition-height relative inline-block overflow-hidden shadow-md duration-200"
-					style:height={(preview ? thumbnailHeight : thumbnailHeight * 0.67) + 'px'}
-				>
-					<img src={imageSrc} alt="" class="block h-full w-full scale-104" />
-
-					{#if viewportPolygon}
-						{@const { leftPct, topPct, widthPct, heightPct } =
-							getViewportRectWithinHistoricMap(historicMap)}
-
-						<div
-							class="pointer-events-none absolute rounded-[4px] border-[4px] border-[#33336666]"
-							style="left: {leftPct}%; top: {topPct}%; width: {widthPct}%; height: {heightPct}%;"
-						></div>
-					{/if}
-				</div>
-			</div>
-		</div>
-
-		<!-- {#if preview}
-			<div class="absolute -bottom-6 w-full rounded-[4px] text-[12px] text-[#336]">
-				<kbd
-					class="bg-background-alt pointer-events-none flex inline h-4 items-center gap-1 rounded-sm border border-[#336] px-1 font-sans font-medium opacity-75 shadow-[0px_1px_0px_0px_#336] select-none"
-					><span class="text-foreground-alt text-[10px]">Spatie</span></kbd
-				>
-				en
-				<MouseLeftClick size="18" class="inline opacity-75" color="#336"></MouseLeftClick>
-				om blad te bekijken
-			</div>
-		{/if} -->
-
-		{#if !preview && editionManifest && canvasManifest}
-			{@const metadata = getMetadata(canvasManifest)}
-			{@const editionMetadata = getMetadata(editionManifest)}
-			{@const collectionId =
-				'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json'}
-			{@const manifestId = editionManifest.id}
-			{@const homepageUrl = editionManifest.rendering[0].id}
-
-			<div class="flex flex-col gap-1 p-2" transition:slide>
-				<div class="flex gap-2">
-					<h3 class="inline text-[14px] font-semibold text-[#33336666]">Editie</h3>
-					<span class="max-w-30 font-mono text-[#336]"
-						>{historicMap.edition}{historicMap.bis ? ' BIS' : ''}</span
-					>
-				</div>
-				{#each metadata as [label, value]}
-					<div class="flex gap-2">
-						<h3 class="inline text-[14px] font-semibold text-[#33336666]">{label}</h3>
-						<span class="max-w-30 font-mono text-[#336]"
-							>{value === 'Watervoorzieningseenheden' ? 'Watervoorzienings- eenheden' : value}</span
-						>
-					</div>
-				{/each}
-
-				<!-- {#each editionMetadata as [label, value]}
-					<div class="flex gap-2">
-						<h3 class="inline text-[14px] font-semibold text-[#33336666]">{label}</h3>
-						<span class="max-w-30 font-mono text-[#336]"
-							>{value === 'Watervoorzieningseenheden' ? 'Watervoorzienings- eenheden' : value}</span
-						>
-					</div>
-				{/each} -->
-
-				<h3 class="mt-1 text-[14px] font-semibold text-[#33336666]">Links</h3>
-				<div class="">
-					<a
-						href={`https://theseus-viewer.netlify.app/?iiif-content=${manifestId}&collection=${collectionId}`}
-						class="text-[#f4a] hover:underline"
-					>
-						<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Open in Theseus
-					</a>
-				</div>
-
-				<div class="">
-					<a href={homepageUrl} class="text-[#f4a] hover:underline">
-						<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Utrecht Universiteit Library
-					</a>
-				</div>
-
-				{#if canvasManifest.annotations}
-					{@const annotationUrl = canvasManifest.annotations[0].id}
-					<div class="">
-						<a
-							href="https://viewer.allmaps.org/?url={annotationUrl}"
-							class="text-[#f4a] hover:underline"
-						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Open in Allmaps Viewer
-						</a>
-					</div>
-
-					<div class="">
-						<button
-							onclick={() =>
-								setClipboard(
-									`https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
-								)}
-							class="cursor-pointer text-[#f4a] hover:underline"
-						>
-							{#if copySuccess}
-								<Check size="15" color="#f4a" class="relative inline" /> XYZ tile URL gekopieerd
-							{:else}
-								<Copy size="15" color="#f4a" class="relative inline" /> Kopiëer XYZ tile URL
-							{/if}
-						</button>
-					</div>
-
-					<div class="">
-						<a
-							href={`https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson}`}
-							class="text-[#f4a] hover:underline"
-						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" /> Open in geojson.io
-						</a>
-					</div>
-				{/if}
-
-				<div class="mt-1 inline-flex flex-col">
-					<h3 class="text-[14px] font-semibold text-[#33336666]">
-						Varianten ({variants.length})
-					</h3>
-					<div class="relative">
-						<div class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#f4a]">
-							<ImagesSquare size="18" />
-						</div>
-
-						<select
-							onchange={(e) => {
-								const id = e.target.value;
-								const historicMap = historicMapsById.values().find((m) => m.manifestId == id);
-								if (historicMap) {
-									changeHistoricMapView(historicMap);
-								} else {
-									const backCanvasManifest = variants.find((m) => m.id == id);
-									addFakeGeoreferencedMap(backCanvasManifest);
-								}
-							}}
-							name="variant"
-							class="w-55 truncate rounded-lg border-2 border-[#33336611] bg-white py-2.5 pr-16 pl-10 text-base font-medium shadow-[0_2px_2px_rgba(0,0,0,0.05)] focus:outline-none"
-						>
-							{#each variants as variant}
-								{@const name = Object.fromEntries(getMetadata(variant)).Type || 'Voorkant'}
-								<option
-									value={variant && variant.id}
-									selected={historicMap.manifestId == variant.id}>{name}</option
-								>
-							{/each}
-						</select>
-
-						<!-- <span
-							class="pointer-events-none absolute top-1/2 right-8 flex h-6 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-[#eef] text-center text-sm font-semibold text-[#336]"
-						>
-							+{variants.length}
-						</span> -->
 					</div>
 				</div>
 			</div>

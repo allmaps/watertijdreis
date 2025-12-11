@@ -31,7 +31,10 @@
 
 	function updateFromEvent(e) {
 		const rect = trackEl.getBoundingClientRect();
-		const px = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+		const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? e.targetTouches?.[0]?.clientX;
+		if (!clientX) return;
+
+		const px = Math.min(Math.max(clientX - rect.left, 0), rect.width);
 		value = Math.round((px / rect.width) * 100);
 		onchange(value);
 	}
@@ -86,6 +89,7 @@
 			h-6 cursor-pointer items-center
 			active:scale-[0.99]
 		"
+		style="touch-action: none"
 		onpointerdown={onPointerDown}
 		onkeydown={handleKeyDown}
 		onfocus={handleFocus}

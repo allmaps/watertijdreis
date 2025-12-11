@@ -12,6 +12,8 @@
 		tabindex = undefined
 	} = $props();
 
+	const isTouch = typeof window !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+
 	let buttonEl = $state();
 	let slotEl = $state(null);
 
@@ -76,13 +78,24 @@
 			buttonEl.style.setProperty('--grad-opacity', '0');
 		}
 	});
+
+	let hoverdelay = null;
 </script>
 
 <button
 	bind:this={buttonEl}
 	{onclick}
-	onmouseenter={() => openOnHover && (collapsed = false)}
-	onmouseleave={() => openOnHover && (collapsed = true)}
+	onmouseenter={() => {
+		if (!isTouch && openOnHover) {
+			hoverdelay = setTimeout(() => (collapsed = false), 500);
+		}
+	}}
+	onmouseleave={() => {
+		if (!isTouch && openOnHover) {
+			collapsed = true;
+			clearTimeout(hoverdelay);
+		}
+	}}
 	{tabindex}
 	class="
         group relative cursor-pointer
@@ -95,12 +108,14 @@
 	<div
 		class="pointer-events-none absolute inset-0 rounded-[9px] transition-opacity duration-500"
 		style:opacity="var(--grad-opacity)"
-		style:background="radial-gradient(circle at var(--x, 50%) var(--y, 50%), #66f 0%, #eeeeff88 70%)"
+		style:background={'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%)'}
 	></div>
 
-	<div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg">
+	<div
+		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffee]"
+	>
 		<Icon
-			color="#ff44aa"
+			color="#3333aa"
 			weight="regular"
 			class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"
 		></Icon>
@@ -111,7 +126,7 @@
 		>
 			<div
 				bind:this={slotEl}
-				class="flex origin-left items-center whitespace-nowrap transition-all delay-100 duration-300 ease-out"
+				class="flex origin-left items-center whitespace-nowrap transition-all delay-100 duration-500 ease-out"
 				style:width="max-content"
 				style:transform={`translateX(${collapsed ? -6 : 0}px) scaleX(${collapsed ? 85 : 100}%)`}
 				style:opacity={collapsed ? 0 : 1}

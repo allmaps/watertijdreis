@@ -28,7 +28,6 @@
 		if (visible) {
 			opacity = layerOptions.historicMapsOpacity;
 			opacityUpdateInterval = setInterval(() => {
-				console.log('update');
 				layerOptions.historicMapsOpacity = opacity;
 			}, 200);
 		}

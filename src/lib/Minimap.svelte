@@ -6,6 +6,7 @@
 		visibleHistoricMaps,
 		visibleHistoricMapsInViewport,
 		viewportPolygon,
+		sheetIndexVisible,
 		hoveredHistoricMap,
 		clickedHistoricMap,
 		selectedHistoricMap,
@@ -96,7 +97,7 @@
 		{width}
 		{height}
 		viewBox={viewBox.join(' ')}
-		class="transition-scale absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
+		class="transition-scale pointer-events-none absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
 		style="filter: drop-shadow( 1px 1px 0px #33336666);"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
@@ -144,10 +145,14 @@
 					ry={(viewBox[2] / width) * 2}
 				></rect>
 			{/if}
-			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
 				<g out:fade={{ duration: 250 }}>
-					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
-						{@const historicMap = previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
+						{@const historicMap =
+							previewHistoricMap ||
+							clickedHistoricMap ||
+							selectedHistoricMap ||
+							(sheetIndexVisible && hoveredHistoricMap)}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates

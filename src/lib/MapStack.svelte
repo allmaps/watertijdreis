@@ -1,18 +1,11 @@
 <script lang="ts">
 	import { flip } from 'svelte/animate';
 	import { fade, fly, scale } from 'svelte/transition';
+	import MapThumbnail from './MapThumbnail.svelte';
 
 	type HistoricMap = { id: string; year: number };
 
-	let {
-		maps,
-		x,
-		pixelsPerYear,
-		mapsInViewport,
-		hoveredHistoricMap,
-		getHistoricMapThumbnail,
-		selectedYear
-	} = $props<{
+	let { maps, x, pixelsPerYear, mapsInViewport, hoveredHistoricMap, selectedYear } = $props<{
 		maps: HistoricMap[];
 		x: number;
 		pixelsPerYear: number;
@@ -52,7 +45,7 @@
 		{@const showContent = selectedYear + 0.5 > map.yearEnd && visible}
 
 		<div
-			class="absolute h-10 w-10 origin-bottom shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
+			class="absolute h-8 w-10 origin-bottom shadow-[0_6px_6px_rgba(0,0,0,0.1)]"
 			style:background-color={visible ? style.color : 'transparent'}
 			style:border={visible ? '' : '1px solid #eeeeff44'}
 			style="
@@ -62,20 +55,9 @@
                 transition: opacity 0.5s;
             "
 		>
-			{#if false}
+			{#if showContent}
 				<div transition:scale={{ duration: 200 }} class="h-full w-full">
-					{#await getHistoricMapThumbnail(map.id)}
-						<div
-							style:background-color={style.color}
-							class="h-full w-full animate-pulse opacity-50"
-						></div>
-					{:then src}
-						{#if src}
-							<img {src} alt="" class="h-full w-full object-cover object-center" />
-						{:else}
-							<div class="h-full w-full bg-gray-400"></div>
-						{/if}
-					{/await}
+					<MapThumbnail id={map.id} height={32}></MapThumbnail>
 				</div>
 			{/if}
 		</div>
