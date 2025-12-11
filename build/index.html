@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<script>
+	try {
+		const ok =
+		({}?.a === undefined) &&
+		Array.prototype.at &&
+		typeof import('data:text/javascript,export default 123') === 'object';
+
+		if (!ok) {
+			window.location.href = '/unsupported-browser.html';
+		}
+	} catch (_) {
+		window.location.href = '/unsupported-browser.html';
+	}
+	</script>
+	<title>Watertijdreis</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta name="description" content="Watertijdreis - Interactieve historische waterstaatskaarten van Nederland" />
+	<meta name="theme-color" content="#333366" />
+
+	<meta property="og:title" content="Watertijdreis" />
+	<meta property="og:description" content="Reis door de tijd langs historische waterstaatskaarten van Nederland!" />
+	<meta property="og:image" content="https://dev.watertijdreis.nl/meta-thumbnail-small.png" />
+	<meta property="og:image:secure_url" content="https://dev.watertijdreis.nl/meta-thumbnail-small.png" />
+	<meta property="og:image:width" content="1000" />
+	<meta property="og:image:height" content="1000" />
+	<meta property="og:image:type" content="image/png" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://dev.watertijdreis.nl" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Watertijdreis" />
+	<meta name="twitter:description" content="Reis door de tijd langs historische waterstaatskaarten van Nederland!" />
+	<meta name="twitter:image" content="https://dev.watertijdreis.nl/meta-thumbnail-small.png" /> 
+
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<!-- <link rel="manifest" href="/manifest.json" /> -->
+	<link rel="icon" type="image/x-icon" href="waves_flipped.png" />
+	<link rel="stylesheet" href="https://use.typekit.net/bis1pqi.css" />
+
+	<script defer src="https://stats.allmaps.org/script.js" data-website-id="53da7c24-8f6f-49aa-a55f-3e1c886585e5"></script>
+	
+	
+		<link href="./_app/immutable/assets/0.C1Zw8M6Z.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/2.COvMrM2I.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.BUgFujXd.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/D4IbFQaT.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/BCb-bXPf.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.BXkaXYJm.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CWj6FrbW.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CaLg0wbH.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.BgwGVB9G.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/2.kJo0jRTs.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/BNYSXTBN.js">
+</head>
+
+<body data-sveltekit-preload-data="hover">
+	<div style="display: contents"><!--[--><!--[--><!----><!----><div class="fixed inset-0 h-[100dvh] w-full overflow-hidden"><link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css"/> <div id="map-container" class="polka fixed inset-0 h-full w-full bg-size-[25px_25px]" style="
+		touch-action: auto; 
+		background-color: #fafaff; 
+		background-image: radial-gradient(#eef 2.5px, transparent 2.5px)
+	"></div> <!--[--><!--[!--><!--]--><!--]--> <div class="group fixed top-21 left-2 z-1000 my-3 flex flex-shrink-0 cursor-pointer items-center justify-center rounded-[9px] border-2 border-[#33336611] bg-[#33336611] font-[500] text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)] backdrop-blur-md duration-500 sm:top-24 sm:left-5"><span class="absolute left-0 h-full w-1/2 rounded-[8px] bg-white shadow-md transition-[left,width] duration-300 ease-out" style="left: 0px; width: 86px;"></span> <button class="z-2 flex cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300" tabindex="3"><svg xmlns="http://www.w3.org/2000/svg" role="img" width="18" height="18" fill="#f4a" viewBox="0 0 256 256" class="shrink-0 transition-[fill] duration-500"><!--[!--><!--]--><rect width="256" height="256" fill="none"></rect><!--[!--><!--[!--><!--[!--><!--[!--><!--[--><path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69ZM104,52.94l48,24V203.06l-48-24ZM40,62.25l48-12v127.5l-48,12Zm176,131.5-48,12V78.25l48-12Z"></path><!--]--><!--]--><!--]--><!--]--><!--]--></svg><!----> Kaart</button> <button class="z-2 flex max-w-50 cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300" tabindex="4"><svg xmlns="http://www.w3.org/2000/svg" role="img" width="18" height="18" fill="#336" viewBox="0 0 256 256" class="shrink-0 transition-[fill] duration-500"><!--[!--><!--]--><rect width="256" height="256" fill="none"></rect><!--[!--><!--[!--><!--[!--><!--[!--><!--[--><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Zm-32-80a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,136Zm0,32a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,168Z"></path><!--]--><!--]--><!--]--><!--]--><!--]--></svg><!----> <!--[!--><!--[!--><span class="truncate">Bladindex</span> <!--[--><kbd class="ml-1 flex inline items-center rounded-[4px] border border-[#eef] bg-white px-1 font-sans text-[12px] text-[#cce] shadow-[0px_2px_0px_0px_#cce] select-none"><span>Spatie</span></kbd><!--]--><!--]--><!--]--></button></div> <!--[!--><!--]--><!----><!----> <!--[!--><!--]--> <!--[!--><!--]--><!----> <!--[!--><!--]--><!----> <div class="absolute top-2 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-[#ffffff] p-4 text-[#336] shadow-lg sm:top-5 sm:left-5 svelte-zne36e" role="group"><button class="svelte-zne36e"><h1 class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef] svelte-zne36e"><!--[--><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 0ms;">W</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 100ms;">a</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 200ms;">t</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 300ms;">e</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 400ms;">r</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 500ms;">t</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 600ms;">i</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 700ms;">j</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 800ms;">d</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 900ms;">r</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 1000ms;">e</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 1100ms;">i</span><span class="inline-block will-change-[transform,text-shadow,color] svelte-zne36e wave-loading" style="animation-delay: 1200ms;">s</span><!--]--></h1></button> <button tabindex="1" class="group relative cursor-pointer rounded-[9px] font-[500] text-[#336] backdrop-blur-sm transition-all duration-500 ease-out active:scale-95 active:outline-3" style="--grad-opacity: 0;"><div class="pointer-events-none absolute inset-0 rounded-[9px] transition-opacity duration-500" style="opacity: var(--grad-opacity); background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%);"></div> <div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"><!----><svg xmlns="http://www.w3.org/2000/svg" role="img" width="1em" height="1em" fill="#3333aa" viewBox="0 0 256 256" class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"><!--[!--><!--]--><rect width="256" height="256" fill="none"></rect><!--[!--><!--[!--><!--[!--><!--[!--><!--[--><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path><!--]--><!--]--><!--]--><!--]--><!--]--></svg><!----> <div class="ease-[cubic-bezier(0.3, 0.8, 0.3, 2.3)] overflow-hidden transition-[width] duration-300" style="width: 0px;"><div class="flex origin-left items-center whitespace-nowrap transition-all delay-100 duration-500 ease-out" style="width: max-content; transform: translateX(0px) scaleX(100%); opacity: 1; padding: 0 4px;"><span class="ml-1"><!---->Over<!----></span> <!--[!--><!--]--></div></div></div></button><!----> <button tabindex="2" class="group relative cursor-pointer rounded-[9px] font-[500] text-[#336] backdrop-blur-sm transition-all duration-500 ease-out active:scale-95 active:outline-3" style="--grad-opacity: 0;"><div class="pointer-events-none absolute inset-0 rounded-[9px] transition-opacity duration-500" style="opacity: var(--grad-opacity); background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%);"></div> <div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"><!----><svg xmlns="http://www.w3.org/2000/svg" role="img" width="1em" height="1em" fill="#3333aa" viewBox="0 0 256 256" class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"><!--[!--><!--]--><rect width="256" height="256" fill="none"></rect><!--[!--><!--[!--><!--[!--><!--[!--><!--[--><path d="M237.66,106.35l-80-80A8,8,0,0,0,144,32V72.35c-25.94,2.22-54.59,14.92-78.16,34.91-28.38,24.08-46.05,55.11-49.76,87.37a12,12,0,0,0,20.68,9.58h0c11-11.71,50.14-48.74,107.24-52V192a8,8,0,0,0,13.66,5.65l80-80A8,8,0,0,0,237.66,106.35ZM160,172.69V144a8,8,0,0,0-8-8c-28.08,0-55.43,7.33-81.29,21.8a196.17,196.17,0,0,0-36.57,26.52c5.8-23.84,20.42-46.51,42.05-64.86C99.41,99.77,127.75,88,152,88a8,8,0,0,0,8-8V51.32L220.69,112Z"></path><!--]--><!--]--><!--]--><!--]--><!--]--></svg><!----> <div class="ease-[cubic-bezier(0.3, 0.8, 0.3, 2.3)] overflow-hidden transition-[width] duration-300" style="width: 0px;"><div class="flex origin-left items-center whitespace-nowrap transition-all delay-100 duration-500 ease-out" style="width: max-content; transform: translateX(0px) scaleX(100%); opacity: 1; padding: 0 4px;"><span class="ml-1"><!---->Delen<!----></span> <!--[!--><!--]--></div></div></div></button><!----></div><!----> <!--[!--><!--]--><!----> <!--[!--><!--]--><!----> <!--[!--><!--]--><!----><!----></div><!----><!----><!----><!--]--> <!--[!--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_1d3787q = {
+						base: new URL(".", location).pathname.slice(0, -1),
+						assets: "/WaterTijdReis"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("./_app/immutable/entry/start.BUgFujXd.js"),
+						import("./_app/immutable/entry/app.BXkaXYJm.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 2],
+							data: [null,null],
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+</body>
+
+</html>
