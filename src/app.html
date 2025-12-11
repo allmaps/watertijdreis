@@ -2,6 +2,20 @@
 <html lang="en">
 
 <head>
+	<script>
+	try {
+		const ok =
+		({}?.a === undefined) &&
+		Array.prototype.at &&
+		typeof import('data:text/javascript,export default 123') === 'object';
+
+		if (!ok) {
+			window.location.href = '/unsupported-browser.html';
+		}
+	} catch (_) {
+		window.location.href = '/unsupported-browser.html';
+	}
+	</script>
 	<title>Watertijdreis</title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -29,6 +43,9 @@
 	<!-- <link rel="manifest" href="/manifest.json" /> -->
 	<link rel="icon" type="image/x-icon" href="waves_flipped.png" />
 	<link rel="stylesheet" href="https://use.typekit.net/bis1pqi.css" />
+
+	<script defer src="https://stats.allmaps.org/script.js" data-website-id="53da7c24-8f6f-49aa-a55f-3e1c886585e5"></script>
+	
 	%sveltekit.head%
 </head>
 
