@@ -520,7 +520,7 @@
 											{#if !type.toLowerCase().includes('achterkant')}
 												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
 											{:else}
-												<img {src} alt={type} class="block h-full w-full object-cover" />
+												<img {src} alt={type} class="block h-full w-auto object-cover" />
 											{/if}
 										</div>
 
