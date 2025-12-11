@@ -1310,7 +1310,7 @@
 								[minX, minY],
 								[maxX, maxY]
 							],
-							{ padding: 100, speed: 2, curve: 1.8, essential: true }
+							{ padding: 75, speed: 2, curve: 1.8, essential: true }
 						),
 					250
 				);
