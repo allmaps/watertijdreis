@@ -51,13 +51,13 @@
 		});
 	});
 
-	$effect(() => {
-		if (maplibreLoaded) console.log('maplibre geladen: ', map);
-	});
+	// $effect(() => {
+	// 	if (maplibreLoaded) console.log('maplibre geladen: ', map);
+	// });
 
-	$effect(() => {
-		if (historicMapsLoaded) console.log('historische kaarten geladen: ', historicMapsById);
-	});
+	// $effect(() => {
+	// 	if (historicMapsLoaded) console.log('historische kaarten geladen: ', historicMapsById);
+	// });
 
 	let historicMapsLoaded: boolean = $state(false);
 	let historicMapsById: Map<string, HistoricMap> = $state(new SvelteMap());
