@@ -436,7 +436,7 @@
 			<div
 				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
-				class="flex flex-col gap-4 overflow-y-auto border-t border-[#eeeeff10]"
+				class="flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t border-[#eeeeff10]"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="pt-2">

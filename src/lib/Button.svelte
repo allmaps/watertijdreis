@@ -112,7 +112,7 @@
 	></div>
 
 	<div
-		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffee]"
+		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"
 	>
 		<Icon
 			color="#3333aa"

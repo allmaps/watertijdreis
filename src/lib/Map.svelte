@@ -778,18 +778,18 @@
 				setGridVisibility(false, clickedLngLat);
 			}, 1500);
 
-			if (feature) {
-				setTimeout(
-					() =>
-						map!.flyTo({
-							center: clickedLngLat,
-							speed: 0.5,
-							curve: 1,
-							essential: true
-						}),
-					250
-				);
-			}
+			// if (feature) {
+			// 	setTimeout(
+			// 		() =>
+			// 			map!.flyTo({
+			// 				center: clickedLngLat,
+			// 				speed: 0.5,
+			// 				curve: 1,
+			// 				essential: true
+			// 			}),
+			// 		250
+			// 	);
+			// }
 
 			if (clickedFeature && clickedFeature.properties?.id === mapId) {
 				if (mapId) setHistoricMapView(historicMapsById.get(mapId));
@@ -840,6 +840,7 @@
 		rippleScale = 3,
 		speed = 300
 	) {
+		if (sheetIndexVisible && !isVisible) return;
 		const source = map.getSource('map-outlines');
 		if (!source || !source._data) return;
 		const allFeatures = source._data.features;
