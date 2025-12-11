@@ -747,7 +747,7 @@
 			source: 'map-outlines',
 			paint: {
 				'line-color': '#f4a',
-				'line-width': 1.5,
+				'line-width': 1,
 				'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
 			}
 		});
