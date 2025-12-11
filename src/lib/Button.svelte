@@ -13,6 +13,8 @@
 	} = $props();
 
 	const isTouch = typeof window !== 'undefined' && matchMedia('(pointer: coarse)').matches;
+	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+	if (!isApplePlatform && kbd) kbd = kbd.replace('⌘', 'Ctrl ');
 
 	let buttonEl = $state();
 	let slotEl = $state(null);
