@@ -432,6 +432,12 @@
 
 			{@const manifestId = editionManifest.id}
 
+			{@const canvasId = canvasManifest.id}
+
+			{@const canvasIndex = canvasId.match(/\/p(\d*)$/)?.[1]}
+
+			{@const imageId = canvasManifest.items[0]?.items[0]?.body?.service[0]?.id}
+
 			{@const homepageUrl = editionManifest.rendering[0].id}
 
 			<div
@@ -542,7 +548,7 @@
 
 					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
 						<a
-							href={homepageUrl}
+							href={`${homepageUrl}?page=${canvasIndex}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
@@ -553,7 +559,7 @@
 						</a>
 
 						<a
-							href={`https://theseus-viewer.netlify.app/?iiif-content=${manifestId}&collection=${collectionId}`}
+							href={`https://theseus-viewer.netlify.app/embed?iiif-content=${manifestId}&canvas=${canvasId}&collection=${collectionId}&panel=navPlace`}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-[#f4a] hover:underline"
@@ -575,6 +581,17 @@
 								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
 
 								Open in Allmaps Viewer
+							</a>
+
+							<a
+								href={annotationUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-[#f4a] hover:underline"
+							>
+								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+								Open Georeference Annotation
 							</a>
 
 							<button
@@ -606,6 +623,16 @@
 								Open in geojson.io
 							</a>
 						{/if}
+						<a
+							href={`${imageId}/full/max/0/default.png`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-[#f4a] hover:underline"
+						>
+							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+							Download PNG
+						</a>
 					</div>
 				</div>
 			</div>
