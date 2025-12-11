@@ -1133,10 +1133,16 @@
 	}
 
 	let sheetIndexVisible = $state(false);
-	function setSheetIndexVisibility(visible = true) {
+	function setSheetIndexVisibility(visible = !sheetIndexVisible) {
 		sheetIndexVisible = visible;
 		setGridVisibility(visible, { lng: 5.63, lat: 52.16 }, 100, 150);
+		if (visible && selectedHistoricMap) {
+			map?.setLayoutProperty('map-outlines-numbers', 'visibility', visible ? 'visible' : 'none');
+			map?.setLayoutProperty('map-outlines-stroke', 'visibility', visible ? 'visible' : 'none');
+			map?.setLayoutProperty('map-outlines-fill', 'visibility', visible ? 'visible' : 'none');
+		}
 		map?.setPaintProperty('map-outlines-numbers', 'text-opacity', +visible);
+		return visible;
 	}
 
 	function setLabelVisibility(visible = true) {
@@ -1299,7 +1305,7 @@
 								[minX, minY],
 								[maxX, maxY]
 							],
-							{ padding: 100, speed: 2, curve: 1.8 }
+							{ padding: 100, speed: 2, curve: 1.8, essential: true }
 						),
 					250
 				);
@@ -1651,6 +1657,7 @@
 	{visibleHistoricMapsInViewport}
 	{viewportPolygon}
 	{hoveredHistoricMap}
+	{sheetIndexVisible}
 	{clickedHistoricMap}
 	{selectedHistoricMap}
 	{historicMapsLoaded}
@@ -1664,6 +1671,8 @@
 	{viewportPolygon}
 	{clickedHistoricMap}
 	{selectedHistoricMap}
+	{hoveredHistoricMap}
+	{sheetIndexVisible}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
 ></MapInfo>
@@ -1685,6 +1694,7 @@
 		if (e.key == 'Escape') {
 			clickedFeature = null;
 			setGridVisibility(false);
+			setSheetIndexVisibility(false);
 		}
 	}}
 	onpopstate={() => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fly, fade } from 'svelte/transition';
+	import { fly, fade, draw } from 'svelte/transition';
 	import { Spring } from 'svelte/motion';
 	import { HandSwipeRight, HandGrabbing } from 'phosphor-svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
@@ -401,6 +401,19 @@
 						<feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="1" />
 					</filter>
 				</defs>
+
+				{#if filter.yearStart > minHistoricMapYear}
+					{@const x = getX(filter.yearStart)}
+					<line
+						x1={x}
+						y1={0}
+						x2={x}
+						y2={height}
+						stroke="#eef"
+						stroke-width={2}
+						stroke-dasharray="4 2"
+					></line>
+				{/if}
 
 				<rect
 					x="0"

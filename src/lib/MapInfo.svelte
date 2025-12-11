@@ -53,6 +53,8 @@
 		historicMapsById,
 		visibleHistoricMapsInViewport,
 		viewportPolygon,
+		sheetIndexVisible,
+		hoveredHistoricMap,
 		clickedHistoricMap,
 		selectedHistoricMap,
 		changeHistoricMapView,
@@ -63,6 +65,7 @@
 		return (
 			selectedHistoricMap ||
 			clickedHistoricMap ||
+			(sheetIndexVisible && hoveredHistoricMap) ||
 			(visibleHistoricMapsInViewport.size == 1
 				? visibleHistoricMapsInViewport.values().next().value
 				: null)

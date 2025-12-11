@@ -22,7 +22,7 @@
 
 	function leftBtnClick() {
 		rightBtnSelected = false;
-		if (pinnedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id)
+		if (pinnedHistoricMap && selectedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id)
 			pinnedView = saveMapView(false);
 		restoreView();
 		setSheetIndexVisibility(false);
@@ -38,7 +38,7 @@
 			extendClickedMapTimeout();
 			setHistoricMapView(pinnedHistoricMap, pinnedView);
 		} else {
-			setSheetIndexVisibility(true);
+			if (!setSheetIndexVisibility()) leftBtnClick();
 		}
 	}
 
@@ -74,15 +74,17 @@
 <svelte:document
 	onkeydown={(e) => {
 		if (e.key == ' ' && !spaceKeyDown) {
+			spaceKeyDown = true;
 			rightBtnClick();
 		}
-		if (e.key == 'Escape' && selectedHistoricMap) {
-			restoreView();
+		if (e.key == 'Escape') {
+			leftBtnClick();
 		}
 	}}
 	onkeyup={(e) => {
 		if (e.key == ' ') {
-			if (!selectedHistoricMap) leftBtnClick();
+			spaceKeyDown = false;
+			// if (!selectedHistoricMap) leftBtnClick();
 		}
 	}}
 />

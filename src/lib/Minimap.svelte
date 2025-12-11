@@ -6,6 +6,7 @@
 		visibleHistoricMaps,
 		visibleHistoricMapsInViewport,
 		viewportPolygon,
+		sheetIndexVisible,
 		hoveredHistoricMap,
 		clickedHistoricMap,
 		selectedHistoricMap,
@@ -144,10 +145,14 @@
 					ry={(viewBox[2] / width) * 2}
 				></rect>
 			{/if}
-			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
 				<g out:fade={{ duration: 250 }}>
-					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
-						{@const historicMap = previewHistoricMap || clickedHistoricMap || selectedHistoricMap}
+					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
+						{@const historicMap =
+							previewHistoricMap ||
+							clickedHistoricMap ||
+							selectedHistoricMap ||
+							(sheetIndexVisible && hoveredHistoricMap)}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates
