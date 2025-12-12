@@ -7,7 +7,7 @@
 <Modal title="Over Watertijdreis" bind:visible>
 	<div class="prose sm:p-6 sm:pt-0">
 		<p>
-			Watertijdreis maakt het mogelijk om ruim 150 jaar aan Nederlandse watergeschiedenis te
+			Watertijdreis maakt het mogelijk om ruim 125 jaar aan Nederlandse watergeschiedenis te
 			ontdekken. Vanaf de negentiende eeuw is er veel veranderd in de manier waarop we water beheren
 			en afwateren. De Waterstaatskaarten, vervaardigd door Rijkswaterstaat tussen 1865 en 1992,
 			brengen die veranderingen landsdekkend in beeld. Je ziet hoe Nederland zich in korte tijd snel
