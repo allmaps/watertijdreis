@@ -12,7 +12,7 @@
 	import { slide, fly, scale } from 'svelte/transition';
 	import Geocoder from './Geocoder.svelte';
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
-	import { PUBLIC_GEOCODE_EARTH_API_KEY } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 	import LayersPanel from './LayersPanel.svelte';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
@@ -29,6 +29,8 @@
 		layerOptions = $bindable(),
 		userLocationActive = $bindable()
 	} = $props();
+
+	const geocodeEarthApiKey = env.PUBLIC_GEOCODE_EARTH_API_KEY;
 
 	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
 	let kbdVisible = $state(false);
@@ -69,7 +71,7 @@
 <Geocoder
 	{flyToFeature}
 	bind:visible={searchBarVisible}
-	providers={[new GeocodeEarth(PUBLIC_GEOCODE_EARTH_API_KEY)]}
+	providers={[new GeocodeEarth(geocodeEarthApiKey)]}
 ></Geocoder>
 
 <LayersPanel2 bind:visible={layersPanelVisible2} bind:layerOptions></LayersPanel2>
