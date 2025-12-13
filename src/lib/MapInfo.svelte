@@ -333,8 +333,8 @@
 {#if historicMap}
 	<div
 		class="
-			fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] bg-gradient-to-r from-[#336]
-			from-[270px] to-[#336] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
+			fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] bg-gradient-to-r from-[#33336688] from-[270px]
+			to-[#33336688] shadow-lg transition-[width] duration-300 sm:top-auto sm:from-[#336] sm:to-transparent sm:to-[calc(50%-30px)]
 			{sheetInformationVisible || selectedHistoricMap ? 'bg-[#336]' : ''}
 			{sheetInformationVisible || selectedHistoricMap
 			? 'w-auto sm:w-87'
