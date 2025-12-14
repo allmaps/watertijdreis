@@ -1697,6 +1697,7 @@
 	{selectedHistoricMap}
 	{hoveredHistoricMap}
 	{sheetIndexVisible}
+	{setHistoricMapView}
 	{changeHistoricMapView}
 	{getHistoricMapThumbnail}
 ></MapInfo>
