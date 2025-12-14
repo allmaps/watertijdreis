@@ -27,6 +27,7 @@
 	let inputValue = $state('');
 	let featuresByProviderIndex: GeocoderGeoJsonFeature[][] = $state([]);
 	let selectedFeatureIndex: number = $state(0);
+	let firstResultsFetched: boolean = $state(false);
 
 	let dialogElement = $state<HTMLDivElement>();
 	let firstFocusableElement = $state<HTMLElement>();
@@ -58,6 +59,10 @@
 	}
 
 	const DEBOUNCE_WAIT_MS = 200;
+	const DEBOUNCE_OPTIONS = {
+		leading: false,
+		trailing: true
+	};
 
 	const getFeatures = debounce(
 		async (text: string) => {
@@ -84,10 +89,11 @@
 			});
 
 			featuresByProviderIndex = await Promise.all(promises);
+			firstResultsFetched = true;
 			selectedFeatureIndex = 0;
 		},
 		DEBOUNCE_WAIT_MS,
-		{ leading: true, trailing: true }
+		DEBOUNCE_OPTIONS
 	);
 
 	$effect(() => {
@@ -104,6 +110,7 @@
 			}, 50);
 		} else {
 			inputValue = '';
+			firstResultsFetched = false;
 			featuresByProviderIndex = [];
 		}
 	});
@@ -272,7 +279,11 @@
 						{/each}
 					{:else}
 						<li class="px-4 py-8 text-center text-sm text-gray-500">
-							Geen resultaten gevonden voor "{inputValue}"
+							{#if firstResultsFetched}
+								Geen resultaten gevonden voor "{inputValue}"
+							{:else}
+								Aan het zoeken...
+							{/if}
 						</li>
 					{/if}
 				</ul>
