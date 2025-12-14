@@ -58,6 +58,7 @@
 		clickedHistoricMap,
 		selectedHistoricMap,
 		changeHistoricMapView,
+		setHistoricMapView,
 		getHistoricMapThumbnail
 	} = $props();
 
@@ -352,8 +353,11 @@
 					style="transform-style: preserve-3d; perspective: 100px"
 				>
 					<div
+						onclick={() => {
+							if (historicMap && !selectedHistoricMap) setHistoricMapView(historicMap);
+						}}
 						bind:this={thumbnailEl}
-						class="h-22 w-fit origin-[10%_100%] overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
+						class="pointer-events-auto h-22 w-fit origin-[10%_100%] cursor-pointer overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
 						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
 					>
 						{#if canvasManifest && getMetadata(canvasManifest).flat().includes('Achterkant')}
@@ -386,7 +390,12 @@
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
 					in:fly|global={{ x: -20 }}
 				>
-					<h1 class="line-clamp-2 max-w-50 truncate text-[16px] font-bold text-[#eef]">
+					<h1
+						onclick={() => {
+							if (historicMap && !selectedHistoricMap) setHistoricMapView(historicMap);
+						}}
+						class="pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold text-[#eef]"
+					>
 						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
 
