@@ -14,6 +14,9 @@ importers:
       '@fortawesome/fontawesome-free':
         specifier: ^6.7.2
         version: 6.7.2
+      '@lukulent/svelte-umami':
+        specifier: ^0.0.4
+        version: 0.0.4(svelte@5.43.6)
       '@maplibre/maplibre-gl-style-spec':
         specifier: ^24.3.1
         version: 24.3.1
@@ -518,6 +521,11 @@ packages:
 
   '@kninnug/constrainautor@4.0.1':
     resolution: {integrity: sha512-wVnev6bmVBY3GjZeaDK+SQFIc2crpLQAmb5nYUVy/QtYUBz0masTji20XToVXfym7WgpaRFHDhcyX15CMhND8w==}
+
+  '@lukulent/svelte-umami@0.0.4':
+    resolution: {integrity: sha512-LXmo0oa8lPg032gfqFQgRhEJgUDqgsOzyqPSXtJ2nKlUAYhsPbB0EXwgOjrj7+IfeiBEiq2c6vfv0VV5Jvv/PA==}
+    peerDependencies:
+      svelte: ^4.0.0 || ^5.0.0
 
   '@mapbox/geojson-rewind@0.5.2':
     resolution: {integrity: sha512-tJaT+RbYGJYStt7wI3cq4Nl4SXxG8W7JDG5DMJu97V25RnbNg3QtQtf+KD+VLjNpWKYsRvXDNmNrBgEETr1ifA==}
@@ -3606,6 +3614,11 @@ snapshots:
   '@kninnug/constrainautor@4.0.1':
     dependencies:
       robust-predicates: 3.0.2
+
+  '@lukulent/svelte-umami@0.0.4(svelte@5.43.6)':
+    dependencies:
+      esm-env: 1.2.2
+      svelte: 5.43.6
 
   '@mapbox/geojson-rewind@0.5.2':
     dependencies:

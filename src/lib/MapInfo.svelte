@@ -633,6 +633,16 @@
 							</a>
 						{/if}
 						<a
+							href={`${imageId}/full/1024,/0/default.png`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-[#f4a] hover:underline"
+						>
+							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+
+							Download beeld (1024px)
+						</a>
+						<a
 							href={`${imageId}/full/max/0/default.png`}
 							target="_blank"
 							rel="noopener noreferrer"
@@ -640,7 +650,7 @@
 						>
 							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
 
-							Download PNG
+							Download beeld (5000px)
 						</a>
 					</div>
 				</div>
