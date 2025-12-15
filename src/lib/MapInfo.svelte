@@ -564,7 +564,7 @@
 						>
 							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
 
-							Utrecht Universiteit Library
+							Universiteitsbibliotheek Utrecht
 						</a>
 
 						<a
