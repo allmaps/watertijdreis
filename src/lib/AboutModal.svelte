@@ -106,6 +106,23 @@
 				</ul>
 			</li>
 		</ul>
+
+		<i>Kaartattributie:</i>
+		<p>De achtergrondkaarten in deze applicatie maken gebruik van gegevens van:</p>
+		<ul>
+			<li>
+				Basiskaart: &copy;
+				<a href="https://www.openstreetmap.org/copyright" target="_blank"
+					>OpenStreetMap-bijdragers</a
+				>
+				(via <a href="https://protomaps.com/" target="_blank">ProtoMaps</a>)
+			</li>
+			<li>
+				Luchtfoto's & Hoogte:
+				<a href="https://www.pdok.nl/" target="_blank">PDOK</a>
+				& <a href="https://www.ahn.nl/" target="_blank">AHN</a>
+			</li>
+		</ul>
 		<hr />
 		<div class="flex flex-wrap">
 			<div class="basis-2/2 p-2">
