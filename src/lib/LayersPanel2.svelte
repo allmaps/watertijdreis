@@ -122,7 +122,7 @@
 		></Slider>
 	</div>
 
-	<p class="mt-4 text-[12px] opacity-50">Overlaygkaart</p>
+	<p class="mt-4 text-[12px] opacity-50">Overlegkaart</p>
 	<Select
 		Icon={MapPin}
 		options={overlayLayerOptions}
