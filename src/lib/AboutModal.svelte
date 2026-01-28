@@ -150,6 +150,11 @@
 					><img class="mx-auto h-10" alt="De Geomaten Logo" src="/img/svg/geomaten-logo.svg" /></a
 				>
 			</div>
+			<div class="basis-2/2 p-2">
+				<a href="https://www.uu.nl/bijzondere-collecties/"
+					><img class="mx-auto h-20" alt="Universiteit Utrecht Logo" src="/img/svg/uu-logo.svg" /></a
+				>
+			</div>
 		</div>
 	</div>
 </Modal>
