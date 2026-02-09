@@ -1248,7 +1248,7 @@
 			applyMask: false
 		});
 
-		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId);
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId,undefined,{animate: false});
 
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
