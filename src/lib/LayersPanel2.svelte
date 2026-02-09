@@ -65,7 +65,7 @@
 	let baseMapOptions = [
 		{ value: 'none', label: 'Geen achtergrond', icon: EyeSlash },
 		{ value: 'protomaps', label: 'OpenStreetMap', icon: MapTrifold },
-		{ value: 'satelliet', label: 'Sattelietbeeld', icon: Camera },
+		{ value: 'satelliet', label: 'Satellietbeeld', icon: Camera },
 		{ value: 'ahn', label: 'Hoogtekaart (AHN)', icon: Mountains }
 	];
 
@@ -122,7 +122,7 @@
 		></Slider>
 	</div>
 
-	<p class="mt-4 text-[12px] opacity-50">Overlaygkaart</p>
+	<p class="mt-4 text-[12px] opacity-50">Overlegkaart</p>
 	<Select
 		Icon={MapPin}
 		options={overlayLayerOptions}
