@@ -117,7 +117,7 @@
 
 			prevBis = historicMap.bis;
 
-			editionManifestLoading = getEditionManifest(historicMap.edition).then((data) => {
+			editionManifestLoading = getEditionManifest(historicMap.edition, historicMap.bis).then((data) => {
 				editionManifestLoading = null;
 
 				editionManifest = data || null;
