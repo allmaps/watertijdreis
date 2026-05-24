@@ -54,8 +54,14 @@
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<!-- <link rel="manifest" href="/manifest.json" /> -->
-		<link rel="icon" type="image/x-icon" href="favicon.svg" />
+		
+		<!-- SVG (moderne browsers) -->
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+		<!-- (fallback voor oudere browsers/Safari) -->
+		<link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="16x16 32x32 48x48">
+		
 		<link rel="stylesheet" href="https://use.typekit.net/bis1pqi.css" />
 
 		%sveltekit.head%

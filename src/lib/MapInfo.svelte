@@ -117,11 +117,13 @@
 
 			prevBis = historicMap.bis;
 
-			editionManifestLoading = getEditionManifest(historicMap.edition, historicMap.bis).then((data) => {
-				editionManifestLoading = null;
+			editionManifestLoading = getEditionManifest(historicMap.edition, historicMap.bis).then(
+				(data) => {
+					editionManifestLoading = null;
 
-				editionManifest = data || null;
-			});
+					editionManifest = data || null;
+				}
+			);
 		}
 	});
 
