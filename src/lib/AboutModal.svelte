@@ -1,5 +1,5 @@
 <script>
-	import Modal from './Modal.svelte';
+	import Modal from './components/Modal.svelte';
 
 	let { visible = $bindable() } = $props();
 </script>
@@ -152,7 +152,11 @@
 			</div>
 			<div class="basis-2/2 p-2">
 				<a href="https://www.uu.nl/bijzondere-collecties/"
-					><img class="mx-auto h-20" alt="Universiteit Utrecht Logo" src="/img/svg/uu-logo.svg" /></a
+					><img
+						class="mx-auto h-20"
+						alt="Universiteit Utrecht Logo"
+						src="/img/svg/uu-logo.svg"
+					/></a
 				>
 			</div>
 		</div>

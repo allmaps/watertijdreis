@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from 'phosphor-svelte';
-	import Modal from './Modal.svelte';
-	import Select from './Select.svelte';
-	import Slider from './Slider.svelte';
+	import Modal from './components/Modal.svelte';
+	import Select from './components/Select.svelte';
+	import Slider from './components/Slider.svelte';
 
 	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 

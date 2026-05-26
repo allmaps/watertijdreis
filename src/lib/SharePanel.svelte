@@ -7,7 +7,7 @@
 		RedditLogo,
 		WhatsappLogo
 	} from 'phosphor-svelte';
-	import Modal from './Modal.svelte';
+	import Modal from './components/Modal.svelte';
 	let { visible = $bindable() } = $props();
 
 	async function setClipboard(text: string) {

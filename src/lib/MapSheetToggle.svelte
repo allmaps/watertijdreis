@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { MapTrifold, FileText, PushPin } from 'phosphor-svelte';
-	import Toast from './Toast.svelte';
+	import Toast from './components/Toast.svelte';
 
 	let {
 		pinnedHistoricMap = $bindable(),

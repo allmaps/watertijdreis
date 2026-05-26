@@ -9,7 +9,7 @@
 	import Header from './Header.svelte';
 	import Minimap from './Minimap.svelte';
 	import MapInfo from './MapInfo.svelte';
-	import Toast from './Toast.svelte';
+	import Toast from './components/Toast.svelte';
 	import Timeline from './Timeline.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';

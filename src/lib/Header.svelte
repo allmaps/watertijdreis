@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ShareFat, Info } from 'phosphor-svelte';
 	import SharePanel from './SharePanel.svelte';
-	import Button from './Button.svelte';
+	import Button from './components/Button.svelte';
 	import AboutModal from './AboutModal.svelte';
 
 	let { historicMapsLoaded, resetState } = $props();

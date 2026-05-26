@@ -10,8 +10,8 @@
 	import Geocoder from './Geocoder.svelte';
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { env } from '$env/dynamic/public';
-	import Button from './Button.svelte';
-	import LayersPanel2 from './LayersPanel2.svelte';
+	import Button from './components/Button.svelte';
+	import LayersModal from './LayersModal.svelte';
 
 	let {
 		selectedHistoricMap,
@@ -65,7 +65,7 @@
 	providers={[new GeocodeEarth(geocodeEarthApiKey)]}
 ></Geocoder>
 
-<LayersPanel2 bind:visible={layersPanelVisible2} bind:layerOptions></LayersPanel2>
+<LayersModal bind:visible={layersPanelVisible2} bind:layerOptions></LayersModal>
 
 <!-- <div class="fixed top-25 right-2 flex flex-col items-end gap-4">
 	<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>

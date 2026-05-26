@@ -1,5 +1,5 @@
 <script>
-	import { mousePosition } from './mousePosition.svelte';
+	import { mousePosition } from '../mousePosition.svelte';
 	let {
 		Icon,
 		kbd = undefined,
