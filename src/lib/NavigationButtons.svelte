@@ -1,46 +1,48 @@
 <script lang="ts">
-	import {
-		MagnifyingGlass,
-		MagnifyingGlassPlus,
-		MagnifyingGlassMinus,
-		NavigationArrow,
-		Compass,
-		MapTrifold,
-		Gear,
-	} from "phosphor-svelte";
+	import { MagnifyingGlassPlus, MagnifyingGlassMinus, Compass, MapTrifold } from 'phosphor-svelte';
 
 	import { fade } from 'svelte/transition';
-	import { onMount, onDestroy } from 'svelte';
 
 	let layersOpen = false;
 	let closeTimeout: ReturnType<typeof setTimeout> | null = null;
-	let basemap = "AHN";
-	let historical = "Aan";
-	let overlay = "Water";
+	let basemap = 'AHN';
+	let historical = 'Aan';
+	let overlay = 'Water';
 
-	const basemapOptions = ["AHN", "OSM", "Satelliet"];
-	const historicalOptions = ["Aan", "Uit"];
-	const overlayOptions = ["Waterwegen (2025)", "Gemeentegrenzen", "Plaatsnamen"];
+	const basemapOptions = ['AHN', 'OSM', 'Satelliet'];
+	const historicalOptions = ['Aan', 'Uit'];
+	const overlayOptions = ['Waterwegen (2025)', 'Gemeentegrenzen', 'Plaatsnamen'];
 
-	function setBasemap(option) { basemap = option; }
-	function setHistorical(option) { historical = option; }
-	function setOverlay(option) { overlay = option; }
+	function setBasemap(option) {
+		basemap = option;
+	}
+	function setHistorical(option) {
+		historical = option;
+	}
+	function setOverlay(option) {
+		overlay = option;
+	}
 
 	export let map: maplibregl.Map | null = null;
 
-	let searchQuery = "";
+	let searchQuery = '';
 	let expanded = false;
 	let inputEl: HTMLInputElement | null = null;
 
-	function zoomIn() { map?.zoomIn(); }
-	function zoomOut() { map?.zoomOut(); }
-	function resetRotation() { map?.setBearing(0); }
-
+	function zoomIn() {
+		map?.zoomIn();
+	}
+	function zoomOut() {
+		map?.zoomOut();
+	}
+	function resetRotation() {
+		map?.setBearing(0);
+	}
 
 	function handleSearch(e: Event) {
 		e.preventDefault();
 		alert(`Search for: ${searchQuery}`);
-		inputEl?.blur(); 
+		inputEl?.blur();
 	}
 
 	function openPanel() {
@@ -53,95 +55,107 @@
 		}, 250);
 	}
 
-	let scale = "10000";
+	let scale = '10000';
 
-  function handleScaleInput(e: Event) {
-    const target = e.target as HTMLSpanElement;
-    scale = target.innerText.replace(/[^\d,.]/g, "");
-  }
-
-  
+	function handleScaleInput(e: Event) {
+		const target = e.target as HTMLSpanElement;
+		scale = target.innerText.replace(/[^\d,.]/g, '');
+	}
 </script>
-
-
 
 <div id="top-controls-left">
 	<!-- Wrapper voor gradient-rand -->
-<div class="rounded-full p-[2px] bg-gradient-to-br from-pink-400 to-pink-200 shadow-2xl">
-  <!-- Knop zelf -->
-  <button
-    class="w-9 h-9 rounded-full bg-[#336] flex items-center justify-center text-white transition-transform duration-300 hover:scale-105 active:scale-95"
-    title="Lagen"
-    onclick={() => layersOpen = !layersOpen}
-  >
-    <MapTrifold size={16} />
-  </button>
-    {#if layersOpen}
-  <div class="layers-panel" 
-       onmouseenter={openPanel} 
-       onmouseleave={closePanel}
-       transition:fade={{ duration: 200 }}>
-	   <div id="select-container" class="with-icon"> 
-		<label>Basemap</label> <MapTrifold size="18" class="inline absolute top-[31px] left-4" /> 
-		<select bind:value={basemap} onchange={(e) => setBasemap(e.target.value)}> 
-			{#each basemapOptions as option} 
-			<option value={option}>{option}</option> {/each} 
-		</select> 
-	</div> 
-	<div id="select-container" class="with-icon"> 
-				<label>Historical map</label> 
-				<MapTrifold size="18" class="inline absolute top-[31px] left-4" /> 
-				<select bind:value={historical} onchange={(e) => setHistorical(e.target.value)}> 
-					{#each historicalOptions as option} 
-					<option value={option}>{option}</option> 
-					{/each} 
-				</select> 
-			</div> 
-			<div id="select-container" class="with-icon"> 
-						<label>Overlay</label> 
-						<MapTrifold size="18" class="inline absolute top-[31px] left-4" /> 
-						<select bind:value={overlay} onchange={(e) => setOverlay(e.target.value)}> 
-							{#each overlayOptions as option} 
-							<option value={option}>{option}</option> {/each} </select> </div>
-    </div>
-	{/if}
-  </div>
-  <div class="rounded-full p-[2px] bg-gradient-to-br from-pink-400 to-pink-200 shadow-2xl">
-  <button
-    class="w-9 h-9 rounded-full bg-[#336] flex items-center justify-center text-white transition-transform duration-300 hover:scale-105 active:scale-95"
-    title="Reset rotatie"
-    onclick={resetRotation}
-  >
-    <Compass size={18} />
-  </button>
+	<div class="rounded-full bg-gradient-to-br from-pink-400 to-pink-200 p-[2px] shadow-2xl">
+		<!-- Knop zelf -->
+		<button
+			class="flex h-9 w-9 items-center justify-center rounded-full bg-[#336] text-white transition-transform duration-300 hover:scale-105 active:scale-95"
+			title="Lagen"
+			onclick={() => (layersOpen = !layersOpen)}
+		>
+			<MapTrifold size={16} />
+		</button>
+		{#if layersOpen}
+			<div
+				class="layers-panel"
+				onmouseenter={openPanel}
+				onmouseleave={closePanel}
+				transition:fade={{ duration: 200 }}
+			>
+				<div id="select-container" class="with-icon">
+					<label>Basemap</label>
+					<MapTrifold size="18" class="absolute top-[31px] left-4 inline" />
+					<select bind:value={basemap} onchange={(e) => setBasemap(e.target.value)}>
+						{#each basemapOptions as option}
+							<option value={option}>{option}</option>
+						{/each}
+					</select>
+				</div>
+				<div id="select-container" class="with-icon">
+					<label>Historical map</label>
+					<MapTrifold size="18" class="absolute top-[31px] left-4 inline" />
+					<select bind:value={historical} onchange={(e) => setHistorical(e.target.value)}>
+						{#each historicalOptions as option}
+							<option value={option}>{option}</option>
+						{/each}
+					</select>
+				</div>
+				<div id="select-container" class="with-icon">
+					<label>Overlay</label>
+					<MapTrifold size="18" class="absolute top-[31px] left-4 inline" />
+					<select bind:value={overlay} onchange={(e) => setOverlay(e.target.value)}>
+						{#each overlayOptions as option}
+							<option value={option}>{option}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
+		{/if}
+	</div>
+	<div class="rounded-full bg-gradient-to-br from-pink-400 to-pink-200 p-[2px] shadow-2xl">
+		<button
+			class="flex h-9 w-9 items-center justify-center rounded-full bg-[#336] text-white transition-transform duration-300 hover:scale-105 active:scale-95"
+			title="Reset rotatie"
+			onclick={resetRotation}
+		>
+			<Compass size={18} />
+		</button>
+	</div>
+
+	<div class="rounded-full bg-gradient-to-br from-pink-400 to-pink-200 p-[2px] shadow-2xl">
+		<div class="flex w-9 flex-col overflow-hidden rounded-full bg-[#336]">
+			<button
+				class="zoom-btn flex h-9 items-center justify-center text-white"
+				title="Inzoomen"
+				onclick={zoomIn}
+			>
+				<MagnifyingGlassPlus size={16} />
+			</button>
+			<div class="divider"></div>
+			<button
+				class="zoom-btn flex h-9 items-center justify-center text-white"
+				title="Uitzoomen"
+				onclick={zoomOut}
+			>
+				<MagnifyingGlassMinus size={16} />
+			</button>
+		</div>
+	</div>
+
+	<div
+		id="scalebar-container"
+		class="rounded-full bg-gradient-to-br from-pink-400 to-pink-200 p-[2px] shadow-2xl"
+	>
+		<div class="flex h-8 w-32 items-center justify-center rounded-full bg-[#336] px-3 text-white">
+			<span class="prefix mr-1 select-none">1:</span>
+			<span
+				class="scale-value min-w-[40px] outline-none"
+				contenteditable="true"
+				oninput={handleScaleInput}
+				spellcheck="false">{scale}</span
+			>
+		</div>
+	</div>
 </div>
-
-<div class="rounded-full p-[2px] bg-gradient-to-br from-pink-400 to-pink-200 shadow-2xl">
-  <div class="flex flex-col rounded-full overflow-hidden bg-[#336] w-9">
-    <button class="zoom-btn h-9 flex items-center justify-center text-white" title="Inzoomen" onclick={zoomIn}>
-      <MagnifyingGlassPlus size={16} />
-    </button>
-    <div class="divider"></div>
-    <button class="zoom-btn h-9 flex items-center justify-center text-white" title="Uitzoomen" onclick={zoomOut}>
-      <MagnifyingGlassMinus size={16} />
-    </button>
-  </div>
-</div>
-
-<div id="scalebar-container" class="rounded-full p-[2px] bg-gradient-to-br from-pink-400 to-pink-200 shadow-2xl">
-
-  <div class="flex items-center justify-center w-32 h-8 rounded-full bg-[#336] text-white px-3">
-    <span class="prefix mr-1 select-none">1:</span>
-    <span 
-      class="scale-value outline-none min-w-[40px]" 
-      contenteditable="true" 
-      oninput={handleScaleInput} 
-      spellcheck="false">{scale}</span>
-  </div>
-</div>
-</div>
-
-
 
 <style>
 

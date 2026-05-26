@@ -4,26 +4,19 @@
 		MagnifyingGlassMinus,
 		MagnifyingGlassPlus,
 		NavigationArrow,
-		GridFour,
-		SelectionSlash,
-		Stack,
-		GpsFix
+		Stack
 	} from 'phosphor-svelte';
-	import { slide, fly, scale } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import Geocoder from './Geocoder.svelte';
 	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
 	import { env } from '$env/dynamic/public';
-	import LayersPanel from './LayersPanel.svelte';
-	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
 	import LayersPanel2 from './LayersPanel2.svelte';
-	import ZoomButtons from './ZoomButtons.svelte';
 
 	let {
 		selectedHistoricMap,
 		flyToFeature,
 		flyToUserLocation,
-		setGridVisibility,
 		zoomIn,
 		zoomOut,
 		layerOptions = $bindable(),
@@ -39,9 +32,7 @@
 	});
 
 	let searchBarVisible = $state(false);
-	let layersPanelVisible = $state(false);
 	let layersPanelVisible2 = $state(false);
-	let gridVisible = $state(false);
 
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);

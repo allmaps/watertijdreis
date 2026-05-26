@@ -1,24 +1,9 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
 
-	import {
-		ImagesSquare,
-		ArrowSquareOut,
-		Copy,
-		Check,
-		CaretCircleDown,
-		CaretDown,
-		CaretUp, // Added CaretUp
-		Info,
-		ShareFat,
-		ArrowBendDownRight,
-		ArrowBendDownLeft,
-		X
-	} from 'phosphor-svelte';
+	import { ArrowSquareOut, Copy, Check, CaretDown, CaretUp, Info } from 'phosphor-svelte';
 
-	import { fly, scale, draw, fade, slide } from 'svelte/transition';
-
-	import { cubicInOut } from 'svelte/easing';
+	import { fly, fade, slide } from 'svelte/transition';
 
 	import type { HistoricMap } from './types/historicmap';
 	import MapThumbnail from './MapThumbnail.svelte';

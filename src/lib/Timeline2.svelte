@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { fly, fade, draw } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { Spring } from 'svelte/motion';
-	import { HandSwipeRight, HandGrabbing } from 'phosphor-svelte';
+	import { HandGrabbing } from 'phosphor-svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import MapStack from './MapStack.svelte';
 	import TimelineSettings from './TimelineSettings.svelte';
 	import { onMount } from 'svelte';
-	import { point } from '@turf/turf';
 
 	let {
 		visible,

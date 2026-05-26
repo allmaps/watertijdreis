@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { fade, scale, fly } from 'svelte/transition';
-	import { Label, Switch } from 'bits-ui';
+	import { scale } from 'svelte/transition';
+	import { Switch } from 'bits-ui';
 	import { ArrowElbowDownRight, Gear } from 'phosphor-svelte';
 
 	let { filter = $bindable(), applyFilter, minYear, maxYear } = $props();

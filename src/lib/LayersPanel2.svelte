@@ -1,21 +1,6 @@
 <script lang="ts">
-	import {
-		EyeClosed,
-		ImagesSquare,
-		MapTrifold,
-		X,
-		MapPin,
-		CaretDown,
-		Eye,
-		Aperture,
-		Mountains,
-		Camera,
-		EyeSlash,
-		Waves
-	} from 'phosphor-svelte';
-	import { fly, fade, scale } from 'svelte/transition';
+	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from 'phosphor-svelte';
 	import Modal from './Modal.svelte';
-	import Button from './Button.svelte';
 	import Select from './Select.svelte';
 	import Slider from './Slider.svelte';
 

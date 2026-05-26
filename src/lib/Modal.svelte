@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { X } from 'phosphor-svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
 	let { visible = $bindable(), title, children, opacity = 100 } = $props();
 

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { flip } from 'svelte/animate';
-	import { fade, fly, scale } from 'svelte/transition';
+	import { scale } from 'svelte/transition';
 	import MapThumbnail from './MapThumbnail.svelte';
 
 	type HistoricMap = { id: string; year: number };

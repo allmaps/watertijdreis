@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
-
 	const { year, x, maps, selectedYear, getHistoricMapThumbnail } = $props();
 	const zRotations = Array(25)
 		.fill(0)

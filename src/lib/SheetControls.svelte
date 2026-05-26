@@ -1,5 +1,5 @@
 <script>
-	import { ArrowLeft, ArrowRight, ArrowUUpLeft, ImagesSquare, MapTrifold } from 'phosphor-svelte';
+	import { ArrowLeft, ArrowRight, MapTrifold } from 'phosphor-svelte';
 
 	let { visibleHistoricMaps, selectedHistoricMap, changeHistoricMapView } = $props();
 

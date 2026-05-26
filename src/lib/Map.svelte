@@ -8,13 +8,11 @@
 
 	import Header from './Header.svelte';
 	import Minimap from './Minimap.svelte';
-	import Timeline from './Timeline.svelte';
 	import MapInfo from './MapInfo.svelte';
 	import Toast from './Toast.svelte';
 	import Timeline2 from './Timeline2.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';
-	// import SheetControls from './SheetControls.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
 	import { basemapStyle } from './basemap';
 
@@ -1248,7 +1246,7 @@
 			applyMask: false
 		});
 
-		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId,undefined,{animate: false});
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId, undefined, { animate: false });
 
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {

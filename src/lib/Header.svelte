@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { ShareFat, Info, MagnifyingGlass, Waves } from 'phosphor-svelte';
+	import { ShareFat, Info } from 'phosphor-svelte';
 	import SharePanel from './SharePanel.svelte';
 	import Button from './Button.svelte';
-	import Modal from './Modal.svelte';
-	import MapThumbnail from './MapThumbnail.svelte';
 	import AboutModal from './AboutModal.svelte';
 
 	let { historicMapsLoaded, resetState } = $props();
@@ -13,8 +11,6 @@
 
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);
-
-	let searchBarVisible = $state(false);
 </script>
 
 <AboutModal bind:visible={aboutPanelVisible}></AboutModal>

@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { Tween, Spring } from 'svelte/motion';
-	import { fly, fade, scale } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
-	import MapThumbnail from './MapThumbnail.svelte';
+	import { Spring } from 'svelte/motion';
+	import { fly } from 'svelte/transition';
 	import TimelinePointer from './TimelinePointer.svelte';
 	import PlayPauseButton from './PlayPauseButton.svelte';
 	import MapThumbnailStack from './MapThumbnailStack.svelte';
-	import { Eye, ImagesSquare, Gear } from 'phosphor-svelte';
-	import { Label, Switch } from 'bits-ui';
+	import { Switch } from 'bits-ui';
 	import TimelineSettings from './TimelineSettings.svelte';
 
 	let {

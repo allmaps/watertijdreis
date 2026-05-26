@@ -1,15 +1,8 @@
 <script lang="ts">
-	import {
-		ArrowBendDownLeft,
-		ArrowElbowDownLeft,
-		ArrowUDownLeft,
-		MagnifyingGlass,
-		MapPinSimple
-	} from 'phosphor-svelte';
+	import { MagnifyingGlass } from 'phosphor-svelte';
 	import { debounce } from 'lodash-es';
-	import type { GeocoderProvider } from '$lib/geocoder/provider';
 	import type { GeojsonPoint } from '@allmaps/types';
-	import { fade, scale, slide, fly } from 'svelte/transition';
+	import { slide, fly } from 'svelte/transition';
 
 	type GeocoderGeoJsonFeature = {
 		geometry: GeojsonPoint;

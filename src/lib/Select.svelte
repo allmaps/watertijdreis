@@ -1,5 +1,4 @@
 <script>
-	import { Eye } from 'phosphor-svelte';
 	import { fly } from 'svelte/transition';
 
 	let { options = [], value = null, onchange = () => {}, Icon = null } = $props();

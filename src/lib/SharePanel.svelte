@@ -3,11 +3,9 @@
 		Check,
 		ClipboardText,
 		EnvelopeSimple,
-		InstagramLogo,
 		LinkedinLogo,
 		RedditLogo,
-		WhatsappLogo,
-		ChatCircle
+		WhatsappLogo
 	} from 'phosphor-svelte';
 	import Modal from './Modal.svelte';
 	let { visible = $bindable() } = $props();
