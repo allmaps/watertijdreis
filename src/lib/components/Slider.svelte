@@ -1,100 +1,91 @@
-<script>
+<script lang="ts">
 	import { Gradient } from 'phosphor-svelte';
 
-	let { value = 50, onchange = () => {} } = $props();
+	interface Props {
+		value?: number;
+		onchange?: (val: number) => void;
+	}
 
-	let trackEl = $state(null);
+	let { value = $bindable(50), onchange }: Props = $props();
+
+	let trackEl = $state<HTMLDivElement | null>(null);
+	let sliderElement = $state<HTMLDivElement | null>(null);
 	let dragging = $state(false);
+	let hasFocus = $state(false);
 
-	function percentToX(p) {
-		if (!trackEl) return 0;
-		return (p / 100) * trackEl.clientWidth;
+	function updateFromEvent(e: PointerEvent) {
+		if (!trackEl) return;
+		const rect = trackEl.getBoundingClientRect();
+
+		const clientX = e.clientX;
+
+		const px = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+		value = Math.round((px / rect.width) * 100);
+
+		if (onchange) onchange(value);
 	}
 
-	function onPointerDown(e) {
-		dragging = true;
-		updateFromEvent(e);
-		window.addEventListener('pointermove', onPointerMove);
-		window.addEventListener('pointerup', onPointerUp);
-	}
-
-	function onPointerMove(e) {
+	function onPointerMove(e: PointerEvent) {
 		if (dragging) updateFromEvent(e);
 	}
 
 	function onPointerUp() {
 		dragging = false;
-		onchange(value);
-		window.removeEventListener('pointermove', onPointerMove);
+		if (onchange) onchange(value);
+
+		window.removeEventListener('pointermove', onPointerMove as EventListener);
 		window.removeEventListener('pointerup', onPointerUp);
 	}
 
-	function updateFromEvent(e) {
-		const rect = trackEl.getBoundingClientRect();
-		const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? e.targetTouches?.[0]?.clientX;
-		if (!clientX) return;
+	function onPointerDown(e: PointerEvent) {
+		if (e.button !== 0) return;
 
-		const px = Math.min(Math.max(clientX - rect.left, 0), rect.width);
-		value = Math.round((px / rect.width) * 100);
-		onchange(value);
+		dragging = true;
+		updateFromEvent(e);
+
+		window.addEventListener('pointermove', onPointerMove as EventListener);
+		window.addEventListener('pointerup', onPointerUp);
 	}
 
-	let sliderElement = $state();
-	let hasFocus = $state(false);
-
-	function handleKeyDown(e) {
+	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
 			e.preventDefault();
-			e.stopImmediatePropagation();
 			value = Math.max(0, value - 5);
-			onchange(value);
+			if (onchange) onchange(value);
 		} else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
 			e.preventDefault();
-			e.stopImmediatePropagation();
 			value = Math.min(100, value + 5);
-			onchange(value);
-		} else if (e.key === 'Tab') {
-			hasFocus = false;
-			return;
-		} else if (e.key !== 'Escape') {
-			e.stopPropagation();
+			if (onchange) onchange(value);
 		}
-	}
-
-	function handleFocus() {
-		hasFocus = true;
-	}
-
-	function handleBlur() {
-		hasFocus = false;
 	}
 
 	$effect(() => {
-		if (hasFocus && sliderElement && document.activeElement !== sliderElement) {
-			sliderElement.focus();
-		}
+		return () => {
+			window.removeEventListener('pointermove', onPointerMove as EventListener);
+			window.removeEventListener('pointerup', onPointerUp);
+		};
 	});
 </script>
 
 <div class="flex flex-col gap-0 select-none">
 	<div class="text-sm font-[600] text-[#336]">
-		<Gradient color="#f4a" size="20" class="mr-1 inline"></Gradient>
+		<Gradient color="#f4a" size="20" class="mr-1 inline" />
 		{value}%
 	</div>
 
 	<div
 		bind:this={sliderElement}
 		class="
-			group rounded-[12px]px-2 relative flex
-			h-6 cursor-pointer items-center
-			active:scale-[0.99]
-		"
+            group relative flex h-6
+            cursor-pointer items-center
+            outline-none active:scale-[0.99]
+        "
 		style="touch-action: none"
 		onpointerdown={onPointerDown}
 		onkeydown={handleKeyDown}
-		onfocus={handleFocus}
-		onblur={handleBlur}
-		tabindex="-1"
+		onfocus={() => (hasFocus = true)}
+		onblur={() => (hasFocus = false)}
+		tabindex="0"
 		role="slider"
 		aria-valuenow={value}
 		aria-valuemin="0"
@@ -103,18 +94,19 @@
 	>
 		<div bind:this={trackEl} class="relative h-2 w-full rounded-full bg-[#00000022]">
 			<div
-				class="absolute top-0 left-0 h-full rounded-full bg-linear-to-r from-[#336] from-[67%] to-[#336]"
+				class="absolute top-0 left-0 h-full rounded-full bg-[#336]"
 				style:width={`${value}%`}
 			></div>
 
 			<div
 				class="
-					absolute top-1/2 h-4.5 w-4.5 -translate-y-1/2
-					rounded-full bg-[#336] shadow-[2px_2px_8px_#33336655] outline-3 outline-[#fff]
-					transition-transform duration-300
-					{dragging ? 'scale-90' : ''}
-				"
-				style:left={`calc(${value * 0.95}% - 0.3rem)`}
+                    absolute top-1/2 h-4.5 w-4.5 -translate-y-1/2
+                    rounded-full bg-[#336] shadow-[2px_2px_8px_#33336655]
+                    transition-transform duration-300
+                    {dragging ? 'scale-90' : ''}
+                    {hasFocus ? 'ring-2 ring-[#ff44aa] ring-offset-2' : ''}
+                "
+				style:left={`calc(${value}% - 9px)`}
 			></div>
 		</div>
 	</div>

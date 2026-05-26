@@ -1,63 +1,87 @@
-<script>
+<script lang="ts">
 	import { fly } from 'svelte/transition';
+	import type { Component } from 'svelte';
 
-	let { options = [], value = null, onchange = () => {}, Icon = null } = $props();
+	interface SelectOption {
+		value: any;
+		label: string;
+		icon?: Component<any>;
+	}
+
+	interface Props {
+		options: SelectOption[];
+		value?: any;
+		onchange?: (opt: SelectOption) => void;
+		Icon?: Component<any> | null;
+	}
+
+	let { options = [], value = $bindable(null), onchange, Icon = null }: Props = $props();
+
 	let open = $state(false);
-
-	let buttonEl;
+	let buttonEl = $state<HTMLDivElement | null>(null);
 	let dropdownPos = $state({ top: 0, left: 0, width: 0 });
 
-	if (value === null) value = options[0].value;
+	if (value === null && options.length > 0) {
+		value = options[0].value;
+	}
 
-	let selectedOption = $derived(options.find((i) => i.value == value));
+	let selectedOption = $derived(
+		options.find((i) => i.value == value) || { label: '', value: null, icon: undefined }
+	);
 
 	function toggle() {
 		if (!open && buttonEl) {
 			const rect = buttonEl.getBoundingClientRect();
 			dropdownPos = {
-				top: rect.bottom + 4,
-				left: rect.left,
+				top: rect.bottom + window.scrollY + 4,
+				left: rect.left + window.scrollX,
 				width: rect.width
 			};
 		}
 		open = !open;
 	}
 
-	function choose(opt) {
+	function choose(opt: SelectOption) {
 		value = opt.value;
-		onchange(opt);
+		if (onchange) onchange(opt);
 		open = false;
 	}
 
-	function onDocClick(e) {
-		if (open && buttonEl && !buttonEl.contains(e.target)) {
+	function onDocClick(e: MouseEvent) {
+		if (open && buttonEl && !buttonEl.contains(e.target as Node)) {
 			open = false;
 		}
 	}
 
 	$effect(() => {
-		if (open) document.addEventListener('click', onDocClick);
-		else document.removeEventListener('click', onDocClick);
+		if (open) {
+			document.addEventListener('click', onDocClick);
+			return () => document.removeEventListener('click', onDocClick);
+		}
 	});
 </script>
 
 <div class="relative inline-block text-left" bind:this={buttonEl}>
 	<button
+		type="button"
 		class="
-			group relative cursor-pointer rounded-[9px]
-			bg-linear-to-bl from-[#33336622] to-[#ffffff8]
-			font-[500] text-[#336] backdrop-blur-sm
-			transition-all duration-300 ease-out active:scale-95
-		"
+            group relative cursor-pointer rounded-[9px]
+            bg-linear-to-bl from-[#33336622] to-[#ffffff88]
+            font-[500] text-[#336] backdrop-blur-sm
+            transition-all duration-300 ease-out active:scale-95
+        "
 		onclick={toggle}
+		aria-haspopup="listbox"
+		aria-expanded={open}
 	>
 		<div class="m-0.5 flex items-center gap-2 rounded-[8px] bg-white px-2.5 py-2 shadow-lg">
 			{#if selectedOption.icon}
-				<selectedOption.icon
+				{@const SelectedIcon = selectedOption.icon}
+				<SelectedIcon
 					color="#ff44aa"
 					weight="regular"
 					class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622]"
-				></selectedOption.icon>
+				/>
 			{:else if Icon}
 				<Icon
 					color="#ff44aa"
@@ -66,7 +90,7 @@
 				/>
 			{/if}
 
-			<div class="max-w-45 min-w-45 break-words">
+			<div class="max-w-45 min-w-45 text-left break-words">
 				<span class="ml-1">{selectedOption.label}</span>
 			</div>
 
@@ -88,28 +112,35 @@
 {#if open}
 	<div
 		class="
-			z-[9999] overflow-hidden rounded-[9px] border border-[#eef]
-			bg-white shadow-lg
-		"
+            z-[9999] overflow-hidden rounded-[9px] border border-[#eef]
+            bg-white shadow-lg
+        "
 		style="
-			position: fixed;
-			top: {dropdownPos.top}px;
-			left: {dropdownPos.left}px;
-			width: {dropdownPos.width}px;
-		"
+            position: fixed;
+            top: {dropdownPos.top}px;
+            left: {dropdownPos.left}px;
+            width: {dropdownPos.width}px;
+        "
 		transition:fly={{ y: -5, duration: 150 }}
+		role="listbox"
 	>
 		{#each options as opt}
-			{@const I = opt.icon}
+			{@const OptIcon = opt.icon}
 			<button
+				type="button"
 				class="
-					w-full cursor-pointer px-3 py-2 text-left
-					text-[16px] font-[500] text-[#336]
-					transition-colors hover:bg-[#f5f5ff]
-				"
+                    w-full cursor-pointer px-3 py-2 text-left
+                    text-[16px] font-[500] text-[#336]
+                    transition-colors hover:bg-[#f5f5ff]
+                    {opt.value === value ? 'bg-[#f5f5ff]' : ''}
+                "
 				onclick={() => choose(opt)}
+				role="option"
+				aria-selected={opt.value === value}
 			>
-				{#if I}<I class="mr-1 inline" color="#ff44aa" />{/if}
+				{#if OptIcon}
+					<OptIcon class="mr-1 inline h-5 w-5" color="#ff44aa" />
+				{/if}
 				{opt.label}
 			</button>
 		{/each}
