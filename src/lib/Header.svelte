@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { ShareFat, Info } from 'phosphor-svelte';
-	import SharePanel from './SharePanel.svelte';
+	import ShareModal from './ShareModal.svelte';
 	import Button from './components/Button.svelte';
 	import AboutModal from './AboutModal.svelte';
 
 	let { historicMapsLoaded, resetState } = $props();
 
 	let aboutPanelVisible = $state(false);
-	let sharePanelVisible = $state(false);
+	let shareModalVisible = $state(false);
 
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);
@@ -15,7 +15,7 @@
 
 <AboutModal bind:visible={aboutPanelVisible}></AboutModal>
 
-<SharePanel bind:visible={sharePanelVisible}></SharePanel>
+<ShareModal bind:visible={shareModalVisible}></ShareModal>
 
 <div
 	class="absolute top-2 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-[#ffffff] p-4 text-[#336] shadow-lg sm:top-5 sm:left-5"
@@ -45,7 +45,7 @@
 	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}
 		>Over</Button
 	>
-	<Button tabindex="2" onclick={() => (sharePanelVisible = !sharePanelVisible)} Icon={ShareFat}
+	<Button tabindex="2" onclick={() => (shareModalVisible = !shareModalVisible)} Icon={ShareFat}
 		>Delen</Button
 	>
 	<!-- <button
@@ -80,7 +80,7 @@
 			</span>
 		</button>
 		<button
-			onclick={() => (sharePanelVisible = !sharePanelVisible)}
+			onclick={() => (shareModalVisible = !shareModalVisible)}
 			class={`
 				group inline-flex flex-shrink-0 cursor-pointer 
 				items-center justify-center border-2 border-[#33336611]
