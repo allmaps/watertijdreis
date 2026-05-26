@@ -13,17 +13,17 @@
 	import Timeline from './Timeline.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';
-	import { getUserLocation } from '$lib/UserLocation.svelte';
+	import { getUserLocation } from '$lib/utils/UserLocation.svelte';
 	import { basemapStyle } from './basemap';
 
-	import { mousePosition } from './mousePosition.svelte';
+	import { mousePosition } from './state/mousePosition.svelte';
 
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	import { spriteStore } from './SpriteSheet.svelte';
+	import { spriteStore } from './state/SpriteSheet.svelte';
 
 	$effect(() => {
 		spriteStore.init();

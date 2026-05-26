@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { Component } from 'svelte';
-	import { mousePosition } from '../mousePosition.svelte';
+	import { mousePosition } from '../state/mousePosition.svelte';
 
 	interface Props {
 		Icon: Component<any>;
