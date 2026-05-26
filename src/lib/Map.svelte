@@ -10,7 +10,7 @@
 	import Minimap from './Minimap.svelte';
 	import MapInfo from './MapInfo.svelte';
 	import Toast from './Toast.svelte';
-	import Timeline2 from './Timeline2.svelte';
+	import Timeline from './Timeline.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';
 	import { getUserLocation } from '$lib/UserLocation.svelte';
@@ -1647,19 +1647,7 @@
 
 <Header {historicMapsLoaded} {resetState} />
 
-<!-- <Timeline
-	bind:filter
-	{applyFilter}
-	{historicMapsLoaded}
-	{historicMapsById}
-	{selectedHistoricMap}
-	{mapsInViewport}
-	{setLabelVisibility}
-	{getHistoricMapThumbnail}
-	{map}
-></Timeline> -->
-
-<Timeline2
+<Timeline
 	visible={historicMapsLoaded && !selectedHistoricMap}
 	{historicMapsLoaded}
 	{historicMapsById}
@@ -1670,7 +1658,7 @@
 	{getHistoricMapThumbnail}
 	{setLabelVisibility}
 	{setGridVisibility}
-></Timeline2>
+></Timeline>
 
 <!-- <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls> -->
 
