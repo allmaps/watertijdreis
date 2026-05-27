@@ -33,7 +33,6 @@ html, body {
 .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right {
 }
 
-/* optional: scalebar visuals */
 .maplibregl-ctrl-scale {
     opacity: 0;
     background: transparent !important;

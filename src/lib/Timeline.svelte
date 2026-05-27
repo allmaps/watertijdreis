@@ -460,7 +460,7 @@
 
 					{#if year % 25 === 0}
 						<text
-							x={x - 12}
+							x={x - 14}
 							y={ticksOnTop ? 22 : height - 12}
 							font-family="Inter"
 							font-size="12"
@@ -475,7 +475,7 @@
 						>
 					{:else if year % 5 === 0 && pixelsPerYear > 7}
 						<text
-							x={x - 12}
+							x={x - 14}
 							y={ticksOnTop ? 22 : height - 12}
 							font-family="Inter"
 							font-size="12"
@@ -490,7 +490,7 @@
 						>
 					{:else if pixelsPerYear > 35}
 						<text
-							x={x - 12}
+							x={x - 14}
 							y={ticksOnTop ? 22 : height - 12}
 							font-family="Inter"
 							font-size="12"
