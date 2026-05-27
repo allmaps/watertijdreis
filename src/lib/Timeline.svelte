@@ -462,7 +462,7 @@
 						<text
 							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
-							font-family="ivypresto-display"
+							font-family="Inter"
 							font-size="12"
 							font-weight="700"
 							fill={timelineTickColor}
@@ -477,7 +477,7 @@
 						<text
 							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
-							font-family="ivypresto-display"
+							font-family="Inter"
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (9 - pixelsPerYear) / 2}
@@ -492,7 +492,7 @@
 						<text
 							x={x - 12}
 							y={ticksOnTop ? 22 : height - 12}
-							font-family="ivypresto-display"
+							font-family="Inter"
 							font-size="12"
 							fill={timelineTickColor}
 							opacity={1 - (38 - pixelsPerYear) / 3}
