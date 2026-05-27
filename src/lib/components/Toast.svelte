@@ -27,10 +27,10 @@
 {#if visible}
 	<div
 		class="
-            fixed bottom-42 left-1/2 z-999 -translate-x-1/2
-            rounded-[8px] border-2 border-[#33336611]
-            bg-[#3333aa22] px-4 py-2 text-center
-            text-[14px] font-[500] text-[#336]
+            text-wtr-blue border-wtr-blue/7 bg-wtr-lighter-blue/13 fixed bottom-42
+            left-1/2 z-999 -translate-x-1/2
+            rounded-[8px] border-2 px-4 py-2
+            text-center text-[14px] font-[500]
             shadow-[0_2px_2px_rgba(0,0,0,0.05)] shadow-lg backdrop-blur-md
         "
 		role="status"

@@ -321,14 +321,14 @@
 {#if historicMap}
 	<div
 		class="
-			fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px] bg-gradient-to-r from-[#33336688] from-[270px]
-			to-[#33336688] shadow-lg transition-[width] duration-300 sm:top-auto sm:from-[#336] sm:to-transparent sm:to-[calc(50%-30px)]
-			{sheetInformationVisible || selectedHistoricMap ? 'bg-[#336]' : ''}
+			sm:from-wtr-blue from-wtr-blue/50 to-wtr-blue/50 fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px]
+			bg-gradient-to-r from-[270px] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
+			{sheetInformationVisible || selectedHistoricMap ? 'bg-wtr-blue' : ''}
 			{sheetInformationVisible || selectedHistoricMap
 			? 'w-auto sm:w-87'
 			: 'w-auto sm:w-[calc(100vh-16px)]'}
 		"
-		style:background-color={selectedHistoricMap ? '#336' : ''}
+		style:background-color={selectedHistoricMap ? 'var(--color-wtr-blue)' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
 		style:pointer-events={selectedHistoricMap ? 'auto' : 'none'}
@@ -364,7 +364,7 @@
 								getViewportRectWithinHistoricMap(historicMap)}
 
 							<div
-								class="pointer-events-none absolute rounded-[4px] border-[4px] border-[#33336666]"
+								class="border-wtr-blue/40 pointer-events-none absolute rounded-[4px] border-[4px]"
 								style="left: {leftPct}%; top: {topPct}%; width: {widthPct}%; height: {heightPct}%;"
 							></div>
 						{/if}
@@ -381,12 +381,12 @@
 						onclick={() => {
 							if (historicMap && !selectedHistoricMap) setHistoricMapView(historicMap);
 						}}
-						class="pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold text-[#eef]"
+						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold"
 					>
 						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : '...'}
 					</h1>
 
-					<p class="text-[14px] font-[500] text-[#eeeeff]">
+					<p class="text-wtr-subtle-blue text-[14px] font-[500]">
 						{historicMap?.yearEnd} &middot; Editie {historicMap?.edition}{historicMap?.bis
 							? ' BIS'
 							: ''}
@@ -403,16 +403,16 @@
 									toggleSheetInformation();
 								}
 							}}
-							class="mt-2 flex items-center gap-1.5 rounded-lg border-2 border-[#eeeeff22] bg-[#eeeeff11] px-3 py-1.5 text-[12px] font-[600] text-[#eef] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							class="text-wtr-subtle-blue border-wtr-subtle-blue/13 bg-wtr-subtle-blue/7 mt-2 flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-[600] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
 						>
 							{#if sheetInformationVisible}
 								<Info class="inline" size="18" />
 								<span class="whitespace-nowrap">Sluiten</span>
-								<CaretDown color="#eef" size={18} weight="bold" />
+								<CaretDown color="var(--color-wtr-subtle-blue)" size={18} weight="bold" />
 							{:else}
 								<Info class="inline" size="18" />
 								<span class="whitespace-nowrap">Openen</span>
-								<CaretUp color="#eef" size={18} />
+								<CaretUp color="var(--color-wtr-subtle-blue)" size={18} />
 							{/if}
 						</button>
 					{/if}
@@ -439,21 +439,21 @@
 			<div
 				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
-				class="scrollable flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t border-[#eeeeff10]"
+				class="scrollable border-wtr-subtle-blue/6 flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t"
 				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
 			>
 				<div class="pt-2">
-					<!-- <h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bladinformatie</h3> -->
+					<!-- <h3 class="mb-1 text-[16px] font-[600] text-wtr-subtle-blue">Bladinformatie</h3> -->
 					<div class="px-4 pb-0">
-						<ul class="text-[14px] text-[#eef]">
-							<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
+						<ul class="text-wtr-subtle-blue text-[14px]">
+							<li class="odd:bg-wtr-subtle-blue/7 rounded-[4px] px-2 py-1">
 								<i class="font-[600] opacity-50">Bladtitel:</i>
 
 								<span class="font-[500]">{historicMap.label}</span>
 							</li>
 
 							{#each metadata as [label, value]}
-								<li class="rounded-[4px] px-2 py-1 odd:bg-[#eeeeff11]">
+								<li class="odd:bg-wtr-subtle-blue/7 rounded-[4px] px-2 py-1">
 									<i class="font-[600] opacity-50">{label}:</i>
 
 									<span class="font-[500]">{value}</span>
@@ -465,7 +465,7 @@
 
 				{#if variants && variants.length > 1}
 					<div class="px-4 pb-0">
-						<h3 class="mb-1 text-[16px] font-[600] text-[#eef]">Bijbladen</h3>
+						<h3 class="text-wtr-subtle-blue mb-1 text-[16px] font-[600]">Bijbladen</h3>
 
 						<div class="flex flex-col">
 							{#each variants as variant}
@@ -513,12 +513,12 @@
 											}
 										}}
 										tabindex="15"
-										class="flex cursor-pointer items-center gap-1 rounded-[4px] p-1.5 transition-colors hover:bg-[#eeeeff11] {isCurrentSheet
-											? 'text-color-[#f4a] rounded-[6px] bg-[#eeeeff30]'
+										class="hover:bg-wtr-subtle-blue/7 flex cursor-pointer items-center gap-1 rounded-[4px] p-1.5 transition-colors {isCurrentSheet
+											? 'text-color-wtr-pink bg-wtr-subtle-blue/19 rounded-[6px]'
 											: ''}"
 									>
 										<div
-											class="h-14 flex-shrink-0 overflow-hidden rounded-[2px] bg-[#eeeeff11] shadow-md"
+											class="bg-wtr-subtle-blue/7 h-14 flex-shrink-0 overflow-hidden rounded-[2px] shadow-md"
 										>
 											{#if !type.toLowerCase().includes('achterkant')}
 												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
@@ -528,7 +528,7 @@
 										</div>
 
 										<div class="flex flex-1 items-center text-left">
-											<p class="px-2 text-[12px] font-[600] text-[#eef]">
+											<p class="text-wtr-subtle-blue px-2 text-[12px] font-[600]">
 												{@html type}
 											</p>
 										</div>
@@ -540,16 +540,16 @@
 				{/if}
 
 				<div class="px-4 pb-6">
-					<h3 class="mb-2 text-[16px] font-[600] text-[#eef]">Externe links</h3>
+					<h3 class="text-wtr-subtle-blue mb-2 text-[16px] font-[600]">Externe links</h3>
 
-					<div class="flex flex-col gap-2 rounded-[4px] bg-[#eeeeff11] p-2 text-[13px]">
+					<div class="bg-wtr-subtle-blue/7 flex flex-col gap-2 rounded-[4px] p-2 text-[13px]">
 						<a
 							href={`${homepageUrl}?page=${canvasIndex}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-[#f4a] hover:underline"
+							class="text-wtr-pink hover:underline"
 						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 							Universiteitsbibliotheek Utrecht
 						</a>
@@ -558,9 +558,9 @@
 							href={`https://theseus-viewer.netlify.app/embed?iiif-content=${manifestId}&canvas=${canvasId}&collection=${collectionId}&panel=navPlace`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-[#f4a] hover:underline"
+							class="text-wtr-pink hover:underline"
 						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 							Open in Theseus
 						</a>
@@ -572,9 +572,9 @@
 								href="https://viewer.allmaps.org/?url={annotationUrl}"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-[#f4a] hover:underline"
+								class="text-wtr-pink hover:underline"
 							>
-								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 								Open in Allmaps Viewer
 							</a>
@@ -583,9 +583,9 @@
 								href={annotationUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-[#f4a] hover:underline"
+								class="text-wtr-pink hover:underline"
 							>
-								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 								Open Georeference Annotation
 							</a>
@@ -595,14 +595,14 @@
 									setClipboard(
 										`https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
 									)}
-								class="cursor-pointer text-left text-[#f4a] hover:underline"
+								class="text-wtr-pink cursor-pointer text-left hover:underline"
 							>
 								{#if copySuccess}
-									<Check size="15" color="#f4a" class="relative inline" />
+									<Check size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 									XYZ tile URL gekopieerd
 								{:else}
-									<Copy size="15" color="#f4a" class="relative inline" />
+									<Copy size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 									Kopiëer XYZ tile URL
 								{/if}
@@ -612,9 +612,9 @@
 								href={`https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson`}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-[#f4a] hover:underline"
+								class="text-wtr-pink hover:underline"
 							>
-								<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 								Open in geojson.io
 							</a>
@@ -623,9 +623,9 @@
 							href={`${imageId}/full/1024,/0/default.png`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-[#f4a] hover:underline"
+							class="text-wtr-pink hover:underline"
 						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 							Download beeld (1024px)
 						</a>
@@ -633,9 +633,9 @@
 							href={`${imageId}/full/max/0/default.png`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-[#f4a] hover:underline"
+							class="text-wtr-pink hover:underline"
 						>
-							<ArrowSquareOut size="15" color="#f4a" class="relative inline" />
+							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
 
 							Download beeld (5000px)
 						</a>
@@ -660,7 +660,7 @@
 		border-radius: 10px;
 	}
 	.scrollable::-webkit-scrollbar-thumb:hover {
-		background-color: #eeeeff;
+		background-color: var(--color-wtr-subtle-blue);
 	}
 	.scrollable {
 		scrollbar-color: #eeeeff88 transparent;

@@ -1025,18 +1025,6 @@
 			source: 'pdok-gemeentegrenzen',
 			layout: { visibility: 'visible' }
 		});
-
-		// map.addLayer({
-		// 	id: 'overlay-gemeentegrenzen',
-		// 	type: 'line',
-		// 	source: 'pdok-gemeentegrenzen',
-		// 	layout: { visibility: 'none' },
-		// 	paint: {
-		// 		'line-color': '#33a',
-		// 		'line-width': 1,
-		// 		'line-opacity': 0.8
-		// 	}
-		// });
 	}
 
 	function flyToFeature(feature) {

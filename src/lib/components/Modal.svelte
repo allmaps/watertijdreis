@@ -71,7 +71,7 @@
 
 {#if visible}
 	<div
-		class="fixed inset-0 z-2000 flex items-center justify-center bg-[#333366aa] bg-[url('/wave_pattern.png')] bg-size-[32px]"
+		class="bg-wtr-blue/66 fixed inset-0 z-2000 flex items-center justify-center bg-[url('/wave_pattern.png')] bg-size-[32px]"
 		style:opacity={opacity + '%'}
 		role="dialog"
 		aria-modal="true"
@@ -102,18 +102,18 @@
 			<button
 				onclick={close}
 				type="button"
-				class="absolute top-4 right-4 rounded-[8px] bg-[#ff44aa22] p-2 opacity-50 transition-opacity hover:opacity-100"
+				class="bg-wtr-pink/13 absolute top-4 right-4 rounded-[8px] p-2 opacity-50 transition-opacity hover:opacity-100"
 				aria-label="Sluit venster"
 			>
-				<X size="24" color="#f4a" weight="bold" />
+				<X size="24" color="var(--color-wtr-pink)" weight="bold" />
 			</button>
 
 			<div class="flex h-full w-full flex-col items-center overflow-auto overflow-x-hidden py-8">
 				{#if title}
-					<h1 class="w-full text-center text-[22px] font-[700] text-[#336]">{title}</h1>
+					<h1 class="text-wtr-blue w-full text-center text-[22px] font-[700]">{title}</h1>
 				{/if}
 
-				<div class="mt-2 p-8 text-[#336]">
+				<div class="text-wtr-blue mt-2 p-8">
 					{@render children?.()}
 				</div>
 			</div>

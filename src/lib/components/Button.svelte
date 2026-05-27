@@ -122,9 +122,9 @@
 	}}
 	{tabindex}
 	class="
-        group relative cursor-pointer
-        rounded-[9px] font-[500]
-        text-[#336] backdrop-blur-sm transition-all
+        group text-wtr-blue relative
+        cursor-pointer rounded-[9px]
+        font-[500] backdrop-blur-sm transition-all
         duration-500 ease-out active:scale-95 active:outline-3
     "
 	style:--grad-opacity="0"
@@ -136,12 +136,12 @@
 	></div>
 
 	<div
-		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"
+		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-white px-2.25 py-2 shadow-lg hover:bg-white/90"
 	>
 		<Icon
-			color="#3333aa"
+			color="var(--color-wtr-lighter-blue)"
 			weight="regular"
-			class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"
+			class="drop-shadow-wtr-blue/13 inline h-5.5 w-5.5 drop-shadow-[1px_1px_0] transition-opacity duration-300 group-hover:opacity-100"
 		/>
 
 		<div
@@ -163,7 +163,7 @@
 				{#if computedKbd}
 					<kbd
 						class="
-                        ml-1 flex items-center rounded-[4px] border border-[#eef] bg-white
+                        border-wtr-subtle-blue ml-1 flex items-center rounded-[4px] border bg-white
                         px-1 font-sans text-[12px] text-[#cce]
                         shadow-[0px_2px_0px_0px_#cce] select-none
                         "

@@ -152,8 +152,8 @@
 		}}
 		title="Instellingen"
 		class="
-			flex h-8 w-8 cursor-pointer items-center justify-center
-			rounded-full bg-[#eef] text-[#444]
+			bg-wtr-subtle-blue flex h-8 w-8 cursor-pointer items-center
+			justify-center rounded-full text-[#444]
 			shadow-md transition-all
 			hover:scale-105 hover:shadow-lg
             active:scale-95
@@ -171,7 +171,7 @@
 			class="fixed right-2 bottom-34 w-80 rounded-lg bg-white px-3 py-3 shadow-lg transition-all duration-200"
 			transition:scale={{ duration: 250, y: 10 }}
 		>
-			<ul class="flex flex-col gap-2 text-sm font-[500] text-[#333366]">
+			<ul class="text-wtr-blue flex flex-col gap-2 text-sm font-[500]">
 				<li
 					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
 				>
@@ -189,7 +189,7 @@
 						oninput={() => {
 							if (yearStart >= minYear && yearStart < filter.yearEnd) filter.yearStart = yearStart;
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
+						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>
 					tot
 					<input
@@ -205,7 +205,7 @@
 						oninput={() => {
 							if (yearEnd >= minYear && yearEnd <= maxYear) filter.yearEnd = yearEnd;
 						}}
-						class="w-20 rounded border border-[#eef] px-2 py-1 text-[16px] font-[600] text-[#33a]"
+						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>
 				</li>
 				<li class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
@@ -243,33 +243,45 @@
 				>
 					Edities:
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 'All' ? 'background: #336; color: #eef;' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 'All'
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue);'
+							: ''}
 						onclick={() => setEdition('All')}>Alle</button
 					>
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 1 ? 'background: #336; color: #eef' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 1
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
+							: ''}
 						onclick={() => setEdition(1)}>1</button
 					>
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 2 ? 'background: #336; color: #eef' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 2
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
+							: ''}
 						onclick={() => setEdition(2)}>2</button
 					>
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 3 ? 'background: #336; color: #eef' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 3
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
+							: ''}
 						onclick={() => setEdition(3)}>3</button
 					>
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 4 ? 'background: #336; color: #eef' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 4
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
+							: ''}
 						onclick={() => setEdition(4)}>4</button
 					>
 					<button
-						class="cursor-pointer rounded-[4px] border-1 border-[#eef] p-2 px-2.5 hover:bg-[#eef]"
-						style={selectedEdition == 5 ? 'background: #336; color: #eef' : ''}
+						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
+						style={selectedEdition == 5
+							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
+							: ''}
 						onclick={() => setEdition(5)}>5</button
 					>
 				</li>
@@ -279,7 +291,7 @@
 		flex cursor-pointer items-center justify-start gap-2 rounded-md px-2 py-1
 		pl-5 transition
 		{selectedRegulier
-						? 'text-[#333366] hover:bg-gray-100'
+						? 'text-wtr-blue hover:bg-gray-100'
 						: 'cursor-not-allowed text-gray-300 opacity-80'}
 	"
 				>
@@ -296,9 +308,9 @@
 							onchange={(e) => toggleBIS(e.target.checked)}
 							disabled={!selectedRegulier}
 							class="
-								h-4 w-4 rounded border-gray-300 text-[#fff]
+								h-4 w-4 rounded border-gray-300 text-white
 								{selectedRegulier ? 'cursor-pointer' : 'opacity-80'}
-								accent-[#f4a]
+								accent-wtr-pink
 							"
 						/>
 					</label>

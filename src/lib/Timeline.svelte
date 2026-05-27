@@ -336,17 +336,17 @@
 	>
 		{#if showHint}
 			<div
-				class="absolute inset-0 z-2000 flex flex-col items-center justify-center bg-linear-to-b from-transparent to-[#336]"
+				class="to-wtr-blue absolute inset-0 z-2000 flex flex-col items-center justify-center bg-linear-to-b from-transparent"
 				onpointerenter={hideHint}
 				onmousedown={hideHint}
 				onwheel={hideHint}
 				transition:fade={{ duration: 500 }}
 			>
 				<div class="hand-animation">
-					<HandGrabbing size={25} color="#fff" class="drop-shadow-[1px_1px_0_#333366]"
+					<HandGrabbing size={25} color="#fff" class="drop-shadow-wtr-blue drop-shadow-[1px_1px_0]"
 					></HandGrabbing>
 				</div>
-				<p class="mt-4 text-[14px] font-[600] text-[#eef] text-shadow-[1px_1px_0_#000]">
+				<p class="text-wtr-subtle-blue mt-4 text-[14px] font-[600] text-shadow-[1px_1px_0_#000]">
 					Sleep de tijdlijn om door de tijd te reizen
 				</p>
 			</div>
@@ -360,7 +360,7 @@
 			{onwheel}
 			bind:clientWidth={width}
 			bind:clientHeight={height}
-			class="absolute h-full w-full overflow-hidden rounded-[8px] bg-[#336] bg-size-[32px]"
+			class="bg-wtr-blue absolute h-full w-full overflow-hidden rounded-[8px] bg-size-[32px]"
 		>
 			<div
 				class="absolute inset-0 bg-[url(/wave_pattern8.png)] bg-size-[auto_11px]"
@@ -408,7 +408,7 @@
 						y1={0}
 						x2={x}
 						y2={height}
-						stroke="#eef"
+						stroke="var(--color-wtr-subtle-blue)"
 						stroke-width={2}
 						stroke-dasharray="4 2"
 					></line>
@@ -437,8 +437,8 @@
 				{#if pixelsPerYear > 3}
 					<path
 						d={ticks.minor}
-						stroke="#eeeeff88"
 						stroke-width="1.5"
+						class="stroke-wtr-subtle-blue/53"
 						opacity={1 - (5 - pixelsPerYear) / 2}
 					/>
 				{/if}
@@ -446,13 +446,13 @@
 				{#if pixelsPerYear > 7}
 					<path
 						d={ticks.medium}
-						stroke="#eeeeff88"
 						stroke-width="1.5"
+						class="stroke-wtr-subtle-blue/53"
 						opacity={1 - (9 - pixelsPerYear) / 2}
 					/>
 				{/if}
 
-				<path d={ticks.major} stroke="#eeeeff88" stroke-width="1.5" />
+				<path d={ticks.major} class="stroke-wtr-subtle-blue/53" stroke-width="1.5" />
 
 				{#each { length: endYearInt - startYearInt + 1 } as _, i}
 					{@const year = startYearInt + i}
@@ -518,7 +518,7 @@
 								y1={height}
 								x2={start}
 								y2={height - 5}
-								stroke="#eeeeff88"
+								class="stroke-wtr-subtle-blue/53"
 								stroke-width="1"
 								opacity="0.4"
 							></line>
@@ -527,7 +527,7 @@
 								y1={height}
 								x2={middle - 25}
 								y2={height}
-								stroke="#eeeeff88"
+								class="stroke-wtr-subtle-blue/53"
 								stroke-width="1"
 								opacity="0.4"
 							></line>
@@ -536,7 +536,7 @@
 								y1={height}
 								x2={end}
 								y2={height}
-								stroke="#eeeeff88"
+								class="stroke-wtr-subtle-blue/53"
 								stroke-width="1"
 								opacity="0.4"
 							></line>
@@ -545,7 +545,7 @@
 								y={height + 4}
 								font-size="12"
 								font-weight="600"
-								fill="#eeeeff88"
+								class="fill-wtr-subtle-blue/53"
 								text-anchor="middle"
 								style="text-shadow: black; pointer-events: none; "
 							>
@@ -556,7 +556,7 @@
 								y1={height}
 								x2={end}
 								y2={height - 5}
-								stroke="#eeeeff88"
+								class="stroke-wtr-subtle-blue/53"
 								stroke-width="1"
 								opacity="0.4"
 							></line>

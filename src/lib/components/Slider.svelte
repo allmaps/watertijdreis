@@ -68,8 +68,8 @@
 </script>
 
 <div class="flex flex-col gap-0 select-none">
-	<div class="text-sm font-[600] text-[#336]">
-		<Gradient color="#f4a" size="20" class="mr-1 inline" />
+	<div class="text-wtr-blue text-sm font-[600]">
+		<Gradient color="var(--color-wtr-pink)" size="20" class="mr-1 inline" />
 		{value}%
 	</div>
 
@@ -92,19 +92,19 @@
 		aria-valuemax="100"
 		aria-label="Doorzichtigheid"
 	>
-		<div bind:this={trackEl} class="relative h-2 w-full rounded-full bg-[#00000022]">
+		<div bind:this={trackEl} class="relative h-2 w-full rounded-full bg-black/13">
 			<div
-				class="absolute top-0 left-0 h-full rounded-full bg-[#336]"
+				class="bg-wtr-blue absolute top-0 left-0 h-full rounded-full"
 				style:width={`${value}%`}
 			></div>
 
 			<div
 				class="
-                    absolute top-1/2 h-4.5 w-4.5 -translate-y-1/2
-                    rounded-full bg-[#336] shadow-[2px_2px_8px_#33336655]
+                    bg-wtr-blue shadow-wtr-blue/33 absolute top-1/2 h-4.5
+                    w-4.5 -translate-y-1/2 rounded-full shadow-[2px_2px_8px]
                     transition-transform duration-300
                     {dragging ? 'scale-90' : ''}
-                    {hasFocus ? 'ring-2 ring-[#ff44aa] ring-offset-2' : ''}
+                    {hasFocus ? 'ring-wtr-pink ring-2 ring-offset-2' : ''}
                 "
 				style:left={`calc(${value}% - 9px)`}
 			></div>

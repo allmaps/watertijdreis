@@ -65,9 +65,9 @@
 	<button
 		type="button"
 		class="
-            group relative cursor-pointer rounded-[9px]
-            bg-linear-to-bl from-[#33336622] to-[#ffffff88]
-            font-[500] text-[#336] backdrop-blur-sm
+            group text-wtr-blue from-wtr-blue/13 relative
+            cursor-pointer rounded-[9px] bg-linear-to-bl
+            to-white/50 font-[500] backdrop-blur-sm
             transition-all duration-300 ease-out active:scale-95
         "
 		onclick={toggle}
@@ -78,15 +78,15 @@
 			{#if selectedOption.icon}
 				{@const SelectedIcon = selectedOption.icon}
 				<SelectedIcon
-					color="#ff44aa"
+					color="var(--color-wtr-pink)"
 					weight="regular"
-					class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622]"
+					class="drop-shadow-wtr-blue/13 inline h-5.5 w-5.5 drop-shadow-[1px_1px_0]"
 				/>
 			{:else if Icon}
 				<Icon
-					color="#ff44aa"
+					color="var(--color-wtr-pink)"
 					weight="regular"
-					class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622]"
+					class="drop-shadow-wtr-blue/13 inline h-5.5 w-5.5 drop-shadow-[1px_1px_0] "
 				/>
 			{/if}
 
@@ -99,7 +99,7 @@
 					? 'rotate-180'
 					: ''}"
 				fill="none"
-				stroke="#336"
+				stroke="var(--color-wtr-blue)"
 				stroke-width="2"
 				viewBox="0 0 24 24"
 			>
@@ -112,7 +112,7 @@
 {#if open}
 	<div
 		class="
-            z-[9999] overflow-hidden rounded-[9px] border border-[#eef]
+            border-wtr-subtle-blue z-[9999] overflow-hidden rounded-[9px] border
             bg-white shadow-lg
         "
 		style="
@@ -129,8 +129,8 @@
 			<button
 				type="button"
 				class="
-                    w-full cursor-pointer px-3 py-2 text-left
-                    text-[16px] font-[500] text-[#336]
+                    text-wtr-blue w-full cursor-pointer px-3 py-2
+                    text-left text-[16px] font-[500]
                     transition-colors hover:bg-[#f5f5ff]
                     {opt.value === value ? 'bg-[#f5f5ff]' : ''}
                 "
@@ -139,7 +139,7 @@
 				aria-selected={opt.value === value}
 			>
 				{#if OptIcon}
-					<OptIcon class="mr-1 inline h-5 w-5" color="#ff44aa" />
+					<OptIcon class="mr-1 inline h-5 w-5" color="var(--color-wtr-pink)" />
 				{/if}
 				{opt.label}
 			</button>

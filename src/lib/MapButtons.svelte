@@ -117,44 +117,12 @@
 		<div class="relative -top-[2px]">
 			<Button Icon={MagnifyingGlassMinus} onclick={zoomOut} kbd="-">Uitzoomen</Button>
 		</div>
-		<!-- <button
-			onclick={zoomIn}
-			class={`
-			group flex cursor-pointer
-			items-center justify-center border-b-2
-			border-[#33336611] px-2.25 py-2
-			transition-colors duration-200 hover:bg-[#eeeeff88]
-			`}
-			title="Zoom In"
-			tabindex="8"
-		>
-			<MagnifyingGlassPlus
-				color="#f4a"
-				class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-			/>
-		</button>
-
-		<button
-			onclick={zoomOut}
-			class={`
-			group flex cursor-pointer
-			items-center justify-center p-2
-			transition-colors duration-200 hover:bg-[#eeeeff88]
-			`}
-			title="Zoom Out"
-			tabindex="9"
-		>
-			<MagnifyingGlassMinus
-				color="#f4a"
-				class="h-[22px] w-[22px] opacity-70 transition-opacity group-hover:opacity-100"
-			/>
-		</button> -->
 	</div>
 
 	<div
 		style:width={scaleWidth + 'px'}
-		class="mt-4 h-2 rounded-b-[4px] border-2 border-t-0 border-[#333366aa] text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
+		class="border-wtr-blue/66 mt-4 h-2 rounded-b-[4px] border-2 border-t-0 text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
 	>
-		<span class="relative -top-4 p-2 text-[12px] font-[600] text-[#336]">{scaleText}</span>
+		<span class="text-wtr-blue relative -top-4 p-2 text-[12px] font-[600]">{scaleText}</span>
 	</div>
 </div>

@@ -97,8 +97,7 @@
 		{width}
 		{height}
 		viewBox={viewBox.join(' ')}
-		class="transition-scale pointer-events-none absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none duration-300 hover:scale-100 sm:right-8"
-		style="filter: drop-shadow( 1px 1px 0px #33336666);"
+		class="drop-shadow-wtr-blue/50 transition-scale pointer-events-none absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none drop-shadow-[1px_1px_0px] duration-300 hover:scale-100 sm:right-8"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
@@ -119,14 +118,6 @@
 				/>
 			{/each}
 			{#if viewport && !selectedHistoricMap}
-				<!-- <polygon
-					points={getClippedProjectedPoints(viewport.geometry.coordinates[0])}
-					fill="none"
-					stroke="#33336666"
-					stroke-width={(viewBox[2] / width) * 4}
-					rx="4"
-					ry="4"
-				/> -->
 				{@const {
 					x,
 					y,
@@ -139,7 +130,7 @@
 					width={w}
 					height={h}
 					fill="none"
-					stroke="#33336644"
+					class="stroke-wtr-blue/27"
 					stroke-width={(viewBox[2] / width) * 4}
 					rx={(viewBox[2] / width) * 2}
 					ry={(viewBox[2] / width) * 2}
@@ -177,7 +168,7 @@
 						<path
 							in:draw|global={{ duration: 250 }}
 							fill="none"
-							stroke="#33a"
+							stroke="var(--color-wtr-lighter-blue)"
 							stroke-width={strokeWidth}
 							d={`
 								M ${x1} ${y1}
@@ -188,7 +179,7 @@
 						<path
 							in:draw|global={{ duration: 250 }}
 							fill="none"
-							stroke="#33a"
+							stroke="var(--color-wtr-lighter-blue)"
 							stroke-width={strokeWidth}
 							d={`
 								M ${x1} ${y1}

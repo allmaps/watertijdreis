@@ -1,6 +1,15 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+@theme {
+    --color-wtr-blue: #333366;
+    --color-wtr-lighter-blue: #3333aa;
+    --color-wtr-subtle-blue: #eef;
+    --color-wtr-pink: #ff44aa;
+
+    --font-sans: "Inter", "Helvetica Neue", sans-serif;
+}
+
 :root {
     height: -webkit-fill-available;
 }
@@ -29,11 +38,11 @@ html, body {
     opacity: 0;
     background: transparent !important;
     border: 2px solid #33336688 !important;
-    box-shadow: 1px 2px 0 #eef;
+    box-shadow: 1px 2px 0 var(--color-wtr-subtle-blue);
     border-radius: 0 0 4px 4px !important;
     border-top: none !important;
-    color: #333366 !important;
-    text-shadow: 1px 1px 0 #eef;
+    color: var(--color-wtr-blue) !important;
+    text-shadow: 1px 1px 0 var(--color-wtr-subtle-blue);
     font-size: 14px !important;
     font-weight: 600;
     padding: 4px 6px;
