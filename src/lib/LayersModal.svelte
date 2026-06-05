@@ -1,23 +1,8 @@
 <script lang="ts">
-	import {
-		EyeClosed,
-		ImagesSquare,
-		MapTrifold,
-		X,
-		MapPin,
-		CaretDown,
-		Eye,
-		Aperture,
-		Mountains,
-		Camera,
-		EyeSlash,
-		Waves
-	} from 'phosphor-svelte';
-	import { fly, fade, scale } from 'svelte/transition';
-	import Modal from './Modal.svelte';
-	import Button from './Button.svelte';
-	import Select from './Select.svelte';
-	import Slider from './Slider.svelte';
+	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from 'phosphor-svelte';
+	import Modal from './components/Modal.svelte';
+	import Select from './components/Select.svelte';
+	import Slider from './components/Slider.svelte';
 
 	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 
@@ -87,11 +72,11 @@
 	/>
 
 	{#if layerOptions.baseMap === 'protomaps'}
-		<div class="mt-4 max-w-60 text-[15px] font-[500] text-[#336]">
+		<div class="text-wtr-blue mt-4 max-w-60 text-[15px] font-[500]">
 			<input
 				type="checkbox"
 				bind:checked={layerOptions.protoMapsWaterInFront}
-				class="mr-2 accent-[#f4a]"
+				class="accent-wtr-pink mr-2"
 			/>
 			Waterlagen vóór historische kaarten
 			<kbd
@@ -102,7 +87,7 @@
 			<input
 				type="checkbox"
 				bind:checked={layerOptions.protomapsLabelsInFront}
-				class="mr-2 accent-[#f4a]"
+				class="accent-wtr-pink mr-2"
 			/>
 			Plaatsnamen vóór historische kaarten
 			<kbd

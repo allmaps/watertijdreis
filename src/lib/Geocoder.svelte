@@ -1,15 +1,8 @@
 <script lang="ts">
-	import {
-		ArrowBendDownLeft,
-		ArrowElbowDownLeft,
-		ArrowUDownLeft,
-		MagnifyingGlass,
-		MapPinSimple
-	} from 'phosphor-svelte';
+	import { MagnifyingGlass } from 'phosphor-svelte';
 	import { debounce } from 'lodash-es';
-	import type { GeocoderProvider } from '$lib/geocoder/provider';
 	import type { GeojsonPoint } from '@allmaps/types';
-	import { fade, scale, slide, fly } from 'svelte/transition';
+	import { slide, fly } from 'svelte/transition';
 
 	type GeocoderGeoJsonFeature = {
 		geometry: GeojsonPoint;
@@ -204,7 +197,7 @@
 	>
 		<button
 			type="button"
-			class="absolute inset-0 cursor-default bg-[#333366aa] bg-[url('/wave_pattern.png')] bg-size-[32px]"
+			class="bg-wtr-blue/66 absolute inset-0 cursor-default bg-[url('/wave_pattern.png')] bg-size-[32px]"
 			aria-label="Sluit venster"
 			onclick={close}
 			transition:fly={{ y: -5, duration: 250 }}
@@ -219,9 +212,9 @@
 				bg-white shadow-lg sm:top-1/4 sm:w-[600px] sm:max-w-[90vw]"
 			transition:fly={{ y: -20, duration: 250 }}
 		>
-			<div class="relative w-full border-b border-[#eef]">
+			<div class="border-wtr-subtle-blue relative w-full border-b">
 				<div class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
-					<MagnifyingGlass size="24" color="#f4a"></MagnifyingGlass>
+					<MagnifyingGlass size="24" color="var(--color-wtr-pink)"></MagnifyingGlass>
 				</div>
 
 				<input
@@ -229,8 +222,8 @@
 					bind:value={inputValue}
 					onkeydown={handleKeydown}
 					class="
-						focus-ring-0 w-full bg-transparent px-4 py-4 pr-12
-						pl-12 text-[18px] font-[500] text-[#336]
+						focus-ring-0 text-wtr-blue w-full bg-transparent px-4 py-4
+						pr-12 pl-12 text-[18px] font-[500]
 						placeholder:text-[#88a] focus:outline-none sm:text-[20px]
 					"
 					type="search"
@@ -246,8 +239,8 @@
 					bind:this={listEl}
 					transition:slide={{ duration: 200 }}
 					class="
-						relative max-h-[50vh] w-full overflow-y-auto
-						bg-white text-[#336] sm:max-h-[60vh]"
+						text-wtr-blue relative max-h-[50vh] w-full
+						overflow-y-auto bg-white sm:max-h-[60vh]"
 				>
 					{#if features.length > 0}
 						{#each features as feature, i}
@@ -259,7 +252,7 @@
 										group flex w-full cursor-pointer items-center justify-between px-4
 										py-3 text-left text-[16px] transition-colors
 										duration-75 focus:outline-none
-										{i === selectedFeatureIndex ? 'bg-[#eeeeff88] underline' : ''}
+										{i === selectedFeatureIndex ? 'bg-wtr-subtle-blue/53 underline' : ''}
 									"
 									onmouseenter={() => (selectedFeatureIndex = i)}
 									onclick={() => confirmSelection(feature)}

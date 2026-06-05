@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { MapTrifold, FileText, PushPin } from 'phosphor-svelte';
-	import Toast from './Toast.svelte';
+	import Toast from './components/Toast.svelte';
 
 	let {
 		pinnedHistoricMap = $bindable(),
@@ -91,9 +91,9 @@
 
 <div
 	class="
-        group fixed top-21 left-2 z-1000 my-3 flex flex-shrink-0 cursor-pointer items-center justify-center
-        rounded-[9px] border-2 border-[#33336611] bg-[#33336611] font-[500]
-        text-[#336] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
+        group text-wtr-blue border-wtr-blue/7 bg-wtr-blue/7 fixed top-21 left-2 z-1000 my-3 flex flex-shrink-0
+        cursor-pointer items-center justify-center rounded-[9px] border-2
+        font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
         backdrop-blur-md duration-500
         sm:top-24 sm:left-5
     "
@@ -111,7 +111,7 @@
 	>
 		<MapTrifold
 			size="18"
-			color={!rightBtnSelected ? '#f4a' : '#336'}
+			color={!rightBtnSelected ? 'var(--color-wtr-pink)' : 'var(--color-wtr-blue)'}
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 		Kaart
@@ -124,7 +124,7 @@
 	>
 		<FileText
 			size="18"
-			color={rightBtnSelected ? '#f4a' : '#336'}
+			color={rightBtnSelected ? 'var(--color-wtr-pink)' : 'var(--color-wtr-blue)'}
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 
@@ -167,7 +167,7 @@
 			{#if keyboardShortcutVisible}
 				<kbd
 					class="
-					ml-1 flex inline items-center rounded-[4px] border border-[#eef] bg-white
+					border-wtr-subtle-blue ml-1 flex inline items-center rounded-[4px] border bg-white
 					px-1 font-sans text-[12px] text-[#cce]
 					shadow-[0px_2px_0px_0px_#cce] select-none
 					"

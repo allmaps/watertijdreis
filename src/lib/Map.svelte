@@ -8,24 +8,22 @@
 
 	import Header from './Header.svelte';
 	import Minimap from './Minimap.svelte';
-	import Timeline from './Timeline.svelte';
 	import MapInfo from './MapInfo.svelte';
-	import Toast from './Toast.svelte';
-	import Timeline2 from './Timeline2.svelte';
+	import Toast from './components/Toast.svelte';
+	import Timeline from './Timeline.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
 	import MapButtons from './MapButtons.svelte';
-	// import SheetControls from './SheetControls.svelte';
-	import { getUserLocation } from '$lib/UserLocation.svelte';
+	import { getUserLocation } from '$lib/utils/UserLocation.svelte';
 	import { basemapStyle } from './basemap';
 
-	import { mousePosition } from './mousePosition.svelte';
+	import { mousePosition } from './state/mousePosition.svelte';
 
 	import type { GeoJsonProperties, Geometry, Feature } from 'geojson';
 	import type { HistoricMap } from './types/historicmap';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	import { spriteStore } from './SpriteSheet.svelte';
+	import { spriteStore } from './state/SpriteSheet.svelte';
 
 	$effect(() => {
 		spriteStore.init();
@@ -299,7 +297,7 @@
 			}
 		});
 
-		toastContent = `Je ziet nu kaarten van <i class="font-[700]">${Math.round(filter.yearEnd)}</i> en ouder`;
+		toastContent = `Je ziet nu kaarten van ${Math.round(filter.yearEnd)} en ouder`;
 	}
 
 	type LayerOptions = {
@@ -1027,18 +1025,6 @@
 			source: 'pdok-gemeentegrenzen',
 			layout: { visibility: 'visible' }
 		});
-
-		// map.addLayer({
-		// 	id: 'overlay-gemeentegrenzen',
-		// 	type: 'line',
-		// 	source: 'pdok-gemeentegrenzen',
-		// 	layout: { visibility: 'none' },
-		// 	paint: {
-		// 		'line-color': '#33a',
-		// 		'line-width': 1,
-		// 		'line-opacity': 0.8
-		// 	}
-		// });
 	}
 
 	function flyToFeature(feature) {
@@ -1248,7 +1234,7 @@
 			applyMask: false
 		});
 
-		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId,undefined,{animate: false});
+		warpedMapLayer.setMapsOptionsByMapId(optionsByMapId, undefined, { animate: false });
 
 		const bbox = warpedMapLayer?.getMapsBbox([historicMap.id], {
 			projection: {
@@ -1649,19 +1635,7 @@
 
 <Header {historicMapsLoaded} {resetState} />
 
-<!-- <Timeline
-	bind:filter
-	{applyFilter}
-	{historicMapsLoaded}
-	{historicMapsById}
-	{selectedHistoricMap}
-	{mapsInViewport}
-	{setLabelVisibility}
-	{getHistoricMapThumbnail}
-	{map}
-></Timeline> -->
-
-<Timeline2
+<Timeline
 	visible={historicMapsLoaded && !selectedHistoricMap}
 	{historicMapsLoaded}
 	{historicMapsById}
@@ -1672,7 +1646,7 @@
 	{getHistoricMapThumbnail}
 	{setLabelVisibility}
 	{setGridVisibility}
-></Timeline2>
+></Timeline>
 
 <!-- <SheetControls {visibleHistoricMaps} {selectedHistoricMap} {changeHistoricMapView}></SheetControls> -->
 

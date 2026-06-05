@@ -1,26 +1,48 @@
-<script>
-	import { mousePosition } from './mousePosition.svelte';
+<script lang="ts">
+	import { browser } from '$app/environment';
+	import type { Component } from 'svelte';
+	import { mousePosition } from '../state/mousePosition.svelte';
+
+	interface Props {
+		Icon: Component<any>;
+		kbd?: string;
+		children?: import('svelte').Snippet;
+		onclick?: (e: MouseEvent) => void;
+		collapsed?: boolean;
+		collapseAfterRender?: boolean;
+		collapseAfterRenderDelay?: number;
+		openOnHover?: boolean;
+		tabindex?: number;
+	}
+
 	let {
 		Icon,
 		kbd = undefined,
-		children = '',
+		children,
 		onclick,
-		collapsed = false,
+		collapsed = $bindable(false),
 		collapseAfterRender = true,
 		collapseAfterRenderDelay = 2000,
 		openOnHover = true,
 		tabindex = undefined
-	} = $props();
+	}: Props = $props();
 
-	const isTouch = typeof window !== 'undefined' && matchMedia('(pointer: coarse)').matches;
-	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
-	if (!isApplePlatform && kbd) kbd = kbd.replace('⌘', 'Ctrl ');
+	const isTouch = browser && window.matchMedia('(pointer: coarse)').matches;
+	let computedKbd = $state(kbd);
 
-	let buttonEl = $state();
-	let slotEl = $state(null);
+	$effect(() => {
+		if (kbd && browser) {
+			const isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
+			computedKbd = isApplePlatform ? kbd : kbd.replace('⌘', 'Ctrl ');
+		}
+	});
+
+	let buttonEl = $state<HTMLButtonElement | null>(null);
+	let slotEl = $state<HTMLDivElement | null>(null);
 
 	let expandedWidth = $state(0);
 	let buttonRect = $state({ left: 0, top: 0, width: 0, height: 0 });
+	let hoverdelay: ReturnType<typeof setTimeout> | null = null;
 
 	$effect(() => {
 		if (collapseAfterRender) {
@@ -33,7 +55,9 @@
 		if (!slotEl) return;
 		const ro = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				expandedWidth = entry.borderBoxSize[0].inlineSize;
+				if (entry.borderBoxSize?.[0]) {
+					expandedWidth = entry.borderBoxSize[0].inlineSize;
+				}
 			}
 		});
 		ro.observe(slotEl);
@@ -80,8 +104,6 @@
 			buttonEl.style.setProperty('--grad-opacity', '0');
 		}
 	});
-
-	let hoverdelay = null;
 </script>
 
 <button
@@ -95,14 +117,14 @@
 	onmouseleave={() => {
 		if (!isTouch && openOnHover) {
 			collapsed = true;
-			clearTimeout(hoverdelay);
+			if (hoverdelay) clearTimeout(hoverdelay);
 		}
 	}}
 	{tabindex}
 	class="
-        group relative cursor-pointer
-        rounded-[9px] font-[500]
-        text-[#336] backdrop-blur-sm transition-all
+        group text-wtr-blue relative
+        cursor-pointer rounded-[9px]
+        font-[500] backdrop-blur-sm transition-all
         duration-500 ease-out active:scale-95 active:outline-3
     "
 	style:--grad-opacity="0"
@@ -114,16 +136,16 @@
 	></div>
 
 	<div
-		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-[#fff] px-2.25 py-2 shadow-lg hover:bg-[#ffffffe5]"
+		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-white px-2.25 py-2 shadow-lg hover:bg-white/90"
 	>
 		<Icon
-			color="#3333aa"
+			color="var(--color-wtr-lighter-blue)"
 			weight="regular"
-			class="inline h-5.5 w-5.5 drop-shadow-[1px_1px_0_#33336622] transition-opacity duration-300 group-hover:opacity-100"
-		></Icon>
+			class="drop-shadow-wtr-blue/13 inline h-5.5 w-5.5 drop-shadow-[1px_1px_0] transition-opacity duration-300 group-hover:opacity-100"
+		/>
 
 		<div
-			class="ease-[cubic-bezier(0.3, 0.8, 0.3, 2.3)] overflow-hidden transition-[width] duration-300"
+			class="overflow-hidden transition-[width] duration-300 ease-out"
 			style:width="{collapsed ? 0 : expandedWidth}px"
 		>
 			<div
@@ -138,15 +160,15 @@
 					{@render children?.()}
 				</span>
 
-				{#if kbd}
+				{#if computedKbd}
 					<kbd
 						class="
-                    ml-1 flex items-center rounded-[4px] border border-[#eef] bg-white
-                    px-1 font-sans text-[12px] text-[#cce]
-                    shadow-[0px_2px_0px_0px_#cce] select-none
-                    "
+                        border-wtr-subtle-blue ml-1 flex items-center rounded-[4px] border bg-white
+                        px-1 font-sans text-[12px] text-[#cce]
+                        shadow-[0px_2px_0px_0px_#cce] select-none
+                        "
 					>
-						<span>{kbd}</span>
+						<span>{computedKbd}</span>
 					</kbd>
 				{/if}
 			</div>

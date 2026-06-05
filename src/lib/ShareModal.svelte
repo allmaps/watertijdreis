@@ -3,13 +3,11 @@
 		Check,
 		ClipboardText,
 		EnvelopeSimple,
-		InstagramLogo,
 		LinkedinLogo,
 		RedditLogo,
-		WhatsappLogo,
-		ChatCircle
+		WhatsappLogo
 	} from 'phosphor-svelte';
-	import Modal from './Modal.svelte';
+	import Modal from './components/Modal.svelte';
 	let { visible = $bindable() } = $props();
 
 	async function setClipboard(text: string) {
@@ -41,11 +39,11 @@
 			type="text"
 			readonly
 			value={typeof window !== 'undefined' ? window.location.href : ''}
-			class="h-12 w-2/3 rounded-[6px] border-2 border-[#eef] bg-[#ff44aa11] px-2 py-1 text-[16px] font-[500] text-[#336]"
+			class="text-wtr-blue bg-wtr-pink/7 border-wtr-subtle-blue h-12 w-2/3 rounded-[6px] border-2 px-2 py-1 text-[16px] font-[500]"
 		/>
 		<button
 			onclick={() => setClipboard(window.location.href)}
-			class="ml-4 h-12 w-42 cursor-pointer rounded-[6px] bg-[#336] px-4 py-1 font-[600] text-white transition-colors hover:bg-[#558]"
+			class="bg-wtr-blue ml-4 h-12 w-42 cursor-pointer rounded-[6px] px-4 py-1 font-[600] text-white transition-colors hover:bg-[#558]"
 		>
 			{#if copySuccess}
 				<Check size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"></Check>
@@ -63,7 +61,8 @@
 			class="mx-4"
 			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${typeof window !== 'undefined' ? window.location.href : ''}`}
 		>
-			<EnvelopeSimple size="30" color="#f4a" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
+			<EnvelopeSimple size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
+			></EnvelopeSimple>
 		</a>
 		<a
 			class="mx-4"
@@ -71,11 +70,12 @@
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<LinkedinLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"></LinkedinLogo>
+			<LinkedinLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
+			></LinkedinLogo>
 		</a>
 
 		<!-- <a class="mx-4" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-			<InstagramLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"
+			<InstagramLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
 			></InstagramLogo>
 		</a> -->
 
@@ -85,7 +85,8 @@
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<RedditLogo size="30" color="#f4a" class="relative -top-1 mt-6 inline"></RedditLogo>
+			<RedditLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
+			></RedditLogo>
 		</a>
 
 		<a
@@ -101,7 +102,11 @@
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<WhatsappLogo size="30" color="#f4a" class="relative -top-1 mt-6 mr-1 inline" />
+			<WhatsappLogo
+				size="30"
+				color="var(--color-wtr-pink)"
+				class="relative -top-1 mt-6 mr-1 inline"
+			/>
 		</a>
 	</div>
 </Modal>
