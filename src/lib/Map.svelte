@@ -6,6 +6,8 @@
 
 	import { SvelteMap } from 'svelte/reactivity';
 
+	import { animateFeatureOpacity } from '$lib/utils/mapAnimations.svelte';
+
 	import Header from './Header.svelte';
 	import Minimap from './Minimap.svelte';
 	import MapInfo from './MapInfo.svelte';
@@ -24,6 +26,11 @@
 	import { onMount } from 'svelte';
 
 	import { spriteStore } from './state/SpriteSheet.svelte';
+	import {
+		addBackgroundLayers,
+		addGemeentegrenzenLayer,
+		addWaterschapsgrenzenLayer
+	} from './map/mapLayers.svelte';
 
 	$effect(() => {
 		spriteStore.init();
@@ -374,12 +381,12 @@
 
 		if (layerOptions.overlay === 'waterschapsgrenzen') {
 			if (!map.getSource('pdok-waterschapsgrenzen')) {
-				addWaterschapsgrenzenLayer();
+				addWaterschapsgrenzenLayer(map);
 			}
 		}
 		if (layerOptions.overlay === 'gemeentegrenzen') {
 			if (!map.getSource('pdok-gemeentegrenzen')) {
-				addGemeentegrenzenLayer();
+				addGemeentegrenzenLayer(map);
 			}
 		}
 		// if (layerOptions.overlay === 'dijken') {
@@ -505,7 +512,7 @@
 		map.on('load', async () => {
 			maplibreLoaded = true;
 
-			addBackgroundLayers();
+			addBackgroundLayers(map);
 			warpedMapLayer = new WarpedMapLayer();
 			map.addLayer(warpedMapLayer);
 			warpedMapLayer.setLayerOptions({ visible: false });
@@ -798,16 +805,16 @@
 			if (featureId !== undefined) {
 				if (currentFillId !== null && currentFillId !== featureId) {
 					if (fillFadeOutTimer) clearTimeout(fillFadeOutTimer);
-					animateFeatureOpacity(currentFillId, 'animated-fill-opacity', 0, 50);
+					animateFeatureOpacity(map, currentFillId, 'animated-fill-opacity', 0, 50);
 				}
 
 				if (currentFillId !== featureId) {
 					currentFillId = featureId;
 
-					animateFeatureOpacity(featureId, 'animated-fill-opacity', 0.25, 300, () => {
+					animateFeatureOpacity(map, featureId, 'animated-fill-opacity', 0.25, 300, () => {
 						fillFadeOutTimer = setTimeout(() => {
 							if (currentFillId === featureId) {
-								animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 500);
+								animateFeatureOpacity(map, featureId, 'animated-fill-opacity', 0, 500);
 								currentFillId = null;
 							}
 						}, 1000);
@@ -820,7 +827,6 @@
 		});
 	}
 
-	const activeAnimations = {};
 	const featureTimeouts = {};
 	let gridResetTimer = null;
 	let currentFillId = null;
@@ -868,7 +874,7 @@
 			}
 
 			if (!isVisible) {
-				animateFeatureOpacity(id, 'animated-stroke-opacity', 0, 500);
+				animateFeatureOpacity(map, id, 'animated-stroke-opacity', 0, 500);
 				return;
 			}
 
@@ -881,149 +887,9 @@
 			const targetOpacity = Math.max(0, 0.5 - distance / rippleScale);
 
 			featureTimeouts[id] = setTimeout(() => {
-				animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
+				animateFeatureOpacity(map, id, 'animated-stroke-opacity', targetOpacity, 500);
 				delete featureTimeouts[id];
 			}, delay);
-		});
-	}
-
-	function animateFeatureOpacity(id, prop, endVal, duration, callback) {
-		const animKey = `${id}-${prop}`;
-
-		if (activeAnimations[animKey]) {
-			cancelAnimationFrame(activeAnimations[animKey]);
-		}
-
-		const startTime = performance.now();
-
-		const currentState = map.getFeatureState({ source: 'map-outlines', id: id });
-		const startVal = currentState?.[prop] !== undefined ? currentState[prop] : 0;
-
-		if (Math.abs(startVal - endVal) < 0.01) {
-			delete activeAnimations[animKey];
-			if (callback) callback();
-			return;
-		}
-
-		function frame(currentTime) {
-			const elapsed = currentTime - startTime;
-			let progress = elapsed / duration;
-			if (progress > 1) progress = 1;
-
-			const currentVal = startVal + (endVal - startVal) * progress;
-
-			map.setFeatureState({ source: 'map-outlines', id }, { [prop]: currentVal });
-
-			if (progress < 1) {
-				activeAnimations[animKey] = requestAnimationFrame(frame);
-			} else {
-				delete activeAnimations[animKey];
-				if (callback) callback();
-			}
-		}
-
-		activeAnimations[animKey] = requestAnimationFrame(frame);
-	}
-
-	function addBackgroundLayers() {
-		if (!map) return;
-
-		map.addSource('dsm-05', {
-			type: 'raster',
-			tiles: [
-				'https://service.pdok.nl/rws/ahn/wms/v1_0?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&FORMAT=image/png&STYLES=&TRANSPARENT=TRUE&LAYERS=dsm_05m&TILED=true&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&BBOX={bbox-epsg-3857}'
-			],
-			tileSize: 256
-		});
-		map.addLayer({
-			id: 'dsm-05-layer',
-			type: 'raster',
-			source: 'dsm-05',
-			layout: {
-				visibility: 'none'
-			},
-			paint: {}
-		});
-
-		map.addSource('satelliet', {
-			type: 'raster',
-			tiles: [
-				'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?service=WMS&version=1.1.1&request=GetMap&layers=Actueel_ortho25&styles=&format=image/jpeg&transparent=true&height=256&width=256&srs=EPSG:3857&bbox={bbox-epsg-3857}'
-			],
-			tileSize: 256,
-			scheme: 'tms',
-			minzoom: 6,
-			maxzoom: 20,
-			attribution: 'PDOK'
-		});
-
-		map.addLayer({
-			id: 'satelliet-layer',
-			type: 'raster',
-			source: 'satelliet',
-			layout: {
-				visibility: 'none'
-			},
-			paint: {}
-		});
-	}
-
-	function addWaterschapsgrenzenLayer() {
-		if (!map || map.getSource('pdok-waterschapsgrenzen')) return;
-
-		map.addSource('pdok-waterschapsgrenzen', {
-			type: 'raster',
-			tiles: [
-				'https://service.pdok.nl/hwh/waterschappen-waterschapsgrenzen-imso/wms/v2_0?' +
-					'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
-					'&LAYERS=waterschap' +
-					'&STYLES=' +
-					'&FORMAT=image/png' +
-					'&TRANSPARENT=true' +
-					'&CRS=EPSG:3857' +
-					'&WIDTH=256&HEIGHT=256' +
-					'&BBOX={bbox-epsg-3857}'
-			],
-			tileSize: 256
-		});
-
-		// map.addSource('pdok-gemeentegrenzen', {
-		// 	type: 'geojson',
-		// 	data: 'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wfs/v1_0?service=WFS&version=2.0.0&request=GetFeature&typeName=Gemeentegebied&outputFormat=application/json&srsName=EPSG:4326'
-		// });
-
-		map.addLayer({
-			id: 'overlay-waterschapsgrenzen',
-			type: 'raster',
-			source: 'pdok-waterschapsgrenzen',
-			layout: { visibility: 'visible' }
-		});
-	}
-
-	function addGemeentegrenzenLayer() {
-		if (!map || map.getSource('pdok-gemeentegrenzen')) return;
-
-		map.addSource('pdok-gemeentegrenzen', {
-			type: 'raster',
-			tiles: [
-				'https://service.pdok.nl/kadaster/bestuurlijkegebieden/wms/v1_0?' +
-					'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
-					'&LAYERS=Gemeentegebied' +
-					'&STYLES=' +
-					'&FORMAT=image/png' +
-					'&TRANSPARENT=true' +
-					'&CRS=EPSG:3857' +
-					'&WIDTH=256&HEIGHT=256' +
-					'&BBOX={bbox-epsg-3857}'
-			],
-			tileSize: 256
-		});
-
-		map.addLayer({
-			id: 'overlay-gemeentegrenzen',
-			type: 'raster',
-			source: 'pdok-gemeentegrenzen',
-			layout: { visibility: 'visible' }
 		});
 	}
 
