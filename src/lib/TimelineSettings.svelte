@@ -3,7 +3,7 @@
 	import { Switch } from 'bits-ui';
 	import { ArrowElbowDownRight, Gear } from 'phosphor-svelte';
 
-	let { filter = $bindable(), applyFilter, minYear, maxYear } = $props();
+	let { mapContext, minYear, maxYear } = $props();
 
 	let showSettings = $state(false);
 	let settingsPanel: HTMLDivElement | undefined = $state();
@@ -44,11 +44,11 @@
 		}
 	}
 
-	let selectedRegulier = $state(!filter.type);
-	let selectedEdition = $state(filter.edition);
-	let selectedBIS = $state(filter.bis);
-	let selectedHWP = $state(filter.type === 'HWP');
-	let selectedWVE = $state(filter.type === 'WVE');
+	let selectedRegulier = $state(!mapContext.filter.type);
+	let selectedEdition = $state(mapContext.filter.edition);
+	let selectedBIS = $state(mapContext.filter.bis);
+	let selectedHWP = $state(mapContext.filter.type === 'HWP');
+	let selectedWVE = $state(mapContext.filter.type === 'WVE');
 	let selectedOption = $state('');
 
 	function clearAll() {
@@ -63,8 +63,8 @@
 		if (selectedRegulier && !v) return false;
 
 		if (selectedRegulier !== v) {
-			filter.type = undefined;
-			applyFilter(filter);
+			mapContext.filter.type = undefined;
+			mapContext.applyFilter(mapContext.filter);
 		}
 		if (v) {
 			clearAll();
@@ -72,8 +72,8 @@
 		} else {
 			selectedRegulier = false;
 			if (selectedBIS) {
-				filter.bis = false;
-				applyFilter(filter);
+				mapContext.filter.bis = false;
+				mapContext.applyFilter(mapContext.filter);
 			}
 			selectedBIS = false;
 		}
@@ -82,8 +82,8 @@
 	function toggleBIS(v: boolean) {
 		if (!selectedRegulier) return;
 		if (selectedBIS !== v) {
-			filter.bis = v;
-			applyFilter(filter);
+			mapContext.filter.bis = v;
+			mapContext.applyFilter(mapContext.filter);
 		}
 		selectedBIS = v;
 	}
@@ -91,9 +91,9 @@
 	function toggleHWP(v: boolean) {
 		if (selectedHWP !== v) {
 			setEdition('All');
-			filter.type = 'HWP';
-			filter.yearEnd = maxYear;
-			applyFilter(filter);
+			mapContext.filter.type = 'HWP';
+			mapContext.filter.yearEnd = maxYear;
+			mapContext.applyFilter(mapContext.filter);
 		}
 		if (v) {
 			clearAll();
@@ -106,9 +106,9 @@
 	function toggleWVE(v: boolean) {
 		if (selectedWVE !== v) {
 			setEdition('All');
-			filter.type = 'WVE';
-			filter.yearEnd = maxYear;
-			applyFilter(filter);
+			mapContext.filter.type = 'WVE';
+			mapContext.filter.yearEnd = maxYear;
+			mapContext.applyFilter(mapContext.filter);
 		}
 		if (v) {
 			clearAll();
@@ -123,16 +123,16 @@
 		if (!selectedRegulier) return;
 
 		if (selectedEdition !== v) {
-			filter.edition = v;
+			mapContext.filter.edition = v;
 
-			filter.yearEnd = maxYear;
-			applyFilter(filter);
+			mapContext.filter.yearEnd = maxYear;
+			mapContext.applyFilter(mapContext.filter);
 		}
 		selectedEdition = v;
 	}
 
-	let yearStart = $derived(filter.yearStart);
-	let yearEnd = $derived(filter.yearEnd);
+	let yearStart = $derived(mapContext.filter.yearStart);
+	let yearEnd = $derived(mapContext.filter.yearEnd);
 </script>
 
 <svelte:window onpointerdown={handleWindowClick} onkeydown={handleKeyDown} />
@@ -179,31 +179,32 @@
 					<input
 						type="number"
 						min={minYear - 1}
-						max={filter.yearEnd}
+						max={mapContext.filter.yearEnd}
 						bind:value={yearStart}
 						onchange={() => {
-							yearStart = Math.max(minYear, Math.min(filter.yearEnd - 1, yearStart));
-							filter.yearStart = yearStart;
-							applyFilter(filter);
+							yearStart = Math.max(minYear, Math.min(mapContext.filter.yearEnd - 1, yearStart));
+							mapContext.filter.yearStart = yearStart;
+							mapContext.applyFilter(mapContext.filter);
 						}}
 						oninput={() => {
-							if (yearStart >= minYear && yearStart < filter.yearEnd) filter.yearStart = yearStart;
+							if (yearStart >= minYear && yearStart < mapContext.filter.yearEnd)
+								mapContext.filter.yearStart = yearStart;
 						}}
 						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>
 					tot
 					<input
 						type="number"
-						min={filter.yearStart}
+						min={mapContext.filter.yearStart}
 						max={maxYear + 1}
 						bind:value={yearEnd}
 						onchange={() => {
 							yearEnd = Math.max(minYear, Math.min(maxYear, yearEnd));
-							filter.yearEnd = yearEnd;
-							applyFilter(filter);
+							mapContext.filter.yearEnd = yearEnd;
+							mapContext.applyFilter(mapContext.filter);
 						}}
 						oninput={() => {
-							if (yearEnd >= minYear && yearEnd <= maxYear) filter.yearEnd = yearEnd;
+							if (yearEnd >= minYear && yearEnd <= maxYear) mapContext.filter.yearEnd = yearEnd;
 						}}
 						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>

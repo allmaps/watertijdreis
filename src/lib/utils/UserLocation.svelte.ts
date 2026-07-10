@@ -21,3 +21,19 @@ export function getUserLocation(): Promise<{ lat: number; lng: number }> {
 		);
 	});
 }
+
+export function isInNL(lat, lng) {
+	const NL_BBOX = {
+		minLat: 50.5,
+		maxLat: 53.7,
+		minLng: 3.0,
+		maxLng: 7.5
+	};
+
+	return (
+		lat >= NL_BBOX.minLat &&
+		lat <= NL_BBOX.maxLat &&
+		lng >= NL_BBOX.minLng &&
+		lng <= NL_BBOX.maxLng
+	);
+}

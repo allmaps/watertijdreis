@@ -13,7 +13,7 @@
 		};
 	};
 
-	let { providers, visible = $bindable(), flyToFeature } = $props();
+	let { providers, visible = $bindable(), mapContext } = $props();
 
 	let inputEl: HTMLInputElement | undefined = $state();
 	let listEl: HTMLUListElement | undefined = $state();
@@ -113,7 +113,7 @@
 	}
 
 	function confirmSelection(feature: GeocoderGeoJsonFeature) {
-		flyToFeature(feature);
+		mapContext.flyToFeature(feature);
 		visible = false;
 	}
 
