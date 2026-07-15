@@ -3,6 +3,7 @@ import { SvelteMap } from 'svelte/reactivity';
 import type { MapContext } from './mapContext.svelte';
 import { WarpedMapLayer } from '@allmaps/maplibre';
 import { addOutlineLayers } from './mapLayers.svelte';
+import * as turf from '@turf/turf';
 
 const ANNOTATION_URL = 'maps-sorted-by-edition.json';
 
@@ -32,22 +33,56 @@ export class HistoricMapsContext {
 
     warpedMapLayer: WarpedMapLayer | null = $state(null);
 
-    historicMapsLoaded = $state(false);
-    historicMapsById = new SvelteMap<string, HistoricMap>();
-    historicMapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
-        if (!this.historicMapsLoaded) return;
+    mapsLoaded = $state(false);
+    mapsById = new SvelteMap<string, HistoricMap>();
+    mapsByNumber: Map<number, HistoricMap[]> | undefined = $derived.by(() => {
+        if (!this.mapsLoaded) return;
         const grouped = new Map<number, HistoricMap[]>();
-        for (const { number, ...rest } of this.historicMapsById.values())
+        for (const { number, ...rest } of this.mapsById.values())
             (grouped.get(number) ?? grouped.set(number, []).get(number))!.unshift({ number, ...rest });
         return grouped;
     });
 
-    visibleHistoricMaps: SvelteMap<string, HistoricMap> = new SvelteMap();
-    mapsInViewport: SvelteMap<string, HistoricMap> = new SvelteMap();
-    visibleHistoricMapsInViewport: SvelteMap<string, HistoricMap> = new SvelteMap();
+    #mapIdsInViewport = $state<string[]>([]);
+    visibleMaps = new SvelteMap<string, HistoricMap>();
 
-    selectedHistoricMap: HistoricMap | null = $state(null);
-    pinnedHistoricMap: HistoricMap | null = $state(null);
+    mapsInViewport = $derived.by(() => {
+        const maps = new Map<string, HistoricMap>();
+        for (const id of this.#mapIdsInViewport) {
+            const mapData = this.mapsById.get(id);
+            if (mapData) maps.set(id, mapData);
+        }
+        return maps;
+    });
+
+    visibleMapsInViewport = $derived.by(() => {
+        const maps = new Map<string, HistoricMap>();
+        for (const id of this.#mapIdsInViewport) {
+            if (this.visibleMaps.has(id)) {
+                const mapData = this.mapsById.get(id);
+                if (mapData) maps.set(id, mapData);
+            }
+        }
+        return maps;
+    });
+
+
+    selectedMap: HistoricMap | null = $state(null);
+    pinnedMap: HistoricMap | null = $state(null);
+
+    hoveredHistoricMap = $state<HistoricMap | null>(null);
+    clickedHistoricMap = $state<HistoricMap | null>(null);
+
+    #hoveredFeatureId = $state<number | null>(null);
+    #clickedFeatureId = $state<number | null>(null)
+
+    gridVisible = $state(false);
+    #gridResetTimer: ReturnType<typeof setTimeout> | null = null;
+    #gridVisibilityTimer: ReturnType<typeof setTimeout> | null = null;
+    #rippleResetTimer: ReturnType<typeof setTimeout> | null = null;
+    #fillFadeOutTimer: ReturnType<typeof setTimeout> | null = null;
+    #featureTimeouts: Record<number | string, ReturnType<typeof setTimeout>> = {};
+
 
     filter: Filter = $state({
         yearStart: 1865,
@@ -70,7 +105,189 @@ export class HistoricMapsContext {
 
         await this.load(ANNOTATION_URL);
 
-        // addOutlineLayers(this.mapContext);
+        this.mapContext.activeMap.on('mousemove', 'map-outlines-fill', e => this.handleMapMouseMove(e));
+        this.mapContext.activeMap.on('mouseleave', 'map-outlines-fill', e => this.handleMapMouseLeave(e));
+        this.mapContext.activeMap.on('moveend', () => {
+            this.updateViewportMaps();
+        });
+        this.mapContext.activeMap.on('click', 'map-outlines-fill', (e) => {
+            this.handleMapClick(e);
+        });
+
+        this.updateViewportMaps();
+    }
+
+    private updateViewportMaps() {
+        const reference = this.warpedMapLayer?.renderer?.mapsInViewport;
+        if (reference) {
+            this.#mapIdsInViewport = Array.from(reference);
+        }
+    }
+
+    private updateMapOutlines() {
+        const map = this.mapContext.activeMap;
+        const mapsArray = Array.from(this.visibleMaps.values());
+
+        const polygons = mapsArray.map((historicMap, index) => ({
+            type: "Feature" as const,
+            id: index,
+            geometry: historicMap.polygon,
+            properties: {
+                id: historicMap.id
+            }
+        }));
+
+        const points = mapsArray.map((historicMap, index) => ({
+            type: "Feature" as const,
+            id: index,
+            geometry: turf.centerOfMass(historicMap.polygon).geometry,
+            properties: {
+                year: historicMap.yearEnd,
+                num: `${historicMap.number}.${historicMap.position}`
+            }
+        }));
+
+        const outlinesSource = map.getSource('map-outlines') as maplibregl.GeoJSONSource | undefined;
+        outlinesSource?.setData({ type: 'FeatureCollection', features: polygons });
+
+        const labelsSource = map.getSource('map-labels') as maplibregl.GeoJSONSource | undefined;
+        labelsSource?.setData({ type: 'FeatureCollection', features: points });
+    }
+
+    handleMapClick(e: any) {
+        const clickedLngLat = e.lngLat;
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const mapId = feature.properties?.id;
+        const historicMap = this.mapsById.get(mapId) || null;
+
+
+        if (this.#shouldOpenImmediately(historicMap)) {
+            this.setHistoricMapView(historicMap);
+            return;
+        }
+
+        this.setGridVisibility(true, clickedLngLat);
+
+        if (this.#rippleResetTimer) clearTimeout(this.#rippleResetTimer);
+        this.#rippleResetTimer = setTimeout(() => {
+            this.setGridVisibility(false, clickedLngLat);
+        }, 1500);
+
+        this.#handleMapSelection(historicMap, feature.id);
+        this.#triggerFillFlashAnimation(feature.id);
+    }
+
+    setGridVisibility(
+        isVisible: boolean,
+        centerLngLat = { lng: 5.63, lat: 52.16 },
+        rippleScale = 3,
+        speed = 300
+    ) {
+        if (this.mapContext.sheetIndexVisible && !isVisible) return;
+
+        const source = this.mapContext.activeMap.getSource('map-outlines') as any;
+        if (!source || !source._data) return;
+        const allFeatures = source._data.features;
+
+        if (this.#gridVisibilityTimer) clearTimeout(this.#gridVisibilityTimer);
+        this.#gridVisibilityTimer = setTimeout(() => (this.gridVisible = isVisible), 100);
+
+        if (isVisible && this.#gridResetTimer) {
+            clearTimeout(this.#gridResetTimer);
+            this.#gridResetTimer = null;
+        }
+
+        const hoverFillOpacity = isVisible ? 0.1 : 0;
+
+        this.mapContext.activeMap.setPaintProperty('map-outlines-fill', 'fill-opacity', [
+            'max',
+            ['coalesce', ['feature-state', 'animated-fill-opacity'], 0],
+            ['case', ['boolean', ['feature-state', 'hover'], false], hoverFillOpacity, 0]
+        ]);
+
+        allFeatures.forEach((feature: any) => {
+            const id = feature.id;
+            if (id === undefined) return;
+
+            if (this.#featureTimeouts[id]) {
+                clearTimeout(this.#featureTimeouts[id]);
+                delete this.#featureTimeouts[id];
+            }
+
+            if (!isVisible) {
+                this.mapContext.animateFeatureOpacity(id, 'animated-stroke-opacity', 0, 500);
+                return;
+            }
+
+            const [x, y] = feature.geometry.coordinates[0][0];
+            const dx = centerLngLat.lng - x;
+            const dy = centerLngLat.lat - y;
+            const distance = Math.sqrt(dx ** 2 + dy ** 2);
+
+            const delay = distance * speed;
+            const targetOpacity = Math.max(0, 0.5 - distance / rippleScale);
+
+            this.#featureTimeouts[id] = setTimeout(() => {
+                this.mapContext.animateFeatureOpacity(id, 'animated-stroke-opacity', targetOpacity, 500);
+                delete this.#featureTimeouts[id];
+            }, delay);
+        });
+    }
+
+    setSheetIndexVisibility(visible = !this.mapContext.sheetIndexVisible) {
+        this.mapContext.sheetIndexVisible = visible;
+        this.setGridVisibility(visible, { lng: 5.63, lat: 52.16 }, 100, 150);
+
+        const isMapSelected = !!this.selectedMap;
+        const visibilityStyle = (!isMapSelected || visible) ? 'visible' : 'none';
+
+        const layers = ['map-outlines-numbers', 'map-outlines-stroke', 'map-outlines-fill'];
+        layers.forEach(layerId => {
+            this.mapContext.activeMap.setLayoutProperty(layerId, 'visibility', visibilityStyle);
+        });
+
+        this.mapContext.activeMap.setPaintProperty('map-outlines-numbers', 'text-opacity', visible ? 1 : 0);
+
+        return visible;
+    }
+
+    #handleMapSelection(historicMap: HistoricMap | null, featureId: number) {
+        this.clickedHistoricMap = historicMap;
+        this.#clickedFeatureId = featureId;
+
+        if (this.#gridResetTimer) clearTimeout(this.#gridResetTimer);
+        this.#gridResetTimer = setTimeout(() => {
+            this.clickedHistoricMap = null;
+            this.#clickedFeatureId = null;
+        }, 2500);
+    }
+
+    #shouldOpenImmediately(historicMap: HistoricMap | null): boolean {
+        if (!historicMap) return false;
+
+        if (this.mapContext.sheetIndexVisible) return true;
+
+        const isDoubleClicked = this.clickedHistoricMap?.id === historicMap.id;
+        return isDoubleClicked;
+    }
+
+    #triggerFillFlashAnimation(featureId: number) {
+        if (this.#clickedFeatureId !== null && this.#clickedFeatureId !== featureId) {
+            if (this.#fillFadeOutTimer) clearTimeout(this.#fillFadeOutTimer);
+            this.mapContext.animateFeatureOpacity(this.#clickedFeatureId, 'animated-fill-opacity', 0, 50);
+        }
+
+        if (this.#clickedFeatureId === featureId && this.#fillFadeOutTimer) return;
+
+        this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0.25, 300, () => {
+            this.#fillFadeOutTimer = setTimeout(() => {
+                if (this.#clickedFeatureId === featureId) {
+                    this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 500);
+                }
+            }, 1000);
+        });
     }
 
     async load(url: string) {
@@ -81,8 +298,8 @@ export class HistoricMapsContext {
             const data = await res.json();
 
             this.mapContext.map.on('maptilesloadedfromsprites', () => {
-                this.historicMapsLoaded = true;
-                this.mapContext.applyFilter(this.mapContext.filter);
+                this.mapsLoaded = true;
+                this.applyFilter();
             });
 
             const imageInfos = data.map(transformToIIIFInfoJson);
@@ -105,7 +322,7 @@ export class HistoricMapsContext {
                     ...item._meta
                 };
 
-                this.historicMapsById.set(id, historicMap);
+                this.mapsById.set(id, historicMap);
             });
 
             await Promise.all(loadPromises);
@@ -136,9 +353,8 @@ export class HistoricMapsContext {
         }
     }
 
-    applyFilter(filter: Filter) {
-        if (!this.historicMapsByNumber || this.selectedHistoricMap) return;
-
+    applyFilter(filter: Filter = this.filter) {
+        if (!this.mapsByNumber || this.selectedMap) return;
 
         let maxYear = 0;
         filter.yearStart = Math.min(filter.yearEnd - 1, filter.yearStart);
@@ -146,7 +362,7 @@ export class HistoricMapsContext {
         const mapsToColor: string[] = [];
         const mapsToDesaturate: string[] = [];
 
-        this.historicMapsByNumber.forEach((sheets) => {
+        this.mapsByNumber.forEach((sheets) => {
             let x1, y1, x2, y2;
             const firstEdYearEnd = 1894;
 
@@ -191,7 +407,7 @@ export class HistoricMapsContext {
         filter.yearEnd = Math.min(maxYear, filter.yearEnd);
 
         const mapsToShow = mapsToColor.concat(mapsToDesaturate);
-        const visibleHistoricMapIds = this.visibleHistoricMaps.keys().toArray();
+        const visibleHistoricMapIds = this.visibleMaps.keys().toArray();
 
         const mapsToHide = visibleHistoricMapIds.filter((id) => !mapsToShow.includes(id));
         const mapsToAdd = mapsToShow.filter((id) => !visibleHistoricMapIds.includes(id));
@@ -226,22 +442,24 @@ export class HistoricMapsContext {
 
         this.warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
 
-        mapsToHide.forEach((id) => this.visibleHistoricMaps.delete(id));
+        mapsToHide.forEach((id) => this.visibleMaps.delete(id));
         mapsToAdd.forEach((id) => {
-            const historicMap = this.historicMapsById.get(id);
+            const historicMap = this.mapsById.get(id);
             if (historicMap) {
-                this.visibleHistoricMaps.set(id, historicMap);
+                this.visibleMaps.set(id, historicMap);
             }
         });
 
-        this.toastContent = `Je ziet nu kaarten van ${Math.round(filter.yearEnd)} en ouder`;
+        this.updateMapOutlines()
+
+        this.mapContext.toastContent = `Je ziet nu kaarten van ${Math.round(filter.yearEnd)} en ouder`;
     }
 
     setHistoricMapView(historicMap: HistoricMap, view: MapView | undefined) {
-        if (!this.historicMapsLoaded) return;
+        if (!this.mapsLoaded) return;
 
         this.mapContext.clickedFeature = null;
-        this.mapContext.setSheetIndexVisibility(false);
+        this.setSheetIndexVisibility(false);
 
         this.mapContext.savedLayerVisibility = {};
         const layers = this.mapContext.activeMap.getStyle().layers;
@@ -262,7 +480,7 @@ export class HistoricMapsContext {
         this.warpedMapLayer.setLayerOptions({ opacity: 1 });
 
         const { id } = historicMap;
-        const mapsToHide = this.visibleHistoricMaps
+        const mapsToHide = this.visibleMaps
             .keys()
             .filter((i) => i != id)
             .toArray();
@@ -277,7 +495,7 @@ export class HistoricMapsContext {
             applyMask: false
         });
 
-        this.selectedHistoricMap = historicMap;
+        this.selectedMap = historicMap;
 
         this.mapContext.saveMapView();
 
@@ -307,11 +525,11 @@ export class HistoricMapsContext {
     }
 
     changeHistoricMapView(historicMap: HistoricMap) {
-        if (!this.historicMapsLoaded) return;
+        if (!this.mapsLoaded) return;
 
         const optionsByMapId = new Map();
 
-        optionsByMapId.set(this.selectedHistoricMap?.id, {
+        optionsByMapId.set(this.selectedMap?.id, {
             visible: false,
             transformationType: 'thinPlateSpline',
             applyMask: true
@@ -343,6 +561,39 @@ export class HistoricMapsContext {
             );
         }
 
-        this.selectedHistoricMap = historicMap;
+        this.selectedMap = historicMap;
+    }
+
+    handleMapMouseMove(e: any) {
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        if (this.#hoveredFeatureId !== null && this.#hoveredFeatureId !== feature.id) {
+            this.mapContext.activeMap.setFeatureState(
+                { source: 'map-outlines', id: this.#hoveredFeatureId },
+                { hover: false }
+            );
+        }
+
+        this.#hoveredFeatureId = feature.id;
+        this.mapContext.activeMap.setFeatureState(
+            { source: 'map-outlines', id: this.#hoveredFeatureId },
+            { hover: true }
+        );
+
+        const mapId = feature.properties?.id;
+        this.hoveredHistoricMap = this.mapsById.get(mapId) || null;
+    }
+
+    handleMapMouseLeave() {
+        if (this.#hoveredFeatureId !== null) {
+            this.mapContext.activeMap.setFeatureState(
+                { source: 'map-outlines', id: this.#hoveredFeatureId },
+                { hover: false }
+            );
+        }
+
+        this.#hoveredFeatureId = null;
+        this.hoveredHistoricMap = null;
     }
 }

@@ -37,17 +37,17 @@
 
 	let historicMap = $derived.by(() => {
 		return (
-			mapContext.historic.selectedHistoricMap ||
-			mapContext.clickedHistoricMap ||
-			(mapContext.sheetIndexVisible && mapContext.hoveredHistoricMap) ||
-			(mapContext.historic.visibleHistoricMapsInViewport &&
-			mapContext.historic.visibleHistoricMapsInViewport.size == 1
-				? mapContext.historic.visibleHistoricMapsInViewport.values().next().value
+			mapContext.historic.selectedMap ||
+			mapContext.historic.clickedHistoricMap ||
+			(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap) ||
+			(mapContext.historic.visibleMapsInViewport &&
+			mapContext.historic.visibleMapsInViewport.size == 1
+				? mapContext.historic.visibleMapsInViewport.values().next().value
 				: null)
 		);
 	});
 
-	let preview = $derived(!mapContext.historic.selectedHistoricMap);
+	let preview = $derived(!mapContext.historic.selectedMap);
 
 	let prevEdition: number | null = null;
 
@@ -80,9 +80,7 @@
 
 		if (!mainVariant) return null;
 
-		return mapContext.historic.historicMapsById
-			.values()
-			.find((i) => i.manifestId == mainVariant.id);
+		return mapContext.historic.mapsById.values().find((i) => i.manifestId == mainVariant.id);
 	});
 
 	$effect(() => {
@@ -265,7 +263,7 @@
 			geoFullMaskBbox: warpedMap?.geoFullMaskBbox
 		};
 
-		mapContext.historic.historicMapsById.set(id, historicMap);
+		mapContext.historic.mapsById.set(id, historicMap);
 
 		mapContext.historic.changeHistoricMapView(historicMap);
 	}
@@ -301,7 +299,7 @@
 	});
 
 	$effect(() => {
-		if (!mapContext.historic.selectedHistoricMap) {
+		if (!mapContext.historic.selectedMap) {
 			sheetInformationVisible = false;
 		}
 	});
@@ -314,15 +312,15 @@
 		class="
 			sm:from-wtr-blue from-wtr-blue/50 to-wtr-blue/50 fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px]
 			bg-gradient-to-r from-[270px] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
-			{sheetInformationVisible || mapContext.historic.selectedHistoricMap ? 'bg-wtr-blue' : ''}
-			{sheetInformationVisible || mapContext.historic.selectedHistoricMap
+			{sheetInformationVisible || mapContext.historic.selectedMap ? 'bg-wtr-blue' : ''}
+			{sheetInformationVisible || mapContext.historic.selectedMap
 			? 'w-auto sm:w-87'
 			: 'w-auto sm:w-[calc(100vh-16px)]'}
 		"
-		style:background-color={mapContext.historic.selectedHistoricMap ? 'var(--color-wtr-blue)' : ''}
+		style:background-color={mapContext.historic.selectedMap ? 'var(--color-wtr-blue)' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
-		style:pointer-events={mapContext.historic.selectedHistoricMap ? 'auto' : 'none'}
+		style:pointer-events={mapContext.historic.selectedMap ? 'auto' : 'none'}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
 			{#key historicMap.id}
@@ -332,7 +330,7 @@
 				>
 					<div
 						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedHistoricMap)
+							if (historicMap && !mapContext.historic.selectedMap)
 								mapContext.historic.setHistoricMapView(historicMap);
 						}}
 						bind:this={thumbnailEl}
@@ -371,7 +369,7 @@
 				>
 					<h1
 						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedHistoricMap)
+							if (historicMap && !mapContext.historic.selectedMap)
 								mapContext.historic.setHistoricMapView(historicMap);
 						}}
 						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold"
@@ -385,7 +383,7 @@
 							: ''}
 					</p>
 
-					{#if mapContext.historic.selectedHistoricMap}
+					{#if mapContext.historic.selectedMap}
 						<button
 							transition:slide={{ duration: 300 }}
 							onclick={toggleSheetInformation}
@@ -471,7 +469,7 @@
 										.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
 									'Hoofdblad (voorkant)'}
 
-								{@const historicMap = mapContext.historic.historicMapsById
+								{@const historicMap = mapContext.historic.mapsById
 									.values()
 									.find((m) => m.manifestId == variant.id)}
 
@@ -495,7 +493,7 @@
 											if (e.key === 'Enter' || e.key === ' ') {
 												e.preventDefault();
 
-												const historicMap = mapContext.historic.historicMapsById
+												const historicMap = mapContext.historic.mapsById
 
 													.values()
 

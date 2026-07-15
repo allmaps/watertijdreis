@@ -44,11 +44,11 @@
 		}
 	}
 
-	let selectedRegulier = $state(!mapContext.filter.type);
-	let selectedEdition = $state(mapContext.filter.edition);
-	let selectedBIS = $state(mapContext.filter.bis);
-	let selectedHWP = $state(mapContext.filter.type === 'HWP');
-	let selectedWVE = $state(mapContext.filter.type === 'WVE');
+	let selectedRegulier = $state(!mapContext.historic.filter.type);
+	let selectedEdition = $state(mapContext.historic.filter.edition);
+	let selectedBIS = $state(mapContext.historic.filter.bis);
+	let selectedHWP = $state(mapContext.historic.filter.type === 'HWP');
+	let selectedWVE = $state(mapContext.historic.filter.type === 'WVE');
 	let selectedOption = $state('');
 
 	function clearAll() {
@@ -63,8 +63,8 @@
 		if (selectedRegulier && !v) return false;
 
 		if (selectedRegulier !== v) {
-			mapContext.filter.type = undefined;
-			mapContext.applyFilter(mapContext.filter);
+			mapContext.historic.filter.type = undefined;
+			mapContext.historic.applyFilter();
 		}
 		if (v) {
 			clearAll();
@@ -72,8 +72,8 @@
 		} else {
 			selectedRegulier = false;
 			if (selectedBIS) {
-				mapContext.filter.bis = false;
-				mapContext.applyFilter(mapContext.filter);
+				mapContext.historic.filter.bis = false;
+				mapContext.historic.applyFilter();
 			}
 			selectedBIS = false;
 		}
@@ -82,8 +82,8 @@
 	function toggleBIS(v: boolean) {
 		if (!selectedRegulier) return;
 		if (selectedBIS !== v) {
-			mapContext.filter.bis = v;
-			mapContext.applyFilter(mapContext.filter);
+			mapContext.historic.filter.bis = v;
+			mapContext.historic.applyFilter();
 		}
 		selectedBIS = v;
 	}
@@ -91,9 +91,9 @@
 	function toggleHWP(v: boolean) {
 		if (selectedHWP !== v) {
 			setEdition('All');
-			mapContext.filter.type = 'HWP';
-			mapContext.filter.yearEnd = maxYear;
-			mapContext.applyFilter(mapContext.filter);
+			mapContext.historic.filter.type = 'HWP';
+			mapContext.historic.filter.yearEnd = maxYear;
+			mapContext.historic.applyFilter();
 		}
 		if (v) {
 			clearAll();
@@ -106,9 +106,9 @@
 	function toggleWVE(v: boolean) {
 		if (selectedWVE !== v) {
 			setEdition('All');
-			mapContext.filter.type = 'WVE';
-			mapContext.filter.yearEnd = maxYear;
-			mapContext.applyFilter(mapContext.filter);
+			mapContext.historic.filter.type = 'WVE';
+			mapContext.historic.filter.yearEnd = maxYear;
+			mapContext.historic.applyFilter();
 		}
 		if (v) {
 			clearAll();
@@ -123,16 +123,16 @@
 		if (!selectedRegulier) return;
 
 		if (selectedEdition !== v) {
-			mapContext.filter.edition = v;
+			mapContext.historic.filter.edition = v;
 
-			mapContext.filter.yearEnd = maxYear;
-			mapContext.applyFilter(mapContext.filter);
+			mapContext.historic.filter.yearEnd = maxYear;
+			mapContext.historic.applyFilter();
 		}
 		selectedEdition = v;
 	}
 
-	let yearStart = $derived(mapContext.filter.yearStart);
-	let yearEnd = $derived(mapContext.filter.yearEnd);
+	let yearStart = $derived(mapContext.historic.filter.yearStart);
+	let yearEnd = $derived(mapContext.historic.filter.yearEnd);
 </script>
 
 <svelte:window onpointerdown={handleWindowClick} onkeydown={handleKeyDown} />
@@ -179,32 +179,36 @@
 					<input
 						type="number"
 						min={minYear - 1}
-						max={mapContext.filter.yearEnd}
+						max={mapContext.historic.filter.yearEnd}
 						bind:value={yearStart}
 						onchange={() => {
-							yearStart = Math.max(minYear, Math.min(mapContext.filter.yearEnd - 1, yearStart));
-							mapContext.filter.yearStart = yearStart;
-							mapContext.applyFilter(mapContext.filter);
+							yearStart = Math.max(
+								minYear,
+								Math.min(mapContext.historic.filter.yearEnd - 1, yearStart)
+							);
+							mapContext.historic.filter.yearStart = yearStart;
+							mapContext.historic.applyFilter();
 						}}
 						oninput={() => {
-							if (yearStart >= minYear && yearStart < mapContext.filter.yearEnd)
-								mapContext.filter.yearStart = yearStart;
+							if (yearStart >= minYear && yearStart < mapContext.historic.filter.yearEnd)
+								mapContext.historic.filter.yearStart = yearStart;
 						}}
 						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>
 					tot
 					<input
 						type="number"
-						min={mapContext.filter.yearStart}
+						min={mapContext.historic.filter.yearStart}
 						max={maxYear + 1}
 						bind:value={yearEnd}
 						onchange={() => {
 							yearEnd = Math.max(minYear, Math.min(maxYear, yearEnd));
-							mapContext.filter.yearEnd = yearEnd;
-							mapContext.applyFilter(mapContext.filter);
+							mapContext.historic.filter.yearEnd = yearEnd;
+							mapContext.historic.applyFilter();
 						}}
 						oninput={() => {
-							if (yearEnd >= minYear && yearEnd <= maxYear) mapContext.filter.yearEnd = yearEnd;
+							if (yearEnd >= minYear && yearEnd <= maxYear)
+								mapContext.historic.filter.yearEnd = yearEnd;
 						}}
 						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>

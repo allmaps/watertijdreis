@@ -13,7 +13,7 @@
 	import Button from './components/Button.svelte';
 	import LayersModal from './LayersModal.svelte';
 
-	let { mapContext, flyToUserLocation, layerOptions = $bindable() } = $props();
+	let { mapContext, layerOptions = $bindable() } = $props();
 
 	const geocodeEarthApiKey = env.PUBLIC_GEOCODE_EARTH_API_KEY;
 
@@ -68,10 +68,10 @@
 <div
 	class="
 	fixed right-2 flex flex-col items-end gap-2 transition-all duration-300
-	{mapContext.historic.selectedHistoricMap ? 'bottom-36 sm:bottom-2' : 'bottom-36'}
+	{mapContext.historic.selectedMap ? 'bottom-36 sm:bottom-2' : 'bottom-36'}
 	"
 >
-	{#if !mapContext.historic.selectedHistoricMap}
+	{#if !mapContext.historic.selectedMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
 			<Button
 				tabindex="5"
@@ -84,7 +84,7 @@
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex="6" Icon={NavigationArrow} onclick={flyToUserLocation}
+			<Button tabindex="6" Icon={NavigationArrow} onclick={() => mapContext.flyToUserLocation()}
 				>Mijn locatie tonen</Button
 			>
 		</div>

@@ -30,8 +30,8 @@
 			{#each 'Watertijdreis'.split('') as letter, i}
 				<span
 					class="inline-block will-change-[transform,text-shadow,color]"
-					class:wave={mapContext.historic.historicMapsLoaded}
-					class:wave-loading={!mapContext.historic.historicMapsLoaded}
+					class:wave={mapContext.historic.mapsLoaded}
+					class:wave-loading={!mapContext.historic.mapsLoaded}
 					style:animation=""
 					style:animation-delay={i * 100 + 'ms'}
 				>

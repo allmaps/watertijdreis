@@ -14,31 +14,31 @@
 	function leftBtnClick() {
 		rightBtnSelected = false;
 		if (
-			mapContext.historic.pinnedHistoricMap &&
-			mapContext.historic.selectedHistoricMap &&
-			mapContext.historic.pinnedHistoricMap.id == mapContext.historic.selectedHistoricMap.id
+			mapContext.historic.pinnedMap &&
+			mapContext.historic.selectedMap &&
+			mapContext.historic.pinnedMap.id == mapContext.historic.selectedMap.id
 		)
 			pinnedView = mapContext.saveMapView(false);
 		mapContext.restoreView();
-		mapContext.setSheetIndexVisibility(false);
+		mapContext.historic.setSheetIndexVisibility(false);
 	}
 
 	function rightBtnClick() {
 		rightBtnSelected = true;
 
-		if (mapContext.clickedHistoricMap && !mapContext.historic.selectedHistoricMap) {
+		if (mapContext.historic.clickedHistoricMap && !mapContext.historic.selectedMap) {
 			extendClickedMapTimeout();
-			mapContext.historic.setHistoricMapView(mapContext.clickedHistoricMap);
-		} else if (mapContext.historic.pinnedHistoricMap && !mapContext.historic.selectedHistoricMap) {
+			mapContext.historic.setHistoricMapView(mapContext.historic.clickedHistoricMap);
+		} else if (mapContext.historic.pinnedMap && !mapContext.historic.selectedMap) {
 			extendClickedMapTimeout();
-			mapContext.historic.setHistoricMapView(mapContext.historic.pinnedHistoricMap, pinnedView);
+			mapContext.historic.setHistoricMapView(mapContext.historic.pinnedMap, pinnedView);
 		} else {
-			if (!mapContext.setSheetIndexVisibility()) leftBtnClick();
+			if (!mapContext.historic.setSheetIndexVisibility()) leftBtnClick();
 		}
 	}
 
 	$effect(() => {
-		if (mapContext.historic.selectedHistoricMap) rightBtnSelected = true;
+		if (mapContext.historic.selectedMap) rightBtnSelected = true;
 		else rightBtnSelected = false;
 	});
 
@@ -79,7 +79,7 @@
 	onkeyup={(e) => {
 		if (e.key == ' ') {
 			spaceKeyDown = false;
-			// if (!mapContext.historic.selectedHistoricMap) leftBtnClick();
+			// if (!mapContext.historic.selectedMap) leftBtnClick();
 		}
 	}}
 />
@@ -123,40 +123,42 @@
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 
-		{#if mapContext.historic.selectedHistoricMap}
-			<span class="truncate">{mapContext.historic.selectedHistoricMap.label}</span>
+		{#if mapContext.historic.selectedMap}
+			<span class="truncate">{mapContext.historic.selectedMap.label}</span>
 			<span
 				role="button"
 				tabindex="0"
 				class="cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
-					if (mapContext.historic.pinnedHistoricMap) mapContext.historic.pinnedHistoricMap = null;
-					else mapContext.historic.pinnedHistoricMap = mapContext.historic.selectedHistoricMap;
+					if (mapContext.historic.pinnedMap) mapContext.historic.pinnedMap = null;
+					else mapContext.historic.pinnedMap = mapContext.historic.selectedMap;
 				}}
 			>
-				{#if mapContext.historic.pinnedHistoricMap && mapContext.historic.pinnedHistoricMap.id == mapContext.historic.selectedHistoricMap.id}
+				{#if mapContext.historic.pinnedMap && mapContext.historic.pinnedMap.id == mapContext.historic.selectedMap.id}
 					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
 				{:else}
 					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="regular"></PushPin>
 				{/if}
 			</span>
-		{:else if mapContext.historic.pinnedHistoricMap && !mapContext.clickedHistoricMap}
-			<span class="truncate">{mapContext.historic.pinnedHistoricMap.label}</span>
+		{:else if mapContext.historic.pinnedMap && !mapContext.historic.clickedHistoricMap}
+			<span class="truncate">{mapContext.historic.pinnedMap.label}</span>
 			<span
 				role="button"
 				tabindex="0"
 				class="cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
-					mapContext.historic.pinnedHistoricMap = null;
+					mapContext.historic.pinnedMap = null;
 				}}
 			>
 				<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
 			</span>
 		{:else}
 			<span class="truncate">
-				{mapContext.clickedHistoricMap ? mapContext.clickedHistoricMap.label : 'Bladindex'}
+				{mapContext.historic.clickedHistoricMap
+					? mapContext.historic.clickedHistoricMap.label
+					: 'Bladindex'}
 			</span>
 
 			{#if keyboardShortcutVisible}

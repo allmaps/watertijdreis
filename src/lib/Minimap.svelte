@@ -7,16 +7,16 @@
 
 	let previewHistoricMap = $derived.by(() => {
 		if (
-			mapContext.historic.visibleHistoricMapsInViewport &&
-			mapContext.historic.visibleHistoricMapsInViewport.size == 1
+			mapContext.historic.visibleMapsInViewport &&
+			mapContext.historic.visibleMapsInViewport.size == 1
 		)
-			return mapContext.historic.visibleHistoricMapsInViewport.values().next().value;
+			return mapContext.historic.visibleMapsInViewport.values().next().value;
 		return null;
 	});
 
 	let polygons = $derived.by(() => {
-		if (!mapContext.historic.historicMapsLoaded) return [];
-		return mapContext.historic.visibleHistoricMaps
+		if (!mapContext.historic.mapsLoaded) return [];
+		return mapContext.historic.visibleMaps
 			.values()
 			.toArray()
 			.map((i) => ({
@@ -87,7 +87,7 @@
 	}
 </script>
 
-{#if mapContext.historic.visibleHistoricMaps && mapContext.historic.visibleHistoricMaps.size}
+{#if mapContext.historic.visibleMaps && mapContext.historic.visibleMaps.size}
 	<svg
 		{width}
 		{height}
@@ -98,16 +98,18 @@
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#each polygons as poly}
 				{@const previewed =
-					!mapContext.clickedHistoricMap &&
+					!mapContext.historic.clickedHistoricMap &&
 					previewHistoricMap &&
 					poly.properties.id == previewHistoricMap.id}
 				{@const selected =
-					mapContext.selectedHistoricMap && poly.properties.id == mapContext.selectedHistoricMap.id}
+					mapContext.historic.selectedMap &&
+					poly.properties.id == mapContext.historic.selectedMap.id}
 				{@const clicked =
-					mapContext.clickedHistoricMap && poly.properties.id == mapContext.clickedHistoricMap.id}
+					mapContext.historic.clickedHistoricMap &&
+					poly.properties.id == mapContext.historic.clickedHistoricMap.id}
 				{@const visible =
-					!mapContext.selectedHistoricMap &&
-					mapContext.historic.visibleHistoricMapsInViewport.has(poly.properties.id)}
+					!mapContext.historic.selectedMap &&
+					mapContext.historic.visibleMapsInViewport.has(poly.properties.id)}
 				{@const fill =
 					previewed || clicked || selected ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
@@ -117,7 +119,7 @@
 					stroke-width={(viewBox[2] / width) * 1.33}
 				/>
 			{/each}
-			{#if viewport && !mapContext.selectedHistoricMap}
+			{#if viewport && !mapContext.historic.selectedMap}
 				{@const {
 					x,
 					y,
@@ -136,14 +138,14 @@
 					ry={(viewBox[2] / width) * 2}
 				></rect>
 			{/if}
-			{#if previewHistoricMap || mapContext.clickedHistoricMap || mapContext.selectedHistoricMap || (mapContext.sheetIndexVisible && mapContext.hoveredHistoricMap)}
+			{#if previewHistoricMap || mapContext.historic.clickedHistoricMap || mapContext.historic.selectedMap || (mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
 				<g out:fade={{ duration: 250 }}>
-					{#key previewHistoricMap || mapContext.clickedHistoricMap || mapContext.selectedHistoricMap || (mapContext.sheetIndexVisible && mapContext.hoveredHistoricMap)}
+					{#key previewHistoricMap || mapContext.historic.clickedHistoricMap || mapContext.historic.selectedMap || (mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
 						{@const historicMap =
 							previewHistoricMap ||
-							mapContext.clickedHistoricMap ||
-							mapContext.selectedHistoricMap ||
-							(mapContext.sheetIndexVisible && mapContext.hoveredHistoricMap)}
+							mapContext.historic.clickedHistoricMap ||
+							mapContext.historic.selectedMap ||
+							(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates

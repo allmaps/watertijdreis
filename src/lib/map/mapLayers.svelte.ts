@@ -117,53 +117,20 @@ export function addUserLocationCircle(map: MaplibreMap) {
     });
 }
 
-let clickedMapTimeout = null;
-
 export function addOutlineLayers(mapContext: MapContext) {
-    if (!mapContext.map) return;
+    const map = mapContext.map;
+    if (!map) return;
 
-    mapContext.map.addLayer(
-        {
-            id: 'map-outlines-skeleton',
-            type: 'fill',
-            source: 'map-outlines',
-            paint: { 'fill-color': ['get', 'skeletonColor'] }
-        },
-        'warped-map-layer'
-    );
+    const labelZoomValues = [5, 6, 6, 9, 7, 12, 8, 15, 9, 17, 10, 18, 12, 22, 14, 26, 15, 28, 20, 28];
 
-    mapContext.map.addLayer({
+    map.addLayer({
         id: 'map-outlines-labels',
         type: 'symbol',
         source: 'map-labels',
         layout: {
             'text-font': ['literal', ['Metropolis Bold']],
             'text-field': ['to-string', ['get', 'year']],
-            'text-size': [
-                'interpolate',
-                ['exponential', 1.2],
-                ['zoom'],
-                5,
-                6,
-                6,
-                9,
-                7,
-                12,
-                8,
-                15,
-                9,
-                17,
-                10,
-                18,
-                12,
-                22,
-                14,
-                26,
-                15,
-                28,
-                20,
-                28
-            ],
+            'text-size': ['interpolate', ['exponential', 1.2], ['zoom'], ...labelZoomValues],
             'text-allow-overlap': true
         },
         paint: {
@@ -174,38 +141,14 @@ export function addOutlineLayers(mapContext: MapContext) {
         }
     });
 
-    mapContext.map.addLayer({
+    map.addLayer({
         id: 'map-outlines-numbers',
         type: 'symbol',
         source: 'map-labels',
         layout: {
             'text-font': ['literal', ['Metropolis Bold']],
             'text-field': ['to-string', ['get', 'num']],
-            'text-size': [
-                'interpolate',
-                ['exponential', 1.2],
-                ['zoom'],
-                5,
-                6,
-                6,
-                9,
-                7,
-                12,
-                8,
-                15,
-                9,
-                17,
-                10,
-                18,
-                12,
-                22,
-                14,
-                26,
-                15,
-                28,
-                20,
-                28
-            ],
+            'text-size': ['interpolate', ['exponential', 1.2], ['zoom'], ...labelZoomValues],
             'text-allow-overlap': true
         },
         paint: {
@@ -217,7 +160,7 @@ export function addOutlineLayers(mapContext: MapContext) {
         }
     });
 
-    mapContext.map.addLayer({
+    map.addLayer({
         id: 'map-outlines-fill',
         type: 'fill',
         source: 'map-outlines',
@@ -227,7 +170,7 @@ export function addOutlineLayers(mapContext: MapContext) {
         }
     });
 
-    mapContext.map.addLayer({
+    map.addLayer({
         id: 'map-outlines-stroke',
         type: 'line',
         source: 'map-outlines',
@@ -235,82 +178,6 @@ export function addOutlineLayers(mapContext: MapContext) {
             'line-color': '#f4a',
             'line-width': 1,
             'line-opacity': ['coalesce', ['feature-state', 'animated-stroke-opacity'], 0]
-        }
-    });
-
-    let gridResetTimer = null;
-    let currentFillId = null;
-    let fillFadeOutTimer = null;
-    const activeAnimations = {};
-    const featureTimeouts = {};
-
-    mapContext.map.doubleClickZoom.disable();
-
-    mapContext.map.on('click', 'map-outlines-fill', (e) => {
-        const clickedLngLat = e.lngLat;
-        const feature = e.features?.[0];
-        const featureId = feature?.id;
-        const mapId = feature?.properties?.id;
-
-        if (mapContext.sheetIndexVisible && mapId) {
-            mapContext.historic.setHistoricMapView(mapContext.historic.historicMapsById.get(mapId));
-            return;
-        }
-
-        mapContext.setGridVisibility(true, clickedLngLat);
-
-        if (gridResetTimer) clearTimeout(gridResetTimer);
-        gridResetTimer = setTimeout(() => {
-            mapContext.setGridVisibility(false, clickedLngLat);
-        }, 1500);
-
-        // if (feature) {
-        // 	setTimeout(
-        // 		() =>
-        // 			map!.flyTo({
-        // 				center: clickedLngLat,
-        // 				speed: 0.5,
-        // 				curve: 1,
-        // 				essential: true
-        // 			}),
-        // 		250
-        // 	);
-        // }
-
-        if (mapContext.clickedFeature && mapContext.clickedFeature.properties?.id === mapId) {
-            if (mapId) mapContext.historic.setHistoricMapView(mapContext.historic.historicMapsById.get(mapId));
-        }
-
-        mapContext.clickedFeature = feature;
-
-        if (featureId !== undefined) {
-            if (currentFillId !== null && currentFillId !== featureId) {
-                if (fillFadeOutTimer) clearTimeout(fillFadeOutTimer);
-                animateFeatureOpacity(mapContext.map, currentFillId, 'animated-fill-opacity', 0, 50);
-            }
-
-            if (currentFillId !== featureId) {
-                currentFillId = featureId;
-
-                animateFeatureOpacity(
-                    mapContext.map,
-                    featureId,
-                    'animated-fill-opacity',
-                    0.25,
-                    300,
-                    () => {
-                        fillFadeOutTimer = setTimeout(() => {
-                            if (currentFillId === featureId) {
-                                animateFeatureOpacity(mapContext.map, featureId, 'animated-fill-opacity', 0, 500);
-                                currentFillId = null;
-                            }
-                        }, 1000);
-                    }
-                );
-
-                if (clickedMapTimeout) clearTimeout(clickedMapTimeout);
-                clickedMapTimeout = setTimeout(() => (mapContext.clickedFeature = null), 2500);
-            }
         }
     });
 }

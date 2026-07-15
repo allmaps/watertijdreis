@@ -35,8 +35,8 @@
 
 	let view = new Spring(
 		{
-			start: mapContext.filter.yearEnd - 10,
-			end: mapContext.filter.yearEnd + 10
+			start: mapContext.historic.filter.yearEnd - 10,
+			end: mapContext.historic.filter.yearEnd + 10
 		},
 		{ stiffness: 0.1, damping: 0.5 }
 	);
@@ -44,8 +44,8 @@
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
-			const newStart = mapContext.filter.yearEnd - halfRange;
-			const newEnd = mapContext.filter.yearEnd + halfRange;
+			const newStart = mapContext.historic.filter.yearEnd - halfRange;
+			const newEnd = mapContext.historic.filter.yearEnd + halfRange;
 
 			const clampedStart = Math.max(newStart, MIN_YEAR);
 			const clampedEnd = Math.min(newEnd, MAX_YEAR);
@@ -132,13 +132,13 @@
 			const yearDelta = (dx / width) * currentRange;
 
 			const selectedYear = Math.min(
-				Math.max(mapContext.filter.yearEnd + yearDelta, minHistoricMapYear - 1),
+				Math.max(mapContext.historic.filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
 			);
-			if (Math.floor(selectedYear) - mapContext.filter.yearEnd) {
-				scheduledFilterUpdate = mapContext.applyFilter.bind(mapContext, mapContext.filter);
+			if (Math.floor(selectedYear) - mapContext.historic.filter.yearEnd) {
+				scheduledFilterUpdate = () => mapContext.historic.applyFilter();
 			}
-			mapContext.filter.yearEnd = selectedYear;
+			mapContext.historic.filter.yearEnd = selectedYear;
 
 			backgroundOffsetX += dx * -0.5;
 			backgroundVelocity = dx * -0.2;
@@ -159,11 +159,11 @@
 			if (remainingPointer) lastX = remainingPointer.clientX;
 		}
 		if (pointerCache.size === 0) {
-			const selectedYear = Math.round(mapContext.filter.yearEnd);
-			if (Math.floor(selectedYear) - mapContext.filter.yearEnd) {
-				scheduledFilterUpdate = mapContext.applyFilter.bind(mapContext, mapContext.filter);
+			const selectedYear = Math.round(mapContext.historic.filter.yearEnd);
+			if (Math.floor(selectedYear) - mapContext.historic.filter.yearEnd) {
+				scheduledFilterUpdate = () => mapContext.historic.applyFilter();
 			}
-			mapContext.filter.yearEnd = selectedYear;
+			mapContext.historic.filter.yearEnd = selectedYear;
 
 			if (scheduledFilterUpdate) scheduledFilterUpdate();
 			if (filterUpdateInterval) clearInterval(filterUpdateInterval);
@@ -253,26 +253,28 @@
 	});
 
 	let filteredMaps = $derived(
-		mapContext.historic.historicMapsById
+		mapContext.historic.mapsById
 			.values()
 			// .toSorted((a,b) => a.bis - b.bis)
 			.filter(
-				(map) => mapContext.filter.edition === 'All' || mapContext.filter.edition === map.edition
+				(map) =>
+					mapContext.historic.filter.edition === 'All' ||
+					mapContext.historic.filter.edition === map.edition
 			)
-			.filter((map) => mapContext.filter.bis || !map.bis)
-			.filter((map) => mapContext.filter.type == map.type)
+			.filter((map) => mapContext.historic.filter.bis || !map.bis)
+			.filter((map) => mapContext.historic.filter.type == map.type)
 			.toArray()
 	);
 
 	let mapsByYear = $derived.by(() => {
-		if (!mapContext.historic.historicMapsLoaded) return {};
+		if (!mapContext.historic.mapsLoaded) return {};
 		const mapsByYear: Record<number, HistoricMap[]> = {};
 		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);
 		return mapsByYear;
 	});
 
 	let editions = $derived.by(() => {
-		if (!mapContext.historic.historicMapsLoaded) return;
+		if (!mapContext.historic.mapsLoaded) return;
 		const editionMap = new Map<string, Edition>();
 		for (const map of filteredMaps) {
 			const key = `${map.edition}-${map.bis}`;
@@ -296,10 +298,10 @@
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
 	let minHistoricMapYear = $derived(
-		yearsWithMaps ? Math.min(...yearsWithMaps) : mapContext.filter.yearEnd
+		yearsWithMaps ? Math.min(...yearsWithMaps) : mapContext.historic.filter.yearEnd
 	);
 	let maxHistoricMapYear = $derived(
-		yearsWithMaps ? Math.max(...yearsWithMaps) : mapContext.filter.yearEnd
+		yearsWithMaps ? Math.max(...yearsWithMaps) : mapContext.historic.filter.yearEnd
 	);
 
 	const HINT_KEY = 'timeline_hint_shown';
@@ -383,7 +385,7 @@
 							maps={mapsByYear[year]}
 							{pixelsPerYear}
 							{mapContext}
-							selectedYear={mapContext.filter.yearEnd}
+							selectedYear={mapContext.historic.filter.yearEnd}
 						></MapStack>
 					{/if}
 				{/each}
@@ -395,8 +397,8 @@
 					</filter>
 				</defs>
 
-				{#if mapContext.filter.yearStart > minHistoricMapYear}
-					{@const x = getX(mapContext.filter.yearStart)}
+				{#if mapContext.historic.filter.yearStart > minHistoricMapYear}
+					{@const x = getX(mapContext.historic.filter.yearStart)}
 					<line
 						x1={x}
 						y1={0}
@@ -424,7 +426,7 @@
 							view.current.start + (clickX / width) * (view.current.end - view.current.start);
 						const roundedYear = Math.round(clickedYear);
 						if (roundedYear >= minHistoricMapYear && roundedYear <= maxHistoricMapYear) {
-							mapContext.filter.yearEnd = roundedYear;
+							mapContext.historic.filter.yearEnd = roundedYear;
 						}
 					}}
 				/>
@@ -462,7 +464,7 @@
 							fill={timelineTickColor}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									mapContext.filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
@@ -477,7 +479,7 @@
 							opacity={1 - (9 - pixelsPerYear) / 2}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									mapContext.filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
@@ -492,7 +494,7 @@
 							opacity={1 - (38 - pixelsPerYear) / 3}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									mapContext.filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
