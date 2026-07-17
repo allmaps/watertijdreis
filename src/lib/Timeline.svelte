@@ -7,17 +7,7 @@
 	import TimelineSettings from './TimelineSettings.svelte';
 	import { onMount } from 'svelte';
 
-	let {
-		visible,
-		historicMapsLoaded,
-		historicMapsById,
-		mapsInViewport,
-		hoveredHistoricMap,
-		getHistoricMapThumbnail,
-		filter = $bindable(),
-		applyFilter,
-		setLabelVisibility
-	} = $props();
+	let { mapContext, visible } = $props();
 
 	let width = $state(0);
 	let height = $state(120);
@@ -45,8 +35,8 @@
 
 	let view = new Spring(
 		{
-			start: filter.yearEnd - 10,
-			end: filter.yearEnd + 10
+			start: mapContext.historic.filter.yearEnd - 10,
+			end: mapContext.historic.filter.yearEnd + 10
 		},
 		{ stiffness: 0.1, damping: 0.5 }
 	);
@@ -54,8 +44,8 @@
 	$effect(() => {
 		if (width > 0 && pixelsPerYear > 0) {
 			const halfRange = width / 2 / pixelsPerYear;
-			const newStart = filter.yearEnd - halfRange;
-			const newEnd = filter.yearEnd + halfRange;
+			const newStart = mapContext.historic.filter.yearEnd - halfRange;
+			const newEnd = mapContext.historic.filter.yearEnd + halfRange;
 
 			const clampedStart = Math.max(newStart, MIN_YEAR);
 			const clampedEnd = Math.min(newEnd, MAX_YEAR);
@@ -105,7 +95,7 @@
 			if (scheduledFilterUpdate) scheduledFilterUpdate();
 		}, 1000 / FILTER_UPDATES_PER_SEC);
 
-		setLabelVisibility(true);
+		mapContext.setLabelVisibility(true);
 
 		if (showHint) {
 			hideHint();
@@ -135,20 +125,20 @@
 
 			if (Math.abs(e.clientX - pointerDownX) > 5 || Math.abs(dy) > 5) {
 				hasMoved = true;
-				setLabelVisibility(true);
+				mapContext.setLabelVisibility(true);
 			}
 
 			const currentRange = view.current.end - view.current.start;
 			const yearDelta = (dx / width) * currentRange;
 
 			const selectedYear = Math.min(
-				Math.max(filter.yearEnd + yearDelta, minHistoricMapYear - 1),
+				Math.max(mapContext.historic.filter.yearEnd + yearDelta, minHistoricMapYear - 1),
 				maxHistoricMapYear + 1
 			);
-			if (Math.floor(selectedYear) - filter.yearEnd) {
-				scheduledFilterUpdate = applyFilter.bind(this, filter);
+			if (Math.floor(selectedYear) - mapContext.historic.filter.yearEnd) {
+				scheduledFilterUpdate = () => mapContext.historic.applyFilter();
 			}
-			filter.yearEnd = selectedYear;
+			mapContext.historic.filter.yearEnd = selectedYear;
 
 			backgroundOffsetX += dx * -0.5;
 			backgroundVelocity = dx * -0.2;
@@ -169,11 +159,11 @@
 			if (remainingPointer) lastX = remainingPointer.clientX;
 		}
 		if (pointerCache.size === 0) {
-			const selectedYear = Math.round(filter.yearEnd);
-			if (Math.floor(selectedYear) - filter.yearEnd) {
-				scheduledFilterUpdate = applyFilter.bind(this, filter);
+			const selectedYear = Math.round(mapContext.historic.filter.yearEnd);
+			if (Math.floor(selectedYear) - mapContext.historic.filter.yearEnd) {
+				scheduledFilterUpdate = () => mapContext.historic.applyFilter();
 			}
-			filter.yearEnd = selectedYear;
+			mapContext.historic.filter.yearEnd = selectedYear;
 
 			if (scheduledFilterUpdate) scheduledFilterUpdate();
 			if (filterUpdateInterval) clearInterval(filterUpdateInterval);
@@ -219,7 +209,7 @@
 			fadeOpacity();
 		}
 
-		setLabelVisibility(false);
+		mapContext.setLabelVisibility(false);
 	}
 
 	function onwheel(e: WheelEvent) {
@@ -263,24 +253,28 @@
 	});
 
 	let filteredMaps = $derived(
-		historicMapsById
+		mapContext.historic.mapsById
 			.values()
 			// .toSorted((a,b) => a.bis - b.bis)
-			.filter((map) => filter.edition === 'All' || filter.edition === map.edition)
-			.filter((map) => filter.bis || !map.bis)
-			.filter((map) => filter.type == map.type)
+			.filter(
+				(map) =>
+					mapContext.historic.filter.edition === 'All' ||
+					mapContext.historic.filter.edition === map.edition
+			)
+			.filter((map) => mapContext.historic.filter.bis || !map.bis)
+			.filter((map) => mapContext.historic.filter.type == map.type)
 			.toArray()
 	);
 
 	let mapsByYear = $derived.by(() => {
-		if (!historicMapsLoaded) return {};
+		if (!mapContext.historic.mapsLoaded) return {};
 		const mapsByYear: Record<number, HistoricMap[]> = {};
 		for (const map of filteredMaps) (mapsByYear[map.yearEnd] ??= []).push(map);
 		return mapsByYear;
 	});
 
 	let editions = $derived.by(() => {
-		if (!historicMapsLoaded) return;
+		if (!mapContext.historic.mapsLoaded) return;
 		const editionMap = new Map<string, Edition>();
 		for (const map of filteredMaps) {
 			const key = `${map.edition}-${map.bis}`;
@@ -303,8 +297,12 @@
 	});
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
-	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : filter.yearEnd);
-	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : filter.yearEnd);
+	let minHistoricMapYear = $derived(
+		yearsWithMaps ? Math.min(...yearsWithMaps) : mapContext.historic.filter.yearEnd
+	);
+	let maxHistoricMapYear = $derived(
+		yearsWithMaps ? Math.max(...yearsWithMaps) : mapContext.historic.filter.yearEnd
+	);
 
 	const HINT_KEY = 'timeline_hint_shown';
 	let showHint = $state(false);
@@ -386,10 +384,8 @@
 							{x}
 							maps={mapsByYear[year]}
 							{pixelsPerYear}
-							{mapsInViewport}
-							{getHistoricMapThumbnail}
-							{hoveredHistoricMap}
-							selectedYear={filter.yearEnd}
+							{mapContext}
+							selectedYear={mapContext.historic.filter.yearEnd}
 						></MapStack>
 					{/if}
 				{/each}
@@ -401,8 +397,8 @@
 					</filter>
 				</defs>
 
-				{#if filter.yearStart > minHistoricMapYear}
-					{@const x = getX(filter.yearStart)}
+				{#if mapContext.historic.filter.yearStart > minHistoricMapYear}
+					{@const x = getX(mapContext.historic.filter.yearStart)}
 					<line
 						x1={x}
 						y1={0}
@@ -430,7 +426,7 @@
 							view.current.start + (clickX / width) * (view.current.end - view.current.start);
 						const roundedYear = Math.round(clickedYear);
 						if (roundedYear >= minHistoricMapYear && roundedYear <= maxHistoricMapYear) {
-							filter.yearEnd = roundedYear;
+							mapContext.historic.filter.yearEnd = roundedYear;
 						}
 					}}
 				/>
@@ -468,7 +464,7 @@
 							fill={timelineTickColor}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
@@ -483,7 +479,7 @@
 							opacity={1 - (9 - pixelsPerYear) / 2}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
@@ -498,7 +494,7 @@
 							opacity={1 - (38 - pixelsPerYear) / 3}
 							onclick={() => {
 								if (year >= minHistoricMapYear && year <= maxHistoricMapYear) {
-									filter.yearEnd = year;
+									mapContext.historic.filter.yearEnd = year;
 								}
 							}}
 							style="cursor: pointer; pointer-events: auto;">{year}</text
@@ -566,11 +562,7 @@
 			</svg>
 		</div>
 
-		<TimelineSettings
-			bind:filter
-			{applyFilter}
-			minYear={minHistoricMapYear}
-			maxYear={maxHistoricMapYear}
+		<TimelineSettings {mapContext} minYear={minHistoricMapYear} maxYear={maxHistoricMapYear}
 		></TimelineSettings>
 	</div>
 {/if}

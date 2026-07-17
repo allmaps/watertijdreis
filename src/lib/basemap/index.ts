@@ -5,6 +5,23 @@ import * as StyleSpec from '@maplibre/maplibre-gl-style-spec';
 import { ALLMAPS_FLAVOR, TERRAIN_COLORS } from '$lib/basemap/colors';
 import { env } from '$env/dynamic/public';
 
+export const LABELS_LAYERS = [
+	'address_label',
+	'waterway_label',
+	'roads_oneway',
+	'roads_labels_minor',
+	'water_label_ocean',
+	'earth_label_islands',
+	'water_label_lakes',
+	'roads_shields',
+	'roads_labels_major',
+	'places_subplace',
+	'places_region',
+	'places_locality',
+	'places_country',
+	'city_label'
+];
+
 export function basemapStyle(
 	lang: string,
 	glyphs?: string,

@@ -3,16 +3,7 @@
 	import { MapTrifold, FileText, PushPin } from 'phosphor-svelte';
 	import Toast from './components/Toast.svelte';
 
-	let {
-		pinnedHistoricMap = $bindable(),
-		clickedHistoricMap,
-		selectedHistoricMap,
-		setHistoricMapView,
-		setSheetIndexVisibility,
-		extendClickedMapTimeout,
-		saveMapView,
-		restoreView
-	} = $props();
+	let { mapContext, extendClickedMapTimeout } = $props();
 
 	let rightBtnSelected = $state(false);
 	let leftBtnWidth = $state(86);
@@ -22,28 +13,32 @@
 
 	function leftBtnClick() {
 		rightBtnSelected = false;
-		if (pinnedHistoricMap && selectedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id)
-			pinnedView = saveMapView(false);
-		restoreView();
-		setSheetIndexVisibility(false);
+		if (
+			mapContext.historic.pinnedMap &&
+			mapContext.historic.selectedMap &&
+			mapContext.historic.pinnedMap.id == mapContext.historic.selectedMap.id
+		)
+			pinnedView = mapContext.saveMapView(false);
+		mapContext.restoreView();
+		mapContext.historic.setSheetIndexVisibility(false);
 	}
 
 	function rightBtnClick() {
 		rightBtnSelected = true;
 
-		if (clickedHistoricMap && !selectedHistoricMap) {
+		if (mapContext.historic.clickedHistoricMap && !mapContext.historic.selectedMap) {
 			extendClickedMapTimeout();
-			setHistoricMapView(clickedHistoricMap);
-		} else if (pinnedHistoricMap && !selectedHistoricMap) {
+			mapContext.historic.setHistoricMapView(mapContext.historic.clickedHistoricMap);
+		} else if (mapContext.historic.pinnedMap && !mapContext.historic.selectedMap) {
 			extendClickedMapTimeout();
-			setHistoricMapView(pinnedHistoricMap, pinnedView);
+			mapContext.historic.setHistoricMapView(mapContext.historic.pinnedMap, pinnedView);
 		} else {
-			if (!setSheetIndexVisibility()) leftBtnClick();
+			if (!mapContext.historic.setSheetIndexVisibility()) leftBtnClick();
 		}
 	}
 
 	$effect(() => {
-		if (selectedHistoricMap) rightBtnSelected = true;
+		if (mapContext.historic.selectedMap) rightBtnSelected = true;
 		else rightBtnSelected = false;
 	});
 
@@ -84,7 +79,7 @@
 	onkeyup={(e) => {
 		if (e.key == ' ') {
 			spaceKeyDown = false;
-			// if (!selectedHistoricMap) leftBtnClick();
+			// if (!mapContext.historic.selectedMap) leftBtnClick();
 		}
 	}}
 />
@@ -128,40 +123,42 @@
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 
-		{#if selectedHistoricMap}
-			<span class="truncate">{selectedHistoricMap.label}</span>
+		{#if mapContext.historic.selectedMap}
+			<span class="truncate">{mapContext.historic.selectedMap.label}</span>
 			<span
 				role="button"
 				tabindex="0"
 				class="cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
-					if (pinnedHistoricMap) pinnedHistoricMap = null;
-					else pinnedHistoricMap = selectedHistoricMap;
+					if (mapContext.historic.pinnedMap) mapContext.historic.pinnedMap = null;
+					else mapContext.historic.pinnedMap = mapContext.historic.selectedMap;
 				}}
 			>
-				{#if pinnedHistoricMap && pinnedHistoricMap.id == selectedHistoricMap.id}
+				{#if mapContext.historic.pinnedMap && mapContext.historic.pinnedMap.id == mapContext.historic.selectedMap.id}
 					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
 				{:else}
 					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="regular"></PushPin>
 				{/if}
 			</span>
-		{:else if pinnedHistoricMap && !clickedHistoricMap}
-			<span class="truncate">{pinnedHistoricMap.label}</span>
+		{:else if mapContext.historic.pinnedMap && !mapContext.historic.clickedHistoricMap}
+			<span class="truncate">{mapContext.historic.pinnedMap.label}</span>
 			<span
 				role="button"
 				tabindex="0"
 				class="cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
-					pinnedHistoricMap = null;
+					mapContext.historic.pinnedMap = null;
 				}}
 			>
 				<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
 			</span>
 		{:else}
 			<span class="truncate">
-				{clickedHistoricMap ? clickedHistoricMap.label : 'Bladindex'}
+				{mapContext.historic.clickedHistoricMap
+					? mapContext.historic.clickedHistoricMap.label
+					: 'Bladindex'}
 			</span>
 
 			{#if keyboardShortcutVisible}

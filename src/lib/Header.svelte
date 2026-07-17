@@ -4,7 +4,7 @@
 	import Button from './components/Button.svelte';
 	import AboutModal from './AboutModal.svelte';
 
-	let { historicMapsLoaded, resetState } = $props();
+	let { mapContext } = $props();
 
 	let aboutPanelVisible = $state(false);
 	let shareModalVisible = $state(false);
@@ -23,15 +23,15 @@
 	onmouseleave={() => (buttonCollapse = true)}
 	role="group"
 >
-	<button onclick={resetState}>
+	<button onclick={() => mapContext.resetState()}>
 		<h1
 			class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]"
 		>
 			{#each 'Watertijdreis'.split('') as letter, i}
 				<span
 					class="inline-block will-change-[transform,text-shadow,color]"
-					class:wave={historicMapsLoaded}
-					class:wave-loading={!historicMapsLoaded}
+					class:wave={mapContext.historic.mapsLoaded}
+					class:wave-loading={!mapContext.historic.mapsLoaded}
 					style:animation=""
 					style:animation-delay={i * 100 + 'ms'}
 				>

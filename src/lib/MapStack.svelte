@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { scale } from 'svelte/transition';
 	import MapThumbnail from './MapThumbnail.svelte';
+	import { MapContext } from './map/mapContext.svelte';
 
 	type HistoricMap = { id: string; year: number };
 
-	let { maps, x, pixelsPerYear, mapsInViewport, hoveredHistoricMap, selectedYear } = $props<{
+	let { mapContext, maps, x, pixelsPerYear, selectedYear } = $props<{
+		mapContext: MapContext;
 		maps: HistoricMap[];
 		x: number;
 		pixelsPerYear: number;
-		mapsInViewport: Map<string, HistoricMap>;
 	}>();
 
 	const mapWidth = 40;
@@ -39,7 +40,7 @@
 
 <div class="absolute" style={containerStyle}>
 	{#each maps as map, index (map.id)}
-		{@const visible = mapsInViewport.has(map.id)}
+		{@const visible = mapContext.historic.mapsInViewport.has(map.id)}
 		{@const style = getMapStyle(map.id)}
 		{@const showContent = selectedYear + 0.5 > map.yearEnd && visible}
 
