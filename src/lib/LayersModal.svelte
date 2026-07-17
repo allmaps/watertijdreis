@@ -4,16 +4,16 @@
 	import Select from './components/Select.svelte';
 	import Slider from './components/Slider.svelte';
 
-	let { visible = $bindable(), mapContext } = $props();
+	let { visible = $bindable(), layerOptions = $bindable() } = $props();
 
 	let opacityUpdateInterval;
-	let opacity = $state(mapContext.layerOptions.historicMapsOpacity);
+	let opacity = $state(layerOptions.historicMapsOpacity);
 	$effect(() => {
 		clearInterval(opacityUpdateInterval);
 		if (visible) {
-			opacity = mapContext.layerOptions.historicMapsOpacity;
+			opacity = layerOptions.historicMapsOpacity;
 			opacityUpdateInterval = setInterval(() => {
-				mapContext.layerOptions.historicMapsOpacity = opacity;
+				layerOptions.historicMapsOpacity = opacity;
 			}, 200);
 		}
 	});
@@ -67,15 +67,15 @@
 	<Select
 		Icon={MapTrifold}
 		options={baseMapOptions}
-		value={mapContext.layerOptions.baseMap}
-		onchange={(opt) => (mapContext.layerOptions.baseMap = opt.value)}
+		value={layerOptions.baseMap}
+		onchange={(opt) => (layerOptions.baseMap = opt.value)}
 	/>
 
-	{#if mapContext.layerOptions.baseMap === 'protomaps'}
+	{#if layerOptions.baseMap === 'protomaps'}
 		<div class="text-wtr-blue mt-4 max-w-60 text-[15px] font-[500]">
 			<input
 				type="checkbox"
-				bind:checked={mapContext.layerOptions.protoMapsWaterInFront}
+				bind:checked={layerOptions.protoMapsWaterInFront}
 				class="accent-wtr-pink mr-2"
 			/>
 			Waterlagen vóór historische kaarten
@@ -86,7 +86,7 @@
 			<br />
 			<input
 				type="checkbox"
-				bind:checked={mapContext.layerOptions.protoMapsLabelsInFront}
+				bind:checked={layerOptions.protomapsLabelsInFront}
 				class="accent-wtr-pink mr-2"
 			/>
 			Plaatsnamen vóór historische kaarten
@@ -111,8 +111,8 @@
 	<Select
 		Icon={MapPin}
 		options={overlayLayerOptions}
-		value={mapContext.layerOptions.overlay}
-		onchange={(opt) => (mapContext.layerOptions.overlay = opt.value)}
+		value={layerOptions.overlay}
+		onchange={(opt) => (layerOptions.overlay = opt.value)}
 	/>
 </Modal>
 

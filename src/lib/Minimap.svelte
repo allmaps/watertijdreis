@@ -1,22 +1,27 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
-	import { onMount } from 'svelte';
 	import { draw, fade } from 'svelte/transition';
 
-	let { mapContext } = $props();
+	let {
+		visibleHistoricMaps,
+		visibleHistoricMapsInViewport,
+		viewportPolygon,
+		sheetIndexVisible,
+		hoveredHistoricMap,
+		clickedHistoricMap,
+		selectedHistoricMap,
+		historicMapsLoaded
+	} = $props();
 
 	let previewHistoricMap = $derived.by(() => {
-		if (
-			mapContext.historic.visibleMapsInViewport &&
-			mapContext.historic.visibleMapsInViewport.size == 1
-		)
-			return mapContext.historic.visibleMapsInViewport.values().next().value;
+		if (visibleHistoricMapsInViewport.size == 1)
+			return visibleHistoricMapsInViewport.values().next().value;
 		return null;
 	});
 
 	let polygons = $derived.by(() => {
-		if (!mapContext.historic.mapsLoaded) return [];
-		return mapContext.historic.visibleMaps
+		if (!historicMapsLoaded) return [];
+		return visibleHistoricMaps
 			.values()
 			.toArray()
 			.map((i) => ({
@@ -51,8 +56,8 @@
 	});
 
 	let viewport = $derived.by(() => {
-		if (!mapContext.viewportPolygon) return;
-		return turf.toMercator(mapContext.viewportPolygon);
+		if (!viewportPolygon) return;
+		return turf.toMercator(viewportPolygon);
 	});
 
 	function getProjectedPoints(coordinates: [number, number][]): string {
@@ -87,7 +92,7 @@
 	}
 </script>
 
-{#if mapContext.historic.visibleMaps && mapContext.historic.visibleMaps.size}
+{#if visibleHistoricMaps.size}
 	<svg
 		{width}
 		{height}
@@ -98,18 +103,11 @@
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#each polygons as poly}
 				{@const previewed =
-					!mapContext.historic.clickedHistoricMap &&
-					previewHistoricMap &&
-					poly.properties.id == previewHistoricMap.id}
-				{@const selected =
-					mapContext.historic.selectedMap &&
-					poly.properties.id == mapContext.historic.selectedMap.id}
-				{@const clicked =
-					mapContext.historic.clickedHistoricMap &&
-					poly.properties.id == mapContext.historic.clickedHistoricMap.id}
+					!clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const selected = selectedHistoricMap && poly.properties.id == selectedHistoricMap.id}
+				{@const clicked = clickedHistoricMap && poly.properties.id == clickedHistoricMap.id}
 				{@const visible =
-					!mapContext.historic.selectedMap &&
-					mapContext.historic.visibleMapsInViewport.has(poly.properties.id)}
+					!selectedHistoricMap && visibleHistoricMapsInViewport.has(poly.properties.id)}
 				{@const fill =
 					previewed || clicked || selected ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
 				<polygon
@@ -119,7 +117,7 @@
 					stroke-width={(viewBox[2] / width) * 1.33}
 				/>
 			{/each}
-			{#if viewport && !mapContext.historic.selectedMap}
+			{#if viewport && !selectedHistoricMap}
 				{@const {
 					x,
 					y,
@@ -138,14 +136,14 @@
 					ry={(viewBox[2] / width) * 2}
 				></rect>
 			{/if}
-			{#if previewHistoricMap || mapContext.historic.clickedHistoricMap || mapContext.historic.selectedMap || (mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
+			{#if previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
 				<g out:fade={{ duration: 250 }}>
-					{#key previewHistoricMap || mapContext.historic.clickedHistoricMap || mapContext.historic.selectedMap || (mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
+					{#key previewHistoricMap || clickedHistoricMap || selectedHistoricMap || (sheetIndexVisible && hoveredHistoricMap)}
 						{@const historicMap =
 							previewHistoricMap ||
-							mapContext.historic.clickedHistoricMap ||
-							mapContext.historic.selectedMap ||
-							(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
+							clickedHistoricMap ||
+							selectedHistoricMap ||
+							(sheetIndexVisible && hoveredHistoricMap)}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
 						{@const centerPoint = hovered
 							? turf.centerOfMass(hovered).geometry.coordinates
