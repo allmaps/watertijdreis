@@ -74,7 +74,7 @@ export class HistoricMapsContext {
     clickedHistoricMap = $state<HistoricMap | null>(null);
 
     #hoveredFeatureId = $state<number | null>(null);
-    #clickedFeatureId = $state<number | null>(null)
+    #clickedFeatureId = $state<number | null>(null);
 
     gridVisible = $state(false);
     #gridResetTimer: ReturnType<typeof setTimeout> | null = null;
@@ -273,20 +273,27 @@ export class HistoricMapsContext {
         return isDoubleClicked;
     }
 
+    #fillTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
     #triggerFillFlashAnimation(featureId: number) {
         if (this.#clickedFeatureId !== null && this.#clickedFeatureId !== featureId) {
-            if (this.#fillFadeOutTimer) clearTimeout(this.#fillFadeOutTimer);
-            this.mapContext.animateFeatureOpacity(this.#clickedFeatureId, 'animated-fill-opacity', 0, 50);
+            clearTimeout(this.#fillTimers.get(this.#clickedFeatureId));
+            this.mapContext.animateFeatureOpacity(this.#clickedFeatureId, 'animated-fill-opacity', 0, 300);
         }
 
-        if (this.#clickedFeatureId === featureId && this.#fillFadeOutTimer) return;
+        clearTimeout(this.#fillTimers.get(featureId));
+        this.#clickedFeatureId = featureId;
 
-        this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0.25, 300, () => {
-            this.#fillFadeOutTimer = setTimeout(() => {
-                if (this.#clickedFeatureId === featureId) {
-                    this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 500);
-                }
-            }, 1000);
+        this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', .15, 200, () => {
+            if (this.#clickedFeatureId !== featureId) {
+                this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 300);
+                return;
+            }
+
+            this.#fillTimers.set(featureId, setTimeout(() => {
+                this.mapContext.animateFeatureOpacity(featureId, 'animated-fill-opacity', 0, 500);
+                this.#fillTimers.delete(featureId);
+            }, 1000));
         });
     }
 

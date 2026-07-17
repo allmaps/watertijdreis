@@ -1,7 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import type { LngLatLike, Map as MaplibreMap } from 'maplibre-gl';
 import * as pmtiles from 'pmtiles';
-import { addBackgroundLayers, addOutlineLayers, addUserLocationCircle } from './mapLayers.svelte';
+import { addBackgroundLayers, addUserLocationCircle } from './mapLayers.svelte';
 import { basemapStyle, LABELS_LAYERS } from '$lib/basemap';
 import { goto } from '$app/navigation';
 import { HistoricMapsContext } from './historicMapsContext.svelte';
@@ -88,8 +88,6 @@ export class MapContext {
     resetState() {
         if (!this.maplibreLoaded || !this.historic.mapsLoaded) return;
         this.restoreView();
-
-        console.log(this.activeMap);
 
         this.activeMap.easeTo({
             center: [defaultState.lng, defaultState.lat],
@@ -230,14 +228,6 @@ export class MapContext {
 
         const bladId = q.get('blad');
         const pinnedId = q.get('pinned');
-
-        if (!this.historic.mapsLoaded && bladId) {
-            this.historic.onload = () => {
-                this.historic.selectedMap = this.historic.mapsById.get(bladId) || null;
-                console.log("aha")
-            }
-            return;
-        }
 
         // TODO: watch for when maps are loaded!!
         if (bladId) setTimeout(() => this.historic.selectedMap = this.historic.mapsById.get(bladId) || null, 500);
