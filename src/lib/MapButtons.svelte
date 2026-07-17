@@ -13,7 +13,15 @@
 	import Button from './components/Button.svelte';
 	import LayersModal from './LayersModal.svelte';
 
-	let { mapContext, layerOptions = $bindable() } = $props();
+	let {
+		selectedHistoricMap,
+		flyToFeature,
+		flyToUserLocation,
+		zoomIn,
+		zoomOut,
+		layerOptions = $bindable(),
+		userLocationActive = $bindable()
+	} = $props();
 
 	const geocodeEarthApiKey = env.PUBLIC_GEOCODE_EARTH_API_KEY;
 
@@ -52,12 +60,12 @@
 />
 
 <Geocoder
-	{mapContext}
+	{flyToFeature}
 	bind:visible={searchBarVisible}
 	providers={[new GeocodeEarth(geocodeEarthApiKey)]}
 ></Geocoder>
 
-<LayersModal bind:visible={layersPanelVisible2} {mapContext}></LayersModal>
+<LayersModal bind:visible={layersPanelVisible2} bind:layerOptions></LayersModal>
 
 <!-- <div class="fixed top-25 right-2 flex flex-col items-end gap-4">
 	<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
@@ -68,10 +76,10 @@
 <div
 	class="
 	fixed right-2 flex flex-col items-end gap-2 transition-all duration-300
-	{mapContext.historic.selectedMap ? 'bottom-36 sm:bottom-2' : 'bottom-36'}
+	{selectedHistoricMap ? 'bottom-36 sm:bottom-2' : 'bottom-36'}
 	"
 >
-	{#if !mapContext.historic.selectedMap}
+	{#if !selectedHistoricMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
 			<Button
 				tabindex="5"
@@ -84,7 +92,7 @@
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex="6" Icon={NavigationArrow} onclick={() => mapContext.flyToUserLocation()}
+			<Button tabindex="6" Icon={NavigationArrow} onclick={flyToUserLocation}
 				>Mijn locatie tonen</Button
 			>
 		</div>
@@ -105,13 +113,9 @@
 			justify-center overflow-hidden rounded-lg
 		`}
 	>
-		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+"
-			>Inzoomen&nbsp;</Button
-		>
+		<Button Icon={MagnifyingGlassPlus} onclick={zoomIn} kbd="+">Inzoomen&nbsp;</Button>
 		<div class="relative -top-[2px]">
-			<Button Icon={MagnifyingGlassMinus} onclick={() => mapContext.zoomOut()} kbd="-"
-				>Uitzoomen</Button
-			>
+			<Button Icon={MagnifyingGlassMinus} onclick={zoomOut} kbd="-">Uitzoomen</Button>
 		</div>
 	</div>
 

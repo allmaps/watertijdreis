@@ -125,7 +125,7 @@
         group text-wtr-blue relative
         cursor-pointer rounded-[9px]
         font-[500] backdrop-blur-sm transition-all
-        duration-500 ease-out active:scale-95
+        duration-500 ease-out active:scale-95 active:outline-3
     "
 	style:--grad-opacity="0"
 >

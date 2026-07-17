@@ -33,21 +33,32 @@
 		return result;
 	}
 
-	let { mapContext } = $props();
+	let {
+		warpedMapLayer,
+		historicMapsById,
+		visibleHistoricMapsInViewport,
+		viewportPolygon,
+		sheetIndexVisible,
+		hoveredHistoricMap,
+		clickedHistoricMap,
+		selectedHistoricMap,
+		changeHistoricMapView,
+		setHistoricMapView,
+		getHistoricMapThumbnail
+	} = $props();
 
 	let historicMap = $derived.by(() => {
 		return (
-			mapContext.historic.selectedMap ||
-			mapContext.historic.clickedHistoricMap ||
-			(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap) ||
-			(mapContext.historic.visibleMapsInViewport &&
-			mapContext.historic.visibleMapsInViewport.size == 1
-				? mapContext.historic.visibleMapsInViewport.values().next().value
+			selectedHistoricMap ||
+			clickedHistoricMap ||
+			(sheetIndexVisible && hoveredHistoricMap) ||
+			(visibleHistoricMapsInViewport.size == 1
+				? visibleHistoricMapsInViewport.values().next().value
 				: null)
 		);
 	});
 
-	let preview = $derived(!mapContext.historic.selectedMap);
+	let preview = $derived(!selectedHistoricMap);
 
 	let prevEdition: number | null = null;
 
@@ -80,7 +91,7 @@
 
 		if (!mainVariant) return null;
 
-		return mapContext.historic.mapsById.values().find((i) => i.manifestId == mainVariant.id);
+		return historicMapsById.values().find((i) => i.manifestId == mainVariant.id);
 	});
 
 	$effect(() => {
@@ -112,11 +123,11 @@
 	}
 
 	function getViewportRectWithinHistoricMap(historicMap) {
-		if (!mapContext.viewportPolygon) return;
+		if (!viewportPolygon) return;
 
 		const [minX, minY, maxX, maxY] = historicMap.geoFullMaskBbox;
 
-		const vpBbox = turf.bbox(mapContext.viewportPolygon);
+		const vpBbox = turf.bbox(viewportPolygon);
 
 		const [vMinX, vMinY, vMaxX, vMaxY] = vpBbox;
 
@@ -167,7 +178,7 @@
 	async function addFakeGeoreferencedMap(canvasManifest) {
 		const { id, height, width } = canvasManifest;
 
-		const mainWarpedMap = mapContext.historic.warpedMapLayer.getWarpedMap(mainSheet.id);
+		const mainWarpedMap = warpedMapLayer.getWarpedMap(mainSheet.id);
 
 		const [minLng, minLat, maxLng, maxLat] = mainWarpedMap.geoFullMaskBbox;
 
@@ -239,9 +250,9 @@
 			}
 		};
 
-		await mapContext.historic.warpedMapLayer.addGeoreferencedMap(annotation);
+		await warpedMapLayer.addGeoreferencedMap(annotation);
 
-		const warpedMap = mapContext.historic.warpedMapLayer.getWarpedMap(id);
+		const warpedMap = warpedMapLayer.getWarpedMap(id);
 
 		const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
 
@@ -263,9 +274,9 @@
 			geoFullMaskBbox: warpedMap?.geoFullMaskBbox
 		};
 
-		mapContext.historic.mapsById.set(id, historicMap);
+		historicMapsById.set(id, historicMap);
 
-		mapContext.historic.changeHistoricMapView(historicMap);
+		changeHistoricMapView(historicMap);
 	}
 
 	let sheetInformationVisible = $state(false);
@@ -299,7 +310,7 @@
 	});
 
 	$effect(() => {
-		if (!mapContext.historic.selectedMap) {
+		if (!selectedHistoricMap) {
 			sheetInformationVisible = false;
 		}
 	});
@@ -312,15 +323,15 @@
 		class="
 			sm:from-wtr-blue from-wtr-blue/50 to-wtr-blue/50 fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px]
 			bg-gradient-to-r from-[270px] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
-			{sheetInformationVisible || mapContext.historic.selectedMap ? 'bg-wtr-blue' : ''}
-			{sheetInformationVisible || mapContext.historic.selectedMap
+			{sheetInformationVisible || selectedHistoricMap ? 'bg-wtr-blue' : ''}
+			{sheetInformationVisible || selectedHistoricMap
 			? 'w-auto sm:w-87'
 			: 'w-auto sm:w-[calc(100vh-16px)]'}
 		"
-		style:background-color={mapContext.historic.selectedMap ? 'var(--color-wtr-blue)' : ''}
+		style:background-color={selectedHistoricMap ? 'var(--color-wtr-blue)' : ''}
 		style:max-height={sheetInformationVisible ? (isMobile ? '50vh' : '60vh') : '120px'}
 		transition:fade={{ duration: 500 }}
-		style:pointer-events={mapContext.historic.selectedMap ? 'auto' : 'none'}
+		style:pointer-events={selectedHistoricMap ? 'auto' : 'none'}
 	>
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
 			{#key historicMap.id}
@@ -330,8 +341,7 @@
 				>
 					<div
 						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedMap)
-								mapContext.historic.setHistoricMapView(historicMap);
+							if (historicMap && !selectedHistoricMap) setHistoricMapView(historicMap);
 						}}
 						bind:this={thumbnailEl}
 						class="pointer-events-auto h-22 w-fit origin-[10%_100%] cursor-pointer overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
@@ -349,7 +359,7 @@
 							<MapThumbnail id={historicMap.id} height={88}></MapThumbnail>
 						{/if}
 
-						{#if historicMap && mapContext.viewportPolygon}
+						{#if historicMap && viewportPolygon}
 							{@const { leftPct, topPct, widthPct, heightPct } =
 								getViewportRectWithinHistoricMap(historicMap)}
 
@@ -369,8 +379,7 @@
 				>
 					<h1
 						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedMap)
-								mapContext.historic.setHistoricMapView(historicMap);
+							if (historicMap && !selectedHistoricMap) setHistoricMapView(historicMap);
 						}}
 						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold"
 					>
@@ -383,7 +392,7 @@
 							: ''}
 					</p>
 
-					{#if mapContext.historic.selectedMap}
+					{#if selectedHistoricMap}
 						<button
 							transition:slide={{ duration: 300 }}
 							onclick={toggleSheetInformation}
@@ -469,7 +478,7 @@
 										.replace('Watervoorzieningseenheden', 'Watervoorzienings-<br>eenheden') ||
 									'Hoofdblad (voorkant)'}
 
-								{@const historicMap = mapContext.historic.mapsById
+								{@const historicMap = historicMapsById
 									.values()
 									.find((m) => m.manifestId == variant.id)}
 
@@ -484,7 +493,7 @@
 								{#if src}
 									<button
 										onclick={() => {
-											if (historicMap) mapContext.historic.changeHistoricMapView(historicMap);
+											if (historicMap) changeHistoricMapView(historicMap);
 											else addFakeGeoreferencedMap(variant);
 
 											if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
@@ -493,13 +502,13 @@
 											if (e.key === 'Enter' || e.key === ' ') {
 												e.preventDefault();
 
-												const historicMap = mapContext.historic.mapsById
+												const historicMap = historicMapsById
 
 													.values()
 
 													.find((m) => m.manifestId == variant.id);
 
-												if (historicMap) mapContext.historic.changeHistoricMapView(historicMap);
+												if (historicMap) changeHistoricMapView(historicMap);
 												else addFakeGeoreferencedMap(variant);
 											}
 										}}
