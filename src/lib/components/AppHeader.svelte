@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ShareFat, Info } from 'phosphor-svelte';
-	import ShareModal from './ShareModal.svelte';
-	import Button from './components/Button.svelte';
-	import AboutModal from './AboutModal.svelte';
+	import ShareModal from './modals/ShareModal.svelte';
+	import Button from './ui/Button.svelte';
+	import AboutModal from './modals/AboutModal.svelte';
 
 	let { mapContext } = $props();
 

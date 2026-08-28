@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { MapTrifold, FileText, PushPin } from 'phosphor-svelte';
-	import Toast from './components/Toast.svelte';
+	import Toast from '../ui/Toast.svelte';
 
 	let { mapContext, extendClickedMapTimeout } = $props();
 

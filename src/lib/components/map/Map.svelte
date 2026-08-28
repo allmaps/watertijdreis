@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import Header from './Header.svelte';
+	import Header from '../AppHeader.svelte';
 	import Minimap from './Minimap.svelte';
-	import MapInfo from './MapInfo.svelte';
-	import Toast from './components/Toast.svelte';
-	import Timeline from './Timeline.svelte';
+	import MapInfo from './HistoricMapInfo.svelte';
+	import Toast from '../ui/Toast.svelte';
+	import Timeline from '../timeline/Timeline.svelte';
 	import MapSheetToggle from './MapSheetToggle.svelte';
-	import MapButtons from './MapButtons.svelte';
+	import MapButtons from './MapControls.svelte';
 
-	import { MapContext } from './map/mapContext.svelte';
-	import { mousePosition } from './state/mousePosition.svelte';
-	import { spriteStore } from './state/SpriteSheet.svelte';
-	import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from './map/mapLayers.svelte';
+	import { MapContext } from '../../map/mapContext.svelte';
+	import { mousePosition } from '../../state/mousePosition.svelte';
+	import { spriteStore } from '../../utils/spriteSheet.svelte';
+	import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from '../../map/mapLayers.svelte';
 
 	const containerId = 'map-container';
 	const mapContext = new MapContext();

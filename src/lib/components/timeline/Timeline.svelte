@@ -3,7 +3,7 @@
 	import { Spring } from 'svelte/motion';
 	import { HandGrabbing } from 'phosphor-svelte';
 	import TimelinePointer from './TimelinePointer.svelte';
-	import MapStack from './MapStack.svelte';
+	import MapStack from './HistoricMapThumbnailStack.svelte';
 	import TimelineSettings from './TimelineSettings.svelte';
 	import { onMount } from 'svelte';
 

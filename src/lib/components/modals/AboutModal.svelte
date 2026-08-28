@@ -1,5 +1,5 @@
 <script>
-	import Modal from './components/Modal.svelte';
+	import Modal from '../ui/Modal.svelte';
 
 	let { visible = $bindable() } = $props();
 </script>

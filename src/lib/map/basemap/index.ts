@@ -2,7 +2,7 @@ import { layers as basemapLayers } from '@protomaps/basemaps';
 import mlcontour from 'maplibre-contour';
 import * as maplibregl from 'maplibre-gl';
 import * as StyleSpec from '@maplibre/maplibre-gl-style-spec';
-import { ALLMAPS_FLAVOR, TERRAIN_COLORS } from '$lib/basemap/colors';
+import { ALLMAPS_FLAVOR, TERRAIN_COLORS } from '$lib/map/basemap/colors';
 import { env } from '$env/dynamic/public';
 
 export const LABELS_LAYERS = [

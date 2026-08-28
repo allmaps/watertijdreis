@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { spriteStore } from './state/SpriteSheet.svelte';
+	import { spriteStore } from '../../utils/spriteSheet.svelte';
 
 	let { id, height = undefined, width = undefined, className = '' } = $props();
 

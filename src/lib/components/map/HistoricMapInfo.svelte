@@ -5,8 +5,8 @@
 
 	import { fly, fade, slide } from 'svelte/transition';
 
-	import type { HistoricMap } from './types/historicmap';
-	import MapThumbnail from './MapThumbnail.svelte';
+	import type { HistoricMap } from '../../types/historicmap';
+	import MapThumbnail from './HistoricMapThumbnail.svelte';
 
 	const MANIFEST_URL = 'https://tu-delft-heritage.github.io/watertijdreis-data/collection.json';
 

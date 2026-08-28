@@ -1,6 +1,5 @@
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import type { MapContext } from './mapContext.svelte';
-import { animateFeatureOpacity } from '$lib/utils/mapAnimations.svelte';
 
 export function addBackgroundLayers(map: MaplibreMap) {
     map.addSource('dsm-05', {

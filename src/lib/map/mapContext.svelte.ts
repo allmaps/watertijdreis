@@ -2,10 +2,10 @@ import maplibregl from 'maplibre-gl';
 import type { LngLatLike, Map as MaplibreMap } from 'maplibre-gl';
 import * as pmtiles from 'pmtiles';
 import { addBackgroundLayers, addUserLocationCircle } from './mapLayers.svelte';
-import { basemapStyle, LABELS_LAYERS } from '$lib/basemap';
+import { basemapStyle, LABELS_LAYERS } from '$lib/map/basemap';
 import { goto } from '$app/navigation';
 import { HistoricMapsContext } from './historicMapsContext.svelte';
-import { getValidUserLocation } from '$lib/utils/userLocation.svelte';
+import { getValidUserLocation } from '$lib/utils/userLocation';
 
 
 const defaultState = {

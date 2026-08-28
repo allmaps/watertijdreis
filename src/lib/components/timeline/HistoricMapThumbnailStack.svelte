@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { scale } from 'svelte/transition';
-	import MapThumbnail from './MapThumbnail.svelte';
-	import { MapContext } from './map/mapContext.svelte';
+	import MapThumbnail from '../map/HistoricMapThumbnail.svelte';
+	import { MapContext } from '../../map/mapContext.svelte';
 
 	type HistoricMap = { id: string; year: number };
 

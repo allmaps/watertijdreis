@@ -7,11 +7,11 @@
 		Stack
 	} from 'phosphor-svelte';
 	import { fly } from 'svelte/transition';
-	import Geocoder from './Geocoder.svelte';
-	import { GeocodeEarth } from '$lib/geocoder/providers/geocode-earth';
+	import Geocoder from '../geocoder/Geocoder.svelte';
+	import { GeocodeEarth } from '$lib/components/geocoder/providers/geocode-earth';
 	import { env } from '$env/dynamic/public';
-	import Button from './components/Button.svelte';
-	import LayersModal from './LayersModal.svelte';
+	import Button from '../ui/Button.svelte';
+	import LayersModal from '../modals/LayersModal.svelte';
 
 	let { mapContext, layerOptions = $bindable() } = $props();
 
