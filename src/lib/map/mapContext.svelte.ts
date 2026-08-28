@@ -134,7 +134,6 @@ export class MapContext {
 		this.map.keyboard.disable();
 		this.map.touchZoomRotate.disableRotation();
 		this.map.doubleClickZoom.disable();
-		this.map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
 
 		this.map.on("load", async () => {
 			addBackgroundLayers(this.activeMap);

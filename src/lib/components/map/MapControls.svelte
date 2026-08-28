@@ -1,59 +1,68 @@
 <script lang="ts">
-	import { MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, Stack } from "phosphor-svelte";
 	import { fly } from "svelte/transition";
+	import { MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, Stack } from "phosphor-svelte";
+
+	import { env } from "$env/dynamic/public";
+	import { isApplePlatform } from "$lib/utils/platform";
 	import Geocoder from "../geocoder/Geocoder.svelte";
 	import { GeocodeEarth } from "$lib/components/geocoder/providers/geocode-earth";
-	import { env } from "$env/dynamic/public";
-	import Button from "../ui/Button.svelte";
-	import LayersModal from "../modals/LayersModal.svelte";
+	import LayersModal from "$lib/components/modals/LayersModal.svelte";
+	import Button from "$lib/components/ui/Button.svelte";
 
-	let { mapContext, layerOptions = $bindable() } = $props();
+	let { mapContext } = $props();
 
 	const geocodeEarthApiKey = env.PUBLIC_GEOCODE_EARTH_API_KEY;
 
-	let isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
-	let kbdVisible = $state(false);
+	let searchBarVisible = $state(false);
+	let layersPanelVisible = $state(false);
+
+	let scaleWidth = $state(60);
+	let scaleText = $state("100 m");
+
 	$effect(() => {
-		kbdVisible = true;
+		const map = mapContext.activeMap;
+		if (!map) return;
+
+		const updateScale = () => {
+			const y = map.getContainer().clientHeight / 2;
+			const maxMeters = map.unproject([0, y]).distanceTo(map.unproject([100, y]));
+
+			const pow10 = Math.pow(10, Math.floor(Math.log10(maxMeters)));
+			let displayMeters = Math.round(maxMeters / pow10) * pow10;
+			if (displayMeters === 0) displayMeters = 1;
+
+			scaleWidth = Math.round((displayMeters / maxMeters) * 100);
+			scaleText = displayMeters >= 1000 ? `${displayMeters / 1000} km` : `${displayMeters} m`;
+		};
+
+		updateScale();
+		map.on("move", updateScale);
+
+		return () => {
+			map.off("move", updateScale);
+		};
 	});
 
-	let searchBarVisible = $state(false);
-	let layersPanelVisible2 = $state(false);
+	function handleKeyDown(e: KeyboardEvent) {
+		const isApple = isApplePlatform();
+		const isModifierPressed = isApple ? e.metaKey : e.ctrlKey;
 
-	let buttonCollapse: boolean = $state(false);
-	setTimeout(() => (buttonCollapse = true), 2000);
-
-	const scaleEl = document.querySelector(".maplibregl-ctrl-scale");
-	let scaleWidth = $state(scaleEl.clientWidth);
-	let scaleText = $state(scaleEl.innerText);
-	setInterval(() => {
-		scaleWidth = scaleEl.clientWidth;
-		scaleText = scaleEl.innerText;
-	}, 250);
-</script>
-
-<svelte:window
-	onkeydown={(e) => {
-		if (e.key.toLowerCase() === "k" && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
+		if (e.key.toLowerCase() === "k" && isModifierPressed) {
 			e.preventDefault();
 			searchBarVisible = true;
 		}
 
 		if (e.key.toLowerCase() === "l") {
-			layersPanelVisible2 = !layersPanelVisible2;
+			layersPanelVisible = !layersPanelVisible;
 		}
-	}}
-/>
+	}
+</script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 <Geocoder {mapContext} bind:visible={searchBarVisible} providers={[new GeocodeEarth(geocodeEarthApiKey)]}></Geocoder>
 
-<LayersModal bind:visible={layersPanelVisible2} {mapContext}></LayersModal>
-
-<!-- <div class="fixed top-25 right-2 flex flex-col items-end gap-4">
-	<Button Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
-		Zoek plaats ...
-	</Button>
-</div> -->
+<LayersModal bind:visible={layersPanelVisible} {mapContext}></LayersModal>
 
 <div
 	class="
@@ -63,20 +72,19 @@
 >
 	{#if !mapContext.historic.selectedMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex="5" Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
+			<Button tabindex={5} Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
 				Zoek plaats ...
 			</Button>
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex="6" Icon={NavigationArrow} onclick={() => mapContext.flyToUserLocation()}
+			<Button tabindex={6} Icon={NavigationArrow} onclick={() => mapContext.flyToUserLocation()}
 				>Mijn locatie tonen</Button
 			>
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex="7" Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
-				>Lagen</Button
+			<Button tabindex={7} Icon={Stack} kbd="L" onclick={() => (layersPanelVisible = !layersPanelVisible)}>Lagen</Button
 			>
 		</div>
 	{/if}
@@ -87,7 +95,7 @@
 			justify-center overflow-hidden rounded-lg
 		`}
 	>
-		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+">Inzoomen&nbsp;</Button>
+		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+">Inzoomen</Button>
 		<div class="relative -top-[2px]">
 			<Button Icon={MagnifyingGlassMinus} onclick={() => mapContext.zoomOut()} kbd="-">Uitzoomen</Button>
 		</div>

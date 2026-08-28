@@ -132,7 +132,7 @@
 	<div
 		class="pointer-events-none absolute inset-0 rounded-[9px] transition-opacity duration-500"
 		style:opacity="var(--grad-opacity)"
-		style:background={"radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%)"}
+		style:background="radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%)"
 	></div>
 
 	<div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-white px-2.25 py-2 shadow-lg hover:bg-white/90">

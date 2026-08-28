@@ -57,7 +57,7 @@
 		</a>
 		<a
 			class="mx-4"
-			href={`https://www.linkedin.com/sharing/share-offsite/?url=watertijdreis.nl`}
+			href="https://www.linkedin.com/sharing/share-offsite/?url=watertijdreis.nl"
 			target="_blank"
 			rel="noopener noreferrer"
 		>

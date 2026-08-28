@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
-	import Header from "../AppHeader.svelte";
+	import AppHeader from "../AppHeader.svelte";
 	import Minimap from "./Minimap.svelte";
-	import MapInfo from "./HistoricMapInfo.svelte";
+	import HistoricMapInfo from "./HistoricMapInfo.svelte";
 	import Toast from "../ui/Toast.svelte";
 	import Timeline from "../timeline/Timeline.svelte";
 	import MapSheetToggle from "./MapSheetToggle.svelte";
-	import MapButtons from "./MapControls.svelte";
+	import MapControls from "./MapControls.svelte";
 
 	import { MapContext } from "../../map/mapContext.svelte";
 	import { mousePosition } from "../../state/mousePosition.svelte";
@@ -87,15 +87,6 @@
 		clearTimeout(clickedMapTimeout);
 		clickedMapTimeout = setTimeout(() => (mapContext.historic.clickedFeature = null), delay);
 	}
-
-	$effect(() => {
-		if (!mapContext.maplibreLoaded) return;
-		const offset = mapContext.historic.selectedMap ? 10 : 140;
-		const bottomLeft = document.querySelector(".maplibregl-ctrl-bottom-left");
-		const bottomRight = document.querySelector(".maplibregl-ctrl-bottom-right");
-		if (bottomLeft) bottomLeft.style.setProperty("bottom", offset + "px", "important");
-		if (bottomRight) bottomRight.style.setProperty("bottom", offset + "px", "important");
-	});
 </script>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.4.0/dist/maplibre-gl.css" />
@@ -117,15 +108,15 @@
 <MapSheetToggle {mapContext} {extendClickedMapTimeout}></MapSheetToggle>
 
 {#if mapContext.maplibreLoaded}
-	<MapButtons {mapContext} />
+	<MapControls {mapContext} />
 {/if}
 
-<Header {mapContext} />
+<AppHeader {mapContext} />
 
 <Timeline {mapContext} visible={mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}></Timeline>
 
 <Minimap {mapContext}></Minimap>
-<MapInfo {mapContext}></MapInfo>
+<HistoricMapInfo {mapContext}></HistoricMapInfo>
 
 <svelte:window
 	onkeydown={(e) => {

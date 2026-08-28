@@ -29,23 +29,3 @@ body {
 	user-select: none;
 	-webkit-user-select: none;
 }
-
-.maplibregl-ctrl-bottom-left,
-.maplibregl-ctrl-bottom-right {
-}
-
-.maplibregl-ctrl-scale {
-	opacity: 0;
-	background: transparent !important;
-	border: 2px solid #33336688 !important;
-	box-shadow: 1px 2px 0 var(--color-wtr-subtle-blue);
-	border-radius: 0 0 4px 4px !important;
-	border-top: none !important;
-	color: var(--color-wtr-blue) !important;
-	text-shadow: 1px 1px 0 var(--color-wtr-subtle-blue);
-	font-size: 14px !important;
-	font-weight: 600;
-	padding: 4px 6px;
-	margin-left: 25px !important;
-	text-align: right;
-}
