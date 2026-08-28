@@ -8,24 +8,18 @@
 
 	let aboutPanelVisible = $state(false);
 	let shareModalVisible = $state(false);
-
-	let buttonCollapse: boolean = $state(false);
-	setTimeout(() => (buttonCollapse = true), 2000);
 </script>
 
 <AboutModal bind:visible={aboutPanelVisible}></AboutModal>
 
 <ShareModal bind:visible={shareModalVisible}></ShareModal>
 
-<div
+<header
 	class="text-wtr-blue absolute top-2 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-white p-4 shadow-lg sm:top-5 sm:left-5"
-	onmouseenter={() => (buttonCollapse = false)}
-	onmouseleave={() => (buttonCollapse = true)}
-	role="group"
 >
 	<button onclick={() => mapContext.resetState()}>
 		<h1 class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]">
-			{#each "Watertijdreis".split("") as letter, i}
+			{#each "Watertijdreis".split("") as letter, i (`${i}-${letter}`)}
 				<span
 					class="inline-block will-change-[transform,text-shadow,color]"
 					class:wave={mapContext.historic.mapsLoaded}
@@ -39,9 +33,9 @@
 		</h1>
 	</button>
 
-	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}>Over</Button>
-	<Button tabindex="2" onclick={() => (shareModalVisible = !shareModalVisible)} Icon={ShareFat}>Delen</Button>
-</div>
+	<Button tabindex={1} onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}>Over</Button>
+	<Button tabindex={2} onclick={() => (shareModalVisible = !shareModalVisible)} Icon={ShareFat}>Delen</Button>
+</header>
 
 <style>
 	.wave {
