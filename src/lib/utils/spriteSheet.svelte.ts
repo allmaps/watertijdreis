@@ -30,7 +30,7 @@ export class SpriteSheet {
 
 	private initialized = false;
 
-	constructor(private sources: SpriteSheetSource[]) { }
+	constructor(private sources: SpriteSheetSource[]) {}
 
 	async init() {
 		if (this.initialized) return;
@@ -41,17 +41,13 @@ export class SpriteSheet {
 		this.error = null;
 
 		try {
-			const responses = await Promise.all(
-				this.sources.map(src => fetch(src.jsonUrl))
-			);
+			const responses = await Promise.all(this.sources.map((src) => fetch(src.jsonUrl)));
 
 			for (const r of responses) {
 				if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
 			}
 
-			const jsonArrays: SpriteData[][] = await Promise.all(
-				responses.map(r => r.json())
-			);
+			const jsonArrays: SpriteData[][] = await Promise.all(responses.map((r) => r.json()));
 
 			jsonArrays.forEach((sprites, index) => {
 				const source = this.sources[index];
@@ -61,13 +57,12 @@ export class SpriteSheet {
 						...sprite,
 						sourceImageUrl: source.imageUrl,
 						sheetWidth: source.sheetWidth,
-						sheetHeight: source.sheetHeight
+						sheetHeight: source.sheetHeight,
 					});
 				}
 			});
 
 			this.initialized = true;
-
 		} catch (err) {
 			console.error("SpriteSheet laadfout:", err);
 			this.error = err instanceof Error ? err.message : String(err);
@@ -83,17 +78,17 @@ export class SpriteSheet {
 
 const sources: SpriteSheetSource[] = [
 	{
-		jsonUrl: './sprites/regular-sheets-128.json',
-		imageUrl: './sprites/regular-sheets-128.jpg',
+		jsonUrl: "./sprites/regular-sheets-128.json",
+		imageUrl: "./sprites/regular-sheets-128.jpg",
 		sheetWidth: 3072,
-		sheetHeight: 3078
+		sheetHeight: 3078,
 	},
 	{
-		jsonUrl: './sprites/special-sheets-128.json',
-		imageUrl: './sprites/special-sheets-128.jpg',
+		jsonUrl: "./sprites/special-sheets-128.json",
+		imageUrl: "./sprites/special-sheets-128.jpg",
 		sheetWidth: 1792,
-		sheetHeight: 1951
-	}
+		sheetHeight: 1951,
+	},
 ];
 
 export const spriteStore = new SpriteSheet(sources);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Gradient } from 'phosphor-svelte';
+	import { Gradient } from "phosphor-svelte";
 
 	interface Props {
 		value?: number;
@@ -33,8 +33,8 @@
 		dragging = false;
 		if (onchange) onchange(value);
 
-		window.removeEventListener('pointermove', onPointerMove as EventListener);
-		window.removeEventListener('pointerup', onPointerUp);
+		window.removeEventListener("pointermove", onPointerMove as EventListener);
+		window.removeEventListener("pointerup", onPointerUp);
 	}
 
 	function onPointerDown(e: PointerEvent) {
@@ -43,16 +43,16 @@
 		dragging = true;
 		updateFromEvent(e);
 
-		window.addEventListener('pointermove', onPointerMove as EventListener);
-		window.addEventListener('pointerup', onPointerUp);
+		window.addEventListener("pointermove", onPointerMove as EventListener);
+		window.addEventListener("pointerup", onPointerUp);
 	}
 
 	function handleKeyDown(e: KeyboardEvent) {
-		if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+		if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
 			e.preventDefault();
 			value = Math.max(0, value - 5);
 			if (onchange) onchange(value);
-		} else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+		} else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
 			e.preventDefault();
 			value = Math.min(100, value + 5);
 			if (onchange) onchange(value);
@@ -61,8 +61,8 @@
 
 	$effect(() => {
 		return () => {
-			window.removeEventListener('pointermove', onPointerMove as EventListener);
-			window.removeEventListener('pointerup', onPointerUp);
+			window.removeEventListener("pointermove", onPointerMove as EventListener);
+			window.removeEventListener("pointerup", onPointerUp);
 		};
 	});
 </script>
@@ -93,10 +93,7 @@
 		aria-label="Doorzichtigheid"
 	>
 		<div bind:this={trackEl} class="relative h-2 w-full rounded-full bg-black/13">
-			<div
-				class="bg-wtr-blue absolute top-0 left-0 h-full rounded-full"
-				style:width={`${value}%`}
-			></div>
+			<div class="bg-wtr-blue absolute top-0 left-0 h-full rounded-full" style:width={`${value}%`}></div>
 
 			<div
 				class="

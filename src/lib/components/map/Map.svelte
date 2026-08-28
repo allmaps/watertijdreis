@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount } from "svelte";
 
-	import Header from '../AppHeader.svelte';
-	import Minimap from './Minimap.svelte';
-	import MapInfo from './HistoricMapInfo.svelte';
-	import Toast from '../ui/Toast.svelte';
-	import Timeline from '../timeline/Timeline.svelte';
-	import MapSheetToggle from './MapSheetToggle.svelte';
-	import MapButtons from './MapControls.svelte';
+	import Header from "../AppHeader.svelte";
+	import Minimap from "./Minimap.svelte";
+	import MapInfo from "./HistoricMapInfo.svelte";
+	import Toast from "../ui/Toast.svelte";
+	import Timeline from "../timeline/Timeline.svelte";
+	import MapSheetToggle from "./MapSheetToggle.svelte";
+	import MapButtons from "./MapControls.svelte";
 
-	import { MapContext } from '../../map/mapContext.svelte';
-	import { mousePosition } from '../../state/mousePosition.svelte';
-	import { spriteStore } from '../../utils/spriteSheet.svelte';
-	import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from '../../map/mapLayers.svelte';
+	import { MapContext } from "../../map/mapContext.svelte";
+	import { mousePosition } from "../../state/mousePosition.svelte";
+	import { spriteStore } from "../../utils/spriteSheet.svelte";
+	import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from "../../map/mapLayers.svelte";
 
-	const containerId = 'map-container';
+	const containerId = "map-container";
 	const mapContext = new MapContext();
 
 	onMount(() => {
@@ -23,7 +23,7 @@
 	});
 
 	onMount(() => {
-		document.addEventListener('pointermove', (e) => {
+		document.addEventListener("pointermove", (e) => {
 			mousePosition.x = e.x;
 			mousePosition.y = e.y;
 		});
@@ -32,49 +32,49 @@
 	$effect(() => {
 		if (!mapContext.maplibreLoaded || mapContext.historic.selectedMap) return;
 
-		mapContext.setProtomapsVisiblity(mapContext.layerOptions.baseMap === 'protomaps');
-		if (mapContext.layerOptions.baseMap === 'protomaps')
+		mapContext.setProtomapsVisiblity(mapContext.layerOptions.baseMap === "protomaps");
+		if (mapContext.layerOptions.baseMap === "protomaps")
 			mapContext.setProtomapsWaterInFront(mapContext.layerOptions.protoMapsWaterInFront);
-		if (mapContext.layerOptions.baseMap === 'protomaps')
+		if (mapContext.layerOptions.baseMap === "protomaps")
 			mapContext.setProtoMapsLabelsInFront(mapContext.layerOptions.protoMapsLabelsInFront);
 
-		mapContext.setAHNVisibility(mapContext.layerOptions.baseMap === 'ahn');
-		mapContext.setSatellietVisibility(mapContext.layerOptions.baseMap === 'satelliet');
+		mapContext.setAHNVisibility(mapContext.layerOptions.baseMap === "ahn");
+		mapContext.setSatellietVisibility(mapContext.layerOptions.baseMap === "satelliet");
 
 		if (mapContext.historic.warpedMapLayer)
 			mapContext.historic.warpedMapLayer.setLayerOptions({
-				opacity: mapContext.layerOptions.historicMapsOpacity / 100
+				opacity: mapContext.layerOptions.historicMapsOpacity / 100,
 			});
 	});
 
 	$effect(() => {
 		if (!mapContext.maplibreLoaded) return;
 
-		if (mapContext.layerOptions.overlay !== 'waterschapsgrenzen') {
-			if (mapContext.map.getLayer('overlay-waterschapsgrenzen')) {
-				mapContext.map.removeLayer('overlay-waterschapsgrenzen');
+		if (mapContext.layerOptions.overlay !== "waterschapsgrenzen") {
+			if (mapContext.map.getLayer("overlay-waterschapsgrenzen")) {
+				mapContext.map.removeLayer("overlay-waterschapsgrenzen");
 			}
-			if (mapContext.map.getSource('pdok-waterschapsgrenzen')) {
-				mapContext.map.removeSource('pdok-waterschapsgrenzen');
-			}
-		}
-
-		if (mapContext.layerOptions.overlay !== 'gemeentegrenzen') {
-			if (mapContext.map.getLayer('overlay-gemeentegrenzen')) {
-				mapContext.map.removeLayer('overlay-gemeentegrenzen');
-			}
-			if (mapContext.map.getSource('pdok-gemeentegrenzen')) {
-				mapContext.map.removeSource('pdok-gemeentegrenzen');
+			if (mapContext.map.getSource("pdok-waterschapsgrenzen")) {
+				mapContext.map.removeSource("pdok-waterschapsgrenzen");
 			}
 		}
 
-		if (mapContext.layerOptions.overlay === 'waterschapsgrenzen') {
-			if (!mapContext.map.getSource('pdok-waterschapsgrenzen')) {
+		if (mapContext.layerOptions.overlay !== "gemeentegrenzen") {
+			if (mapContext.map.getLayer("overlay-gemeentegrenzen")) {
+				mapContext.map.removeLayer("overlay-gemeentegrenzen");
+			}
+			if (mapContext.map.getSource("pdok-gemeentegrenzen")) {
+				mapContext.map.removeSource("pdok-gemeentegrenzen");
+			}
+		}
+
+		if (mapContext.layerOptions.overlay === "waterschapsgrenzen") {
+			if (!mapContext.map.getSource("pdok-waterschapsgrenzen")) {
 				addWaterschapsgrenzenLayer(mapContext.map);
 			}
 		}
-		if (mapContext.layerOptions.overlay === 'gemeentegrenzen') {
-			if (!mapContext.map.getSource('pdok-gemeentegrenzen')) {
+		if (mapContext.layerOptions.overlay === "gemeentegrenzen") {
+			if (!mapContext.map.getSource("pdok-gemeentegrenzen")) {
 				addGemeentegrenzenLayer(mapContext.map);
 			}
 		}
@@ -91,10 +91,10 @@
 	$effect(() => {
 		if (!mapContext.maplibreLoaded) return;
 		const offset = mapContext.historic.selectedMap ? 10 : 140;
-		const bottomLeft = document.querySelector('.maplibregl-ctrl-bottom-left');
-		const bottomRight = document.querySelector('.maplibregl-ctrl-bottom-right');
-		if (bottomLeft) bottomLeft.style.setProperty('bottom', offset + 'px', 'important');
-		if (bottomRight) bottomRight.style.setProperty('bottom', offset + 'px', 'important');
+		const bottomLeft = document.querySelector(".maplibregl-ctrl-bottom-left");
+		const bottomRight = document.querySelector(".maplibregl-ctrl-bottom-right");
+		if (bottomLeft) bottomLeft.style.setProperty("bottom", offset + "px", "important");
+		if (bottomRight) bottomRight.style.setProperty("bottom", offset + "px", "important");
 	});
 </script>
 
@@ -105,8 +105,8 @@
 	class="polka fixed inset-0 h-full w-full bg-size-[25px_25px]"
 	style={`
 		touch-action: auto; 
-		background-color: ${mapContext.historic.selectedMap ? '#fffaff' : '#fafaff'}; 
-		background-image: radial-gradient(${mapContext.historic.selectedMap ? '#fef' : '#eef'} 2.5px, transparent 2.5px)
+		background-color: ${mapContext.historic.selectedMap ? "#fffaff" : "#fafaff"}; 
+		background-image: radial-gradient(${mapContext.historic.selectedMap ? "#fef" : "#eef"} 2.5px, transparent 2.5px)
 	`}
 ></div>
 
@@ -122,28 +122,25 @@
 
 <Header {mapContext} />
 
-<Timeline {mapContext} visible={mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}
-></Timeline>
+<Timeline {mapContext} visible={mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}></Timeline>
 
 <Minimap {mapContext}></Minimap>
 <MapInfo {mapContext}></MapInfo>
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key.toLowerCase() == '=') mapContext.zoomIn();
-		if (e.key.toLowerCase() == '-') mapContext.zoomOut();
+		if (e.key.toLowerCase() == "=") mapContext.zoomIn();
+		if (e.key.toLowerCase() == "-") mapContext.zoomOut();
 
-		if (e.key.toLowerCase() == 'w' && mapContext.layerOptions.baseMap == 'protomaps') {
-			mapContext.layerOptions.protoMapsWaterInFront =
-				!mapContext.layerOptions.protoMapsWaterInFront;
+		if (e.key.toLowerCase() == "w" && mapContext.layerOptions.baseMap == "protomaps") {
+			mapContext.layerOptions.protoMapsWaterInFront = !mapContext.layerOptions.protoMapsWaterInFront;
 		}
 
-		if (e.key.toLowerCase() == 't' && mapContext.layerOptions.baseMap == 'protomaps') {
-			mapContext.layerOptions.protoMapsLabelsInFront =
-				!mapContext.layerOptions.protoMapsLabelsInFront;
+		if (e.key.toLowerCase() == "t" && mapContext.layerOptions.baseMap == "protomaps") {
+			mapContext.layerOptions.protoMapsLabelsInFront = !mapContext.layerOptions.protoMapsLabelsInFront;
 		}
 
-		if (e.key == 'Escape') {
+		if (e.key == "Escape") {
 			mapContext.historic.clickedFeature = null;
 			mapContext.historic.setSheetIndexVisibility(false);
 		}
@@ -152,7 +149,7 @@
 		mapContext.applyStateFromURL();
 
 		const q = new URLSearchParams(window.location.search);
-		const bladId = q.get('blad');
+		const bladId = q.get("blad");
 		if (bladId) {
 			const historicMap = mapContext.historic.mapsById.get(bladId);
 			if (historicMap) mapContext.historic.setHistoricMapView(historicMap);

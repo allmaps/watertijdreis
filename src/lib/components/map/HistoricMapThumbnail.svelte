@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { spriteStore } from '../../utils/spriteSheet.svelte';
+	import { spriteStore } from "../../utils/spriteSheet.svelte";
 
-	let { id, height = undefined, width = undefined, className = '' } = $props();
+	let { id, height = undefined, width = undefined, className = "" } = $props();
 
-	id = id.replace('-b', '');
+	id = id.replace("-b", "");
 
 	let sprite = $derived.by(() => {
 		if (spriteStore.loading) return null;
@@ -13,18 +13,18 @@
 	let dimensions = $derived.by(() => {
 		if (!sprite) {
 			return {
-				refWidth: width ? (typeof width === 'number' ? `${width}px` : width) : `${128}px`,
-				refHeight: height ? (typeof height === 'number' ? `${height}px` : height) : `${104}px`,
+				refWidth: width ? (typeof width === "number" ? `${width}px` : width) : `${128}px`,
+				refHeight: height ? (typeof height === "number" ? `${height}px` : height) : `${104}px`,
 				scaleFactor: 1,
-				isReady: false
+				isReady: false,
 			};
 		}
 
 		const originalWidth = sprite.width;
 		const originalHeight = sprite.height;
 
-		const targetWidthNumber = typeof width === 'number' ? width : undefined;
-		const targetHeightNumber = typeof height === 'number' ? height : undefined;
+		const targetWidthNumber = typeof width === "number" ? width : undefined;
+		const targetHeightNumber = typeof height === "number" ? height : undefined;
 
 		let scaleW = 0;
 		let scaleH = 0;
@@ -56,19 +56,19 @@
 		const finalWidthNumber = originalWidth * scaleFactor;
 		const finalHeightNumber = originalHeight * scaleFactor;
 
-		const refWidth = typeof width === 'string' && width ? width : `${finalWidthNumber}px`;
-		const refHeight = typeof height === 'string' && height ? height : `${finalHeightNumber}px`;
+		const refWidth = typeof width === "string" && width ? width : `${finalWidthNumber}px`;
+		const refHeight = typeof height === "string" && height ? height : `${finalHeightNumber}px`;
 
 		return {
 			refWidth,
 			refHeight,
 			scaleFactor,
-			isReady: true
+			isReady: true,
 		};
 	});
 
 	let styleString = $derived.by(() => {
-		if (!sprite || !dimensions.isReady) return '';
+		if (!sprite || !dimensions.isReady) return "";
 
 		const { refWidth, refHeight, scaleFactor } = dimensions;
 
@@ -87,8 +87,8 @@
 			`background-image: url('${sprite.sourceImageUrl}')`,
 			`background-position: -${scaledBackgroundX}px -${scaledBackgroundY}px`,
 			`background-size: ${scaledSheetWidth}px ${scaledSheetHeight}px`,
-			`background-repeat: no-repeat`
-		].join(';');
+			`background-repeat: no-repeat`,
+		].join(";");
 	});
 </script>
 
@@ -98,9 +98,9 @@
 			class="placeholder {spriteStore.loading ? 'loading' : 'error'}"
 			style:width={dimensions.refWidth}
 			style:height={dimensions.refHeight}
-			title={!sprite ? 'Kaart niet gevonden' : undefined}
+			title={!sprite ? "Kaart niet gevonden" : undefined}
 		>
-			{spriteStore.loading ? 'Laden...' : '?'}
+			{spriteStore.loading ? "Laden..." : "?"}
 		</div>
 	{:else}
 		<div class="sprite-image" style={styleString} role="img" aria-label="Kaart thumbnail"></div>

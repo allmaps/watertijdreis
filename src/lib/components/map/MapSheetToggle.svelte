@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { fade, slide } from 'svelte/transition';
-	import { MapTrifold, FileText, PushPin } from 'phosphor-svelte';
-	import Toast from '../ui/Toast.svelte';
+	import { fade, slide } from "svelte/transition";
+	import { MapTrifold, FileText, PushPin } from "phosphor-svelte";
+	import Toast from "../ui/Toast.svelte";
 
 	let { mapContext, extendClickedMapTimeout } = $props();
 
@@ -42,7 +42,7 @@
 		else rightBtnSelected = false;
 	});
 
-	let toastMessage = $state('');
+	let toastMessage = $state("");
 
 	let spaceKeyDown = $state(false);
 	let keyboardShortcutVisible = $state(true);
@@ -59,25 +59,25 @@
 			duration: Math.max(s.duration, f.duration),
 			delay: Math.min(s.delay, f.delay),
 			css: (t) => `
-				${s.css ? s.css(t) + ';' : ''}
-				${f.css ? f.css(t) + ';' : ''}
-			`
+				${s.css ? s.css(t) + ";" : ""}
+				${f.css ? f.css(t) + ";" : ""}
+			`,
 		};
 	}
 </script>
 
 <svelte:document
 	onkeydown={(e) => {
-		if (e.key == ' ' && !spaceKeyDown) {
+		if (e.key == " " && !spaceKeyDown) {
 			spaceKeyDown = true;
 			rightBtnClick();
 		}
-		if (e.key == 'Escape') {
+		if (e.key == "Escape") {
 			leftBtnClick();
 		}
 	}}
 	onkeyup={(e) => {
-		if (e.key == ' ') {
+		if (e.key == " ") {
 			spaceKeyDown = false;
 			// if (!mapContext.historic.selectedMap) leftBtnClick();
 		}
@@ -95,8 +95,8 @@
 >
 	<span
 		class="absolute left-0 h-full w-1/2 rounded-[8px] bg-white shadow-md transition-[left,width] duration-300 ease-out"
-		style:left={(!rightBtnSelected ? 0 : leftBtnWidth) + 'px'}
-		style:width={(!rightBtnSelected ? leftBtnWidth : rightBtnWidth) + 'px'}
+		style:left={(!rightBtnSelected ? 0 : leftBtnWidth) + "px"}
+		style:width={(!rightBtnSelected ? leftBtnWidth : rightBtnWidth) + "px"}
 	></span>
 	<button
 		bind:clientWidth={leftBtnWidth}
@@ -106,7 +106,7 @@
 	>
 		<MapTrifold
 			size="18"
-			color={!rightBtnSelected ? 'var(--color-wtr-pink)' : 'var(--color-wtr-blue)'}
+			color={!rightBtnSelected ? "var(--color-wtr-pink)" : "var(--color-wtr-blue)"}
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 		Kaart
@@ -119,7 +119,7 @@
 	>
 		<FileText
 			size="18"
-			color={rightBtnSelected ? 'var(--color-wtr-pink)' : 'var(--color-wtr-blue)'}
+			color={rightBtnSelected ? "var(--color-wtr-pink)" : "var(--color-wtr-blue)"}
 			class="shrink-0 transition-[fill] duration-500"
 		/>
 
@@ -156,9 +156,7 @@
 			</span>
 		{:else}
 			<span class="truncate">
-				{mapContext.historic.clickedHistoricMap
-					? mapContext.historic.clickedHistoricMap.label
-					: 'Bladindex'}
+				{mapContext.historic.clickedHistoricMap ? mapContext.historic.clickedHistoricMap.label : "Bladindex"}
 			</span>
 
 			{#if keyboardShortcutVisible}
@@ -168,7 +166,7 @@
 					px-1 font-sans text-[12px] text-[#cce]
 					shadow-[0px_2px_0px_0px_#cce] select-none
 					"
-					transition:slideFade={{ axis: 'x', duration: 300 }}
+					transition:slideFade={{ axis: "x", duration: 300 }}
 				>
 					<span>Spatie</span>
 				</kbd>

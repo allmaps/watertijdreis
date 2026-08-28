@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { X } from 'phosphor-svelte';
-	import { fly } from 'svelte/transition';
-	import { tick } from 'svelte';
+	import { X } from "phosphor-svelte";
+	import { fly } from "svelte/transition";
+	import { tick } from "svelte";
 
 	interface Props {
 		visible: boolean;
 		title?: string;
 		opacity?: number;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 	}
 
 	let { visible = $bindable(), title, children, opacity = 100 }: Props = $props();
@@ -24,12 +24,12 @@
 	function handleGlobalKeyDown(e: KeyboardEvent) {
 		if (!visible) return;
 
-		if (e.key === 'Escape') {
+		if (e.key === "Escape") {
 			close();
 			return;
 		}
 
-		if (e.key === 'Tab' && modalElement) {
+		if (e.key === "Tab" && modalElement) {
 			if (e.shiftKey) {
 				if (document.activeElement === firstFocusableElement) {
 					e.preventDefault();
@@ -47,8 +47,7 @@
 	function updateFocusableElements() {
 		if (!modalElement) return;
 
-		const focusableSelectors =
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+		const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 		const focusableElements = modalElement.querySelectorAll<HTMLElement>(focusableSelectors);
 
 		if (focusableElements.length > 0) {
@@ -72,7 +71,7 @@
 {#if visible}
 	<div
 		class="bg-wtr-blue/66 fixed inset-0 z-2000 flex items-center justify-center bg-[url('/wave_pattern.png')] bg-size-[32px]"
-		style:opacity={opacity + '%'}
+		style:opacity={opacity + "%"}
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
@@ -85,7 +84,7 @@
 			clickStartedOnBackdrop = false;
 		}}
 		onkeydown={(e) => {
-			if (e.target === e.currentTarget && e.key === 'Enter') close();
+			if (e.target === e.currentTarget && e.key === "Enter") close();
 		}}
 		transition:fly={{ y: -5, duration: 250 }}
 	>

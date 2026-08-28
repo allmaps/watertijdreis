@@ -1,5 +1,5 @@
 <script>
-	import Modal from '../ui/Modal.svelte';
+	import Modal from "../ui/Modal.svelte";
 
 	let { visible = $bindable() } = $props();
 </script>
@@ -7,37 +7,35 @@
 <Modal title="Over Watertijdreis" bind:visible>
 	<div class="prose sm:p-6 sm:pt-0">
 		<p>
-			Watertijdreis maakt het mogelijk om ruim 125 jaar aan Nederlandse watergeschiedenis te
-			ontdekken. Vanaf de negentiende eeuw is er veel veranderd in de manier waarop we water beheren
-			en afwateren. De Waterstaatskaarten, vervaardigd door Rijkswaterstaat tussen 1865 en 1992,
-			brengen die veranderingen landsdekkend in beeld. Je ziet hoe Nederland zich in korte tijd snel
-			heeft ontwikkeld: afwateringsgebieden verschoven, beek- en rivierlopen zijn verlegd, nieuwe
-			waterbouwkundige kunstwerken zijn gebouwd en grotere wateren zijn ingepolderd. Deze
-			cultuurhistorische tijdreis geeft inzicht in de keuzes die hebben geleid tot het landschap van
-			nu, en kan inspireren om historische kennis opnieuw te benutten.
+			Watertijdreis maakt het mogelijk om ruim 125 jaar aan Nederlandse watergeschiedenis te ontdekken. Vanaf de
+			negentiende eeuw is er veel veranderd in de manier waarop we water beheren en afwateren. De Waterstaatskaarten,
+			vervaardigd door Rijkswaterstaat tussen 1865 en 1992, brengen die veranderingen landsdekkend in beeld. Je ziet hoe
+			Nederland zich in korte tijd snel heeft ontwikkeld: afwateringsgebieden verschoven, beek- en rivierlopen zijn
+			verlegd, nieuwe waterbouwkundige kunstwerken zijn gebouwd en grotere wateren zijn ingepolderd. Deze
+			cultuurhistorische tijdreis geeft inzicht in de keuzes die hebben geleid tot het landschap van nu, en kan
+			inspireren om historische kennis opnieuw te benutten.
 		</p>
 		<p>
-			Geïnspireerd op <a href="https://www.topotijdreis.nl/">Topotijdreis</a> vormt de tijdlijn het startpunt
-			van je reis. In een aantal sprongen reis je voor elk gebied in Nederland door twee eeuwen watergeschiedenis.
-			Het hele land is opgedeeld in zo’n 160 kaartbladen, die elk voorzien zijn van een legenda boordevol
-			informatie. Deze informatie kan op verschillende manieren worden gedeeld en gedownload. De URL
-			past zich tijdens je reis aan je locatie en tijdstip aan, zodat je jouw kaartbeeld kunt opslaan
-			en delen. Daarnaast is het mogelijk de historische kaarten met verschillende achtergrondkaarten
-			te combineren. Door bijvoorbeeld de waterlaag aan of uit te zetten kun je huidige waterlopen en
-			-lichamen vergelijken met die van vroeger.
+			Geïnspireerd op <a href="https://www.topotijdreis.nl/">Topotijdreis</a> vormt de tijdlijn het startpunt van je reis.
+			In een aantal sprongen reis je voor elk gebied in Nederland door twee eeuwen watergeschiedenis. Het hele land is opgedeeld
+			in zo’n 160 kaartbladen, die elk voorzien zijn van een legenda boordevol informatie. Deze informatie kan op verschillende
+			manieren worden gedeeld en gedownload. De URL past zich tijdens je reis aan je locatie en tijdstip aan, zodat je jouw
+			kaartbeeld kunt opslaan en delen. Daarnaast is het mogelijk de historische kaarten met verschillende achtergrondkaarten
+			te combineren. Door bijvoorbeeld de waterlaag aan of uit te zetten kun je huidige waterlopen en -lichamen vergelijken
+			met die van vroeger.
 		</p>
 		<p>
-			Tot nu toe was een landsdekkende verbeelding van twee eeuwen aan waterstaatsgeschiedenis niet
-			eerder overzichtelijk gepresenteerd. Om die reden hebben de <a
-				href="https://www.cultureelerfgoed.nl/">Rijksdienst voor het Cultureel Erfgoed</a
+			Tot nu toe was een landsdekkende verbeelding van twee eeuwen aan waterstaatsgeschiedenis niet eerder
+			overzichtelijk gepresenteerd. Om die reden hebben de <a href="https://www.cultureelerfgoed.nl/"
+				>Rijksdienst voor het Cultureel Erfgoed</a
 			>
-			(RCE) en <a href="https://www.stowa.nl/">STOWA</a> het initiatief genomen voor Watertijdreis.
-			Samen met <a href="https://allmaps.org/">Allmaps</a>,
+			(RCE) en <a href="https://www.stowa.nl/">STOWA</a> het initiatief genomen voor Watertijdreis. Samen met
+			<a href="https://allmaps.org/">Allmaps</a>,
 			<a href="https://www.tudelft.nl/">TU Delft</a>,
 			<a href="https://www.uu.nl/universiteitsbibliotheek">Universiteitsbliotheek Utrecht</a> en
 			<a href="https://www.linkedin.com/company/de-geomaten/">De Geomaten</a>
-			kon deze applicatie worden gemaakt. Watertijdreis zal in de toekomst worden uitgebreid met meer
-			historische kaarten die onze watergeschiedenis verbeelden.
+			kon deze applicatie worden gemaakt. Watertijdreis zal in de toekomst worden uitgebreid met meer historische kaarten
+			die onze watergeschiedenis verbeelden.
 		</p>
 		<p>Voor vragen, feedback en suggesties neem contact op met:</p>
 		<blockquote>
@@ -53,8 +51,7 @@
 				> (STOWA)
 			</li>
 			<li>
-				<a
-					href="https://www.cultureelerfgoed.nl/onderwerpen/bronnen-en-kaarten/overzicht/leven-met-water-kaart"
+				<a href="https://www.cultureelerfgoed.nl/onderwerpen/bronnen-en-kaarten/overzicht/leven-met-water-kaart"
 					>Leven met water</a
 				> (RCE)
 			</li>
@@ -87,9 +84,7 @@
 		<ul>
 			<li><a href="https://github.com/allmaps/watertijdreis">Broncode applicatie</a> (GitHub)</li>
 			<li>
-				<a href="https://github.com/tu-delft-heritage/watertijdreis-data"
-					>Georeference Annotations</a
-				> (GitHub)
+				<a href="https://github.com/tu-delft-heritage/watertijdreis-data">Georeference Annotations</a> (GitHub)
 			</li>
 			<li>
 				Scans (Universiteitsbliotheek Utrecht)
@@ -112,9 +107,7 @@
 		<ul>
 			<li>
 				Basiskaart: &copy;
-				<a href="https://www.openstreetmap.org/copyright" target="_blank"
-					>OpenStreetMap-bijdragers</a
-				>
+				<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap-bijdragers</a>
 				(via <a href="https://protomaps.com/" target="_blank">ProtoMaps</a>)
 			</li>
 			<li>
@@ -131,9 +124,7 @@
 				>
 			</div>
 			<div class="basis-2/2 p-2">
-				<a href="https://www.stowa.nl/"
-					><img class="mx-auto h-10" alt="STOWA Logo" src="/img/svg/stowa-logo.svg" /></a
-				>
+				<a href="https://www.stowa.nl/"><img class="mx-auto h-10" alt="STOWA Logo" src="/img/svg/stowa-logo.svg" /></a>
 			</div>
 			<div class="basis-1/2 p-2">
 				<a href="https://allmaps.org/"
@@ -141,8 +132,7 @@
 				>
 			</div>
 			<div class="basis-1/2 p-2">
-				<a href="https://www.tudelft.nl/"
-					><img class="mx-auto h-20" alt="TU Delft Logo" src="/img/svg/tu-logo.svg" /></a
+				<a href="https://www.tudelft.nl/"><img class="mx-auto h-20" alt="TU Delft Logo" src="/img/svg/tu-logo.svg" /></a
 				>
 			</div>
 			<div class="basis-2/2 p-2">
@@ -152,11 +142,7 @@
 			</div>
 			<div class="basis-2/2 p-2">
 				<a href="https://www.uu.nl/bijzondere-collecties/"
-					><img
-						class="mx-auto h-20"
-						alt="Universiteit Utrecht Logo"
-						src="/img/svg/uu-logo.svg"
-					/></a
+					><img class="mx-auto h-20" alt="Universiteit Utrecht Logo" src="/img/svg/uu-logo.svg" /></a
 				>
 			</div>
 		</div>

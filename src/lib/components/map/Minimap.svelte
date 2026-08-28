@@ -1,15 +1,12 @@
 <script lang="ts">
-	import * as turf from '@turf/turf';
-	import { onMount } from 'svelte';
-	import { draw, fade } from 'svelte/transition';
+	import * as turf from "@turf/turf";
+	import { onMount } from "svelte";
+	import { draw, fade } from "svelte/transition";
 
 	let { mapContext } = $props();
 
 	let previewHistoricMap = $derived.by(() => {
-		if (
-			mapContext.historic.visibleMapsInViewport &&
-			mapContext.historic.visibleMapsInViewport.size == 1
-		)
+		if (mapContext.historic.visibleMapsInViewport && mapContext.historic.visibleMapsInViewport.size == 1)
 			return mapContext.historic.visibleMapsInViewport.values().next().value;
 		return null;
 	});
@@ -20,11 +17,11 @@
 			.values()
 			.toArray()
 			.map((i) => ({
-				type: 'Feature',
+				type: "Feature",
 				geometry: turf.toMercator(structuredClone(i.polygon)),
 				properties: {
-					id: i.id
-				}
+					id: i.id,
+				},
 			}));
 	});
 
@@ -33,8 +30,8 @@
 
 	let viewBox = $derived.by(() => {
 		const bbox = turf.bbox({
-			type: 'FeatureCollection',
-			features: polygons
+			type: "FeatureCollection",
+			features: polygons,
 		});
 
 		const viewWidth = bbox[2] - bbox[0];
@@ -42,12 +39,7 @@
 		const paddingX = viewWidth * 0.075;
 		const paddingY = viewHeight * 0.075;
 
-		return [
-			bbox[0] - paddingX,
-			bbox[1] - paddingY,
-			viewWidth + paddingX * 2,
-			viewHeight + paddingY * 2
-		];
+		return [bbox[0] - paddingX, bbox[1] - paddingY, viewWidth + paddingX * 2, viewHeight + paddingY * 2];
 	});
 
 	let viewport = $derived.by(() => {
@@ -56,7 +48,7 @@
 	});
 
 	function getProjectedPoints(coordinates: [number, number][]): string {
-		return coordinates.map((coord) => coord.join(',')).join(' ');
+		return coordinates.map((coord) => coord.join(",")).join(" ");
 	}
 
 	function getClippedProjectedRect(coordinates: [number, number][]): {
@@ -72,7 +64,7 @@
 
 		const clipped = coordinates.map(([x, y]) => [
 			Math.min(Math.max(x, minXClamp), maxXClamp),
-			Math.min(Math.max(y, minYClamp), maxYClamp)
+			Math.min(Math.max(y, minYClamp), maxYClamp),
 		]);
 
 		const xs = clipped.map((c) => c[0]);
@@ -91,27 +83,20 @@
 	<svg
 		{width}
 		{height}
-		viewBox={viewBox.join(' ')}
+		viewBox={viewBox.join(" ")}
 		class="drop-shadow-wtr-blue/50 transition-scale pointer-events-none absolute bottom-32 left-2 z-998 origin-bottom-left scale-80 touch-none drop-shadow-[1px_1px_0px] duration-300 hover:scale-100 sm:right-8"
 	>
 		<!-- ARROW POINTING FROM SELECTED MAP TO MAP-PREVIEW-BOX -->
 		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
 			{#each polygons as poly}
 				{@const previewed =
-					!mapContext.historic.clickedHistoricMap &&
-					previewHistoricMap &&
-					poly.properties.id == previewHistoricMap.id}
-				{@const selected =
-					mapContext.historic.selectedMap &&
-					poly.properties.id == mapContext.historic.selectedMap.id}
+					!mapContext.historic.clickedHistoricMap && previewHistoricMap && poly.properties.id == previewHistoricMap.id}
+				{@const selected = mapContext.historic.selectedMap && poly.properties.id == mapContext.historic.selectedMap.id}
 				{@const clicked =
-					mapContext.historic.clickedHistoricMap &&
-					poly.properties.id == mapContext.historic.clickedHistoricMap.id}
+					mapContext.historic.clickedHistoricMap && poly.properties.id == mapContext.historic.clickedHistoricMap.id}
 				{@const visible =
-					!mapContext.historic.selectedMap &&
-					mapContext.historic.visibleMapsInViewport.has(poly.properties.id)}
-				{@const fill =
-					previewed || clicked || selected ? '#ff44aaaa' : visible ? '#ff44aa44' : '#ff44aa11'}
+					!mapContext.historic.selectedMap && mapContext.historic.visibleMapsInViewport.has(poly.properties.id)}
+				{@const fill = previewed || clicked || selected ? "#ff44aaaa" : visible ? "#ff44aa44" : "#ff44aa11"}
 				<polygon
 					points={getProjectedPoints(poly.geometry.coordinates[0])}
 					{fill}
@@ -120,12 +105,7 @@
 				/>
 			{/each}
 			{#if viewport && !mapContext.historic.selectedMap}
-				{@const {
-					x,
-					y,
-					width: w,
-					height: h
-				} = getClippedProjectedRect(viewport.geometry.coordinates[0])}
+				{@const { x, y, width: w, height: h } = getClippedProjectedRect(viewport.geometry.coordinates[0])}
 				<rect
 					{x}
 					{y}
@@ -147,9 +127,7 @@
 							mapContext.historic.selectedMap ||
 							(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)}
 						{@const hovered = polygons.find((p) => p.properties.id == historicMap.id)}
-						{@const centerPoint = hovered
-							? turf.centerOfMass(hovered).geometry.coordinates
-							: [0, 0]}
+						{@const centerPoint = hovered ? turf.centerOfMass(hovered).geometry.coordinates : [0, 0]}
 
 						{@const x1 = centerPoint[0]}
 						{@const y1 = centerPoint[1]}

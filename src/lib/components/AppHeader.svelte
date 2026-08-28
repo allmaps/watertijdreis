@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { ShareFat, Info } from 'phosphor-svelte';
-	import ShareModal from './modals/ShareModal.svelte';
-	import Button from './ui/Button.svelte';
-	import AboutModal from './modals/AboutModal.svelte';
+	import { ShareFat, Info } from "phosphor-svelte";
+	import ShareModal from "./modals/ShareModal.svelte";
+	import Button from "./ui/Button.svelte";
+	import AboutModal from "./modals/AboutModal.svelte";
 
 	let { mapContext } = $props();
 
@@ -24,16 +24,14 @@
 	role="group"
 >
 	<button onclick={() => mapContext.resetState()}>
-		<h1
-			class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]"
-		>
-			{#each 'Watertijdreis'.split('') as letter, i}
+		<h1 class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]">
+			{#each "Watertijdreis".split("") as letter, i}
 				<span
 					class="inline-block will-change-[transform,text-shadow,color]"
 					class:wave={mapContext.historic.mapsLoaded}
 					class:wave-loading={!mapContext.historic.mapsLoaded}
 					style:animation=""
-					style:animation-delay={i * 100 + 'ms'}
+					style:animation-delay={i * 100 + "ms"}
 				>
 					{letter}
 				</span>
@@ -41,12 +39,8 @@
 		</h1>
 	</button>
 
-	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}
-		>Over</Button
-	>
-	<Button tabindex="2" onclick={() => (shareModalVisible = !shareModalVisible)} Icon={ShareFat}
-		>Delen</Button
-	>
+	<Button tabindex="1" onclick={() => (aboutPanelVisible = !aboutPanelVisible)} Icon={Info}>Over</Button>
+	<Button tabindex="2" onclick={() => (shareModalVisible = !shareModalVisible)} Icon={ShareFat}>Delen</Button>
 </div>
 
 <style>

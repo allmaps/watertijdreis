@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import { Spring } from 'svelte/motion';
-	import { HandGrabbing } from 'phosphor-svelte';
-	import TimelinePointer from './TimelinePointer.svelte';
-	import MapStack from './HistoricMapThumbnailStack.svelte';
-	import TimelineSettings from './TimelineSettings.svelte';
-	import { onMount } from 'svelte';
+	import { fade } from "svelte/transition";
+	import { Spring } from "svelte/motion";
+	import { HandGrabbing } from "phosphor-svelte";
+	import TimelinePointer from "./TimelinePointer.svelte";
+	import MapStack from "./HistoricMapThumbnailStack.svelte";
+	import TimelineSettings from "./TimelineSettings.svelte";
+	import { onMount } from "svelte";
 
 	let { mapContext, visible } = $props();
 
@@ -30,13 +30,13 @@
 	const MAX_ZOOM = 200;
 	const MIN_YEAR = 1600;
 	const MAX_YEAR = 2300;
-	const timelineTickColor = '#eef';
+	const timelineTickColor = "#eef";
 	const ticksOnTop = true;
 
 	let view = new Spring(
 		{
 			start: mapContext.historic.filter.yearEnd - 10,
-			end: mapContext.historic.filter.yearEnd + 10
+			end: mapContext.historic.filter.yearEnd + 10,
 		},
 		{ stiffness: 0.1, damping: 0.5 }
 	);
@@ -52,7 +52,7 @@
 
 			view.set({
 				start: clampedStart,
-				end: clampedEnd
+				end: clampedEnd,
 			});
 		}
 	});
@@ -221,9 +221,9 @@
 	}
 
 	let ticks = $derived.by(() => {
-		let major = ''; // Elke 25 jaar
-		let medium = ''; // Elke 5 jaar
-		let minor = ''; // Elk jaar
+		let major = ""; // Elke 25 jaar
+		let medium = ""; // Elke 5 jaar
+		let minor = ""; // Elk jaar
 
 		const topY = ticksOnTop ? 0 : height;
 		const bottomBase = ticksOnTop ? 0 : height;
@@ -257,9 +257,7 @@
 			.values()
 			// .toSorted((a,b) => a.bis - b.bis)
 			.filter(
-				(map) =>
-					mapContext.historic.filter.edition === 'All' ||
-					mapContext.historic.filter.edition === map.edition
+				(map) => mapContext.historic.filter.edition === "All" || mapContext.historic.filter.edition === map.edition
 			)
 			.filter((map) => mapContext.historic.filter.bis || !map.bis)
 			.filter((map) => mapContext.historic.filter.type == map.type)
@@ -281,11 +279,11 @@
 			let ed = editionMap.get(key);
 			if (!ed) {
 				ed = {
-					name: `Editie ${map.edition}` + (map.bis ? ' (bis)' : ''),
+					name: `Editie ${map.edition}` + (map.bis ? " (bis)" : ""),
 					edition: map.edition,
 					bis: map.bis,
 					yearStart: map.yearEnd,
-					yearEnd: map.yearEnd
+					yearEnd: map.yearEnd,
 				};
 				editionMap.set(key, ed);
 			} else {
@@ -297,24 +295,20 @@
 	});
 
 	let yearsWithMaps = $derived([...Object.keys(mapsByYear)].map((i) => +i).sort((a, b) => a - b));
-	let minHistoricMapYear = $derived(
-		yearsWithMaps ? Math.min(...yearsWithMaps) : mapContext.historic.filter.yearEnd
-	);
-	let maxHistoricMapYear = $derived(
-		yearsWithMaps ? Math.max(...yearsWithMaps) : mapContext.historic.filter.yearEnd
-	);
+	let minHistoricMapYear = $derived(yearsWithMaps ? Math.min(...yearsWithMaps) : mapContext.historic.filter.yearEnd);
+	let maxHistoricMapYear = $derived(yearsWithMaps ? Math.max(...yearsWithMaps) : mapContext.historic.filter.yearEnd);
 
-	const HINT_KEY = 'timeline_hint_shown';
+	const HINT_KEY = "timeline_hint_shown";
 	let showHint = $state(false);
 
 	function hideHint() {
 		showHint = false;
 
-		localStorage.setItem(HINT_KEY, 'true');
+		localStorage.setItem(HINT_KEY, "true");
 	}
 
 	onMount(() => {
-		if (typeof window !== 'undefined' && !localStorage.getItem(HINT_KEY)) {
+		if (typeof window !== "undefined" && !localStorage.getItem(HINT_KEY)) {
 			showHint = true;
 
 			setTimeout(hideHint, 8000);
@@ -329,9 +323,7 @@
 />
 
 {#if visible}
-	<div
-		class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none"
-	>
+	<div class="fixed right-2 bottom-2 left-2 z-999 h-30 w-auto cursor-pointer touch-none select-none">
 		{#if showHint}
 			<div
 				class="to-wtr-blue absolute inset-0 z-2000 flex flex-col items-center justify-center bg-linear-to-b from-transparent"
@@ -341,8 +333,7 @@
 				transition:fade={{ duration: 500 }}
 			>
 				<div class="hand-animation">
-					<HandGrabbing size={25} color="#fff" class="drop-shadow-wtr-blue drop-shadow-[1px_1px_0]"
-					></HandGrabbing>
+					<HandGrabbing size={25} color="#fff" class="drop-shadow-wtr-blue drop-shadow-[1px_1px_0]"></HandGrabbing>
 				</div>
 				<p class="text-wtr-subtle-blue mt-4 text-[14px] font-[600] text-shadow-[1px_1px_0_#000]">
 					Sleep de tijdlijn om door de tijd te reizen
@@ -350,8 +341,7 @@
 			</div>
 		{/if}
 
-		<TimelinePointer year={Math.ceil((view.current.start + view.current.end) / 2)}
-		></TimelinePointer>
+		<TimelinePointer year={Math.ceil((view.current.start + view.current.end) / 2)}></TimelinePointer>
 
 		<div
 			{onpointerdown}
@@ -373,10 +363,7 @@
 				class="pointer-events-none absolute top-0 right-0 z-1000 h-full w-1/6 bg-gradient-to-l from-[#225] to-transparent"
 			></div>
 
-			<div
-				class="absolute inset-0 z-1 h-[200px] w-full"
-				style="perspective: 1000px; transform-style: preserve-3d;"
-			>
+			<div class="absolute inset-0 z-1 h-[200px] w-full" style="perspective: 1000px; transform-style: preserve-3d;">
 				{#each yearsWithMaps as year}
 					{#if year >= startYearInt && year <= endYearInt}
 						{@const x = getX(year)}
@@ -422,8 +409,7 @@
 
 						const rect = e.currentTarget.getBoundingClientRect();
 						const clickX = e.clientX - rect.left;
-						const clickedYear =
-							view.current.start + (clickX / width) * (view.current.end - view.current.start);
+						const clickedYear = view.current.start + (clickX / width) * (view.current.end - view.current.start);
 						const roundedYear = Math.round(clickedYear);
 						if (roundedYear >= minHistoricMapYear && roundedYear <= maxHistoricMapYear) {
 							mapContext.historic.filter.yearEnd = roundedYear;
@@ -562,8 +548,7 @@
 			</svg>
 		</div>
 
-		<TimelineSettings {mapContext} minYear={minHistoricMapYear} maxYear={maxHistoricMapYear}
-		></TimelineSettings>
+		<TimelineSettings {mapContext} minYear={minHistoricMapYear} maxYear={maxHistoricMapYear}></TimelineSettings>
 	</div>
 {/if}
 

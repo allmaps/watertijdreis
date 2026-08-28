@@ -1,4 +1,4 @@
 export const mousePosition = $state({
-    x: Infinity,
-    y: Infinity
+	x: Infinity,
+	y: Infinity,
 });

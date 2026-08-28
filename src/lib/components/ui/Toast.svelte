@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
+	import { fly } from "svelte/transition";
 
 	interface Props {
 		content?: string;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 	}
 
-	let { content = '', children }: Props = $props();
+	let { content = "", children }: Props = $props();
 
 	const VISIBLE_TIME = 2500;
 	let visible = $state(false);

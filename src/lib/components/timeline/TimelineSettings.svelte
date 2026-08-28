@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
-	import { Switch } from 'bits-ui';
-	import { ArrowElbowDownRight, Gear } from 'phosphor-svelte';
+	import { scale } from "svelte/transition";
+	import { Switch } from "bits-ui";
+	import { ArrowElbowDownRight, Gear } from "phosphor-svelte";
 
 	let { mapContext, minYear, maxYear } = $props();
 
@@ -19,10 +19,8 @@
 	function handleKeyDown(e: KeyboardEvent) {
 		if (!showSettings) return;
 
-		if (e.key === 'Tab') {
-			const focusableElements = settingsPanel?.querySelectorAll(
-				'button, input, [tabindex]:not([tabindex="-1"])'
-			);
+		if (e.key === "Tab") {
+			const focusableElements = settingsPanel?.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
 			if (!focusableElements || focusableElements.length === 0) return;
 
 			const firstElement = focusableElements[0] as HTMLElement;
@@ -39,7 +37,7 @@
 					firstElement.focus();
 				}
 			}
-		} else if (e.key === 'Escape') {
+		} else if (e.key === "Escape") {
 			showSettings = false;
 		}
 	}
@@ -47,16 +45,16 @@
 	let selectedRegulier = $state(!mapContext.historic.filter.type);
 	let selectedEdition = $state(mapContext.historic.filter.edition);
 	let selectedBIS = $state(mapContext.historic.filter.bis);
-	let selectedHWP = $state(mapContext.historic.filter.type === 'HWP');
-	let selectedWVE = $state(mapContext.historic.filter.type === 'WVE');
-	let selectedOption = $state('');
+	let selectedHWP = $state(mapContext.historic.filter.type === "HWP");
+	let selectedWVE = $state(mapContext.historic.filter.type === "WVE");
+	let selectedOption = $state("");
 
 	function clearAll() {
 		selectedRegulier = false;
 		selectedBIS = false;
 		selectedHWP = false;
 		selectedWVE = false;
-		setEdition('All');
+		setEdition("All");
 	}
 
 	function toggleRegulier(v: boolean) {
@@ -90,8 +88,8 @@
 
 	function toggleHWP(v: boolean) {
 		if (selectedHWP !== v) {
-			setEdition('All');
-			mapContext.historic.filter.type = 'HWP';
+			setEdition("All");
+			mapContext.historic.filter.type = "HWP";
 			mapContext.historic.filter.yearEnd = maxYear;
 			mapContext.historic.applyFilter();
 		}
@@ -105,8 +103,8 @@
 	}
 	function toggleWVE(v: boolean) {
 		if (selectedWVE !== v) {
-			setEdition('All');
-			mapContext.historic.filter.type = 'WVE';
+			setEdition("All");
+			mapContext.historic.filter.type = "WVE";
 			mapContext.historic.filter.yearEnd = maxYear;
 			mapContext.historic.applyFilter();
 		}
@@ -119,7 +117,7 @@
 		}
 	}
 
-	function setEdition(v: 'All' | 1 | 2 | 3 | 4 | 5) {
+	function setEdition(v: "All" | 1 | 2 | 3 | 4 | 5) {
 		if (!selectedRegulier) return;
 
 		if (selectedEdition !== v) {
@@ -144,7 +142,7 @@
 			toggleSettings();
 		}}
 		onkeydown={(e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
+			if (e.key === "Enter" || e.key === " ") {
 				e.preventDefault();
 				e.stopPropagation();
 				toggleSettings();
@@ -172,9 +170,7 @@
 			transition:scale={{ duration: 250, y: 10 }}
 		>
 			<ul class="text-wtr-blue flex flex-col gap-2 text-sm font-[500]">
-				<li
-					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-				>
+				<li class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
 					Periode:
 					<input
 						type="number"
@@ -182,10 +178,7 @@
 						max={mapContext.historic.filter.yearEnd}
 						bind:value={yearStart}
 						onchange={() => {
-							yearStart = Math.max(
-								minYear,
-								Math.min(mapContext.historic.filter.yearEnd - 1, yearStart)
-							);
+							yearStart = Math.max(minYear, Math.min(mapContext.historic.filter.yearEnd - 1, yearStart));
 							mapContext.historic.filter.yearStart = yearStart;
 							mapContext.historic.applyFilter();
 						}}
@@ -207,8 +200,7 @@
 							mapContext.historic.applyFilter();
 						}}
 						oninput={() => {
-							if (yearEnd >= minYear && yearEnd <= maxYear)
-								mapContext.historic.filter.yearEnd = yearEnd;
+							if (yearEnd >= minYear && yearEnd <= maxYear) mapContext.historic.filter.yearEnd = yearEnd;
 						}}
 						class="text-wtr-lighter-blue border-wtr-subtle-blue w-20 rounded border px-2 py-1 text-[16px] font-[600]"
 					/>
@@ -243,50 +235,40 @@
 
 				<li
 					class="flex items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-					style:opacity={selectedRegulier ? '100%' : '50%'}
-					style:pointer-events={selectedRegulier ? 'auto' : 'none'}
+					style:opacity={selectedRegulier ? "100%" : "50%"}
+					style:pointer-events={selectedRegulier ? "auto" : "none"}
 				>
 					Edities:
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 'All'
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue);'
-							: ''}
-						onclick={() => setEdition('All')}>Alle</button
+						style={selectedEdition == "All"
+							? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue);"
+							: ""}
+						onclick={() => setEdition("All")}>Alle</button
 					>
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 1
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
-							: ''}
+						style={selectedEdition == 1 ? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)" : ""}
 						onclick={() => setEdition(1)}>1</button
 					>
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 2
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
-							: ''}
+						style={selectedEdition == 2 ? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)" : ""}
 						onclick={() => setEdition(2)}>2</button
 					>
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 3
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
-							: ''}
+						style={selectedEdition == 3 ? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)" : ""}
 						onclick={() => setEdition(3)}>3</button
 					>
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 4
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
-							: ''}
+						style={selectedEdition == 4 ? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)" : ""}
 						onclick={() => setEdition(4)}>4</button
 					>
 					<button
 						class="border-wtr-subtle-blue hover:bg-wtr-subtle-blue cursor-pointer rounded-[4px] border-1 p-2 px-2.5"
-						style={selectedEdition == 5
-							? 'background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)'
-							: ''}
+						style={selectedEdition == 5 ? "background: var(--color-wtr-blue); color: var(--color-wtr-subtle-blue)" : ""}
 						onclick={() => setEdition(5)}>5</button
 					>
 				</li>
@@ -295,9 +277,7 @@
 					class="
 		flex cursor-pointer items-center justify-start gap-2 rounded-md px-2 py-1
 		pl-5 transition
-		{selectedRegulier
-						? 'text-wtr-blue hover:bg-gray-100'
-						: 'cursor-not-allowed text-gray-300 opacity-80'}
+		{selectedRegulier ? 'text-wtr-blue hover:bg-gray-100' : 'cursor-not-allowed text-gray-300 opacity-80'}
 	"
 				>
 					<ArrowElbowDownRight></ArrowElbowDownRight>
@@ -322,9 +302,7 @@
 					BIS-edities tonen
 				</li>
 
-				<li
-					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-				>
+				<li class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
 					Hydrologische Waarnemingspunten
 
 					<Switch.Root
@@ -351,9 +329,7 @@
 					</Switch.Root>
 				</li>
 
-				<li
-					class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50"
-				>
+				<li class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 hover:bg-gray-50">
 					Watervoorzieningseenheden
 
 					<Switch.Root

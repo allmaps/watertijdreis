@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import type { Component } from 'svelte';
-	import { mousePosition } from '$lib/state/mousePosition.svelte';
+	import { browser } from "$app/environment";
+	import type { Component } from "svelte";
+	import { mousePosition } from "$lib/state/mousePosition.svelte";
 
 	interface Props {
 		Icon: Component<any>;
 		kbd?: string;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 		onclick?: (e: MouseEvent) => void;
 		collapsed?: boolean;
 		collapseAfterRender?: boolean;
@@ -24,16 +24,16 @@
 		collapseAfterRender = true,
 		collapseAfterRenderDelay = 2000,
 		openOnHover = true,
-		tabindex = undefined
+		tabindex = undefined,
 	}: Props = $props();
 
-	const isTouch = browser && window.matchMedia('(pointer: coarse)').matches;
+	const isTouch = browser && window.matchMedia("(pointer: coarse)").matches;
 	let computedKbd = $state(kbd);
 
 	$effect(() => {
 		if (kbd && browser) {
 			const isApplePlatform = /Mac|iPhone|iPad/.test(navigator.userAgent);
-			computedKbd = isApplePlatform ? kbd : kbd.replace('⌘', 'Ctrl ');
+			computedKbd = isApplePlatform ? kbd : kbd.replace("⌘", "Ctrl ");
 		}
 	});
 
@@ -74,13 +74,13 @@
 		const ro = new ResizeObserver(updateRect);
 		ro.observe(buttonEl);
 
-		window.addEventListener('scroll', updateRect, { capture: true, passive: true });
-		window.addEventListener('resize', updateRect, { passive: true });
+		window.addEventListener("scroll", updateRect, { capture: true, passive: true });
+		window.addEventListener("resize", updateRect, { passive: true });
 
 		return () => {
 			ro.disconnect();
-			window.removeEventListener('scroll', updateRect, { capture: true });
-			window.removeEventListener('resize', updateRect);
+			window.removeEventListener("scroll", updateRect, { capture: true });
+			window.removeEventListener("resize", updateRect);
 		};
 	});
 
@@ -97,11 +97,11 @@
 		const threshold = 300;
 
 		if (dist < threshold) {
-			buttonEl.style.setProperty('--x', `${x - buttonRect.left}px`);
-			buttonEl.style.setProperty('--y', `${y - buttonRect.top}px`);
-			buttonEl.style.setProperty('--grad-opacity', '1');
+			buttonEl.style.setProperty("--x", `${x - buttonRect.left}px`);
+			buttonEl.style.setProperty("--y", `${y - buttonRect.top}px`);
+			buttonEl.style.setProperty("--grad-opacity", "1");
 		} else {
-			buttonEl.style.setProperty('--grad-opacity', '0');
+			buttonEl.style.setProperty("--grad-opacity", "0");
 		}
 	});
 </script>
@@ -132,12 +132,10 @@
 	<div
 		class="pointer-events-none absolute inset-0 rounded-[9px] transition-opacity duration-500"
 		style:opacity="var(--grad-opacity)"
-		style:background={'radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%)'}
+		style:background={"radial-gradient(circle at var(--x, 50%) var(--y, 50%), #ff44aa88 0%, #eeeeff88 80%)"}
 	></div>
 
-	<div
-		class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-white px-2.25 py-2 shadow-lg hover:bg-white/90"
-	>
+	<div class="relative z-10 m-0.5 flex items-center rounded-[8px] bg-white px-2.25 py-2 shadow-lg hover:bg-white/90">
 		<Icon
 			color="var(--color-wtr-lighter-blue)"
 			weight="regular"
@@ -154,7 +152,7 @@
 				style:width="max-content"
 				style:transform={`translateX(${collapsed ? -6 : 0}px) scaleX(${collapsed ? 85 : 100}%)`}
 				style:opacity={collapsed ? 0 : 1}
-				style:padding={collapsed ? '0px' : '0 4px'}
+				style:padding={collapsed ? "0px" : "0 4px"}
 			>
 				<span class="ml-1">
 					{@render children?.()}

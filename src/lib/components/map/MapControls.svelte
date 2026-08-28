@@ -1,17 +1,11 @@
 <script lang="ts">
-	import {
-		MagnifyingGlass,
-		MagnifyingGlassMinus,
-		MagnifyingGlassPlus,
-		NavigationArrow,
-		Stack
-	} from 'phosphor-svelte';
-	import { fly } from 'svelte/transition';
-	import Geocoder from '../geocoder/Geocoder.svelte';
-	import { GeocodeEarth } from '$lib/components/geocoder/providers/geocode-earth';
-	import { env } from '$env/dynamic/public';
-	import Button from '../ui/Button.svelte';
-	import LayersModal from '../modals/LayersModal.svelte';
+	import { MagnifyingGlass, MagnifyingGlassMinus, MagnifyingGlassPlus, NavigationArrow, Stack } from "phosphor-svelte";
+	import { fly } from "svelte/transition";
+	import Geocoder from "../geocoder/Geocoder.svelte";
+	import { GeocodeEarth } from "$lib/components/geocoder/providers/geocode-earth";
+	import { env } from "$env/dynamic/public";
+	import Button from "../ui/Button.svelte";
+	import LayersModal from "../modals/LayersModal.svelte";
 
 	let { mapContext, layerOptions = $bindable() } = $props();
 
@@ -29,7 +23,7 @@
 	let buttonCollapse: boolean = $state(false);
 	setTimeout(() => (buttonCollapse = true), 2000);
 
-	const scaleEl = document.querySelector('.maplibregl-ctrl-scale');
+	const scaleEl = document.querySelector(".maplibregl-ctrl-scale");
 	let scaleWidth = $state(scaleEl.clientWidth);
 	let scaleText = $state(scaleEl.innerText);
 	setInterval(() => {
@@ -40,22 +34,18 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key.toLowerCase() === 'k' && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
+		if (e.key.toLowerCase() === "k" && (isApplePlatform ? e.metaKey : e.ctrlKey)) {
 			e.preventDefault();
 			searchBarVisible = true;
 		}
 
-		if (e.key.toLowerCase() === 'l') {
+		if (e.key.toLowerCase() === "l") {
 			layersPanelVisible2 = !layersPanelVisible2;
 		}
 	}}
 />
 
-<Geocoder
-	{mapContext}
-	bind:visible={searchBarVisible}
-	providers={[new GeocodeEarth(geocodeEarthApiKey)]}
-></Geocoder>
+<Geocoder {mapContext} bind:visible={searchBarVisible} providers={[new GeocodeEarth(geocodeEarthApiKey)]}></Geocoder>
 
 <LayersModal bind:visible={layersPanelVisible2} {mapContext}></LayersModal>
 
@@ -73,12 +63,7 @@
 >
 	{#if !mapContext.historic.selectedMap}
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button
-				tabindex="5"
-				Icon={MagnifyingGlass}
-				kbd="⌘K"
-				onclick={() => (searchBarVisible = true)}
-			>
+			<Button tabindex="5" Icon={MagnifyingGlass} kbd="⌘K" onclick={() => (searchBarVisible = true)}>
 				Zoek plaats ...
 			</Button>
 		</div>
@@ -90,11 +75,8 @@
 		</div>
 
 		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button
-				tabindex="7"
-				Icon={Stack}
-				kbd="L"
-				onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}>Lagen</Button
+			<Button tabindex="7" Icon={Stack} kbd="L" onclick={() => (layersPanelVisible2 = !layersPanelVisible2)}
+				>Lagen</Button
 			>
 		</div>
 	{/if}
@@ -105,18 +87,14 @@
 			justify-center overflow-hidden rounded-lg
 		`}
 	>
-		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+"
-			>Inzoomen&nbsp;</Button
-		>
+		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+">Inzoomen&nbsp;</Button>
 		<div class="relative -top-[2px]">
-			<Button Icon={MagnifyingGlassMinus} onclick={() => mapContext.zoomOut()} kbd="-"
-				>Uitzoomen</Button
-			>
+			<Button Icon={MagnifyingGlassMinus} onclick={() => mapContext.zoomOut()} kbd="-">Uitzoomen</Button>
 		</div>
 	</div>
 
 	<div
-		style:width={scaleWidth + 'px'}
+		style:width={scaleWidth + "px"}
 		class="border-wtr-blue/66 mt-4 h-2 rounded-b-[4px] border-2 border-t-0 text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
 	>
 		<span class="text-wtr-blue relative -top-4 p-2 text-[12px] font-[600]">{scaleText}</span>

@@ -3,13 +3,7 @@
 </script>
 
 <div class="pointer-events-none absolute -top-1.5 left-1/2 z-[1000] -translate-x-1/2">
-	<svg
-		width="80"
-		height="120"
-		viewBox="0 0 80 120"
-		fill="var(--color-wtr-subtle-blue)"
-		class="drop-shadow-md"
-	>
+	<svg width="80" height="120" viewBox="0 0 80 120" fill="var(--color-wtr-subtle-blue)" class="drop-shadow-md">
 		<line x1="40" y1="0" x2="40" y2="120" stroke="var(--color-wtr-subtle-blue)" stroke-width="1" />
 
 		<rect x="18" y="0" width="48" height="20" rx="3" />

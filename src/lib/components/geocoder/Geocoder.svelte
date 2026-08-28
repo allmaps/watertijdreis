@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { MagnifyingGlass } from 'phosphor-svelte';
-	import { debounce } from 'lodash-es';
-	import type { GeojsonPoint } from '@allmaps/types';
-	import { slide, fly } from 'svelte/transition';
+	import { MagnifyingGlass } from "phosphor-svelte";
+	import { debounce } from "lodash-es";
+	import type { GeojsonPoint } from "@allmaps/types";
+	import { slide, fly } from "svelte/transition";
 
 	type GeocoderGeoJsonFeature = {
 		geometry: GeojsonPoint;
@@ -17,7 +17,7 @@
 
 	let inputEl: HTMLInputElement | undefined = $state();
 	let listEl: HTMLUListElement | undefined = $state();
-	let inputValue = $state('');
+	let inputValue = $state("");
 	let featuresByProviderIndex: GeocoderGeoJsonFeature[][] = $state([]);
 	let selectedFeatureIndex: number = $state(0);
 	let firstResultsFetched: boolean = $state(false);
@@ -26,9 +26,7 @@
 	let firstFocusableElement = $state<HTMLElement>();
 	let lastFocusableElement = $state<HTMLElement>();
 
-	let features: GeocoderGeoJsonFeature[] = $derived(
-		dedupeFeatures(featuresByProviderIndex.flat(1))
-	);
+	let features: GeocoderGeoJsonFeature[] = $derived(dedupeFeatures(featuresByProviderIndex.flat(1)));
 
 	function dedupeFeatures(features: GeocoderGeoJsonFeature[]) {
 		const seen = new Map<string, GeocoderGeoJsonFeature>();
@@ -37,11 +35,11 @@
 			const key = [
 				f.properties.label
 					.toLowerCase()
-					.normalize('NFD')
-					.replace(/\p{Diacritic}/gu, ''),
+					.normalize("NFD")
+					.replace(/\p{Diacritic}/gu, ""),
 				Math.round(f.geometry.coordinates[0] * 1e5),
-				Math.round(f.geometry.coordinates[1] * 1e5)
-			].join('|');
+				Math.round(f.geometry.coordinates[1] * 1e5),
+			].join("|");
 
 			if (!seen.has(key)) {
 				seen.set(key, f);
@@ -54,7 +52,7 @@
 	const DEBOUNCE_WAIT_MS = 200;
 	const DEBOUNCE_OPTIONS = {
 		leading: false,
-		trailing: true
+		trailing: true,
 	};
 
 	const getFeatures = debounce(
@@ -72,8 +70,8 @@
 						properties: {
 							...feature.properties,
 							provider: provider.name,
-							label: cleanLabel(feature.properties.label)
-						}
+							label: cleanLabel(feature.properties.label),
+						},
 					}));
 				} catch (e) {
 					console.error(e);
@@ -102,14 +100,14 @@
 				updateFocusableElements();
 			}, 50);
 		} else {
-			inputValue = '';
+			inputValue = "";
 			firstResultsFetched = false;
 			featuresByProviderIndex = [];
 		}
 	});
 
 	function cleanLabel(label: string): string {
-		return label.replace(/,\s*(nederland|the netherlands)$/i, '');
+		return label.replace(/,\s*(nederland|the netherlands)$/i, "");
 	}
 
 	function confirmSelection(feature: GeocoderGeoJsonFeature) {
@@ -121,7 +119,7 @@
 		if (!listEl) return;
 		const selectedEl = listEl.children[index] as HTMLElement;
 		if (selectedEl) {
-			selectedEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			selectedEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
 		}
 	}
 
@@ -129,21 +127,21 @@
 		e.stopPropagation();
 		e.stopImmediatePropagation();
 
-		if (e.key === 'Escape') {
+		if (e.key === "Escape") {
 			visible = false;
 			return;
 		}
 
 		if (features.length === 0) return;
 
-		if (e.key === 'Enter') {
+		if (e.key === "Enter") {
 			e.preventDefault();
 			confirmSelection(features[selectedFeatureIndex]);
-		} else if (e.key === 'ArrowDown') {
+		} else if (e.key === "ArrowDown") {
 			e.preventDefault();
 			selectedFeatureIndex = Math.min(selectedFeatureIndex + 1, features.length - 1);
 			scrollSelectedIntoView(selectedFeatureIndex);
-		} else if (e.key === 'ArrowUp') {
+		} else if (e.key === "ArrowUp") {
 			e.preventDefault();
 			selectedFeatureIndex = Math.max(selectedFeatureIndex - 1, 0);
 			scrollSelectedIntoView(selectedFeatureIndex);
@@ -157,8 +155,7 @@
 	function updateFocusableElements() {
 		if (!dialogElement) return;
 
-		const focusableSelectors =
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+		const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 		const focusableElements = dialogElement.querySelectorAll(focusableSelectors);
 
 		if (focusableElements.length > 0) {
@@ -168,7 +165,7 @@
 	}
 
 	function trapFocus(e: KeyboardEvent) {
-		if (!visible || e.key !== 'Tab') return;
+		if (!visible || e.key !== "Tab") return;
 
 		if (e.shiftKey) {
 			// Shift + Tab
@@ -234,7 +231,7 @@
 				/>
 			</div>
 
-			{#if inputValue !== ''}
+			{#if inputValue !== ""}
 				<ul
 					bind:this={listEl}
 					transition:slide={{ duration: 200 }}
@@ -286,7 +283,7 @@
 {/if}
 
 <style>
-	input[type='search']::-webkit-search-cancel-button {
+	input[type="search"]::-webkit-search-cancel-button {
 		-webkit-appearance: none;
 		appearance: none;
 	}

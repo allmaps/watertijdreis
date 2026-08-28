@@ -13,9 +13,9 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run",
-		"predeploy": "npm run build",
-		"deploy": "npx gh-pages -d build --branch=gh-pages"
+		"test": "pnpm run test:unit -- --run",
+		"predeploy": "pnpm run build",
+		"deploy": "pnpm dlx gh-pages -d build --branch=gh-pages"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

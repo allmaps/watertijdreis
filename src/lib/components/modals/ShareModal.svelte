@@ -1,19 +1,12 @@
 <script lang="ts">
-	import {
-		Check,
-		ClipboardText,
-		EnvelopeSimple,
-		LinkedinLogo,
-		RedditLogo,
-		WhatsappLogo
-	} from 'phosphor-svelte';
-	import Modal from '../ui/Modal.svelte';
+	import { Check, ClipboardText, EnvelopeSimple, LinkedinLogo, RedditLogo, WhatsappLogo } from "phosphor-svelte";
+	import Modal from "../ui/Modal.svelte";
 	let { visible = $bindable() } = $props();
 
 	async function setClipboard(text: string) {
-		const type = 'text/plain';
+		const type = "text/plain";
 		const clipboardItemData = {
-			[type]: text
+			[type]: text,
 		};
 		const clipboardItem = new ClipboardItem(clipboardItemData);
 		await navigator.clipboard.write([clipboardItem]);
@@ -38,7 +31,7 @@
 		<input
 			type="text"
 			readonly
-			value={typeof window !== 'undefined' ? window.location.href : ''}
+			value={typeof window !== "undefined" ? window.location.href : ""}
 			class="text-wtr-blue bg-wtr-pink/7 border-wtr-subtle-blue h-12 w-2/3 rounded-[6px] border-2 px-2 py-1 text-[16px] font-[500]"
 		/>
 		<button
@@ -49,8 +42,7 @@
 				<Check size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"></Check>
 				Gekopieerd
 			{:else}
-				<ClipboardText size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"
-				></ClipboardText>
+				<ClipboardText size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"></ClipboardText>
 				Kopieer
 			{/if}
 		</button>
@@ -59,10 +51,9 @@
 	<div class="mt-4 text-center">
 		<a
 			class="mx-4"
-			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${typeof window !== 'undefined' ? window.location.href : ''}`}
+			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${typeof window !== "undefined" ? window.location.href : ""}`}
 		>
-			<EnvelopeSimple size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
-			></EnvelopeSimple>
+			<EnvelopeSimple size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
 		</a>
 		<a
 			class="mx-4"
@@ -70,8 +61,7 @@
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<LinkedinLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
-			></LinkedinLogo>
+			<LinkedinLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></LinkedinLogo>
 		</a>
 
 		<!-- <a class="mx-4" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
@@ -81,32 +71,26 @@
 
 		<a
 			class="mx-4"
-			href={`https://reddit.com/submit?url=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}&title=${encodeURIComponent('Watertijdreis - Reis door de tijd!')}`}
+			href={`https://reddit.com/submit?url=${typeof window !== "undefined" ? encodeURIComponent(window.location.href) : ""}&title=${encodeURIComponent("Watertijdreis - Reis door de tijd!")}`}
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<RedditLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
-			></RedditLogo>
+			<RedditLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></RedditLogo>
 		</a>
 
 		<a
 			class="mx-4"
 			href={`https://wa.me/?text=${
-				typeof window !== 'undefined'
+				typeof window !== "undefined"
 					? encodeURIComponent(
-							'Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n' +
-								window.location.href
+							"Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n" + window.location.href
 						)
-					: ''
+					: ""
 			}`}
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			<WhatsappLogo
-				size="30"
-				color="var(--color-wtr-pink)"
-				class="relative -top-1 mt-6 mr-1 inline"
-			/>
+			<WhatsappLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 mr-1 inline" />
 		</a>
 	</div>
 </Modal>

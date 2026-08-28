@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from 'phosphor-svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
-	import Slider from '$lib/components/ui/Slider.svelte';
+	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from "phosphor-svelte";
+	import Modal from "$lib/components/ui/Modal.svelte";
+	import Select from "$lib/components/ui/Select.svelte";
+	import Slider from "$lib/components/ui/Slider.svelte";
 
 	let { visible = $bindable(), mapContext } = $props();
 
@@ -36,28 +36,28 @@
 		sliderPos = {
 			top: rect.top,
 			left: rect.left,
-			width: rect.width
+			width: rect.width,
 		};
 
-		document.addEventListener('pointerup', hideBackground);
+		document.addEventListener("pointerup", hideBackground);
 	}
 
 	function hideBackground() {
 		backgroundVisible = false;
-		document.removeEventListener('pointerup', hideBackground);
+		document.removeEventListener("pointerup", hideBackground);
 	}
 
 	let baseMapOptions = [
-		{ value: 'none', label: 'Geen achtergrond', icon: EyeSlash },
-		{ value: 'protomaps', label: 'OpenStreetMap', icon: MapTrifold },
-		{ value: 'satelliet', label: 'Satellietbeeld', icon: Camera },
-		{ value: 'ahn', label: 'Hoogtekaart (AHN)', icon: Mountains }
+		{ value: "none", label: "Geen achtergrond", icon: EyeSlash },
+		{ value: "protomaps", label: "OpenStreetMap", icon: MapTrifold },
+		{ value: "satelliet", label: "Satellietbeeld", icon: Camera },
+		{ value: "ahn", label: "Hoogtekaart (AHN)", icon: Mountains },
 	];
 
 	let overlayLayerOptions = [
-		{ value: 'none', label: 'Geen overlegkaart', icon: EyeSlash },
-		{ value: 'waterschapsgrenzen', label: 'Waterschapsgrenzen (PDOK)', icon: Waves },
-		{ value: 'gemeentegrenzen', label: 'Gemeentegrenzen (PDOK)', icon: MapPin }
+		{ value: "none", label: "Geen overlegkaart", icon: EyeSlash },
+		{ value: "waterschapsgrenzen", label: "Waterschapsgrenzen (PDOK)", icon: Waves },
+		{ value: "gemeentegrenzen", label: "Gemeentegrenzen (PDOK)", icon: MapPin },
 		// { value: 'dijken', label: 'Dijken', icon: Aperture }
 	];
 </script>
@@ -71,7 +71,7 @@
 		onchange={(opt) => (mapContext.layerOptions.baseMap = opt.value)}
 	/>
 
-	{#if mapContext.layerOptions.baseMap === 'protomaps'}
+	{#if mapContext.layerOptions.baseMap === "protomaps"}
 		<div class="text-wtr-blue mt-4 max-w-60 text-[15px] font-[500]">
 			<input
 				type="checkbox"

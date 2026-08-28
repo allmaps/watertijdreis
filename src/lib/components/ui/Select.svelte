@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
-	import type { Component } from 'svelte';
+	import { fly } from "svelte/transition";
+	import type { Component } from "svelte";
 
 	interface SelectOption {
 		value: any;
@@ -25,9 +25,7 @@
 		value = options[0].value;
 	}
 
-	let selectedOption = $derived(
-		options.find((i) => i.value == value) || { label: '', value: null, icon: undefined }
-	);
+	let selectedOption = $derived(options.find((i) => i.value == value) || { label: "", value: null, icon: undefined });
 
 	function toggle() {
 		if (!open && buttonEl) {
@@ -35,7 +33,7 @@
 			dropdownPos = {
 				top: rect.bottom + window.scrollY + 4,
 				left: rect.left + window.scrollX,
-				width: rect.width
+				width: rect.width,
 			};
 		}
 		open = !open;
@@ -55,8 +53,8 @@
 
 	$effect(() => {
 		if (open) {
-			document.addEventListener('click', onDocClick);
-			return () => document.removeEventListener('click', onDocClick);
+			document.addEventListener("click", onDocClick);
+			return () => document.removeEventListener("click", onDocClick);
 		}
 	});
 </script>
@@ -95,9 +93,7 @@
 			</div>
 
 			<svg
-				class="ml-auto h-4 w-4 transition-transform duration-300 ease-out {open
-					? 'rotate-180'
-					: ''}"
+				class="ml-auto h-4 w-4 transition-transform duration-300 ease-out {open ? 'rotate-180' : ''}"
 				fill="none"
 				stroke="var(--color-wtr-blue)"
 				stroke-width="2"
