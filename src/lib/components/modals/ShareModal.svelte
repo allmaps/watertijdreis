@@ -1,96 +1,118 @@
 <script lang="ts">
+	import { page } from "$app/state";
 	import { Check, ClipboardText, EnvelopeSimple, LinkedinLogo, RedditLogo, WhatsappLogo } from "phosphor-svelte";
-	import Modal from "../ui/Modal.svelte";
+
+	import Modal from "$lib/components/ui/Modal.svelte";
+
 	let { visible = $bindable() } = $props();
 
-	async function setClipboard(text: string) {
-		const type = "text/plain";
-		const clipboardItemData = {
-			[type]: text,
-		};
-		const clipboardItem = new ClipboardItem(clipboardItemData);
-		await navigator.clipboard.write([clipboardItem]);
-		copySuccess = true;
-	}
+	let copySuccess = $state(false);
 
-	let copySuccess: boolean = $state(false);
+	let currentUrl = $derived(page.url.href);
+
+	async function copyToClipboard() {
+		try {
+			if (navigator.clipboard && window.isSecureContext) {
+				await navigator.clipboard.writeText(currentUrl);
+			} else {
+				const textArea = document.createElement("textarea");
+				textArea.value = currentUrl;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textArea);
+			}
+			copySuccess = true;
+		} catch (err) {
+			console.error("Kopiëren mislukt:", err);
+		}
+	}
 
 	$effect(() => {
 		if (copySuccess) {
 			const timeout = setTimeout(() => {
 				copySuccess = false;
-			}, 1000);
+			}, 1500);
 			return () => clearTimeout(timeout);
 		}
 	});
+
+	let mailtoUrl = $derived(
+		`mailto:?subject=${encodeURIComponent("Bekijk Watertijdreis en reis terug in de tijd")}&body=${encodeURIComponent(
+			`Ik wil je uitnodigen om de Watertijdreis te bekijken. Klik op deze link om te beginnen:\n\n${currentUrl}`
+		)}`
+	);
+
+	let linkedinUrl = $derived(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`);
+
+	let redditUrl = $derived(
+		`https://reddit.com/submit?url=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(
+			"Watertijdreis - Reis door de tijd!"
+		)}`
+	);
+
+	let whatsappUrl = $derived(
+		`https://wa.me/?text=${encodeURIComponent(
+			`Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n${currentUrl}`
+		)}`
+	);
 </script>
 
 <Modal title="Deel jouw Watertijdreis" bind:visible>
 	<p class="w-full text-center">Deel het kaartgedeelte dat jij nu bekijkt.</p>
-	<div class="mt-4 flex items-center">
+
+	<div class="mt-4 flex items-center justify-between gap-3">
 		<input
 			type="text"
 			readonly
-			value={typeof window !== "undefined" ? window.location.href : ""}
-			class="text-wtr-blue bg-wtr-pink/7 border-wtr-subtle-blue h-12 w-2/3 rounded-[6px] border-2 px-2 py-1 text-[16px] font-[500]"
+			value={currentUrl}
+			class="border-wtr-subtle-blue text-wtr-blue bg-wtr-pink/10 h-12 flex-1 rounded-md border-2 px-3 py-1 text-base font-medium outline-none"
 		/>
 		<button
-			onclick={() => setClipboard(window.location.href)}
-			class="bg-wtr-blue ml-4 h-12 w-42 cursor-pointer rounded-[6px] px-4 py-1 font-[600] text-white transition-colors hover:bg-[#558]"
+			type="button"
+			onclick={copyToClipboard}
+			class="bg-wtr-blue hover:bg-wtr-blue/90 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-md px-4 font-semibold text-white transition-colors"
 		>
 			{#if copySuccess}
-				<Check size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"></Check>
-				Gekopieerd
+				<Check size={20} color="#fff" />
+				<span>Gekopieerd</span>
 			{:else}
-				<ClipboardText size="22" color="#fff" class="relative -top-2 mt-4 mr-2 inline"></ClipboardText>
-				Kopieer
+				<ClipboardText size={20} color="#fff" />
+				<span>Kopieer</span>
 			{/if}
 		</button>
 	</div>
 
-	<div class="mt-4 text-center">
-		<a
-			class="mx-4"
-			href={`mailto:?subject=Bekijk%20Watertijdreis%20en%20reis%20terug%20in%20de%20tijd&body=Ik%20wil%20je%20uitnodigen%20om%20de%20Watertijdreis%20te%20bekijken.%20Klik%20op%20deze%20link%20om%20te%20beginnen:%0A%0A${typeof window !== "undefined" ? window.location.href : ""}`}
-		>
-			<EnvelopeSimple size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></EnvelopeSimple>
+	<div class="mt-8 flex items-center justify-center gap-8">
+		<a href={mailtoUrl} aria-label="Deel via E-mail" class="transition-transform hover:scale-110">
+			<EnvelopeSimple size={30} color="var(--color-wtr-pink)" />
 		</a>
 		<a
-			class="mx-4"
-			href="https://www.linkedin.com/sharing/share-offsite/?url=watertijdreis.nl"
+			href={linkedinUrl}
 			target="_blank"
 			rel="noopener noreferrer"
+			aria-label="Deel op LinkedIn"
+			class="transition-transform hover:scale-110"
 		>
-			<LinkedinLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></LinkedinLogo>
+			<LinkedinLogo size={30} color="var(--color-wtr-pink)" />
 		</a>
-
-		<!-- <a class="mx-4" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-			<InstagramLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"
-			></InstagramLogo>
-		</a> -->
-
 		<a
-			class="mx-4"
-			href={`https://reddit.com/submit?url=${typeof window !== "undefined" ? encodeURIComponent(window.location.href) : ""}&title=${encodeURIComponent("Watertijdreis - Reis door de tijd!")}`}
+			href={redditUrl}
 			target="_blank"
 			rel="noopener noreferrer"
+			aria-label="Deel op Reddit"
+			class="transition-transform hover:scale-110"
 		>
-			<RedditLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 inline"></RedditLogo>
+			<RedditLogo size={30} color="var(--color-wtr-pink)" />
 		</a>
-
 		<a
-			class="mx-4"
-			href={`https://wa.me/?text=${
-				typeof window !== "undefined"
-					? encodeURIComponent(
-							"Watertijdreis - Reis door de tijd!\nKlik op de link om door de tijd te reizen!\n" + window.location.href
-						)
-					: ""
-			}`}
+			href={whatsappUrl}
 			target="_blank"
 			rel="noopener noreferrer"
+			aria-label="Deel via WhatsApp"
+			class="transition-transform hover:scale-110"
 		>
-			<WhatsappLogo size="30" color="var(--color-wtr-pink)" class="relative -top-1 mt-6 mr-1 inline" />
+			<WhatsappLogo size={30} color="var(--color-wtr-pink)" />
 		</a>
 	</div>
 </Modal>
