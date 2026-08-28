@@ -1,32 +1,30 @@
 <script lang="ts">
+	import { throttle } from "lodash-es";
 	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from "phosphor-svelte";
+
 	import Modal from "$lib/components/ui/Modal.svelte";
 	import Select from "$lib/components/ui/Select.svelte";
 	import Slider from "$lib/components/ui/Slider.svelte";
 
 	let { visible = $bindable(), mapContext } = $props();
 
-	let opacityUpdateInterval;
-	let opacity = $state(mapContext.layerOptions.historicMapsOpacity);
+	let targetOpacity = $state(mapContext.layerOptions.historicMapsOpacity);
 	$effect(() => {
-		clearInterval(opacityUpdateInterval);
-		if (visible) {
-			opacity = mapContext.layerOptions.historicMapsOpacity;
-			opacityUpdateInterval = setInterval(() => {
-				mapContext.layerOptions.historicMapsOpacity = opacity;
-			}, 200);
-		}
+		targetOpacity = mapContext.layerOptions.historicMapsOpacity;
 	});
 
-	let sliderEl;
+	const updateMapOpacity = throttle((val: number) => {
+		mapContext.layerOptions.historicMapsOpacity = val;
+	}, 50);
+
+	function handleSliderChange(val: number) {
+		targetOpacity = val;
+		updateMapOpacity(val);
+	}
+
+	let sliderEl: HTMLElement | undefined = $state();
 	let sliderPos = $state({ top: 0, left: 0, width: 0 });
 	let backgroundVisible = $state(false);
-
-	$effect(() => {
-		if (visible) {
-			setTimeout(() => {}, 250);
-		}
-	});
 
 	function showBackground() {
 		if (!sliderEl) return;
@@ -38,13 +36,10 @@
 			left: rect.left,
 			width: rect.width,
 		};
-
-		document.addEventListener("pointerup", hideBackground);
 	}
 
 	function hideBackground() {
 		backgroundVisible = false;
-		document.removeEventListener("pointerup", hideBackground);
 	}
 
 	let baseMapOptions = [
@@ -58,9 +53,10 @@
 		{ value: "none", label: "Geen overlegkaart", icon: EyeSlash },
 		{ value: "waterschapsgrenzen", label: "Waterschapsgrenzen (PDOK)", icon: Waves },
 		{ value: "gemeentegrenzen", label: "Gemeentegrenzen (PDOK)", icon: MapPin },
-		// { value: 'dijken', label: 'Dijken', icon: Aperture }
 	];
 </script>
+
+<svelte:window onpointerup={hideBackground} />
 
 <Modal bind:visible title="Lagen" opacity={backgroundVisible ? 0 : 100}>
 	<p class="text-[12px] opacity-50">Achtergrondkaart</p>
@@ -99,12 +95,7 @@
 
 	<div onpointerdown={showBackground} bind:this={sliderEl}>
 		<p class="mt-4 text-[12px] opacity-50">Zichtbaarheid waterstaatskaarten</p>
-		<Slider
-			value={opacity}
-			onchange={(val) => {
-				opacity = val;
-			}}
-		></Slider>
+		<Slider value={targetOpacity} onchange={handleSliderChange} />
 	</div>
 
 	<p class="mt-4 text-[12px] opacity-50">Overlegkaart</p>
@@ -127,6 +118,6 @@
 		"
 	>
 		<p class="mt-4 text-[12px] text-[#558]">Zichtbaarheid waterstaatskaarten</p>
-		<Slider value={opacity}></Slider>
+		<Slider value={targetOpacity} onchange={handleSliderChange} />
 	</div>
 {/if}
