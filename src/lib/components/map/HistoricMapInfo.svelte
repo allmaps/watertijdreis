@@ -1,120 +1,101 @@
 <script lang="ts">
 	import * as turf from "@turf/turf";
+	import { ArrowSquareOut, CaretDown, CaretUp, Check, Copy, Info } from "phosphor-svelte";
+	import { fade, fly, slide } from "svelte/transition";
 
-	import { ArrowSquareOut, Copy, Check, CaretDown, CaretUp, Info } from "phosphor-svelte";
-
-	import { fly, fade, slide } from "svelte/transition";
-
-	import type { HistoricMap } from "../../types/historicmap";
+	import { registerBacksideMap } from "$lib/utils/allmaps";
 	import MapThumbnail from "./HistoricMapThumbnail.svelte";
 
 	const MANIFEST_URL = "https://tu-delft-heritage.github.io/watertijdreis-data/collection.json";
 
-	let manifestCollection: any | null = $state(null);
+	let { mapContext } = $props();
+
+	// Global IIIF Collection Manifest
+	let manifestCollection = $state<any>(null);
+	let editionManifest = $state<any>(null);
 
 	$effect(() => {
 		fetch(MANIFEST_URL)
 			.then((res) => res.json())
-
-			.then((data) => (manifestCollection = data));
+			.then((data) => (manifestCollection = data))
+			.catch(console.error);
 	});
 
-	async function getEditionManifest(edition: number, bis: boolean) {
-		if (!manifestCollection) return null;
-
-		const label = `Editie ${edition}${bis ? " BIS" : ""}`;
-
-		const manifestUrl = manifestCollection.items.find((i: any) => i?.label?.nl?.[0] === label)?.id;
-
-		const response = await fetch(manifestUrl);
-
-		const result = await response.json();
-
-		return result;
-	}
-
-	let { mapContext } = $props();
-
 	let historicMap = $derived.by(() => {
+		const visibleMaps = mapContext.historic.visibleMapsInViewport;
+		const singleInViewport = visibleMaps && visibleMaps.size === 1 ? visibleMaps.values().next().value : null;
+
 		return (
 			mapContext.historic.selectedMap ||
 			mapContext.historic.clickedHistoricMap ||
-			(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap) ||
-			(mapContext.historic.visibleMapsInViewport && mapContext.historic.visibleMapsInViewport.size == 1
-				? mapContext.historic.visibleMapsInViewport.values().next().value
-				: null)
+			(mapContext.sheetIndexVisible ? mapContext.historic.hoveredHistoricMap : null) ||
+			singleInViewport
 		);
 	});
 
-	let preview = $derived(!mapContext.historic.selectedMap);
+	let prevEdition = $state<number | null>(null);
+	let prevBis = $state<boolean | null>(null);
 
-	let prevEdition: number | null = null;
+	$effect(() => {
+		if (!historicMap || !manifestCollection) return;
 
-	let prevBis: boolean | null = null;
+		if (historicMap.edition !== prevEdition || historicMap.bis !== prevBis) {
+			prevEdition = historicMap.edition;
+			prevBis = historicMap.bis;
 
-	let editionManifest = $state(null);
+			const label = `Editie ${historicMap.edition}${historicMap.bis ? " BIS" : ""}`;
+			const item = manifestCollection.items?.find((i: any) => i?.label?.nl?.[0] === label);
 
-	let editionManifestLoading = $state(null);
+			if (item?.id) {
+				fetch(item.id)
+					.then((res) => res.json())
+					.then((data) => (editionManifest = data))
+					.catch(() => (editionManifest = null));
+			}
+		}
+	});
 
+	// Canvas manifest and variants of the historic map
 	let canvasManifest = $derived(
-		historicMap && editionManifest ? editionManifest.items.find((i) => i.id == historicMap.manifestId) : null
+		historicMap && editionManifest ? editionManifest.items?.find((i: any) => i.id === historicMap.manifestId) : null
 	);
 
 	let variants = $derived.by(() => {
 		if (!canvasManifest || !editionManifest) return [];
-
-		const structure = editionManifest.structures.find((s) => s.items.find((i) => i.id == canvasManifest.id));
-
-		return structure.items.map((i) => editionManifest.items.find((j) => j.id == i.id));
+		const structure = editionManifest.structures?.find((s: any) =>
+			s.items?.some((i: any) => i.id === canvasManifest.id)
+		);
+		if (!structure) return [];
+		return structure.items.map((i: any) => editionManifest.items?.find((j: any) => j.id === i.id));
 	});
 
 	let mainSheet = $derived.by(() => {
-		if (!variants) return null;
-
-		const mainVariant = variants.find((i) => !getMetadata(i).flat().includes("Type"));
-
+		if (!variants.length) return null;
+		const mainVariant = variants.find((i: any) => !getMetadata(i).flat().includes("Type"));
 		if (!mainVariant) return null;
-
-		return mapContext.historic.mapsById.values().find((i) => i.manifestId == mainVariant.id);
-	});
-
-	$effect(() => {
-		if (!historicMap) return;
-
-		if (historicMap.edition !== prevEdition || historicMap.bis !== prevBis) {
-			prevEdition = historicMap.edition;
-
-			prevBis = historicMap.bis;
-
-			editionManifestLoading = getEditionManifest(historicMap.edition, historicMap.bis).then((data) => {
-				editionManifestLoading = null;
-
-				editionManifest = data || null;
-			});
-		}
+		const mapsArray = Array.from(mapContext.historic.mapsById.values());
+		return mapsArray.find((i: any) => i.manifestId === mainVariant.id);
 	});
 
 	function getMetadata(m = canvasManifest, lang = "nl") {
-		return m.metadata.map((i) => {
+		if (!m?.metadata) return [];
+		return m.metadata.map((i: any) => {
 			const label = i.label[lang] ?? i.label.en ?? i.label.none;
-
 			const value = i.value[lang] ?? i.value.en ?? i.value.none;
-
 			return [label?.[0], value?.[0]];
 		});
 	}
 
-	function getViewportRectWithinHistoricMap(historicMap) {
-		if (!mapContext.viewportPolygon) return;
+	// For projecting the viewport rectangle on to the thumbnail
+	let viewportRect = $derived.by(() => {
+		if (!mapContext.viewportPolygon || !historicMap?.geoFullMaskBbox) return null;
 
 		const [minX, minY, maxX, maxY] = historicMap.geoFullMaskBbox;
+		const [vMinX, vMinY, vMaxX, vMaxY] = turf.bbox(mapContext.viewportPolygon);
 
-		const vpBbox = turf.bbox(mapContext.viewportPolygon);
+		const width = maxX - minX || 1;
+		const height = maxY - minY || 1;
 
-		const [vMinX, vMinY, vMaxX, vMaxY] = vpBbox;
-
-		const width = maxX - minX;
-		const height = maxY - minY;
 		const left = (vMinX - minX) / width;
 		const top = (maxY - vMaxY) / height;
 		const right = (vMaxX - minX) / width;
@@ -122,174 +103,45 @@
 
 		return {
 			leftPct: left * 100,
-
 			topPct: top * 100,
-
 			widthPct: (right - left) * 100,
-
 			heightPct: (bottom - top) * 100,
 		};
-	}
+	});
 
-	async function setClipboard(text) {
-		const type = "text/plain";
+	// For the thumbnail 3D Thumbnail animation
+	let isPreviewing = $derived(
+		Boolean(
+			mapContext.historic.selectedMap ||
+				mapContext.historic.clickedHistoricMap ||
+				(mapContext.sheetIndexVisible && mapContext.historic.hoveredHistoricMap)
+		)
+	);
 
-		const clipboardItemData = {
-			[type]: text,
-		};
-
-		const clipboardItem = new ClipboardItem(clipboardItemData);
-
-		await navigator.clipboard.write([clipboardItem]);
-
-		copySuccess = true;
-	}
-
-	let copySuccess: boolean = $state(false);
+	let thumbnailEl = $state<HTMLElement | null>(null);
+	let hasAnimatedIn = $state(false);
 
 	$effect(() => {
-		if (copySuccess) {
-			const timeout = setTimeout(() => {
-				copySuccess = false;
-			}, 1000);
+		if (!thumbnailEl) return;
 
-			return () => clearTimeout(timeout);
+		if (isPreviewing && !hasAnimatedIn) {
+			requestAnimationFrame(() => {
+				if (!thumbnailEl) return;
+				thumbnailEl.style.transform = "translate(0px, 0px) rotateX(0deg) scale(100%)";
+				thumbnailEl.style.opacity = "1";
+				hasAnimatedIn = true;
+			});
+		} else if (!isPreviewing && hasAnimatedIn) {
+			thumbnailEl.style.transform = "translate(-30px, 0px) rotateX(60deg) scale(25%)";
+			thumbnailEl.style.opacity = "0";
+			hasAnimatedIn = false;
 		}
 	});
 
-	async function addFakeGeoreferencedMap(canvasManifest) {
-		const { id, height, width } = canvasManifest;
-
-		const mainWarpedMap = mapContext.historic.warpedMapLayer.getWarpedMap(mainSheet.id);
-
-		const [minLng, minLat, maxLng, maxLat] = mainWarpedMap.geoFullMaskBbox;
-
-		const annotation = {
-			"@context": "https://schemas.allmaps.org/map/2/context.json",
-
-			type: "GeoreferencedMap",
-
-			id: id,
-
-			resource: {
-				id: canvasManifest.items[0]?.items[0]?.body?.service[0]?.id,
-
-				width: width,
-
-				height: height,
-
-				type: "ImageService2",
-
-				tiles: [
-					{
-						width: 256,
-
-						height: 256,
-
-						scaleFactors: [1, 2, 4, 8, 16, 32],
-					},
-				],
-			},
-
-			gcps: [
-				{
-					resource: [0, 0],
-
-					geo: [minLng + 0.5, maxLat],
-				},
-
-				{
-					resource: [width, 0],
-
-					geo: [maxLng + 0.5, maxLat],
-				},
-
-				{
-					resource: [width, height],
-
-					geo: [maxLng + 0.5, minLat],
-				},
-
-				{
-					resource: [0, height],
-
-					geo: [minLng + 0.5, minLat],
-				},
-			],
-
-			resourceMask: [
-				[0, height],
-
-				[width, height],
-
-				[width, 0],
-
-				[0, 0],
-			],
-
-			transformation: {
-				type: "straight",
-			},
-		};
-
-		await mapContext.historic.warpedMapLayer.addGeoreferencedMap(annotation);
-
-		const warpedMap = mapContext.historic.warpedMapLayer.getWarpedMap(id);
-
-		const coordinates = [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])];
-
-		const historicMap: HistoricMap = {
-			...mainSheet,
-
-			id,
-
-			manifestId: id,
-
-			polygon: {
-				type: "Polygon",
-
-				coordinates,
-			},
-
-			type: "Achterkant",
-
-			geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
-		};
-
-		mapContext.historic.mapsById.set(id, historicMap);
-
-		mapContext.historic.changeHistoricMapView(historicMap);
-	}
-
+	// UI State
 	let sheetInformationVisible = $state(false);
-
-	let thumbnailEl = $state(null);
-
-	$effect(() => {
-		if (historicMap && thumbnailEl) {
-			thumbnailEl.style.transform = `scale(${historicMap ? 100 : 25}%) translate(${historicMap ? 0 : -30}px,0px) rotateX(${historicMap ? 0 : 60}deg) rotateY(${historicMap ? 0 : 0}deg)`;
-
-			thumbnailEl.style.opacity = 1;
-		}
-	});
-
-	function toggleSheetInformation() {
-		sheetInformationVisible = !sheetInformationVisible;
-	}
-
-	let isMobile = $state(false);
-
-	$effect(() => {
-		isMobile = window.innerWidth < 768;
-
-		const handleResize = () => {
-			isMobile = window.innerWidth < 768;
-		};
-
-		window.addEventListener("resize", handleResize);
-
-		return () => window.removeEventListener("resize", handleResize);
-	});
+	let copySuccess = $state(false);
+	let sheetInformationEl = $state<HTMLElement | null>(null);
 
 	$effect(() => {
 		if (!mapContext.historic.selectedMap) {
@@ -297,99 +149,125 @@
 		}
 	});
 
-	let sheetInformationEl = $state(null);
+	async function copyToClipboard(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			copySuccess = true;
+			setTimeout(() => (copySuccess = false), 1500);
+		} catch (e) {
+			console.error("Kopiëren mislukt", e);
+		}
+	}
+
+	async function handleSelectVariant(variant: any) {
+		const mapsArray = Array.from(mapContext.historic.mapsById.values());
+		const existingMap = mapsArray.find((m: any) => m.manifestId === variant.id);
+
+		if (existingMap) {
+			mapContext.historic.changeHistoricMapView(existingMap);
+		} else if (mainSheet) {
+			await registerBacksideMap(variant, mainSheet, mapContext);
+		}
+
+		if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
+	}
+
+	// External Links
+	let externalLinks = $derived.by(() => {
+		if (!canvasManifest || !editionManifest) return null;
+
+		const canvasId = canvasManifest.id;
+		const canvasIndex = canvasId.match(/\/p(\d*)$/)?.[1] || "1";
+		const imageId = canvasManifest.items?.[0]?.items?.[0]?.body?.service?.[0]?.id;
+		const annotationUrl = canvasManifest.annotations?.[0]?.id;
+
+		return {
+			homepageUrl: `${editionManifest.rendering?.[0]?.id}?page=${canvasIndex}`,
+			theseusUrl: `https://theseus-viewer.netlify.app/embed?iiif-content=${editionManifest.id}&canvas=${canvasId}&collection=${MANIFEST_URL}&panel=navPlace`,
+			annotationUrl,
+			xyzUrl: annotationUrl
+				? `https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
+				: null,
+			geoJsonIoUrl: annotationUrl ? `https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson` : null,
+			img1024: imageId ? `${imageId}/full/1024,/0/default.png` : null,
+			imgMax: imageId ? `${imageId}/full/max/0/default.png` : null,
+		};
+	});
 </script>
 
 {#if historicMap}
 	<div
-		class="
-			sm:from-wtr-blue from-wtr-blue/50 to-wtr-blue/50 fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-[8px]
-			bg-gradient-to-r from-[270px] shadow-lg transition-[width] duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
-			{sheetInformationVisible || mapContext.historic.selectedMap ? 'bg-wtr-blue' : ''}
-			{sheetInformationVisible || mapContext.historic.selectedMap ? 'w-auto sm:w-87' : 'w-auto sm:w-[calc(100vh-16px)]'}
-		"
-		style:background-color={mapContext.historic.selectedMap ? "var(--color-wtr-blue)" : ""}
-		style:max-height={sheetInformationVisible ? (isMobile ? "50vh" : "60vh") : "120px"}
-		transition:fade={{ duration: 500 }}
+		class="from-wtr-blue/50 to-wtr-blue/50 sm:from-wtr-blue fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-lg bg-gradient-to-r from-[270px] shadow-lg transition-all duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
+		{sheetInformationVisible || mapContext.historic.selectedMap
+			? 'bg-wtr-blue w-auto sm:w-87'
+			: 'w-auto sm:w-[calc(100vh-16px)]'}"
+		style:max-height={sheetInformationVisible ? "60vh" : "120px"}
 		style:pointer-events={mapContext.historic.selectedMap ? "auto" : "none"}
+		transition:fade={{ duration: 300 }}
 	>
+		<!-- HEADBAR HEADER -->
 		<div class="relative z-20 flex h-30 items-stretch gap-3 bg-inherit">
-			{#key historicMap.id}
+			<div class="pointer-events-none flex-shrink-0 p-4 pr-1" style="transform-style: preserve-3d; perspective: 100px">
 				<div
-					class="pointer-events-none flex-shrink-0 p-4 pr-1"
-					style="transform-style: preserve-3d; perspective: 100px"
+					bind:this={thumbnailEl}
+					onclick={() => {
+						if (historicMap && !mapContext.historic.selectedMap) {
+							mapContext.historic.setHistoricMapView(historicMap);
+						}
+					}}
+					class="pointer-events-auto relative block h-22 w-fit origin-[10%_100%] cursor-pointer overflow-hidden rounded-sm opacity-0 shadow-md transition-all duration-500 will-change-transform"
+					style="transform: translate(-30px, 0px) rotateX(60deg) scale(25%);"
 				>
-					<div
-						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedMap) mapContext.historic.setHistoricMapView(historicMap);
-						}}
-						bind:this={thumbnailEl}
-						class="pointer-events-auto h-22 w-fit origin-[10%_100%] cursor-pointer overflow-hidden opacity-0 shadow-md transition-all delay-300 duration-500 will-change-transform"
-						style:transform={`translate(${-30}px,0px) rotateX(${60}deg) scale(25%)`}
-					>
-						{#if canvasManifest && getMetadata(canvasManifest).flat().includes("Achterkant")}
-							{@const imageService =
-								canvasManifest.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
-								canvasManifest.items?.[0]?.items?.[0]?.body?.id}
+					{#if canvasManifest && getMetadata(canvasManifest).flat().includes("Achterkant")}
+						{@const imageService =
+							canvasManifest.items?.[0]?.items?.[0]?.body?.service?.[0]?.id ||
+							canvasManifest.items?.[0]?.items?.[0]?.body?.id}
+						<img alt="" class="block h-full w-auto object-cover" src="{imageService}/full/,256/0/default.jpg" />
+					{:else}
+						<MapThumbnail id={historicMap.id} height={88} />
+					{/if}
 
-							{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ""}
-
-							<img alt="" class="block h-full w-auto object-cover" {src} />
-						{:else}
-							<MapThumbnail id={historicMap.id} height={88}></MapThumbnail>
-						{/if}
-
-						{#if historicMap && mapContext.viewportPolygon}
-							{@const { leftPct, topPct, widthPct, heightPct } = getViewportRectWithinHistoricMap(historicMap)}
-
-							<div
-								class="border-wtr-blue/40 pointer-events-none absolute rounded-[4px] border-[4px]"
-								style="left: {leftPct}%; top: {topPct}%; width: {widthPct}%; height: {heightPct}%;"
-							></div>
-						{/if}
-					</div>
+					{#if viewportRect}
+						<div
+							class="border-wtr-blue/40 pointer-events-none absolute rounded-sm border-[4px]"
+							style="left: {viewportRect.leftPct}%; top: {viewportRect.topPct}%; width: {viewportRect.widthPct}%; height: {viewportRect.heightPct}%;"
+						></div>
+					{/if}
 				</div>
-			{/key}
+			</div>
 
 			{#key historicMap.id}
 				<div
 					class="flex w-full flex-shrink-1 flex-col items-start justify-center gap-1 pr-4"
-					in:fly|global={{ x: -20 }}
+					in:fly={{ x: -15, duration: 200 }}
 				>
-					<h1
+					<button
+						type="button"
 						onclick={() => {
-							if (historicMap && !mapContext.historic.selectedMap) mapContext.historic.setHistoricMapView(historicMap);
+							if (!mapContext.historic.selectedMap) mapContext.historic.setHistoricMapView(historicMap);
 						}}
-						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 cursor-pointer truncate text-[16px] font-bold"
+						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 text-left text-base font-bold transition-colors hover:underline"
 					>
-						{mainSheet ? mainSheet.label : historicMap ? historicMap.label : "..."}
-					</h1>
+						{mainSheet?.label || historicMap.label || "..."}
+					</button>
 
-					<p class="text-wtr-subtle-blue text-[14px] font-[500]">
-						{historicMap?.yearEnd} &middot; Editie {historicMap?.edition}{historicMap?.bis ? " BIS" : ""}
+					<p class="text-wtr-subtle-blue text-sm font-medium">
+						{historicMap.yearEnd} &middot; Editie {historicMap.edition}{historicMap.bis ? " BIS" : ""}
 					</p>
 
 					{#if mapContext.historic.selectedMap}
 						<button
-							transition:slide={{ duration: 300 }}
-							onclick={toggleSheetInformation}
-							onkeydown={(e) => {
-								if (e.key === "Enter" || e.key === " ") {
-									e.preventDefault();
-
-									toggleSheetInformation();
-								}
-							}}
-							class="text-wtr-subtle-blue border-wtr-subtle-blue/13 bg-wtr-subtle-blue/7 mt-2 flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-[600] shadow-md transition-colors hover:cursor-pointer hover:bg-[#4a4a7a]"
+							type="button"
+							transition:slide={{ duration: 200 }}
+							onclick={() => (sheetInformationVisible = !sheetInformationVisible)}
+							class="text-wtr-subtle-blue border-wtr-subtle-blue/20 bg-wtr-subtle-blue/10 hover:bg-wtr-subtle-blue/20 mt-2 flex items-center gap-1.5 rounded-lg border-2 px-3 py-1 text-xs font-semibold shadow-md transition-colors"
 						>
+							<Info size={18} />
+							<span>{sheetInformationVisible ? "Sluiten" : "Openen"}</span>
 							{#if sheetInformationVisible}
-								<Info class="inline" size="18" />
-								<span class="whitespace-nowrap">Sluiten</span>
-								<CaretDown color="var(--color-wtr-subtle-blue)" size={18} weight="bold" />
+								<CaretDown size={18} weight="bold" />
 							{:else}
-								<Info class="inline" size="18" />
-								<span class="whitespace-nowrap">Openen</span>
-								<CaretUp color="var(--color-wtr-subtle-blue)" size={18} />
+								<CaretUp size={18} />
 							{/if}
 						</button>
 					{/if}
@@ -397,111 +275,71 @@
 			{/key}
 		</div>
 
+		<!-- METADATA & EXTRA PANELS -->
 		{#if sheetInformationVisible}
-			{@const metadata = getMetadata(canvasManifest)}
-
-			{@const collectionId = "https://tu-delft-heritage.github.io/watertijdreis-data/collection.json"}
-
-			{@const manifestId = editionManifest.id}
-
-			{@const canvasId = canvasManifest.id}
-
-			{@const canvasIndex = canvasId.match(/\/p(\d*)$/)?.[1]}
-
-			{@const imageId = canvasManifest.items[0]?.items[0]?.body?.service[0]?.id}
-
-			{@const homepageUrl = editionManifest.rendering[0].id}
-
 			<div
 				bind:this={sheetInformationEl}
 				transition:slide={{ duration: 300 }}
-				class="scrollable border-wtr-subtle-blue/6 flex flex-col gap-4 overflow-x-hidden overflow-y-auto border-t"
-				style="max-height: calc({isMobile ? '50vh' : '60vh'} - 120px);"
+				class="scrollable border-wtr-subtle-blue/10 flex max-h-[calc(60vh-120px)] flex-col gap-4 overflow-y-auto border-t p-4"
 			>
-				<div class="pt-2">
-					<!-- <h3 class="mb-1 text-[16px] font-[600] text-wtr-subtle-blue">Bladinformatie</h3> -->
-					<div class="px-4 pb-0">
-						<ul class="text-wtr-subtle-blue text-[14px]">
-							<li class="odd:bg-wtr-subtle-blue/7 rounded-[4px] px-2 py-1">
-								<i class="font-[600] opacity-50">Bladtitel:</i>
+				<!-- METADATA LIST -->
+				<div>
+					<ul class="text-wtr-subtle-blue space-y-1 text-sm">
+						<li class="bg-wtr-subtle-blue/10 rounded-md px-3 py-1.5">
+							<span class="font-semibold opacity-60">Bladtitel: </span>
+							<span class="font-medium">{historicMap.label}</span>
+						</li>
 
-								<span class="font-[500]">{historicMap.label}</span>
+						{#each getMetadata(canvasManifest) as [label, value]}
+							<li class="bg-wtr-subtle-blue/10 rounded-md px-3 py-1.5">
+								<span class="font-semibold opacity-60">{label}: </span>
+								<span class="font-medium">{value}</span>
 							</li>
-
-							{#each metadata as [label, value]}
-								<li class="odd:bg-wtr-subtle-blue/7 rounded-[4px] px-2 py-1">
-									<i class="font-[600] opacity-50">{label}:</i>
-
-									<span class="font-[500]">{value}</span>
-								</li>
-							{/each}
-						</ul>
-					</div>
+						{/each}
+					</ul>
 				</div>
 
-				{#if variants && variants.length > 1}
-					<div class="px-4 pb-0">
-						<h3 class="text-wtr-subtle-blue mb-1 text-[16px] font-[600]">Bijbladen</h3>
-
-						<div class="flex flex-col">
+				<!-- VARIANTS / BIJBLADEN -->
+				{#if variants.length > 1}
+					<div>
+						<h3 class="text-wtr-subtle-blue mb-2 text-base font-semibold">Bijbladen</h3>
+						<div class="flex flex-col gap-1">
 							{#each variants as variant}
 								{@const metadata = getMetadata(variant)}
+								{@const rawType = metadata.find((i) => i[0] === "Type")?.[1] || "Hoofdblad (voorkant)"}
+								{@const displayType = rawType.replace("Achterkant", "Hoofdblad (achterkant)")}
 
-								{@const type =
-									metadata
-										.find((i) => i[0] === "Type")?.[1]
-										.replace("Achterkant", "Hoofdblad (achterkant)")
-										.replace("Watervoorzieningseenheden", "Watervoorzienings-<br>eenheden") || "Hoofdblad (voorkant)"}
-
-								{@const historicMap = mapContext.historic.mapsById.values().find((m) => m.manifestId == variant.id)}
+								{@const mapsArray = Array.from(mapContext.historic.mapsById.values())}
+								{@const variantMap = mapsArray.find((m: any) => m.manifestId === variant.id)}
 
 								{@const imageService =
 									variant.items?.[0]?.items?.[0]?.body?.service?.[0]?.id || variant.items?.[0]?.items?.[0]?.body?.id}
+								{@const isCurrent = canvasManifest?.id === variant.id}
 
-								{@const src = imageService ? `${imageService}/full/,256/0/default.jpg` : ""}
-
-								{@const isCurrentSheet = canvasManifest.id === variant.id}
-
-								{#if src}
+								{#if imageService}
 									<button
-										onclick={() => {
-											if (historicMap) mapContext.historic.changeHistoricMapView(historicMap);
-											else addFakeGeoreferencedMap(variant);
-
-											if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
-										}}
-										onkeydown={(e) => {
-											if (e.key === "Enter" || e.key === " ") {
-												e.preventDefault();
-
-												const historicMap = mapContext.historic.mapsById
-
-													.values()
-
-													.find((m) => m.manifestId == variant.id);
-
-												if (historicMap) mapContext.historic.changeHistoricMapView(historicMap);
-												else addFakeGeoreferencedMap(variant);
-											}
-										}}
-										tabindex="15"
-										class="hover:bg-wtr-subtle-blue/7 flex cursor-pointer items-center gap-1 rounded-[4px] p-1.5 transition-colors {isCurrentSheet
-											? 'text-color-wtr-pink bg-wtr-subtle-blue/19 rounded-[6px]'
+										type="button"
+										onclick={() => handleSelectVariant(variant)}
+										class="hover:bg-wtr-subtle-blue/10 flex cursor-pointer items-center gap-2 rounded-md p-2 text-left transition-colors {isCurrent
+											? 'bg-wtr-subtle-blue/20 ring-wtr-pink ring-1'
 											: ''}"
 									>
-										<div class="bg-wtr-subtle-blue/7 h-14 flex-shrink-0 overflow-hidden rounded-[2px] shadow-md">
-											{#if !type.toLowerCase().includes("achterkant")}
-												<MapThumbnail id={historicMap.id} height={56}></MapThumbnail>
+										<!-- H-14 W-FIT HOUDT OORSPRONKELIJKE BEELDVERHOUDING -->
+										<div class="bg-wtr-subtle-blue/10 h-14 w-fit flex-shrink-0 overflow-hidden rounded-sm shadow-md">
+											{#if !displayType.toLowerCase().includes("achterkant") && variantMap}
+												<MapThumbnail id={variantMap.id} height={56} />
 											{:else}
-												<img {src} alt={type} class="block h-full w-auto object-cover" />
+												<img
+													src="{imageService}/full/,256/0/default.jpg"
+													alt={displayType}
+													class="block h-full w-auto object-cover"
+												/>
 											{/if}
 										</div>
 
-										<div class="flex flex-1 items-center text-left">
-											<p class="text-wtr-subtle-blue px-2 text-[12px] font-[600]">
-												{@html type}
-											</p>
-										</div>
+										<span class="text-wtr-subtle-blue text-xs font-semibold">
+											{displayType}
+										</span>
 									</button>
 								{/if}
 							{/each}
@@ -509,126 +347,87 @@
 					</div>
 				{/if}
 
-				<div class="px-4 pb-6">
-					<h3 class="text-wtr-subtle-blue mb-2 text-[16px] font-[600]">Externe links</h3>
-
-					<div class="bg-wtr-subtle-blue/7 flex flex-col gap-2 rounded-[4px] p-2 text-[13px]">
-						<a
-							href={`${homepageUrl}?page=${canvasIndex}`}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="text-wtr-pink hover:underline"
-						>
-							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-							Universiteitsbibliotheek Utrecht
-						</a>
-
-						<a
-							href={`https://theseus-viewer.netlify.app/embed?iiif-content=${manifestId}&canvas=${canvasId}&collection=${collectionId}&panel=navPlace`}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="text-wtr-pink hover:underline"
-						>
-							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-							Open in Theseus
-						</a>
-
-						{#if canvasManifest.annotations}
-							{@const annotationUrl = canvasManifest.annotations[0].id}
-
+				<!-- EXTERNAL LINKS -->
+				{#if externalLinks}
+					<div>
+						<h3 class="text-wtr-subtle-blue mb-2 text-base font-semibold">Externe links</h3>
+						<div class="bg-wtr-subtle-blue/10 flex flex-col gap-2 rounded-md p-3 text-xs">
 							<a
-								href="https://viewer.allmaps.org/?url={annotationUrl}"
+								href={externalLinks.homepageUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-wtr-pink hover:underline"
+								class="text-wtr-pink flex items-center gap-1.5 hover:underline"
 							>
-								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-								Open in Allmaps Viewer
+								<ArrowSquareOut size={16} /> Universiteitsbibliotheek Utrecht
 							</a>
 
-							<a href={annotationUrl} target="_blank" rel="noopener noreferrer" class="text-wtr-pink hover:underline">
-								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-								Open Georeference Annotation
+							<a
+								href={externalLinks.theseusUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-wtr-pink flex items-center gap-1.5 hover:underline"
+							>
+								<ArrowSquareOut size={16} /> Open in Theseus
 							</a>
 
-							<button
-								onclick={() =>
-									setClipboard(
-										`https://allmaps.xyz/{z}/{x}/{y}.png?url=${annotationUrl}&transformation.type=thin-plate-spline`
-									)}
-								class="text-wtr-pink cursor-pointer text-left hover:underline"
-							>
-								{#if copySuccess}
-									<Check size="15" color="var(--color-wtr-pink)" class="relative inline" />
+							{#if externalLinks.annotationUrl}
+								<a
+									href="https://viewer.allmaps.org/?url={externalLinks.annotationUrl}"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-wtr-pink flex items-center gap-1.5 hover:underline"
+								>
+									<ArrowSquareOut size={16} /> Open in Allmaps Viewer
+								</a>
 
-									XYZ tile URL gekopieerd
-								{:else}
-									<Copy size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-									Kopiëer XYZ tile URL
+								{#if externalLinks.xyzUrl}
+									<button
+										type="button"
+										onclick={() => copyToClipboard(externalLinks.xyzUrl)}
+										class="text-wtr-pink flex items-center gap-1.5 text-left hover:underline"
+									>
+										{#if copySuccess}
+											<Check size={16} /> XYZ tile URL gekopieerd
+										{:else}
+											<Copy size={16} /> Kopiëer XYZ tile URL
+										{/if}
+									</button>
 								{/if}
-							</button>
 
-							<a
-								href={`https://geojson.io/#data=data:text/x-url,${annotationUrl}.geojson`}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="text-wtr-pink hover:underline"
-							>
-								<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
+								<a
+									href={externalLinks.geoJsonIoUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-wtr-pink flex items-center gap-1.5 hover:underline"
+								>
+									<ArrowSquareOut size={16} /> Open in geojson.io
+								</a>
+							{/if}
 
-								Open in geojson.io
-							</a>
-						{/if}
-						<a
-							href={`${imageId}/full/1024,/0/default.png`}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="text-wtr-pink hover:underline"
-						>
-							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-							Download beeld (1024px)
-						</a>
-						<a
-							href={`${imageId}/full/max/0/default.png`}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="text-wtr-pink hover:underline"
-						>
-							<ArrowSquareOut size="15" color="var(--color-wtr-pink)" class="relative inline" />
-
-							Download beeld (5000px)
-						</a>
+							{#if externalLinks.img1024}
+								<a
+									href={externalLinks.img1024}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-wtr-pink flex items-center gap-1.5 hover:underline"
+								>
+									<ArrowSquareOut size={16} /> Download beeld (1024px)
+								</a>
+							{/if}
+							{#if externalLinks.imgMax}
+								<a
+									href={externalLinks.imgMax}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-wtr-pink flex items-center gap-1.5 hover:underline"
+								>
+									<ArrowSquareOut size={16} /> Download beeld (origineel formaat)
+								</a>
+							{/if}
+						</div>
 					</div>
-				</div>
+				{/if}
 			</div>
 		{/if}
 	</div>
 {/if}
-
-<style>
-	.scrollable::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
-	}
-
-	.scrollable::-webkit-scrollbar-track {
-		background: transparent;
-	}
-	.scrollable::-webkit-scrollbar-thumb {
-		background-color: #eeeeff88;
-		border-radius: 10px;
-	}
-	.scrollable::-webkit-scrollbar-thumb:hover {
-		background-color: var(--color-wtr-subtle-blue);
-	}
-	.scrollable {
-		scrollbar-color: #eeeeff88 transparent;
-		scrollbar-width: thin;
-	}
-</style>
