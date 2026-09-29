@@ -306,14 +306,6 @@ export class MapContext {
 		const { center, zoom, bearing, pitch } = view;
 		this.activeMap.easeTo({ center, zoom, bearing, pitch, ...options });
 
-		const optionsByMapId = new Map();
-		optionsByMapId.set(this.historic.selectedMap?.id, {
-			visible: false,
-			transformationType: "thinPlateSpline",
-			applyMask: true,
-		});
-		this.historic.warpedMapLayer.setMapsOptionsByMapId(optionsByMapId);
-
 		if (this.savedLayerVisibility) {
 			for (const layerId in this.savedLayerVisibility) {
 				this.activeMap.setLayoutProperty(layerId, "visibility", this.savedLayerVisibility[layerId]);
@@ -323,12 +315,12 @@ export class MapContext {
 
 		this.historic.setSheetIndexVisibility(false);
 
-		if (this.historic.selectedMap) {
-			this.historic.warpedMapLayer?.setMapOptions(this.historic.selectedMap?.id, {
+		if (this.historic.previousSelectedMapId) {
+			this.historic.warpedMapLayer?.setMapOptions(this.historic.previousSelectedMapId, {
+				visible: false,
 				transformationType: "thinPlateSpline",
 				applyMask: true,
 			});
-			this.historic.selectedMapId = null;
 		}
 
 		this.historic.applyFilter(this.historic.filter);

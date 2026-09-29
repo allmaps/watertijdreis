@@ -65,7 +65,6 @@ export async function registerBacksideMap(
 	};
 
 	mapContext.historic.mapsById.set(id, backsideMap);
-	mapContext.historic.changeHistoricMapView(backsideMap);
 
 	return backsideMap;
 }

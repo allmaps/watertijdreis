@@ -92,6 +92,7 @@ export class HistoricMapsContext {
 	// Selected (by double clicking / clicking a thumbnail / etc.) and pinned maps,
 	// this works by having a single 'source-of-truth', the HistoricMap IDs; selectedMap/pinnedMap is derived from this ID and setHistoricMapView is called by the $effect in the constructor
 	selectedMapId: string | null = $state(null);
+	previousSelectedMapId: string | null = null;
 	pinnedMapId: string | null = $state(null);
 
 	selectedMap: HistoricMap | null = $derived(
@@ -134,8 +135,10 @@ export class HistoricMapsContext {
 			if (this.selectedMap) {
 				const view = this.selectedMapId === this.pinnedMapId ? this.pinnedMapView : null;
 				this.setHistoricMapView(this.selectedMap, view);
+				this.previousSelectedMapId = this.selectedMapId;
 			} else {
 				this.mapContext.restoreView();
+				this.previousSelectedMapId = null;
 			}
 		});
 	}
@@ -188,8 +191,8 @@ export class HistoricMapsContext {
 		this.#clickedFeatureId = null;
 		this.setSheetIndexVisibility(false);
 
+		if (!this.previousSelectedMapId) this.mapContext.saveMapView();
 		this.#isolateHistoricMapLayer(historicMap.id);
-		this.mapContext.saveMapView();
 		this.#zoomToHistoricMap(historicMap, view);
 	}
 
@@ -210,6 +213,7 @@ export class HistoricMapsContext {
 
 		this.warpedMapLayer.setLayerOptions({ opacity: 1 });
 		const mapsToHide = Array.from(this.visibleMaps.keys()).filter((id) => id !== selectedId);
+		if (this.previousSelectedMapId) mapsToHide.push(this.previousSelectedMapId);
 
 		this.warpedMapLayer.setMapsOptions(mapsToHide, { visible: false });
 		this.warpedMapLayer.setMapOptions(selectedId, {
@@ -238,49 +242,9 @@ export class HistoricMapsContext {
 					[minX, minY],
 					[maxX, maxY],
 				],
-				{ padding: 88, speed: 2, curve: 1.8, essential: true }
+				{ padding: 88, speed: 2, curve: 1.8, essential: true, animate: this.previousSelectedMapId === null }
 			);
 		}
-	}
-
-	changeHistoricMapView(historicMap: HistoricMap) {
-		if (!this.mapsLoaded) return;
-
-		const optionsByMapId = new Map();
-
-		if (this.selectedMapId) {
-			optionsByMapId.set(this.selectedMapId, {
-				visible: false,
-				transformationType: "thinPlateSpline",
-				applyMask: true,
-			});
-		}
-
-		optionsByMapId.set(historicMap.id, {
-			visible: true,
-			transformationType: "straight",
-			saturation: 1,
-			applyMask: false,
-		});
-
-		this.warpedMapLayer.setMapsOptionsByMapId(optionsByMapId, undefined, { animate: false });
-
-		const bbox = this.warpedMapLayer.getMapsBbox([historicMap.id], {
-			projection: { definition: "EPSG:4326" },
-		});
-
-		if (bbox) {
-			const [minX, minY, maxX, maxY] = bbox;
-			this.mapContext.activeMap.fitBounds(
-				[
-					[minX, minY],
-					[maxX, maxY],
-				],
-				{ padding: 50, animate: false }
-			);
-		}
-
-		this.selectedMapId = historicMap.id;
 	}
 
 	updateViewportMaps() {

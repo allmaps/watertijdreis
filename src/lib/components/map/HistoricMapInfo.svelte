@@ -7,6 +7,7 @@
 
 	import { registerBacksideMap } from "$lib/utils/allmaps";
 	import MapThumbnail from "./HistoricMapThumbnail.svelte";
+	import type { HistoricMap } from "$lib/types/historicmap";
 
 	const MANIFEST_URL = "https://tu-delft-heritage.github.io/watertijdreis-data/collection.json";
 
@@ -151,9 +152,10 @@
 		const existingMap = mapsArray.find((m: any) => m.manifestId === variant.id);
 
 		if (existingMap) {
-			historicCtx.changeHistoricMapView(existingMap);
+			historicCtx.selectedMapId = existingMap.id;
 		} else if (mainSheet) {
-			await registerBacksideMap(variant, mainSheet, mapContext);
+			const backsideMap: HistoricMap | null = await registerBacksideMap(variant, mainSheet, mapContext);
+			if (backsideMap) historicCtx.selectedMapId = backsideMap.id;
 		}
 
 		if (sheetInformationEl) sheetInformationEl.scrollTop = 0;
