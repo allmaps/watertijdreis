@@ -17,7 +17,7 @@
 <header
 	class="text-wtr-blue absolute top-2 left-2 z-999 flex items-center gap-1 rounded-[8px] bg-white p-4 shadow-lg sm:top-5 sm:left-5"
 >
-	<button onclick={() => mapContext.resetState()}>
+	<button class="watertijdreis-logo" onclick={() => mapContext.resetState()}>
 		<h1 class="mr-1 flex inline cursor-pointer gap-[1px] text-[20px] font-[700] text-shadow-[2px_2px_0_#eef]">
 			{#each "Watertijdreis".split("") as letter, i (`${i}-${letter}`)}
 				<span
@@ -25,7 +25,7 @@
 					class:wave={mapContext.historic.mapsLoaded}
 					class:wave-loading={!mapContext.historic.mapsLoaded}
 					style:animation=""
-					style:animation-delay={i * 100 + "ms"}
+					style:animation-delay={i * 50 + "ms"}
 				>
 					{letter}
 				</span>
@@ -39,18 +39,20 @@
 
 <style>
 	.wave-loading {
-		animation: wave 300ms ease-in-out infinite alternate;
-		/* animation: wave-loading 600ms ease-in-out infinite alternate; */
+		/* animation: wave 300ms ease-in-out infinite alternate; */
+		animation: wave-loading 600ms ease-in-out infinite alternate;
+	}
+	.watertijdreis-logo:hover .wave {
+		animation: wave 600ms ease-in-out infinite alternate;
 	}
 
 	@keyframes wave-loading {
 		0% {
-			color: var(--color-wtr-blue);
-			opacity: 0;
+			color: #008;
+			transform: translateY(-2px);
 		}
 		100% {
-			color: var(--color-wtr-blue);
-			opacity: 1;
+			opacity: 0.5;
 		}
 	}
 
