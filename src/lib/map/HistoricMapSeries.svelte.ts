@@ -119,14 +119,20 @@ export class HistoricMapSeries {
 
 		this.filter.yearEnd = adjustedYearEnd;
 
-		const mapOptionsByMapId = new Map();
 		const defaultOptions = { applyMask: true, transformationType: "thinPlateSpline", saturation: 1 };
+		const warpedMapLayer = this.context.warpedMapLayer;
 
-		mapsToColor.forEach((id) => mapOptionsByMapId.set(id, { ...defaultOptions, visible: true }));
-		mapsToHide.forEach((id) => mapOptionsByMapId.set(id, { ...defaultOptions, visible: false }));
-		mapsToDesaturate.forEach((id) => mapOptionsByMapId.set(id, { ...defaultOptions, visible: true, saturation: 0 }));
-
-		this.context.warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
+		if (warpedMapLayer) {
+			if (mapsToColor.length > 0) {
+				warpedMapLayer.setMapsOptions(mapsToColor, { ...defaultOptions, visible: true });
+			}
+			if (mapsToHide.length > 0) {
+				warpedMapLayer.setMapsOptions(mapsToHide, { ...defaultOptions, visible: false });
+			}
+			if (mapsToDesaturate.length > 0) {
+				warpedMapLayer.setMapsOptions(mapsToDesaturate, { ...defaultOptions, visible: true, saturation: 0 });
+			}
+		}
 
 		mapsToHide.forEach((id) => this.visibleMaps.delete(id));
 		[...mapsToColor, ...mapsToDesaturate].forEach((id) => {
@@ -139,12 +145,11 @@ export class HistoricMapSeries {
 	}
 
 	#hideAll() {
-		const mapOptionsByMapId = new Map();
-		this.mapsById.keys().forEach((id) => {
-			mapOptionsByMapId.set(id, { visible: false });
-			this.visibleMaps.delete(id);
-		});
-		this.context.warpedMapLayer?.setMapsOptionsByMapId(mapOptionsByMapId);
+		const allMapIds = Array.from(this.mapsById.keys());
+
+		this.context.warpedMapLayer?.setMapsOptions(allMapIds, { visible: false });
+		this.visibleMaps.clear();
+
 		this.context.updateMapOutlines();
 	}
 }

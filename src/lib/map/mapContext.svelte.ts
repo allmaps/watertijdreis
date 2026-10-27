@@ -1,4 +1,4 @@
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import type { Map as MaplibreMap } from "maplibre-gl";
 import * as pmtiles from "pmtiles";
 import { addBackgroundLayers, addUserLocationCircle } from "./mapLayers.svelte";

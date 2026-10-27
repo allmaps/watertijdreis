@@ -347,9 +347,8 @@ export class HistoricMapsContext {
 	setGridVisibility(isVisible: boolean, centerLngLat = { lng: 5.63, lat: 52.16 }, rippleScale = 3, speed = 300) {
 		if (this.mapContext.sheetIndexVisible && !isVisible) return;
 
-		const source = this.mapContext.activeMap.getSource("map-outlines") as any;
-		if (!source || !source._data) return;
-		const allFeatures = source._data.features;
+		if (!this.mapContext.activeMap.getSource("map-outlines")) return;
+		const allFeatures = this.mapContext.activeMap.querySourceFeatures("map-outlines");
 
 		if (this.#gridVisibilityTimer) clearTimeout(this.#gridVisibilityTimer);
 		this.#gridVisibilityTimer = setTimeout(() => (this.gridVisible = isVisible), 100);

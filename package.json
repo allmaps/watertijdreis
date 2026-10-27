@@ -47,10 +47,11 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@allmaps/maplibre": "1.0.0-beta.42",
+		"@allmaps/maplibre": "1.0.0-beta.44",
 		"@fontsource-variable/inter": "^5.3.0",
 		"@lukulent/svelte-umami": "^0.0.4",
 		"@maplibre/maplibre-gl-style-spec": "^24.3.1",
+		"@number-flow/svelte": "^0.4.2",
 		"@protomaps/basemaps": "^5.7.0",
 		"@turf/turf": "^7.2.0",
 		"@types/geojson": "^7946.0.16",
@@ -58,7 +59,7 @@
 		"clsx": "^2.1.1",
 		"lodash-es": "^4.17.21",
 		"maplibre-contour": "^0.1.0",
-		"maplibre-gl": "^5.8.0",
+		"maplibre-gl": "^6.11.2",
 		"pmtiles": "^4.3.0",
 		"svelte-toolbelt": "^0.9.1",
 		"tailwindcss-animate": "^1.0.7"
