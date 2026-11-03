@@ -5,6 +5,7 @@
 	import { MapTrifold, MapPin, Mountains, Camera, EyeSlash, Waves } from "phosphor-svelte";
 
 	import Modal from "$lib/components/ui/Modal.svelte";
+	import AhnGradientEditor from "$lib/components/map/AhnGradientEditor.svelte";
 	import Select from "$lib/components/ui/Select.svelte";
 	import Slider from "$lib/components/ui/Slider.svelte";
 
@@ -70,6 +71,39 @@
 		value={mapContext.layerOptions.baseMap}
 		onchange={(opt) => (mapContext.layerOptions.baseMap = opt.value)}
 	/>
+
+	{#if mapContext.layerOptions.baseMap === "ahn"}
+		<section class="text-wtr-blue mt-3 space-y-2 text-sm" aria-label="Dynamische hoogtekaart">
+			<p>
+				AHN-maaiveld · <a
+					class="underline"
+					href="https://www.pdok.nl/introductie/-/article/actueel-hoogtebestand-nederland-ahn">PDOK</a
+				> · m NAP
+			</p>
+			<label class="flex items-center gap-2"
+				>Dekking reliëf
+				<input
+					class="accent-wtr-pink min-w-0 flex-1"
+					type="range"
+					min="0"
+					max="100"
+					bind:value={mapContext.ahnOpacity}
+				/>
+				{mapContext.ahnOpacity}%
+			</label>
+			<label class="flex items-center gap-2"
+				><input class="accent-wtr-pink" type="checkbox" bind:checked={mapContext.ahnGrayscale} /> Historische kaarten zwart-wit</label
+			>
+			{#if mapContext.ahnError}<p role="status">{mapContext.ahnError}</p>{/if}
+			{#if mapContext.ahnScale}
+				<AhnGradientEditor
+					scale={mapContext.ahnScale}
+					stops={mapContext.ahnStops}
+					onchange={(stops) => (mapContext.ahnStops = stops)}
+				/>
+			{:else}<p class="text-xs">Nog geen hoogtemetingen in beeld.</p>{/if}
+		</section>
+	{/if}
 
 	{#if mapContext.layerOptions.baseMap === "protomaps"}
 		<div class="text-wtr-blue mt-4 max-w-60 text-[15px] font-[500]">

@@ -11,6 +11,10 @@ import { type LayerOptions, type MapView } from "$lib/types/map";
 import type { Feature } from "geojson";
 import { applyStateFromURL, syncStateToURL, defaultState } from "./urlStateManager";
 
+import { DynamicAhnLayer } from "./dynamic-ahn/DynamicAhnLayer";
+import { defaultStops, type GradientStop } from "./dynamic-ahn/gradient";
+import type { HeightScale } from "./dynamic-ahn/terrain";
+
 export class MapContext {
 	map: MaplibreMap | null = $state(null);
 	maplibreLoaded: boolean = $state(false);
@@ -38,6 +42,16 @@ export class MapContext {
 
 	toastContent: string = $state("");
 
+	ahnStops = $state.raw<readonly GradientStop[]>(defaultStops);
+	ahnOpacity = $state(60);
+	ahnGrayscale = $state(false);
+	ahnScale = $state.raw<HeightScale | null>(null);
+	ahnError = $state<string>();
+	private ahn = new DynamicAhnLayer({
+		onScale: (scale) => (this.ahnScale = scale),
+		onError: (error) => (this.ahnError = error),
+	});
+
 	constructor() {
 		// URL sync
 		$effect(() => {
@@ -51,6 +65,20 @@ export class MapContext {
 			this.updateOverlays(this.layerOptions.overlay);
 		});
 
+		$effect(() => {
+			if (!this.maplibreLoaded || this.layerOptions.baseMap !== "ahn" || this.historic.selectedMap) return;
+			const map = this.activeMap;
+			map.addLayer(this.ahn, "map-outlines-labels");
+			return () => {
+				if (map.getLayer(this.ahn.id)) map.removeLayer(this.ahn.id);
+			};
+		});
+		$effect(() => this.ahn.setStyle(this.ahnStops, this.ahnOpacity / 100));
+		$effect(() => {
+			if (!this.maplibreLoaded) return;
+			const grayscale = this.layerOptions.baseMap === "ahn" && !this.historic.selectedMap && this.ahnGrayscale;
+			this.historic.warpedMapLayer.setLayerOptions({ saturation: grayscale ? 0 : 1 });
+		});
 		// Basemap & opacity sync
 		$effect(() => {
 			if (!this.maplibreLoaded || this.historic.selectedMap) return;
@@ -63,7 +91,6 @@ export class MapContext {
 				this.setProtoMapsLabelsInFront(this.layerOptions.protoMapsLabelsInFront);
 			}
 
-			this.setAHNVisibility(this.layerOptions.baseMap === "ahn");
 			this.setSatellietVisibility(this.layerOptions.baseMap === "satelliet");
 
 			if (this.historic.warpedMapLayer) {
@@ -210,12 +237,6 @@ export class MapContext {
 		if (overlay === "gemeentegrenzen" && !this.map.getSource("pdok-gemeentegrenzen")) {
 			addGemeentegrenzenLayer(this.map);
 		}
-	}
-
-	setAHNVisibility(visible: boolean) {
-		if (!this.maplibreLoaded) return;
-		if (!this.activeMap.getLayer("dsm-05-layer")) return;
-		this.activeMap.setLayoutProperty("dsm-05-layer", "visibility", visible ? "visible" : "none");
 	}
 
 	setSatellietVisibility(visible: boolean) {

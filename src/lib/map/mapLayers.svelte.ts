@@ -2,20 +2,6 @@ import type { Map as MaplibreMap } from "maplibre-gl";
 import type { MapContext } from "./mapContext.svelte";
 
 export function addBackgroundLayers(map: MaplibreMap) {
-	map.addSource("dsm-05", {
-		type: "raster",
-		tiles: [
-			"https://service.pdok.nl/rws/ahn/wms/v1_0?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&FORMAT=image/png&STYLES=&TRANSPARENT=TRUE&LAYERS=dsm_05m&TILED=true&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&BBOX={bbox-epsg-3857}",
-		],
-		tileSize: 256,
-	});
-	map.addLayer({
-		id: "dsm-05-layer",
-		type: "raster",
-		source: "dsm-05",
-		layout: { visibility: "none" },
-	});
-
 	map.addSource("satelliet", {
 		type: "raster",
 		tiles: [
