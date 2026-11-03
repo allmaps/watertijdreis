@@ -3,23 +3,34 @@
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import * as turf from "@turf/turf";
 	import { draw, fade } from "svelte/transition";
+	import NumberFlow from "@number-flow/svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 	const historicCtx = mapContext.historic;
 
 	let activeHistoricMap = $derived(historicCtx.selectedMap || historicCtx.previewMap);
 
-	let width: number = $state(160);
-	let height: number = $state(200);
+	// Scaled down by 0.8 from 160x200 to match your previous size without CSS scale hacks
+	let width: number = $state(128);
+	let height: number = $state(160);
+	let svgElement: SVGSVGElement | null = $state(null);
 
 	let polygons = $derived.by(() => {
 		if (!historicCtx.mapsLoaded || !historicCtx.visibleMaps) return [];
 
-		const mapArray = Array.from(historicCtx.visibleMaps.values());
-		return mapArray.map((i) => ({
+		const mapsArray = [];
+		for (const s of mapContext.historic.series) {
+			for (const [id, map] of s.visibleMaps) {
+				mapsArray.push(map);
+			}
+		}
+		return mapsArray.map((i) => ({
 			id: i.id,
 			type: "Feature" as const,
 			geometry: turf.toMercator(structuredClone(i.polygon)),
+			properties: {
+				series: mapContext.historic.series.find((s) => s.visibleMaps.has(i.id))?.id,
+			},
 		}));
 	});
 
@@ -82,6 +93,27 @@
 		};
 	});
 
+	// Precise coordinate mapping without CSS transform distortion
+	let titlePosition = $derived.by(() => {
+		if (!viewportRect || !svgElement) return null;
+
+		const svgRect = svgElement.getBoundingClientRect();
+
+		const pxPerUnitX = svgRect.width / viewBox[2];
+		const pxPerUnitY = svgRect.height / viewBox[3];
+
+		const rightEdgeSvgX = viewportRect.x + viewportRect.width;
+		const centerYSvgY = viewportRect.y + viewportRect.height / 2;
+
+		const screenX = (rightEdgeSvgX - viewBox[0]) * pxPerUnitX;
+		const screenY = (viewBox[1] + viewBox[3] - centerYSvgY) * pxPerUnitY;
+
+		return {
+			left: `${screenX + 20}px`,
+			top: `${screenY}px`,
+		};
+	});
+
 	let arrowPaths = $derived.by(() => {
 		if (!activeHistoricMap) return null;
 
@@ -113,63 +145,90 @@
 	function getProjectedPoints(coordinates: [number, number][]): string {
 		return coordinates.map((coord) => coord.join(",")).join(" ");
 	}
+
+	let range = $state([]);
+
+	$effect(() => {
+		const a = mapContext.historic.visibleMapsInViewport
+			.values()
+			.map((i) => i.yearEnd)
+			.toArray();
+		const min = Math.min(...a);
+		const max = Math.max(...a);
+		range = [min, max];
+	});
 </script>
 
-{#if historicCtx.visibleMaps && historicCtx.visibleMaps.size}
-	<svg
-		{width}
-		{height}
-		viewBox={viewBox.join(" ")}
-		class="drop-shadow-wtr-blue/50 pointer-events-none absolute bottom-32 left-2 z-[998] origin-bottom-left scale-80 touch-none drop-shadow-[1px_1px_0px] transition-transform duration-300 hover:scale-100 sm:right-8"
-	>
-		<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
-			<!-- POLYGONS -->
-			{#each polygons as poly (poly.id)}
-				<polygon
-					points={getProjectedPoints(poly.geometry.coordinates[0])}
-					fill={getPolygonFill(poly.id)}
-					stroke="#ff44aa"
-					stroke-width={scaleFactor * 1.33}
-					class="transition-fill duration-250"
-				/>
-			{/each}
+<div class="pointer-events-none z-[999] block touch-none">
+	{#if mapContext.maplibreLoaded && titlePosition && viewportRect}
+		<h1
+			class="text-wtr-blue absolute z-10000 -translate-y-1/2 rounded-lg bg-white p-2 text-xl text-[16px] font-[500] whitespace-nowrap text-white shadow-lg"
+			style="left: {titlePosition.left}; top: {titlePosition.top};"
+		>
+			<NumberFlow format={{ useGrouping: false }} value={range[0]} />-<NumberFlow
+				format={{ useGrouping: false }}
+				value={range[1]}
+			/>
+		</h1>
+	{/if}
 
-			<!-- VIEWPORT RECTANGLE -->
-			{#if viewportRect}
-				<rect
-					x={viewportRect.x}
-					y={viewportRect.y}
-					width={viewportRect.width}
-					height={viewportRect.height}
-					fill="none"
-					class="stroke-wtr-blue/30"
-					stroke-width={scaleFactor * 4}
-					rx={scaleFactor * 2}
-					ry={scaleFactor * 2}
-				/>
-			{/if}
+	{#if historicCtx.visibleMaps && historicCtx.visibleMaps.size}
+		<svg
+			bind:this={svgElement}
+			{width}
+			{height}
+			viewBox={viewBox.join(" ")}
+			class="drop-shadow-wtr-blue/50 pointer-events-none drop-shadow-[1px_1px_0px]"
+		>
+			<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
+				<!-- POLYGONS -->
+				{#each polygons as poly (poly.id)}
+					<polygon
+						points={getProjectedPoints(poly.geometry.coordinates[0])}
+						fill={getPolygonFill(poly)}
+						stroke={poly.properties.series === "wsk" ? "#ff44aa" : "#44aa44"}
+						stroke-width={scaleFactor * 1.33}
+						class="transition-fill duration-250"
+					/>
+				{/each}
 
-			<!-- ARROW POINTING TO ACTIVE MAP -->
-			{#if arrowPaths}
-				<g out:fade={{ duration: 250 }}>
-					{#key activeHistoricMap?.id}
-						<path
-							in:draw={{ duration: 250 }}
-							fill="none"
-							stroke="var(--color-wtr-lighter-blue)"
-							stroke-width={arrowPaths.strokeWidth}
-							d={arrowPaths.leftArm}
-						/>
-						<path
-							in:draw={{ duration: 250 }}
-							fill="none"
-							stroke="var(--color-wtr-lighter-blue)"
-							stroke-width={arrowPaths.strokeWidth}
-							d={arrowPaths.rightArm}
-						/>
-					{/key}
-				</g>
-			{/if}
-		</g>
-	</svg>
-{/if}
+				<!-- VIEWPORT RECTANGLE -->
+				{#if viewportRect}
+					<rect
+						x={viewportRect.x}
+						y={viewportRect.y}
+						width={viewportRect.width}
+						height={viewportRect.height}
+						fill="none"
+						class="stroke-wtr-blue"
+						stroke-width={scaleFactor * 4}
+						rx={scaleFactor * 2}
+						ry={scaleFactor * 2}
+					/>
+				{/if}
+
+				<!-- ARROW POINTING TO ACTIVE MAP -->
+				{#if arrowPaths}
+					<g out:fade={{ duration: 250 }}>
+						{#key activeHistoricMap?.id}
+							<path
+								in:draw={{ duration: 250 }}
+								fill="none"
+								stroke="var(--color-wtr-blue)"
+								stroke-width={arrowPaths.strokeWidth * 1.5}
+								d={arrowPaths.leftArm}
+							/>
+							<path
+								in:draw={{ duration: 250 }}
+								fill="none"
+								stroke="var(--color-wtr-blue)"
+								stroke-width={arrowPaths.strokeWidth * 1.5}
+								d={arrowPaths.rightArm}
+							/>
+						{/key}
+					</g>
+				{/if}
+			</g>
+		</svg>
+	{/if}
+</div>

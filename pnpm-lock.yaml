@@ -20,6 +20,9 @@ importers:
       '@maplibre/maplibre-gl-style-spec':
         specifier: ^24.3.1
         version: 24.3.1
+      '@number-flow/svelte':
+        specifier: ^0.4.2
+        version: 0.4.2(svelte@5.43.6)
       '@protomaps/basemaps':
         specifier: ^5.7.0
         version: 5.7.0

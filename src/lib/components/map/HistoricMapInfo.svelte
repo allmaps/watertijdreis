@@ -186,7 +186,7 @@
 
 {#if historicMap}
 	<div
-		class="from-wtr-blue/50 to-wtr-blue/50 sm:from-wtr-blue fixed right-2 bottom-2 left-2 z-[1000] overflow-hidden rounded-lg bg-gradient-to-r from-[270px] shadow-lg transition-all duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
+		class="from-wtr-blue/50 to-wtr-blue/50 sm:from-wtr-blue z-[1000] overflow-hidden rounded-lg bg-gradient-to-r from-[270px] shadow-lg transition-all duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
 		{sheetInformationVisible || historicCtx.selectedMap ? 'bg-wtr-blue w-auto sm:w-87' : 'w-auto sm:w-[calc(100vh-16px)]'}"
 		style:max-height={sheetInformationVisible ? "60vh" : "120px"}
 		style:pointer-events={historicCtx.selectedMap ? "auto" : "none"}

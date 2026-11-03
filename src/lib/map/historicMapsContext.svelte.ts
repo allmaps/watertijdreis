@@ -106,8 +106,8 @@ export class HistoricMapsContext {
 		if (this.mapContext.sheetIndexVisible) return this.hoveredHistoricMap;
 
 		// When a user is zoomed in and only one historic map fills the screen, the info and thumbnail of that map will be 'previewed'
-		if (this.mapsLoaded && this.visibleMapsInViewport.size === 1)
-			return Array.from(this.visibleMapsInViewport.values())[0] ?? null;
+		// if (this.mapsLoaded && this.visibleMapsInViewport.size === 1)
+		// 	return Array.from(this.visibleMapsInViewport.values())[0] ?? null;
 		return null;
 	});
 
@@ -152,11 +152,32 @@ export class HistoricMapsContext {
 			this,
 			"wsk",
 			"Waterstaatkaarten",
+			"#ff44aa",
 			WATERSTAATSKAARTEN_URL,
 			WATERSTAATSKAARTEN_SPRITE_JSON,
 			WATERSTAATSKAARTEN_SPRITE_IMG
 		);
 		this.series.push(defaultSeries);
+
+		const secondSeries = new HistoricMapSeries(
+			this,
+			"rk",
+			"Rivierkaarten",
+			"#44ff44",
+			"./second-series.json",
+			WATERSTAATSKAARTEN_SPRITE_JSON,
+			WATERSTAATSKAARTEN_SPRITE_IMG
+		);
+		this.series.push(secondSeries);
+
+		setTimeout(() => {
+			this.warpedMapLayer.bringMapsToFront(["bccf023752ff6f99", "fb8c7f459549c582"]);
+			this.warpedMapLayer.setMapOptions("bccf023752ff6f99", { colorize: true, colorizeColor: "#00ff44" });
+			this.warpedMapLayer.setMapOptions("fb8c7f459549c582", { colorize: true, colorizeColor: "#00ff44" });
+
+			this.series[0].filter.edition = 5;
+			this.series[0].filter.yearEnd = 2000;
+		}, 1000);
 
 		this.#initOutlineSources();
 
@@ -256,7 +277,13 @@ export class HistoricMapsContext {
 
 	updateMapOutlines() {
 		const map = this.mapContext.activeMap;
-		const mapsArray = Array.from(this.visibleMaps.values());
+		// const mapsArray = Array.from(this.visibleMaps.values());
+		const mapsArray = [];
+		for (const s of this.series) {
+			for (const [id, map] of s.visibleMaps) {
+				mapsArray.push(map);
+			}
+		}
 
 		const polygons = mapsArray.map((historicMap, index) => ({
 			type: "Feature" as const,
@@ -264,6 +291,7 @@ export class HistoricMapsContext {
 			geometry: historicMap.polygon,
 			properties: {
 				id: historicMap.id,
+				series: this.series.find((s) => s.visibleMaps.has(historicMap.id))?.id,
 			},
 		}));
 

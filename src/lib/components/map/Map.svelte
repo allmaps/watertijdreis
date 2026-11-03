@@ -14,6 +14,10 @@
 	import { updateMousePosition } from "../../state/mousePosition.svelte";
 	import { spriteStore } from "../../utils/spriteSheet.svelte";
 
+	import NumberFlow from "@number-flow/svelte";
+	import MapSeriesSelector from "../layers/LayerPanel.svelte";
+	import PassiveTimeline from "./PassiveTimeline.svelte";
+
 	const containerId = "map-container";
 	const mapContext = new MapContext();
 
@@ -21,7 +25,6 @@
 
 	onMount(() => {
 		if (!mapContext.map) mapContext.init(containerId);
-
 		spriteStore.init();
 	});
 
@@ -54,6 +57,14 @@
 		const q = new URLSearchParams(window.location.search);
 		mapContext.historic.selectedMapId = q.get("blad") ?? null;
 	}
+
+	let distributions = $derived(
+		mapContext.historic.series.map((s) => {
+			const years: Record<number, number> = {};
+			for (const [, map] of s.visibleMaps) years[map.yearEnd] = (years[map.yearEnd] ?? 0) + 1;
+			return { name: s.id, color: s.id === "wsk" ? "#ff44aa" : "#44aa44", years };
+		})
+	);
 </script>
 
 <div
@@ -76,11 +87,17 @@
 
 <AppHeader />
 
-<Timeline visible={mapContext.maplibreLoaded && mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}
-></Timeline>
+<!-- <Timeline visible={mapContext.maplibreLoaded && mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}
+></Timeline> -->
 
-<Minimap></Minimap>
-<HistoricMapInfo></HistoricMapInfo>
+<div class="absolute bottom-0 left-0 flex-col p-2">
+	<div class="flex items-baseline gap-10">
+		<Minimap></Minimap>
+		<PassiveTimeline {distributions}></PassiveTimeline>
+	</div>
+	<HistoricMapInfo></HistoricMapInfo>
+	<MapSeriesSelector></MapSeriesSelector>
+</div>
 
 <svelte:window onpointermove={updateMousePosition} onkeydown={handleKeyDown} onpopstate={handlePopState} />
 

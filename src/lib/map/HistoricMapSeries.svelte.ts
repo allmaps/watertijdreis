@@ -1,18 +1,18 @@
+// src/lib/state/HistoricMapSeries.svelte.ts
+
 import { SvelteMap } from "svelte/reactivity";
 import type { Filter, HistoricMap } from "$lib/types/historicmap";
 import { transformToIIIFInfoJson } from "$lib/utils/allmaps";
 import { calculateFilteredMapIds } from "./HistoricMapFilter";
 import type { HistoricMapsContext } from "./historicMapsContext.svelte";
+import { MapLayer } from "./MapLayer.svelte";
 
-export class HistoricMapSeries {
-	id: string;
-	name: string;
+export class HistoricMapSeries extends MapLayer {
 	url: string;
 	spriteJsonUrl: string;
 	spriteImageUrl: string;
 	context: HistoricMapsContext;
 
-	enabled = $state(true);
 	mapsLoaded = $state(false);
 
 	mapsById = new SvelteMap<string, HistoricMap>();
@@ -41,23 +41,45 @@ export class HistoricMapSeries {
 		context: HistoricMapsContext,
 		id: string,
 		name: string,
+		themeColor: string,
 		url: string,
 		spriteJsonUrl: string,
 		spriteImageUrl: string
 	) {
-		this.id = id;
-		this.name = name;
+		super({
+			id,
+			name,
+			themeColor,
+			type: "historic-series",
+			visible: true,
+		});
+
 		this.url = url;
 		this.context = context;
 		this.spriteJsonUrl = spriteJsonUrl;
 		this.spriteImageUrl = spriteImageUrl;
 
 		$effect.root(() => {
-			if (this.mapsLoaded) {
-				if (this.enabled) this.applyFilter();
-				else this.#hideAll();
-			}
+			$effect(() => {
+				if (this.mapsLoaded) {
+					if (this.visible) this.applyFilter();
+					else this.#hideAll();
+				}
+			});
 		});
+	}
+
+	setVisibility(visible: boolean) {
+		this.visible = visible;
+		if (!visible) {
+			this.#hideAll();
+		} else {
+			this.applyFilter();
+		}
+	}
+
+	setOpacity(opacity: number) {
+		this.opacity = opacity;
 	}
 
 	async load() {
@@ -87,7 +109,6 @@ export class HistoricMapSeries {
 			});
 
 			await Promise.all(loadPromises);
-
 			await this.#loadSprites();
 
 			this.mapsLoaded = true;
@@ -110,7 +131,7 @@ export class HistoricMapSeries {
 	}
 
 	applyFilter(filter: Filter = this.filter) {
-		if (!this.mapsLoaded || !this.enabled) return;
+		if (!this.mapsLoaded || !this.visible) return;
 
 		const { mapsToColor, mapsToDesaturate, mapsToHide, adjustedYearEnd } = calculateFilteredMapIds(
 			this.mapsByNumber,

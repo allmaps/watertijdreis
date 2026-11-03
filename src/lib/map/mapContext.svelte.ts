@@ -1,21 +1,28 @@
 import * as maplibregl from "maplibre-gl";
 import type { Map as MaplibreMap } from "maplibre-gl";
+import { createAvailableLayers, addUserLocationCircle } from "$lib/map/mapLayers.svelte";
+
 import * as pmtiles from "pmtiles";
-import { addBackgroundLayers, addUserLocationCircle } from "./mapLayers.svelte";
 import { basemapStyle, LABELS_LAYERS } from "$lib/map/basemap";
 import { HistoricMapsContext } from "./historicMapsContext.svelte";
 import { getValidUserLocation } from "$lib/utils/userLocation";
-import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from "$lib/map/mapLayers.svelte";
 
 import { type LayerOptions, type MapView } from "$lib/types/map";
 import type { Feature } from "geojson";
 import { applyStateFromURL, syncStateToURL, defaultState } from "./urlStateManager";
+import type { MapLayer } from "./MapLayer.svelte";
 
 export class MapContext {
 	map: MaplibreMap | null = $state(null);
 	maplibreLoaded: boolean = $state(false);
 
 	historic: HistoricMapsContext = new HistoricMapsContext(this);
+
+	availableLayers: MapLayer[] = $state([]);
+
+	activeLayers: MapLayer[] = $derived.by(() => {
+		return this.availableLayers.filter((layer) => layer.added);
+	});
 
 	viewportPolygon: Feature | null = $state(null);
 
@@ -110,7 +117,7 @@ export class MapContext {
 		this.map.doubleClickZoom.disable();
 
 		this.map.on("load", async () => {
-			addBackgroundLayers(this.activeMap);
+			this.availableLayers = createAvailableLayers(this.activeMap);
 
 			await this.historic.init();
 
@@ -184,44 +191,26 @@ export class MapContext {
 	}
 
 	updateOverlays(overlay: "none" | "waterschapsgrenzen" | "gemeentegrenzen") {
-		if (!this.map) return;
+		if (!this.maplibreLoaded) return;
 
-		if (overlay !== "waterschapsgrenzen") {
-			if (this.map.getLayer("overlay-waterschapsgrenzen")) {
-				this.map.removeLayer("overlay-waterschapsgrenzen");
-			}
-			if (this.map.getSource("pdok-waterschapsgrenzen")) {
-				this.map.removeSource("pdok-waterschapsgrenzen");
-			}
-		}
+		// Haal de grenzen-lagen op via de manager en zet de juiste aan/uit
+		const waterschapsLayer = layersManager.availableLayers.find((l) => l.id === "waterschapsgrenzen");
+		const gemeenteLayer = layersManager.availableLayers.find((l) => l.id === "gemeentegrenzen");
 
-		if (overlay !== "gemeentegrenzen") {
-			if (this.map.getLayer("overlay-gemeentegrenzen")) {
-				this.map.removeLayer("overlay-gemeentegrenzen");
-			}
-			if (this.map.getSource("pdok-gemeentegrenzen")) {
-				this.map.removeSource("pdok-gemeentegrenzen");
-			}
-		}
-
-		if (overlay === "waterschapsgrenzen" && !this.map.getSource("pdok-waterschapsgrenzen")) {
-			addWaterschapsgrenzenLayer(this.map);
-		}
-		if (overlay === "gemeentegrenzen" && !this.map.getSource("pdok-gemeentegrenzen")) {
-			addGemeentegrenzenLayer(this.map);
-		}
+		waterschapsLayer?.setVisibility(overlay === "waterschapsgrenzen");
+		gemeenteLayer?.setVisibility(overlay === "gemeentegrenzen");
 	}
 
 	setAHNVisibility(visible: boolean) {
 		if (!this.maplibreLoaded) return;
-		if (!this.activeMap.getLayer("dsm-05-layer")) return;
-		this.activeMap.setLayoutProperty("dsm-05-layer", "visibility", visible ? "visible" : "none");
+		const ahn = layersManager.availableLayers.find((l) => l.id === "ahn");
+		ahn?.setVisibility(visible);
 	}
 
 	setSatellietVisibility(visible: boolean) {
 		if (!this.maplibreLoaded) return;
-		if (!this.activeMap.getLayer("satelliet-layer")) return;
-		this.activeMap.setLayoutProperty("satelliet-layer", "visibility", visible ? "visible" : "none");
+		const satelliet = layersManager.availableLayers.find((l) => l.id === "satelliet");
+		satelliet?.setVisibility(visible);
 	}
 
 	private protomapsLoaded = false;
