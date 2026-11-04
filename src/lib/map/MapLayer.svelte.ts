@@ -1,38 +1,73 @@
-// src/lib/state/MapLayer.svelte.ts
+// MapLayer.svelte.ts
+import type { Map as MaplibreMap, MapMouseEvent } from "maplibre-gl";
 
-export type MapLayerType = "historic-series" | "pdok-wms" | "pdok-wmts" | "vector-overlay";
+export type MapLayerType = "pdok-wms" | "historic-series";
 
 export interface MapLayerOptions {
 	id: string;
 	name: string;
-	themeColor?: string;
+	themeColor: string;
 	type: MapLayerType;
 	visible?: boolean;
-	opacity?: number;
-	added?: boolean; // Nieuw: of de laag actief in het paneel staat
+	added?: boolean;
+	movable?: boolean;
 }
 
 export abstract class MapLayer {
-	id: string;
+	readonly id: string;
 	name: string;
 	themeColor: string;
-	type: MapLayerType;
+	readonly type: MapLayerType;
+	movable: boolean;
 
-	// Reactieve runes
+	added = $state(false);
 	visible = $state(true);
 	opacity = $state(1);
-	added = $state(false); // Standaard niet in het actieve paneel, tenzij expliciet aangezet
+	suppressed = $state(false);
 
-	constructor(options: MapLayerOptions) {
-		this.id = options.id;
-		this.name = options.name;
-		this.themeColor = options.themeColor ?? "#65e";
-		this.type = options.type;
-		this.visible = options.visible ?? true;
-		this.opacity = options.opacity ?? 1;
-		this.added = options.added ?? false;
+	effectiveVisible = $derived(this.added && this.visible && !this.suppressed);
+
+	protected map = $state<MaplibreMap | null>(null);
+
+	#disposeEffects: () => void;
+
+	constructor({ id, name, themeColor, type, visible = true, added = false, movable = true }: MapLayerOptions) {
+		this.id = id;
+		this.name = name;
+		this.themeColor = themeColor;
+		this.type = type;
+		this.visible = visible;
+		this.added = added;
+		this.movable = movable;
+
+		this.#disposeEffects = $effect.root(() => {
+			$effect(() => {
+				if (!this.map) return; // nog niet gemount
+				this.applyVisibility(this.effectiveVisible);
+			});
+
+			$effect(() => {
+				if (!this.map) return;
+				this.applyOpacity(this.opacity);
+			});
+		});
 	}
 
-	abstract setVisibility(visible: boolean): void;
-	abstract setOpacity(opacity: number): void;
+	destroy() {
+		this.#disposeEffects();
+	}
+
+	abstract get mapLayerIds(): string[];
+	abstract mount(map: MaplibreMap): void | Promise<void>;
+	abstract unmount(): void;
+	protected abstract applyVisibility(visible: boolean): void;
+	protected applyOpacity(opacity: number): void {}
+
+	onClick(e: MapMouseEvent): boolean {
+		return false;
+	}
+	onPointerMove(e: MapMouseEvent): boolean {
+		return false;
+	}
+	onPointerLeave(): void {}
 }

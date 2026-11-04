@@ -1,8 +1,8 @@
 // src/lib/map/mapLayers.svelte.ts
 import type { Map as MaplibreMap } from "maplibre-gl";
-import type { MapContext } from "./mapContext.svelte";
+import type { MapLayer } from "./MapLayer.svelte";
 import { RasterMapLayer } from "./RasterMapLayer.svelte";
-import type { MapLayer } from "$lib/state/MapLayer.svelte";
+import { VectorMapLayer } from "./VectorMapLayer.svelte";
 
 /**
  * Retourneert de catalogus van alle beschikbare lagen in de applicatie.
@@ -10,17 +10,14 @@ import type { MapLayer } from "$lib/state/MapLayer.svelte";
  */
 export function createAvailableLayers(map: MaplibreMap): MapLayer[] {
 	return [
-		new RasterMapLayer({
+		new VectorMapLayer({
 			id: "waterschapsgrenzen",
 			name: "Waterschapsgrenzen",
-			themeColor: "#f4a",
-			type: "pdok-wms",
-			sourceId: "pdok-waterschapsgrenzen",
-			layerId: "overlay-waterschapsgrenzen",
-			tiles: [
-				"https://service.pdok.nl/hwh/waterschappen-waterschapsgrenzen-imso/wms/v2_0?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=waterschap&STYLES=&FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}",
-			],
-			added: true, // Standaard zichtbaar in het paneel
+			themeColor: "#75f",
+			sourceId: "waterschapsgrenzen",
+			data: "./waterschapsgrenzen.geojson",
+			labelField: "naam",
+			added: true,
 		}),
 		new RasterMapLayer({
 			id: "satelliet",
@@ -78,8 +75,4 @@ export function addUserLocationCircle(map: MaplibreMap) {
 			"circle-stroke-opacity-transition": { duration: 400 },
 		},
 	});
-}
-
-export function addOutlineLayers(mapContext: MapContext) {
-	// ... (je bestaande addOutlineLayers code)
 }

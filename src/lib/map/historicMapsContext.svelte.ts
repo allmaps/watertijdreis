@@ -1,72 +1,106 @@
+import { untrack } from "svelte";
 import type { Filter, HistoricMap } from "$lib/types/historicmap";
-import type { MapContext } from "./mapContext.svelte";
-import { WarpedMapLayer } from "@allmaps/maplibre";
-import { addOutlineLayers } from "./mapLayers.svelte";
-import * as turf from "@turf/turf";
-import type { MapLayerMouseEvent, GeoJSONSource } from "maplibre-gl";
 import type { MapView } from "$lib/types/map";
+import type { MapContext } from "./mapContext.svelte";
 import { HistoricMapSeries } from "./HistoricMapSeries.svelte";
 
-const WATERSTAATSKAARTEN_URL = "maps-sorted-by-edition.json";
-const WATERSTAATSKAARTEN_SPRITE_JSON = "/sprites/regular-sheets-128.json";
-const WATERSTAATSKAARTEN_SPRITE_IMG = "/sprites/regular-sheets-128.jpg";
+const SPRITE_JSON = "/sprites/regular-sheets-128.json";
+const SPRITE_IMAGE = "/sprites/regular-sheets-128.jpg";
+
+interface SeriesConfig {
+	id: string;
+	name: string;
+	themeColor: string;
+	url: string;
+	spriteJson: string;
+	spriteImage: string;
+}
+
+/** Eerste serie = primaire serie (waar de UI nog van uitgaat) */
+const SERIES_CONFIG: SeriesConfig[] = [
+	{
+		id: "wsk",
+		name: "Waterstaatkaarten",
+		themeColor: "#ff44aa",
+		url: "maps-sorted-by-edition.json",
+		spriteJson: SPRITE_JSON,
+		spriteImage: SPRITE_IMAGE,
+	},
+	{
+		id: "rk",
+		name: "Rivierkaarten",
+		themeColor: "#44ff44",
+		url: "./second-series.json",
+		spriteJson: SPRITE_JSON,
+		spriteImage: SPRITE_IMAGE,
+	},
+];
+
+const DEFAULT_FILTER: Filter = {
+	yearStart: 1865,
+	yearEnd: 1983,
+	edition: "All",
+	bis: false,
+	type: undefined,
+};
 
 export class HistoricMapsContext {
 	mapContext: MapContext;
-	warpedMapLayer: WarpedMapLayer = new WarpedMapLayer();
 
 	series = $state<HistoricMapSeries[]>([]);
 
-	// -------------------------------------------------------------
-	// For backwards compatibility: HistoricMapsContext supports series, the UI does not (yet), as 'waterstaatskaarten' is now the only series:
-	// here, filter is a reference to the 'waterstaatskaarten'-series filter, and mapsById, visibleMaps, and mapsByNumber are aggregated across 'all' series.
-	// -------------------------------------------------------------
-	get filter(): Filter {
-		return (
-			this.series[0]?.filter ?? {
-				yearStart: 1865,
-				yearEnd: 1983,
-				edition: "All",
-				bis: false,
-				type: undefined,
-			}
-		);
+	get primarySeries(): HistoricMapSeries | undefined {
+		return this.series[0];
 	}
 
 	get mapsLoaded(): boolean {
 		return this.series.length > 0 && this.series.every((s) => s.mapsLoaded);
 	}
 
+	// ------------------------------------------------------------------
+	// Interactie-state: doorgeefluik naar de series
+	// ------------------------------------------------------------------
+	get hoveredHistoricMap() {
+		return this.series.find((s) => s.hoveredHistoricMap)?.hoveredHistoricMap ?? null;
+	}
+
+	get clickedHistoricMap() {
+		return this.series.find((s) => s.clickedHistoricMap)?.clickedHistoricMap ?? null;
+	}
+
+	get gridVisible() {
+		return this.series.some((s) => s.gridVisible);
+	}
+
+	// ------------------------------------------------------------------
+	// Backwards compatibility voor een UI die nog niet met series werkt.
+	// `filter` en `mapsByNumber` komen van de primaire serie; `mapsById` en
+	// `visibleMaps` zijn geaggregeerd over alle series (kaart-ids zijn unieke hashes).
+	// ------------------------------------------------------------------
+	get filter(): Filter {
+		return this.primarySeries?.filter ?? DEFAULT_FILTER;
+	}
+
+	/** Bladnummers botsen tussen series, daarom alleen de primaire serie */
+	get mapsByNumber(): Map<number, HistoricMap[]> {
+		return this.primarySeries?.mapsByNumber ?? new Map();
+	}
+
 	mapsById: Map<string, HistoricMap> = $derived.by(() => {
 		const aggregated = new Map<string, HistoricMap>();
-		for (const s of this.series) {
-			for (const [id, map] of s.mapsById) {
-				aggregated.set(id, map);
-			}
-		}
+		for (const s of this.series) for (const [id, map] of s.mapsById) aggregated.set(id, map);
 		return aggregated;
 	});
 
 	visibleMaps: Map<string, HistoricMap> = $derived.by(() => {
 		const aggregated = new Map<string, HistoricMap>();
-		for (const s of this.series) {
-			for (const [id, map] of s.visibleMaps) {
-				aggregated.set(id, map);
-			}
-		}
+		for (const s of this.series) for (const [id, map] of s.visibleMaps) aggregated.set(id, map);
 		return aggregated;
 	});
 
-	mapsByNumber: Map<number, HistoricMap[]> = $derived.by(() => {
-		const grouped = new Map<number, HistoricMap[]>();
-		for (const sheet of this.mapsById.values()) {
-			const list = grouped.get(sheet.number) ?? [];
-			list.unshift(sheet);
-			grouped.set(sheet.number, list);
-		}
-		return grouped;
-	});
-
+	// ------------------------------------------------------------------
+	// Viewport
+	// ------------------------------------------------------------------
 	#mapIdsInViewport = $state<string[]>([]);
 
 	mapsInViewport = $derived.by(() => {
@@ -81,163 +115,159 @@ export class HistoricMapsContext {
 	visibleMapsInViewport = $derived.by(() => {
 		const maps = new Map<string, HistoricMap>();
 		for (const id of this.#mapIdsInViewport) {
-			if (this.visibleMaps.has(id)) {
-				const mapData = this.mapsById.get(id);
-				if (mapData) maps.set(id, mapData);
-			}
+			if (!this.visibleMaps.has(id)) continue;
+			const mapData = this.mapsById.get(id);
+			if (mapData) maps.set(id, mapData);
 		}
 		return maps;
 	});
 
-	// Selected (by double clicking / clicking a thumbnail / etc.) and pinned maps,
-	// this works by having a single 'source-of-truth', the HistoricMap IDs; selectedMap/pinnedMap is derived from this ID and setHistoricMapView is called by the $effect in the constructor
+	// ------------------------------------------------------------------
+	// Selectie. Eén bron van waarheid: de ID's. selectedMap/pinnedMap zijn daarvan afgeleid
+	// en de $effect in de constructor roept setHistoricMapView aan.
+	// ------------------------------------------------------------------
 	selectedMapId: string | null = $state(null);
 	previousSelectedMapId: string | null = null;
 	pinnedMapId: string | null = $state(null);
+	pinnedMapView: MapView | null = $state(null);
 
 	selectedMap: HistoricMap | null = $derived(
 		this.selectedMapId ? (this.mapsById.get(this.selectedMapId) ?? null) : null
 	);
 	pinnedMap: HistoricMap | null = $derived(this.pinnedMapId ? (this.mapsById.get(this.pinnedMapId) ?? null) : null);
-	pinnedMapView: MapView | null = $state(null);
 
 	previewMap: HistoricMap | null = $derived.by(() => {
 		if (this.clickedHistoricMap) return this.clickedHistoricMap;
 		if (this.mapContext.sheetIndexVisible) return this.hoveredHistoricMap;
-
-		// When a user is zoomed in and only one historic map fills the screen, the info and thumbnail of that map will be 'previewed'
-		// if (this.mapsLoaded && this.visibleMapsInViewport.size === 1)
-		// 	return Array.from(this.visibleMapsInViewport.values())[0] ?? null;
 		return null;
 	});
-
-	hoveredHistoricMap = $state<HistoricMap | null>(null);
-	clickedHistoricMap = $state<HistoricMap | null>(null);
-
-	#hoveredFeatureId = $state<number | null>(null);
-	#clickedFeatureId = $state<number | null>(null);
-
-	// Grid & ripple-effects
-	gridVisible = $state(false);
-	#gridResetTimer: ReturnType<typeof setTimeout> | null = null;
-	#gridVisibilityTimer: ReturnType<typeof setTimeout> | null = null;
-	#rippleResetTimer: ReturnType<typeof setTimeout> | null = null;
-	#featureTimeouts: Record<number | string, ReturnType<typeof setTimeout>> = {};
-	#clickedMapTimeout: ReturnType<typeof setTimeout> | null = null;
-	#fillTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
 	constructor(mapContext: MapContext) {
 		this.mapContext = mapContext;
 
 		$effect(() => {
 			if (!this.mapsLoaded) return;
+			const selectedMap = this.selectedMap; // de enige echte dependency naast mapsLoaded
 
-			if (this.selectedMap) {
-				const view = this.selectedMapId === this.pinnedMapId ? this.pinnedMapView : null;
-				this.setHistoricMapView(this.selectedMap, view);
-				this.previousSelectedMapId = this.selectedMapId;
-			} else {
-				this.mapContext.restoreView();
-				this.previousSelectedMapId = null;
-			}
+			// Alles hieronder leest en schrijft veel state (savedMapViews, filters, ...).
+			// Zonder untrack wordt dat allemaal een dependency en kan de effect zichzelf opnieuw triggeren.
+			untrack(() => {
+				if (selectedMap) {
+					const view = selectedMap.id === this.pinnedMapId ? this.pinnedMapView : null;
+					this.setHistoricMapView(selectedMap, view);
+					this.previousSelectedMapId = selectedMap.id;
+				} else {
+					this.mapContext.restoreView();
+					this.#restoreSeriesOpacity();
+					this.previousSelectedMapId = null;
+				}
+			});
 		});
 	}
 
+	// ------------------------------------------------------------------
+	// Initialisatie
+	// ------------------------------------------------------------------
 	async init() {
-		this.mapContext.map?.addLayer(this.warpedMapLayer);
-		this.warpedMapLayer.setLayerOptions({ visible: false });
-		this.warpedMapLayer.getWarpedMapList().options.animatedOptions.push("opacity");
+		for (const config of SERIES_CONFIG) {
+			const series = new HistoricMapSeries(
+				this,
+				config.id,
+				config.name,
+				config.themeColor,
+				config.url,
+				config.spriteJson,
+				config.spriteImage
+			);
+			this.series.push(series);
+			await this.mapContext.addLayer(series); // eerst mounten, zodat de z-volgorde klopt
+		}
 
-		const defaultSeries = new HistoricMapSeries(
-			this,
-			"wsk",
-			"Waterstaatkaarten",
-			"#ff44aa",
-			WATERSTAATSKAARTEN_URL,
-			WATERSTAATSKAARTEN_SPRITE_JSON,
-			WATERSTAATSKAARTEN_SPRITE_IMG
-		);
-		this.series.push(defaultSeries);
+		// wsk.movable = false;
 
-		const secondSeries = new HistoricMapSeries(
-			this,
-			"rk",
-			"Rivierkaarten",
-			"#44ff44",
-			"./second-series.json",
-			WATERSTAATSKAARTEN_SPRITE_JSON,
-			WATERSTAATSKAARTEN_SPRITE_IMG
-		);
-		this.series.push(secondSeries);
-
-		setTimeout(() => {
-			this.warpedMapLayer.bringMapsToFront(["bccf023752ff6f99", "fb8c7f459549c582"]);
-			this.warpedMapLayer.setMapOptions("bccf023752ff6f99", { colorize: true, colorizeColor: "#00ff44" });
-			this.warpedMapLayer.setMapOptions("fb8c7f459549c582", { colorize: true, colorizeColor: "#00ff44" });
-
-			this.series[0].filter.edition = 5;
-			this.series[0].filter.yearEnd = 2000;
-		}, 1000);
-
-		this.#initOutlineSources();
-
-		this.mapContext.map?.on("maptilesloadedfromsprites", () => {
-			this.series.forEach((s) => s.applyFilter());
-		});
+		this.#applyDevDefaults();
 
 		await Promise.all(this.series.map((s) => s.load()));
 
-		this.mapContext.activeMap.on("click", "map-outlines-fill", (e) => this.handleMapClick(e));
-		this.mapContext.activeMap.on("mousemove", "map-outlines-fill", (e) => this.handleMapMouseMove(e));
-		this.mapContext.activeMap.on("mouseleave", "map-outlines-fill", () => this.handleMapMouseLeave());
 		this.mapContext.activeMap.on("moveend", () => this.updateViewportMaps());
-
 		this.updateViewportMaps();
 	}
 
-	#initOutlineSources() {
-		const emptyFeatureCollection = { type: "FeatureCollection", features: [] };
-		this.mapContext.map?.addSource("map-outlines", { type: "geojson", data: emptyFeatureCollection });
-		this.mapContext.map?.addSource("map-labels", { type: "geojson", data: emptyFeatureCollection });
-		addOutlineLayers(this.mapContext);
+	/** TIJDELIJK: test-instellingen, weghalen zodra de UI dit zelf regelt */
+	#applyDevDefaults() {
+		const wsk = this.series.find((s) => s.id === "wsk");
+		const rk = this.series.find((s) => s.id === "rk");
+
+		setTimeout(() => {
+			rk?.warpedMapLayer.setMapOptions("bccf023752ff6f99", { colorize: true, colorizeColor: "#00ff44" });
+			rk?.warpedMapLayer.setMapOptions("fb8c7f459549c582", { colorize: true, colorizeColor: "#00ff44" });
+			if (wsk) {
+				wsk.filter.edition = 5;
+				wsk.filter.yearEnd = 2000;
+			}
+		}, 1000);
 	}
 
-	applyFilter(filter: Filter = this.filter) {
-		this.series.forEach((s) => s.applyFilter(filter));
+	// ------------------------------------------------------------------
+	// Series
+	// ------------------------------------------------------------------
+	seriesOf(mapId: string | null): HistoricMapSeries | undefined {
+		return mapId ? this.series.find((s) => s.mapsById.has(mapId)) : undefined;
 	}
 
+	updateViewportMaps() {
+		this.#mapIdsInViewport = this.series.flatMap((s) => s.getMapIdsInViewport());
+	}
+
+	applyFilter() {
+		this.series.forEach((s) => s.applyFilter());
+	}
+
+	setSheetIndexVisibility(visible = !this.mapContext.sheetIndexVisible) {
+		this.mapContext.sheetIndexVisible = visible;
+		this.series.forEach((s) => s.setSheetIndexVisible(visible));
+		return visible;
+	}
+
+	// ------------------------------------------------------------------
+	// Kaartblad openen
+	// ------------------------------------------------------------------
 	setHistoricMapView(historicMap: HistoricMap, view?: MapView | null) {
 		if (!this.mapsLoaded) return;
 
-		this.#clickedFeatureId = null;
+		const series = this.seriesOf(historicMap.id);
+		if (!series) return;
+
+		this.series.forEach((s) => s.resetClicked());
 		this.setSheetIndexVisibility(false);
 
 		if (!this.previousSelectedMapId) this.mapContext.saveMapView();
-		this.#isolateHistoricMapLayer(historicMap.id);
-		this.#zoomToHistoricMap(historicMap, view);
+		this.#isolateHistoricMapLayer(series, historicMap.id);
+		this.#zoomToHistoricMap(series, historicMap, view);
 	}
 
-	#isolateHistoricMapLayer(selectedId: string) {
-		this.mapContext.savedLayerVisibility = {};
-		const layers = this.mapContext.activeMap.getStyle().layers;
+	#isolateHistoricMapLayer(series: HistoricMapSeries, selectedId: string) {
+		// Alle andere lagen (en de gebruikerslocatie) tijdelijk verbergen
+		this.mapContext.isolate(series);
+		series.warpedMapLayer.setLayerOptions({ opacity: 1 });
 
-		for (const layer of layers) {
-			if (!layer.id.includes("warped-map-layer-")) {
-				const visibility = this.mapContext.activeMap.getLayoutProperty(layer.id, "visibility") as "visible" | "none";
-				this.mapContext.savedLayerVisibility[layer.id] = visibility || "visible";
+		const mapsToHide = Array.from(series.visibleMaps.keys()).filter((id) => id !== selectedId);
 
-				if (visibility !== "none") {
-					this.mapContext.activeMap.setLayoutProperty(layer.id, "visibility", "none");
-				}
-			}
+		// Het vorige blad kan uit een andere serie komen
+		const prevId = this.previousSelectedMapId;
+		if (prevId && prevId !== selectedId) {
+			const prevSeries = this.seriesOf(prevId);
+			if (prevSeries === series) mapsToHide.push(prevId);
+			else prevSeries?.warpedMapLayer.setMapsOptions([prevId], { visible: false });
 		}
 
-		this.warpedMapLayer.setLayerOptions({ opacity: 1 });
-		const mapsToHide = Array.from(this.visibleMaps.keys()).filter((id) => id !== selectedId);
-		if (this.previousSelectedMapId) mapsToHide.push(this.previousSelectedMapId);
+		series.warpedMapLayer.setMapsOptions(mapsToHide, { visible: false });
 
-		this.warpedMapLayer.setMapsOptions(mapsToHide, { visible: false });
-		this.warpedMapLayer.setMapOptions(selectedId, {
+		series.warpedMapLayer.setMapsOptions(mapsToHide, { visible: false });
+
+		// Het gekozen blad: ongemaskeerd en zonder vervorming, ook als het door het filter
+		// verborgen of ontkleurd was
+		series.warpedMapLayer.setMapOptions(selectedId, {
 			visible: true,
 			transformationType: "straight",
 			saturation: 1,
@@ -246,239 +276,29 @@ export class HistoricMapsContext {
 		});
 	}
 
-	#zoomToHistoricMap(historicMap: HistoricMap, view?: MapView | null) {
+	#zoomToHistoricMap(series: HistoricMapSeries, historicMap: HistoricMap, view?: MapView | null) {
 		if (view) {
 			this.mapContext.activeMap.easeTo(view);
 			return;
 		}
 
-		const bbox = this.warpedMapLayer.getMapsBbox([historicMap.id], {
+		const bbox = series.warpedMapLayer.getMapsBbox([historicMap.id], {
 			projection: { definition: "EPSG:4326" },
 		});
+		if (!bbox) return;
 
-		if (bbox) {
-			const [minX, minY, maxX, maxY] = bbox;
-			this.mapContext.activeMap.fitBounds(
-				[
-					[minX, minY],
-					[maxX, maxY],
-				],
-				{ padding: 88, speed: 2, curve: 1.8, essential: true, animate: this.previousSelectedMapId === null }
-			);
-		}
+		const [minX, minY, maxX, maxY] = bbox;
+		this.mapContext.activeMap.fitBounds(
+			[
+				[minX, minY],
+				[maxX, maxY],
+			],
+			{ padding: 88, speed: 2, curve: 1.8, essential: true, animate: this.previousSelectedMapId === null }
+		);
 	}
 
-	updateViewportMaps() {
-		const reference = this.warpedMapLayer.renderer?.mapsInViewport;
-		if (reference) {
-			this.#mapIdsInViewport = Array.from(reference);
-		}
-	}
-
-	updateMapOutlines() {
-		const map = this.mapContext.activeMap;
-		// const mapsArray = Array.from(this.visibleMaps.values());
-		const mapsArray = [];
-		for (const s of this.series) {
-			for (const [id, map] of s.visibleMaps) {
-				mapsArray.push(map);
-			}
-		}
-
-		const polygons = mapsArray.map((historicMap, index) => ({
-			type: "Feature" as const,
-			id: index,
-			geometry: historicMap.polygon,
-			properties: {
-				id: historicMap.id,
-				series: this.series.find((s) => s.visibleMaps.has(historicMap.id))?.id,
-			},
-		}));
-
-		const points = mapsArray.map((historicMap, index) => ({
-			type: "Feature" as const,
-			id: index,
-			geometry: turf.centerOfMass(historicMap.polygon).geometry,
-			properties: {
-				year: historicMap.yearEnd,
-				num: `${historicMap.number}.${historicMap.position}`,
-			},
-		}));
-
-		const outlinesSource = map.getSource("map-outlines") as GeoJSONSource | undefined;
-		outlinesSource?.setData({ type: "FeatureCollection", features: polygons });
-
-		const labelsSource = map.getSource("map-labels") as GeoJSONSource | undefined;
-		labelsSource?.setData({ type: "FeatureCollection", features: points });
-	}
-
-	handleMapClick(e: MapLayerMouseEvent) {
-		const clickedLngLat = e.lngLat;
-		const feature = e.features?.[0];
-		if (!feature) return;
-
-		const mapId = feature.properties?.id;
-		const historicMap = this.mapsById.get(mapId) || null;
-
-		if (this.#shouldOpenImmediately(historicMap)) {
-			this.selectedMapId = historicMap?.id ?? null;
-			return;
-		}
-
-		this.setGridVisibility(true, clickedLngLat);
-
-		if (this.#rippleResetTimer) clearTimeout(this.#rippleResetTimer);
-		this.#rippleResetTimer = setTimeout(() => {
-			this.setGridVisibility(false, clickedLngLat);
-		}, 1500);
-
-		this.#handleMapSelection(historicMap, Number(feature.id));
-		this.#triggerFillFlashAnimation(Number(feature.id));
-	}
-
-	handleMapMouseMove(e: MapLayerMouseEvent) {
-		const feature = e.features?.[0];
-		if (!feature) return;
-
-		if (this.#hoveredFeatureId !== null && this.#hoveredFeatureId !== feature.id) {
-			this.mapContext.activeMap.setFeatureState(
-				{ source: "map-outlines", id: this.#hoveredFeatureId },
-				{ hover: false }
-			);
-		}
-
-		this.#hoveredFeatureId = Number(feature.id);
-		this.mapContext.activeMap.setFeatureState({ source: "map-outlines", id: this.#hoveredFeatureId }, { hover: true });
-
-		const mapId = feature.properties?.id;
-		this.hoveredHistoricMap = this.mapsById.get(mapId) || null;
-	}
-
-	handleMapMouseLeave() {
-		if (this.#hoveredFeatureId !== null) {
-			this.mapContext.activeMap.setFeatureState(
-				{ source: "map-outlines", id: this.#hoveredFeatureId },
-				{ hover: false }
-			);
-		}
-
-		this.#hoveredFeatureId = null;
-		this.hoveredHistoricMap = null;
-	}
-
-	extendClickedMapTimeout(delay = 2500) {
-		if (!this.#clickedMapTimeout) return;
-		clearTimeout(this.#clickedMapTimeout);
-		this.#clickedMapTimeout = setTimeout(() => (this.#clickedFeatureId = null), delay);
-	}
-
-	setGridVisibility(isVisible: boolean, centerLngLat = { lng: 5.63, lat: 52.16 }, rippleScale = 3, speed = 300) {
-		if (this.mapContext.sheetIndexVisible && !isVisible) return;
-
-		if (!this.mapContext.activeMap.getSource("map-outlines")) return;
-		const allFeatures = this.mapContext.activeMap.querySourceFeatures("map-outlines");
-
-		if (this.#gridVisibilityTimer) clearTimeout(this.#gridVisibilityTimer);
-		this.#gridVisibilityTimer = setTimeout(() => (this.gridVisible = isVisible), 100);
-
-		if (isVisible && this.#gridResetTimer) {
-			clearTimeout(this.#gridResetTimer);
-			this.#gridResetTimer = null;
-		}
-
-		const hoverFillOpacity = isVisible ? 0.1 : 0;
-
-		this.mapContext.activeMap.setPaintProperty("map-outlines-fill", "fill-opacity", [
-			"max",
-			["coalesce", ["feature-state", "animated-fill-opacity"], 0],
-			["case", ["boolean", ["feature-state", "hover"], false], hoverFillOpacity, 0],
-		]);
-
-		allFeatures.forEach((feature: any) => {
-			const id = feature.id;
-			if (id === undefined) return;
-
-			if (this.#featureTimeouts[id]) {
-				clearTimeout(this.#featureTimeouts[id]);
-				delete this.#featureTimeouts[id];
-			}
-
-			if (!isVisible) {
-				this.mapContext.animateFeatureOpacity(id, "animated-stroke-opacity", 0, 500);
-				return;
-			}
-
-			const [x, y] = feature.geometry.coordinates[0][0];
-			const dx = centerLngLat.lng - x;
-			const dy = centerLngLat.lat - y;
-			const distance = Math.sqrt(dx ** 2 + dy ** 2);
-
-			const delay = distance * speed;
-			const targetOpacity = Math.max(0, 0.5 - distance / rippleScale);
-
-			this.#featureTimeouts[id] = setTimeout(() => {
-				this.mapContext.animateFeatureOpacity(id, "animated-stroke-opacity", targetOpacity, 500);
-				delete this.#featureTimeouts[id];
-			}, delay);
-		});
-	}
-
-	setSheetIndexVisibility(visible = !this.mapContext.sheetIndexVisible) {
-		this.mapContext.sheetIndexVisible = visible;
-		this.setGridVisibility(visible, { lng: 5.63, lat: 52.16 }, 100, 150);
-
-		const isMapSelected = !!this.selectedMap;
-		const visibilityStyle = !isMapSelected || visible ? "visible" : "none";
-
-		const layers = ["map-outlines-numbers", "map-outlines-stroke", "map-outlines-fill"];
-		layers.forEach((layerId) => {
-			this.mapContext.activeMap.setLayoutProperty(layerId, "visibility", visibilityStyle);
-		});
-
-		this.mapContext.activeMap.setPaintProperty("map-outlines-numbers", "text-opacity", visible ? 1 : 0);
-
-		return visible;
-	}
-
-	#handleMapSelection(historicMap: HistoricMap | null, featureId: number) {
-		this.clickedHistoricMap = historicMap;
-		this.#clickedFeatureId = featureId;
-
-		if (this.#gridResetTimer) clearTimeout(this.#gridResetTimer);
-		this.#gridResetTimer = setTimeout(() => {
-			this.clickedHistoricMap = null;
-			this.#clickedFeatureId = null;
-		}, 2500);
-	}
-
-	#shouldOpenImmediately(historicMap: HistoricMap | null): boolean {
-		if (!historicMap) return false;
-		if (this.mapContext.sheetIndexVisible) return true;
-		return this.clickedHistoricMap?.id === historicMap.id;
-	}
-
-	#triggerFillFlashAnimation(featureId: number) {
-		if (this.#clickedFeatureId !== null && this.#clickedFeatureId !== featureId) {
-			clearTimeout(this.#fillTimers.get(this.#clickedFeatureId));
-			this.mapContext.animateFeatureOpacity(this.#clickedFeatureId, "animated-fill-opacity", 0, 300);
-		}
-
-		clearTimeout(this.#fillTimers.get(featureId));
-		this.#clickedFeatureId = featureId;
-
-		this.mapContext.animateFeatureOpacity(featureId, "animated-fill-opacity", 0.15, 200, () => {
-			if (this.#clickedFeatureId !== featureId) {
-				this.mapContext.animateFeatureOpacity(featureId, "animated-fill-opacity", 0, 300);
-				return;
-			}
-
-			this.#fillTimers.set(
-				featureId,
-				setTimeout(() => {
-					this.mapContext.animateFeatureOpacity(featureId, "animated-fill-opacity", 0, 500);
-					this.#fillTimers.delete(featureId);
-				}, 1000)
-			);
-		});
+	/** Bij isolatie gaat de opacity naar 1; daarna moet de waarde van de slider terugkomen */
+	#restoreSeriesOpacity() {
+		for (const s of this.series) s.warpedMapLayer.setLayerOptions({ opacity: s.opacity });
 	}
 }
