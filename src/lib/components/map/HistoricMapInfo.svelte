@@ -186,8 +186,7 @@
 
 {#if historicMap}
 	<div
-		class="from-wtr-blue/50 to-wtr-blue/50 sm:from-wtr-blue z-[1000] overflow-hidden rounded-lg bg-gradient-to-r from-[270px] shadow-lg transition-all duration-300 sm:top-auto sm:to-transparent sm:to-[calc(50%-30px)]
-		{sheetInformationVisible || historicCtx.selectedMap ? 'bg-wtr-blue w-auto sm:w-87' : 'w-auto sm:w-[calc(100vh-16px)]'}"
+		class="absolute -top-10 right-0 overflow-hidden rounded-lg transition-all duration-300 sm:top-auto"
 		style:max-height={sheetInformationVisible ? "60vh" : "120px"}
 		style:pointer-events={historicCtx.selectedMap ? "auto" : "none"}
 		transition:fade={{ duration: 300 }}
@@ -233,12 +232,12 @@
 						onclick={() => {
 							if (!historicCtx.selectedMap) historicCtx.selectedMapId = historicMap.id;
 						}}
-						class="text-wtr-subtle-blue pointer-events-auto line-clamp-2 max-w-50 text-left text-base font-bold transition-colors hover:underline"
+						class="text-wtr-blue pointer-events-auto line-clamp-2 max-w-50 text-left text-base font-bold transition-colors hover:underline"
 					>
 						{mainSheet?.label || historicMap.label || "..."}
 					</button>
 
-					<p class="text-wtr-subtle-blue text-sm font-medium">
+					<p class="text-wtr-blue text-sm font-medium">
 						{historicMap.yearEnd} &middot; Editie {historicMap.edition}{historicMap.bis ? " BIS" : ""}
 					</p>
 

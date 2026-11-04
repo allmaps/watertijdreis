@@ -1,24 +1,60 @@
 <script lang="ts">
-	import { DotsSixVertical, Eye, EyeSlash, Info } from "phosphor-svelte";
-	import type { MapLayer } from "$lib/state/MapLayer.svelte";
+	import { DotsSixVertical, Eye, EyeSlash } from "phosphor-svelte";
+	import type { MapLayer } from "$lib/map/MapLayer.svelte";
+	import { HistoricMapSeries } from "$lib/map/HistoricMapSeries.svelte";
 
-	let { layer, onSettingsClick }: { layer: MapLayer; onSettingsClick: () => void } = $props();
+	let {
+		layer,
+		dragging = false,
+		onSettingsClick,
+		onGripDown,
+		onNudge,
+	}: {
+		layer: MapLayer;
+		dragging?: boolean;
+		onSettingsClick: () => void;
+		onGripDown: (e: PointerEvent) => void;
+		onNudge: (direction: 1 | -1) => void;
+	} = $props();
+
+	function onGripKeydown(e: KeyboardEvent) {
+		if (!layer.movable) return;
+		if (e.key === "ArrowUp") {
+			e.preventDefault();
+			onNudge(1);
+		} else if (e.key === "ArrowDown") {
+			e.preventDefault();
+			onNudge(-1);
+		}
+	}
 </script>
 
-<div class="group flex items-center justify-between gap-2 px-1 text-xs transition-colors">
+<div
+	class="group flex items-center justify-between gap-2 rounded-md p-1 text-xs transition-colors {dragging
+		? 'bg-white/10 ring-1 ring-white/25'
+		: ''}"
+>
 	<div class="flex items-center gap-2.5">
-		<!-- Drag handle -->
+		<!-- Drag handle: touch-none zodat touch niet gaat scrollen i.p.v. slepen -->
 		<button
 			type="button"
-			aria-label="Volgorde wijzigen"
-			class="cursor-grab text-white/40 hover:text-white active:cursor-grabbing"
+			data-grip
+			disabled={!layer.movable}
+			aria-label={layer.movable
+				? "Volgorde wijzigen (sleep, of gebruik pijltje omhoog/omlaag)"
+				: "Deze laag staat vast"}
+			onpointerdown={onGripDown}
+			onkeydown={onGripKeydown}
+			class="touch-none text-white/40 transition-colors {layer.movable
+				? 'cursor-grab hover:text-white active:cursor-grabbing'
+				: 'cursor-not-allowed opacity-30'}"
 		>
 			<DotsSixVertical size="18" />
 		</button>
 
-		<!-- Zichtbaarheid Toggle (Oogje) -->
+		<!-- Zichtbaarheid (oogje) -->
 		<button
-			onclick={() => layer.setVisibility(!layer.visible)}
+			onclick={() => (layer.visible = !layer.visible)}
 			class="cursor-pointer rounded-md border border-white/20 bg-white/10 p-1 transition-colors hover:bg-white/20"
 			aria-label="Zichtbaarheid wisselen"
 		>
@@ -29,11 +65,20 @@
 			{/if}
 		</button>
 
-		<!-- Titel -->
 		<span class="max-w-[130px] truncate font-semibold tracking-wide text-white">{layer.name}</span>
 	</div>
 
-	<!-- Rechterkant: Instellingen knop (pijltje / info) -->
+	{#if layer instanceof HistoricMapSeries}
+		{@const years = Array.from(layer.visibleMaps.values()).map((m) => m.yearEnd)}
+		{@const minYear = Math.min(...years)}
+		{@const maxYear = Math.max(...years)}
+		<div class="rounded-md border border-white/20 bg-white/10 px-1 py-0.5">
+			Hist. <span class="font-mono">{isFinite(minYear) ? minYear : "????"}-{isFinite(maxYear) ? maxYear : "????"}</span>
+		</div>
+	{:else}
+		<div class="rounded-md border border-white/20 bg-white/10 px-1 py-0.5">Actueel</div>
+	{/if}
+
 	<button
 		type="button"
 		onclick={onSettingsClick}

@@ -75,15 +75,15 @@
 	style:background-image={`radial-gradient(${mapContext.historic.selectedMap ? "#fef" : "#eef"} 2.5px, transparent 2.5px)`}
 ></div>
 
-{#if !mapContext.historic.selectedMap}
+<!-- {#if !mapContext.historic.selectedMap}
 	<Toast content={mapContext.toastContent}></Toast>
-{/if}
+{/if} -->
 
 <MapSheetToggle></MapSheetToggle>
-
+<!-- 
 {#if mapContext.maplibreLoaded}
 	<MapControls />
-{/if}
+{/if} -->
 
 <AppHeader />
 
@@ -94,8 +94,8 @@
 	<div class="flex items-baseline gap-10">
 		<Minimap></Minimap>
 		<PassiveTimeline {distributions}></PassiveTimeline>
+		<HistoricMapInfo></HistoricMapInfo>
 	</div>
-	<HistoricMapInfo></HistoricMapInfo>
 	<MapSeriesSelector></MapSeriesSelector>
 </div>
 
