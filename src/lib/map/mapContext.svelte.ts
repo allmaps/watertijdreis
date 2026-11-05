@@ -111,12 +111,11 @@ export class MapContext {
 		this.#initEventRouting(this.map);
 
 		this.map.on("load", async () => {
-			this.availableLayers = createAvailableLayers(this.activeMap);
-			addUserLocationCircle(this.activeMap);
-
-			// Eerst de historische series (de basis, onderaan), daarna de standaard-aan lagen erbovenop
-			await this.historic.init();
+			this.availableLayers = createAvailableLayers(this);
 			await this.#mountDefaultLayers();
+			await this.historic.init();
+
+			addUserLocationCircle(this.activeMap);
 
 			this.updateViewport();
 			this.activeMap.on("move", () => this.updateViewport());

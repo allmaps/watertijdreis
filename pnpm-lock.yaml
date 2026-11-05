@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@allmaps/maplibre':
         specifier: 1.0.0-beta.44
-        version: 1.0.0-beta.44
+        version: 1.0.0-beta.44(geotiff@2.1.3)
       '@fontsource-variable/inter':
         specifier: ^5.3.0
         version: 5.3.0
@@ -38,6 +38,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      geotiff:
+        specifier: ^2.1.3
+        version: 2.1.3
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -547,6 +550,9 @@ packages:
     resolution: {integrity: sha512-svlhRTdBXl1MKfRcrCllqvSZkb2qt0Ep+qEh3TUAcv8E4pnf9wJfhKzx5ISKZcFbpS117i+257U4LHyuTYdTuA==}
     peerDependencies:
       svelte: ^4 || ^5
+
+  '@petamoriken/float16@3.9.3':
+    resolution: {integrity: sha512-8awtpHXCx/bNpFt4mt2xdkgtgVvKqty8VbjHI/WWWQuEw+KLzFot3f4+LkQY9YmOtq7A5GdOnqoIC8Pdygjk2g==}
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
@@ -1721,6 +1727,10 @@ packages:
   geojson-polygon-self-intersections@1.2.1:
     resolution: {integrity: sha512-/QM1b5u2d172qQVO//9CGRa49jEmclKEsYOQmWP9ooEjj63tBM51m2805xsbxkzlEELQ2REgTf700gUhhlegxA==}
 
+  geotiff@2.1.3:
+    resolution: {integrity: sha512-PT6uoF5a1+kbC3tHmZSUsLHBp2QJlHasxxxxPW47QIY1VBKpFB+FcDvX+MxER6UzgLQZ0xDzJ9s48B9JbOCTqA==}
+    engines: {node: '>=10.19'}
+
   get-intrinsic@1.3.0:
     resolution: {integrity: sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==}
     engines: {node: '>= 0.4'}
@@ -1878,6 +1888,9 @@ packages:
 
   known-css-properties@0.35.0:
     resolution: {integrity: sha512-a/RAk2BfKk+WFGhhOCAYqSiFLc34k8Mt/6NWRI4joER0EYUzXIcFivjjnoD3+XU1DggLn/tZc3DOAgke7l8a4A==}
+
+  lerc@3.0.0:
+    resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -2085,9 +2098,15 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
+  pako@2.2.0:
+    resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
+
+  parse-headers@2.0.6:
+    resolution: {integrity: sha512-Tz11t3uKztEW5FEVZnj1ox8GKblWn+PvHY9TmJV5Mll2uHEwRdR/5Li1OlXoECjLYkApdhWy44ocONwXLiKO5A==}
 
   parse5@7.2.1:
     resolution: {integrity: sha512-BuBYQYlv1ckiPdQi/ohiivi9Sagc9JG+Ozs0r7b/0iK3sKmrb0b9FdWdBbOdx6hBCM/F9Ir82ofnBhtZOjCRPQ==}
@@ -2266,6 +2285,10 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
+
+  quick-lru@6.1.2:
+    resolution: {integrity: sha512-AAFUA5O1d83pIHEhJwWCq/RQcRukCkn/NSm2QsTEMle5f2hP0ChI2+3Xb051PZCkLryI/Ir1MVKviT2FIloaTQ==}
+    engines: {node: '>=12'}
 
   quickselect@1.1.1:
     resolution: {integrity: sha512-qN0Gqdw4c4KGPsBOQafj6yj/PA6c/L63f6CaZ/DCF/xF4Esu3jVmKLUDYxghFx8Kb/O7y9tI7x2RjTSXwdK1iQ==}
@@ -2650,6 +2673,9 @@ packages:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
 
+  web-worker@1.5.0:
+    resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
+
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
@@ -2699,6 +2725,9 @@ packages:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
 
+  xml-utils@1.10.2:
+    resolution: {integrity: sha512-RqM+2o1RYs6T8+3DzDSoTRAUfrvaejbVHcp3+thnAtDKo8LskR+HomLajEy5UjTz24rpka7AxVBRR3g2wTUkJA==}
+
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
@@ -2720,6 +2749,9 @@ packages:
   zod@4.6.5:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
+  zstddec@0.1.0:
+    resolution: {integrity: sha512-w2NTI8+3l3eeltKAdK8QpiLo/flRAr2p8AGeakfMZOXBxOg9HIu4LVDxBi81sYgVhFhdJjv1OrB5ssI8uFPoLg==}
+
 snapshots:
 
   '@adobe/css-tools@4.4.2': {}
@@ -2728,10 +2760,10 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  '@allmaps/bearing@1.0.0-beta.13':
+  '@allmaps/bearing@1.0.0-beta.13(geotiff@2.1.3)':
     dependencies:
       '@allmaps/annotation': 1.0.0-beta.38
-      '@allmaps/project': 1.0.0-beta.10
+      '@allmaps/project': 1.0.0-beta.10(geotiff@2.1.3)
       '@allmaps/stdlib': 1.0.0-beta.42
       '@allmaps/transform': 1.0.0-beta.53
     transitivePeerDependencies:
@@ -2743,31 +2775,31 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  '@allmaps/maplibre@1.0.0-beta.44':
+  '@allmaps/maplibre@1.0.0-beta.44(geotiff@2.1.3)':
     dependencies:
-      '@allmaps/bearing': 1.0.0-beta.13
-      '@allmaps/project': 1.0.0-beta.10
-      '@allmaps/render': 1.0.0-beta.84
+      '@allmaps/bearing': 1.0.0-beta.13(geotiff@2.1.3)
+      '@allmaps/project': 1.0.0-beta.10(geotiff@2.1.3)
+      '@allmaps/render': 1.0.0-beta.84(geotiff@2.1.3)
       '@allmaps/stdlib': 1.0.0-beta.42
-      '@allmaps/warpedmaplayer': 1.0.0-beta.44
+      '@allmaps/warpedmaplayer': 1.0.0-beta.44(geotiff@2.1.3)
       maplibre-gl: 6.11.2
     transitivePeerDependencies:
       - geotiff
 
-  '@allmaps/project@1.0.0-beta.10':
+  '@allmaps/project@1.0.0-beta.10(geotiff@2.1.3)':
     dependencies:
       '@allmaps/stdlib': 1.0.0-beta.42
       '@allmaps/transform': 1.0.0-beta.53
-      proj4: 2.22.0
+      proj4: 2.22.0(geotiff@2.1.3)
     transitivePeerDependencies:
       - geotiff
 
-  '@allmaps/render@1.0.0-beta.84':
+  '@allmaps/render@1.0.0-beta.84(geotiff@2.1.3)':
     dependencies:
       '@allmaps/annotation': 1.0.0-beta.38
       '@allmaps/id': 1.0.0-beta.39
       '@allmaps/iiif-parser': 1.0.0-beta.49
-      '@allmaps/project': 1.0.0-beta.10
+      '@allmaps/project': 1.0.0-beta.10(geotiff@2.1.3)
       '@allmaps/stdlib': 1.0.0-beta.42
       '@allmaps/tailwind': 1.0.0-beta.22
       '@allmaps/transform': 1.0.0-beta.53
@@ -2776,7 +2808,7 @@ snapshots:
       comlink: 4.4.2
       lodash-es: 4.17.21
       point-in-polygon-hao: 1.2.4
-      proj4: 2.22.0
+      proj4: 2.22.0(geotiff@2.1.3)
       rbush: 4.0.1
     transitivePeerDependencies:
       - geotiff
@@ -2812,10 +2844,10 @@ snapshots:
 
   '@allmaps/types@1.0.0-beta.24': {}
 
-  '@allmaps/warpedmaplayer@1.0.0-beta.44':
+  '@allmaps/warpedmaplayer@1.0.0-beta.44(geotiff@2.1.3)':
     dependencies:
-      '@allmaps/project': 1.0.0-beta.10
-      '@allmaps/render': 1.0.0-beta.84
+      '@allmaps/project': 1.0.0-beta.10(geotiff@2.1.3)
+      '@allmaps/render': 1.0.0-beta.84(geotiff@2.1.3)
       '@allmaps/stdlib': 1.0.0-beta.42
     transitivePeerDependencies:
       - geotiff
@@ -3115,6 +3147,8 @@ snapshots:
       esm-env: 1.2.2
       number-flow: 0.6.2
       svelte: 5.43.6
+
+  '@petamoriken/float16@3.9.3': {}
 
   '@polka/url@1.0.0-next.28': {}
 
@@ -5064,6 +5098,17 @@ snapshots:
     dependencies:
       rbush: 2.0.2
 
+  geotiff@2.1.3:
+    dependencies:
+      '@petamoriken/float16': 3.9.3
+      lerc: 3.0.0
+      pako: 2.2.0
+      parse-headers: 2.0.6
+      quick-lru: 6.1.2
+      web-worker: 1.5.0
+      xml-utils: 1.10.2
+      zstddec: 0.1.0
+
   get-intrinsic@1.3.0:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -5218,6 +5263,8 @@ snapshots:
   kleur@4.1.5: {}
 
   known-css-properties@0.35.0: {}
+
+  lerc@3.0.0: {}
 
   levn@0.4.1:
     dependencies:
@@ -5406,9 +5453,13 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
+  pako@2.2.0: {}
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
+
+  parse-headers@2.0.6: {}
 
   parse5@7.2.1:
     dependencies:
@@ -5507,14 +5558,18 @@ snapshots:
       ansi-styles: 5.2.0
       react-is: 17.0.2
 
-  proj4@2.22.0:
+  proj4@2.22.0(geotiff@2.1.3):
     dependencies:
       mgrs: 1.0.0
       wkt-parser: 1.5.6
+    optionalDependencies:
+      geotiff: 2.1.3
 
   protocol-buffers-schema@3.6.0: {}
 
   punycode@2.3.1: {}
+
+  quick-lru@6.1.2: {}
 
   quickselect@1.1.1: {}
 
@@ -5888,6 +5943,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
+  web-worker@1.5.0: {}
+
   webidl-conversions@7.0.0: {}
 
   whatwg-encoding@3.1.1:
@@ -5918,6 +5975,8 @@ snapshots:
 
   xml-name-validator@5.0.0: {}
 
+  xml-utils@1.10.2: {}
+
   xmlchars@2.2.0: {}
 
   yallist@5.0.0: {}
@@ -5929,3 +5988,5 @@ snapshots:
   zimmerframe@1.1.2: {}
 
   zod@4.6.5: {}
+
+  zstddec@0.1.0: {}

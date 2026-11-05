@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import * as turf from "@turf/turf";
-	import { draw, fade } from "svelte/transition";
+	import { draw, fade, fly } from "svelte/transition";
 	import NumberFlow from "@number-flow/svelte";
+	import { CaretRight, Info } from "phosphor-svelte";
+	import type { MapContext } from "$lib/map/mapContext.svelte";
+	import MapThumbnail from "./HistoricMapThumbnail.svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 	const historicCtx = mapContext.historic;
+	const info = historicCtx.info;
 
 	let activeHistoricMap = $derived(historicCtx.selectedMap || historicCtx.previewMap);
 
@@ -16,31 +19,23 @@
 	let svgElement: SVGSVGElement | null = $state(null);
 
 	let polygons = $derived.by(() => {
-		if (!historicCtx.mapsLoaded || !historicCtx.visibleMaps) return [];
+		if (!historicCtx.mapsLoaded) return [];
 
-		const mapsArray = [];
-		for (const s of mapContext.historic.series) {
-			for (const [id, map] of s.visibleMaps) {
-				mapsArray.push(map);
-			}
-		}
-		return mapsArray.map((i) => ({
-			id: i.id,
-			type: "Feature" as const,
-			geometry: turf.toMercator(structuredClone(i.polygon)),
-			properties: {
-				series: mapContext.historic.series.find((s) => s.visibleMaps.has(i.id))?.id,
-			},
-		}));
+		return historicCtx.series.flatMap((s) =>
+			Array.from(s.visibleMaps.values(), (map) => ({
+				id: map.id,
+				type: "Feature" as const,
+				color: s.themeColor,
+				geometry: turf.toMercator(structuredClone(map.polygon)),
+				properties: {},
+			}))
+		);
 	});
 
 	let viewBox = $derived.by(() => {
 		if (!polygons.length) return [0, 0, 160, 200];
 
-		const bbox = turf.bbox({
-			type: "FeatureCollection",
-			features: polygons,
-		});
+		const bbox = turf.bbox({ type: "FeatureCollection", features: polygons });
 
 		const viewWidth = bbox[2] - bbox[0] || 1;
 		const viewHeight = bbox[3] - bbox[1] || 1;
@@ -52,13 +47,10 @@
 
 	let scaleFactor = $derived(viewBox[2] / width || 1);
 
-	function getPolygonFill(polyId: string): string {
-		const isActive = activeHistoricMap?.id === polyId;
-		if (isActive) return "#ff44aaaa";
-
-		const isVisibleInViewport = !historicCtx.selectedMap && historicCtx.visibleMapsInViewport?.has(polyId);
-
-		return isVisibleInViewport ? "#ff44aa44" : "#ff44aa11";
+	function fillOpacity(polyId: string): number {
+		if (activeHistoricMap?.id === polyId) return 0.67;
+		const inViewport = !historicCtx.selectedMap && historicCtx.visibleMapsInViewport.has(polyId);
+		return inViewport ? 0.27 : 0.07;
 	}
 
 	let viewport = $derived.by(() => {
@@ -85,45 +77,67 @@
 		const x = Math.min(...xs);
 		const y = Math.min(...ys);
 
-		return {
-			x,
-			y,
-			width: Math.max(...xs) - x,
-			height: Math.max(...ys) - y,
-		};
+		return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+	});
+
+	// ------------------------------------------------------------------
+	// Paneel: periode, dat uitgroeit tot een blad-preview
+	// ------------------------------------------------------------------
+
+	/** Aanker in SVG-coördinaten: rechterrand van het kaartvenster, of van het blad als het geopend is */
+	let anchor = $derived.by(() => {
+		if (viewportRect) {
+			return { x: viewportRect.x + viewportRect.width, y: viewportRect.y + viewportRect.height / 2 };
+		}
+
+		const target = activeHistoricMap && polygons.find((p) => p.id === activeHistoricMap.id);
+		if (!target) return null;
+
+		const [, minY, maxX, maxY] = turf.bbox(target);
+		return { x: maxX, y: (minY + maxY) / 2 };
 	});
 
 	// Precise coordinate mapping without CSS transform distortion
-	let titlePosition = $derived.by(() => {
-		if (!viewportRect || !svgElement) return null;
+	let panelPosition = $derived.by(() => {
+		if (!anchor || !svgElement) return null;
 
 		const svgRect = svgElement.getBoundingClientRect();
-
 		const pxPerUnitX = svgRect.width / viewBox[2];
 		const pxPerUnitY = svgRect.height / viewBox[3];
 
-		const rightEdgeSvgX = viewportRect.x + viewportRect.width;
-		const centerYSvgY = viewportRect.y + viewportRect.height / 2;
-
-		const screenX = (rightEdgeSvgX - viewBox[0]) * pxPerUnitX;
-		const screenY = (viewBox[1] + viewBox[3] - centerYSvgY) * pxPerUnitY;
-
 		return {
-			left: `${screenX + 20}px`,
-			top: `${screenY}px`,
+			left: `${(anchor.x - viewBox[0]) * pxPerUnitX + 20}px`,
+			top: `${(viewBox[1] + viewBox[3] - anchor.y) * pxPerUnitY}px`,
 		};
 	});
 
+	/** Jaren van de kaarten in beeld; series zonder jaartallen tellen niet mee */
+	let viewportPeriod = $derived.by((): [number, number] | null => {
+		const years = Array.from(historicCtx.visibleMapsInViewport.values(), (m) => m.yearEnd).filter(
+			(y): y is number => y !== undefined
+		);
+		return years.length ? [Math.min(...years), Math.max(...years)] : null;
+	});
+
+	/** Bij een voorvertoning krimpt de periode tot het jaar van dat blad */
+	let period = $derived.by((): [number, number] | null => {
+		const sheetYear = info.visible ? info.map?.yearEnd : undefined;
+		return sheetYear !== undefined ? [sheetYear, sheetYear] : viewportPeriod;
+	});
+
+	let single = $derived(!!period && period[0] === period[1]);
+
 	let arrowPaths = $derived.by(() => {
-		if (!activeHistoricMap) return null;
+		if (!activeHistoricMap || !anchor) return null;
 
 		const targetPoly = polygons.find((p) => p.id === activeHistoricMap.id);
 		const centerPoint = targetPoly ? turf.centerOfMass(targetPoly).geometry.coordinates : [0, 0];
 
 		const x1 = centerPoint[0];
 		const y1 = centerPoint[1];
-		const x2 = viewBox[0] + viewBox[2] / 2;
-		const y2 = viewBox[1] - viewBox[3] * 0.03;
+
+		const x2 = anchor.x + 20000;
+		const y2 = anchor.y;
 
 		const strokeWidth = scaleFactor * 2;
 		const angle = Math.atan2(y2 - y1, x2 - x1);
@@ -145,31 +159,110 @@
 	function getProjectedPoints(coordinates: [number, number][]): string {
 		return coordinates.map((coord) => coord.join(",")).join(" ");
 	}
-
-	let range = $state([]);
-
-	$effect(() => {
-		const a = mapContext.historic.visibleMapsInViewport
-			.values()
-			.map((i) => i.yearEnd)
-			.toArray();
-		const min = Math.min(...a);
-		const max = Math.max(...a);
-		range = [min, max];
-	});
 </script>
 
 <div class="pointer-events-none z-[999] block touch-none">
-	{#if mapContext.maplibreLoaded && titlePosition && viewportRect}
-		<h1
-			class="text-wtr-blue absolute z-10000 -translate-y-1/2 rounded-lg bg-white p-2 text-xl text-[16px] font-[500] whitespace-nowrap text-white shadow-lg"
-			style="left: {titlePosition.left}; top: {titlePosition.top};"
-		>
-			<NumberFlow format={{ useGrouping: false }} value={range[0]} />-<NumberFlow
-				format={{ useGrouping: false }}
-				value={range[1]}
-			/>
-		</h1>
+	{#if mapContext.maplibreLoaded && panelPosition && (period || info.map)}
+		<div class="absolute z-10000 -translate-y-1/2" style="left: {panelPosition.left}; top: {panelPosition.top};">
+			<div
+				class="bg-wtr-blue flex items-center overflow-hidden rounded-xl whitespace-nowrap text-white shadow-lg ring-1 ring-white/10 {info.visible
+					? 'pointer-events-auto'
+					: ''}"
+				onpointerenter={() => (info.hold = true)}
+				onpointerleave={() => (info.hold = false)}
+			>
+				<!-- Periode -->
+				{#if period}
+					<div class="flex flex-col px-3 py-2">
+						<span class="text-[10px] leading-none font-medium tracking-wider text-white/60 uppercase">
+							{single ? "Jaar" : "Periode"}
+						</span>
+						<span class="mt-1 flex text-base leading-none font-semibold tabular-nums">
+							<NumberFlow format={{ useGrouping: false }} value={period[0]} spinTiming={{ duration: 200 }} />
+							<!-- Tweede jaartal klapt dicht zodra begin en eind gelijk zijn -->
+							<span
+								class="grid transition-[grid-template-columns] duration-300 ease-out"
+								style:grid-template-columns={single ? "0fr" : "1fr"}
+							>
+								<span class="flex overflow-hidden">
+									–<NumberFlow format={{ useGrouping: false }} value={period[1]} />
+								</span>
+							</span>
+						</span>
+					</div>
+				{/if}
+
+				<!-- Blad-preview: groeit uit het paneel -->
+				<div
+					class="grid transition-[grid-template-columns,grid-template-rows] duration-400 ease-out"
+					style:grid-template-columns={info.visible ? "1fr" : "0fr"}
+					style:grid-template-rows={info.visible ? "1fr" : "0fr"}
+					inert={!info.visible}
+				>
+					<div class="min-h-0 min-w-0 overflow-hidden">
+						{#if info.map}
+							{@const map = info.map}
+							<div class="flex items-center gap-3 py-2 pr-3 pl-3 {period ? 'border-l border-white/10' : ''}">
+								<button
+									type="button"
+									onclick={() => info.open()}
+									disabled={info.isSelected}
+									aria-label="Blad openen"
+									class="relative block h-[72px] shrink-0 overflow-hidden rounded-sm shadow-md enabled:cursor-pointer"
+								>
+									{#if info.currentIsBackside && info.canvasImage}
+										<img
+											alt=""
+											class="block h-full w-auto object-cover"
+											src="{info.canvasImage}/full/,256/0/default.jpg"
+										/>
+									{:else}
+										<MapThumbnail id={map.id} height={72} />
+									{/if}
+
+									{#if info.viewportRect}
+										{@const r = info.viewportRect}
+										<div
+											class="border-wtr-blue/50 pointer-events-none absolute rounded-sm border-[3px]"
+											style="left: {r.left}%; top: {r.top}%; width: {r.width}%; height: {r.height}%;"
+										></div>
+									{/if}
+								</button>
+
+								{#key map.id}
+									<div class="flex min-w-0 flex-col items-start gap-0.5" in:fly={{ x: -10, duration: 200 }}>
+										<button
+											type="button"
+											onclick={() => info.open()}
+											disabled={info.isSelected}
+											class="max-w-44 truncate text-left text-sm font-bold text-white enabled:cursor-pointer enabled:hover:underline"
+										>
+											{info.title}
+										</button>
+
+										{#if info.detail}
+											<p class="max-w-44 truncate text-xs text-white/70">{info.detail}</p>
+										{/if}
+
+										{#if info.isSelected}
+											<button
+												type="button"
+												onclick={() => info.requestInfo()}
+												class="group mt-1 flex cursor-pointer items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-xs text-white/90 transition-colors hover:bg-white/20 hover:text-white"
+											>
+												<Info size="14" />
+												Info
+												<CaretRight size="10" class="text-white/60 transition-transform group-hover:translate-x-0.5" />
+											</button>
+										{/if}
+									</div>
+								{/key}
+							</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+		</div>
 	{/if}
 
 	{#if historicCtx.visibleMaps && historicCtx.visibleMaps.size}
@@ -185,10 +278,11 @@
 				{#each polygons as poly (poly.id)}
 					<polygon
 						points={getProjectedPoints(poly.geometry.coordinates[0])}
-						fill={getPolygonFill(poly)}
-						stroke={poly.properties.series === "wsk" ? "#ff44aa" : "#44aa44"}
+						fill={poly.color}
+						fill-opacity={fillOpacity(poly.id)}
+						stroke={poly.color}
 						stroke-width={scaleFactor * 1.33}
-						class="transition-fill duration-250"
+						class="transition-[fill-opacity] duration-250"
 					/>
 				{/each}
 
@@ -214,15 +308,15 @@
 							<path
 								in:draw={{ duration: 250 }}
 								fill="none"
-								stroke="var(--color-wtr-blue)"
-								stroke-width={arrowPaths.strokeWidth * 1.5}
+								stroke="#fff"
+								stroke-width={arrowPaths.strokeWidth * 1}
 								d={arrowPaths.leftArm}
 							/>
 							<path
 								in:draw={{ duration: 250 }}
 								fill="none"
-								stroke="var(--color-wtr-blue)"
-								stroke-width={arrowPaths.strokeWidth * 1.5}
+								stroke="#fff"
+								stroke-width={arrowPaths.strokeWidth * 1}
 								d={arrowPaths.rightArm}
 							/>
 						{/key}

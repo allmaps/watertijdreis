@@ -3,13 +3,17 @@ import type { Map as MaplibreMap } from "maplibre-gl";
 import type { MapLayer } from "./MapLayer.svelte";
 import { RasterMapLayer } from "./RasterMapLayer.svelte";
 import { VectorMapLayer } from "./VectorMapLayer.svelte";
+import { AhnMapLayer } from "./AhnMapLayer.svelte";
+import type { MapContext } from "./mapContext.svelte";
 
 /**
  * Retourneert de catalogus van alle beschikbare lagen in de applicatie.
  * Wordt aangeroepen vanuit MapContext zodra de MapLibre map-instantie klaar is.
  */
-export function createAvailableLayers(map: MaplibreMap): MapLayer[] {
+export function createAvailableLayers(mapContext: MapContext): MapLayer[] {
 	return [
+		...mapContext.historic.createSeries(),
+
 		new VectorMapLayer({
 			id: "waterschapsgrenzen",
 			name: "Waterschapsgrenzen",
@@ -33,18 +37,7 @@ export function createAvailableLayers(map: MaplibreMap): MapLayer[] {
 			maxzoom: 20,
 			added: false, // Moet via 'Laag toevoegen' gekozen worden
 		}),
-		new RasterMapLayer({
-			id: "ahn",
-			name: "AHN Hoogtebestand (DSM 0.5m)",
-			themeColor: "#44a",
-			type: "pdok-wms",
-			sourceId: "dsm-05",
-			layerId: "dsm-05-layer",
-			tiles: [
-				"https://service.pdok.nl/rws/ahn/wms/v1_0?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&FORMAT=image/png&STYLES=&TRANSPARENT=TRUE&LAYERS=dsm_05m&TILED=true&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&BBOX={bbox-epsg-3857}",
-			],
-			added: false, // Moet via 'Laag toevoegen' gekozen worden
-		}),
+		new AhnMapLayer({ id: "ahn", name: "AHN Hoogtekaart", themeColor: "#44a" }),
 	];
 }
 

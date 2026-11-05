@@ -3,24 +3,31 @@ import { SvelteMap } from "svelte/reactivity";
 import { WarpedMapLayer } from "@allmaps/maplibre";
 import * as turf from "@turf/turf";
 import type { GeoJSONSource, Map as MaplibreMap, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
-import type { Filter, HistoricMap } from "$lib/types/historicmap";
 import { transformToIIIFInfoJson } from "$lib/utils/allmaps";
 import { calculateFilteredMapIds } from "./HistoricMapFilter";
 import type { HistoricMapsContext } from "./historicMapsContext.svelte";
 import { MapLayer } from "./MapLayer.svelte";
+import type { Filter, HistoricMap, HistoricMapSeriesOptions, SeriesSource, SpriteConfig } from "$lib/types/historicmap";
 
 const LABEL_ZOOM_VALUES = [5, 6, 6, 9, 7, 12, 8, 15, 9, 17, 10, 18, 12, 22, 14, 26, 15, 28, 20, 28];
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 const DEFAULT_GRID_CENTER = { lng: 5.63, lat: 52.16 };
 
+/** Label voor in de bladindex: bladnummer als dat er is, anders het label van de kaart */
+function sheetLabel(m: HistoricMap) {
+	if (m.number === undefined) return m.label;
+	return m.position ? `${m.number}.${m.position}` : `${m.number}`;
+}
+
 export class HistoricMapSeries extends MapLayer {
-	url: string;
-	spriteJsonUrl: string;
-	spriteImageUrl: string;
 	context: HistoricMapsContext;
+	readonly source: SeriesSource;
+	hasEditions = $state(false);
 
 	// Elke serie heeft zijn eigen WarpedMapLayer, zodat de z-volgorde tussen series klopt.
-	readonly warpedMapLayer: WarpedMapLayer;
+	warpedMapLayer: WarpedMapLayer;
+
+	#loadPromise: Promise<void> | null = null;
 
 	// Alle maplibre-ids van deze serie, geprefixt met de serie-id
 	readonly ids = {
@@ -41,6 +48,7 @@ export class HistoricMapSeries extends MapLayer {
 		if (!this.mapsLoaded) return new Map<number, HistoricMap[]>();
 		const grouped = new Map<number, HistoricMap[]>();
 		for (const sheet of this.mapsById.values()) {
+			if (sheet.number === undefined) continue;
 			const list = grouped.get(sheet.number) ?? [];
 			list.unshift(sheet);
 			grouped.set(sheet.number, list);
@@ -70,24 +78,15 @@ export class HistoricMapSeries extends MapLayer {
 
 	constructor(
 		context: HistoricMapsContext,
-		id: string,
-		name: string,
-		themeColor: string,
-		url: string,
-		spriteJsonUrl: string,
-		spriteImageUrl: string
+		{ id, name, themeColor, source, added, movable }: HistoricMapSeriesOptions
 	) {
-		super({ id, name, themeColor, type: "historic-series", visible: true });
+		super({ id, name, themeColor, type: "historic-series", visible: true, added, movable });
 
-		this.url = url;
 		this.context = context;
-		this.spriteJsonUrl = spriteJsonUrl;
-		this.spriteImageUrl = spriteImageUrl;
-
-		this.warpedMapLayer = new WarpedMapLayer({ layerId: `warped-map-layer-${id}` });
+		this.source = source;
+		this.warpedMapLayer = this.#createWarpedMapLayer();
 
 		$effect.root(() => {
-			// Filter toepassen (of alles verbergen) zodra zichtbaarheid of filter verandert
 			$effect(() => {
 				if (!this.mapsLoaded || !this.map) return;
 				if (this.effectiveVisible) this.applyFilter();
@@ -96,16 +95,9 @@ export class HistoricMapSeries extends MapLayer {
 		});
 	}
 
-	// ------------------------------------------------------------------
-	// MapLayer-contract
-	// ------------------------------------------------------------------
-
-	get mapLayerIds() {
-		// onderste eerst
-		return [this.warpedMapLayer.id, this.ids.labels, this.ids.numbers, this.ids.fill, this.ids.stroke];
+	#createWarpedMapLayer() {
+		return new WarpedMapLayer({ layerId: `warped-map-layer-${this.id}` });
 	}
-
-	readonly #onSpritesLoaded = () => this.applyFilter();
 
 	mount(map: MaplibreMap) {
 		this.map = map;
@@ -116,6 +108,9 @@ export class HistoricMapSeries extends MapLayer {
 
 		this.#addOutlineLayers(map);
 		map.on("maptilesloadedfromsprites", this.#onSpritesLoaded);
+
+		// Data pas ophalen zodra de laag echt op de kaart komt
+		void this.load();
 	}
 
 	unmount() {
@@ -131,7 +126,54 @@ export class HistoricMapSeries extends MapLayer {
 			if (map.getSource(id)) map.removeSource(id);
 		}
 		this.map = null;
+
+		// Een geopend blad uit deze serie mag niet blijven staan (en bij opnieuw toevoegen weer opengaan)
+		const { selectedMapId, pinnedMapId } = this.context;
+		if (selectedMapId && this.mapsById.has(selectedMapId)) this.context.selectedMapId = null;
+		if (pinnedMapId && this.mapsById.has(pinnedMapId)) this.context.pinnedMapId = null;
+
+		// Alles terug naar de beginstand
+		this.#clearTimers();
+		this.hoveredHistoricMap = null;
+		this.clickedHistoricMap = null;
+		this.gridVisible = false;
+		this.#hoveredFeatureId = null;
+		this.#clickedFeatureId = null;
+
+		this.mapsById.clear();
+		this.visibleMaps.clear();
+		this.mapsLoaded = false;
+		this.hasEditions = false;
+		this.#loadPromise = null;
+
+		// Verse instantie; een oude kan na verwijderen niet meer betrouwbaar worden hergebruikt
+		this.warpedMapLayer = this.#createWarpedMapLayer();
+		this.context.updateViewportMaps();
 	}
+
+	#clearTimers() {
+		for (const t of [this.#gridResetTimer, this.#gridVisibilityTimer, this.#rippleResetTimer]) {
+			if (t) clearTimeout(t);
+		}
+		this.#gridResetTimer = this.#gridVisibilityTimer = this.#rippleResetTimer = null;
+
+		Object.values(this.#featureTimeouts).forEach(clearTimeout);
+		this.#featureTimeouts = {};
+
+		this.#fillTimers.forEach(clearTimeout);
+		this.#fillTimers.clear();
+	}
+
+	// ------------------------------------------------------------------
+	// MapLayer-contract
+	// ------------------------------------------------------------------
+
+	get mapLayerIds() {
+		// onderste eerst
+		return [this.warpedMapLayer.id, this.ids.labels, this.ids.numbers, this.ids.fill, this.ids.stroke];
+	}
+
+	readonly #onSpritesLoaded = () => this.applyFilter();
 
 	// De kaartjes zelf (warped maps) worden door de $effect in de constructor aan/uit gezet;
 	// hier gaat het om de outline-lagen van maplibre.
@@ -247,7 +289,7 @@ export class HistoricMapSeries extends MapLayer {
 			type: "Feature" as const,
 			id: index,
 			geometry: turf.centerOfMass(m.polygon).geometry,
-			properties: { year: m.yearEnd, num: `${m.number}.${m.position}` },
+			properties: { year: m.yearEnd ?? "", num: sheetLabel(m) },
 		}));
 
 		(map.getSource(this.ids.outlinesSource) as GeoJSONSource | undefined)?.setData({
@@ -280,49 +322,85 @@ export class HistoricMapSeries extends MapLayer {
 	// Laden & filteren
 	// ------------------------------------------------------------------
 
-	async load() {
-		if (!this.map) return;
+	load(): Promise<void> {
+		return (this.#loadPromise ??= this.#load());
+	}
+
+	async #load() {
+		const layer = this.warpedMapLayer;
+		if (!this.map) {
+			this.#loadPromise = null;
+			return;
+		}
 
 		try {
-			const res = await fetch(this.url);
-			const data = await res.json();
+			const { source } = this;
+			if (source.kind === "annotation") await this.#loadAnnotation(layer, source.url);
+			else await this.#loadGeoreferencedMaps(layer, source.url, source.sprites);
 
-			const imageInfos = data.map(transformToIIIFInfoJson);
-			this.warpedMapLayer.addImageInfos(imageInfos);
+			// Ondertussen verwijderd: deze resultaten zijn verouderd
+			if (layer !== this.warpedMapLayer) return;
 
-			const loadPromises = data.map(async (item: any) => {
-				const id = await this.warpedMapLayer.addGeoreferencedMap(item);
-				const warpedMap = this.warpedMapLayer.getWarpedMap(id);
-
-				this.mapsById.set(id, {
-					id,
-					manifestId: item.resource.partOf[0].id,
-					polygon: {
-						type: "Polygon",
-						coordinates: [warpedMap?.geoMask.concat([warpedMap?.geoMask[0]])],
-					},
-					geoFullMaskBbox: warpedMap?.geoFullMaskBbox,
-					...item._meta,
-				});
-			});
-
-			await Promise.all(loadPromises);
-			await this.#loadSprites();
-
+			this.hasEditions = Array.from(this.mapsById.values()).some((m) => m.edition !== undefined);
 			this.mapsLoaded = true;
+
+			// De renderer weet pas na een frame welke kaarten in beeld zijn
+			this.map?.once("idle", () => this.context.updateViewportMaps());
 		} catch (error) {
+			this.#loadPromise = null; // een volgende poging mag opnieuw proberen
 			console.error(`HistoricMapSeries (${this.name}): Fout tijdens het laden:`, error);
 		}
 	}
 
-	async #loadSprites() {
-		try {
-			const spriteJson = await fetch(this.spriteJsonUrl).then((r) => r.json());
-			const fullImageUrl = this.spriteImageUrl.startsWith("http")
-				? this.spriteImageUrl
-				: `${window.location.origin}${this.spriteImageUrl}`;
+	async #loadGeoreferencedMaps(layer: WarpedMapLayer, url: string, sprites?: SpriteConfig) {
+		const data = await fetch(url).then((r) => r.json());
 
-			this.warpedMapLayer.addSprites(spriteJson, fullImageUrl, [3072, 3078]);
+		layer.addImageInfos(data.map(transformToIIIFInfoJson));
+
+		await Promise.all(
+			data.map(async (item: any) => {
+				const id = await layer.addGeoreferencedMap(item);
+				this.#registerMap(layer, id, { manifestId: item.resource.partOf[0].id, ...item._meta });
+			})
+		);
+
+		if (sprites) await this.#loadSprites(layer, sprites);
+	}
+
+	async #loadAnnotation(layer: WarpedMapLayer, url: string) {
+		const annotation = await fetch(url).then((r) => r.json());
+		const results = await layer.addGeoreferenceAnnotation(annotation);
+
+		for (const result of results) {
+			if (result.ok) this.#registerMap(layer, result.mapId);
+			else console.warn(`HistoricMapSeries (${this.name}): kaart ${result.index} kon niet geladen worden`, result);
+		}
+	}
+
+	#registerMap(layer: WarpedMapLayer, id: string, extra: Partial<HistoricMap> = {}) {
+		if (layer !== this.warpedMapLayer) return; // verouderd
+
+		const warpedMap = layer.getWarpedMap(id);
+		if (!warpedMap) {
+			console.warn(`HistoricMapSeries (${this.name}): geen WarpedMap voor id`, id);
+			return;
+		}
+
+		const ring = warpedMap.geoMask;
+		this.mapsById.set(id, {
+			label: id,
+			...extra,
+			id,
+			polygon: { type: "Polygon", coordinates: [[...ring, ring[0]]] },
+			geoFullMaskBbox: warpedMap.geoFullMaskBbox,
+		});
+	}
+
+	async #loadSprites(layer: WarpedMapLayer, { json, image, size }: SpriteConfig) {
+		try {
+			const spriteJson = await fetch(json).then((r) => r.json());
+			const fullImageUrl = image.startsWith("http") ? image : `${window.location.origin}${image}`;
+			layer.addSprites(spriteJson, fullImageUrl, size);
 		} catch (error) {
 			console.error(`HistoricMapSeries (${this.name}): Fout tijdens laden sprites:`, error);
 		}
@@ -331,14 +409,23 @@ export class HistoricMapSeries extends MapLayer {
 	applyFilter(filter: Filter = this.filter) {
 		if (!this.mapsLoaded || !this.effectiveVisible) return;
 
+		if (!this.mapsLoaded || !this.effectiveVisible) return;
+
+		const defaultOptions = { applyMask: true, transformationType: "thinPlateSpline", saturation: 1 };
+
+		if (!this.hasEditions) {
+			this.warpedMapLayer.setMapsOptions(Array.from(this.mapsById.keys()), { ...defaultOptions, visible: true });
+			for (const [id, historicMap] of this.mapsById) this.visibleMaps.set(id, historicMap);
+			this.updateOutlines();
+			return;
+		}
+
 		const { mapsToColor, mapsToDesaturate, mapsToHide, adjustedYearEnd } = calculateFilteredMapIds(
 			this.mapsByNumber,
 			filter
 		);
 
 		this.filter.yearEnd = adjustedYearEnd;
-
-		const defaultOptions = { applyMask: true, transformationType: "thinPlateSpline", saturation: 1 };
 
 		if (mapsToColor.length > 0) {
 			this.warpedMapLayer.setMapsOptions(mapsToColor, { ...defaultOptions, visible: true });

@@ -1,38 +1,33 @@
 import { untrack } from "svelte";
-import type { Filter, HistoricMap } from "$lib/types/historicmap";
+import type { Filter, HistoricMap, HistoricMapSeriesOptions } from "$lib/types/historicmap";
 import type { MapView } from "$lib/types/map";
 import type { MapContext } from "./mapContext.svelte";
 import { HistoricMapSeries } from "./HistoricMapSeries.svelte";
+import { SheetInfo } from "./sheetInfo.svelte";
 
 const SPRITE_JSON = "/sprites/regular-sheets-128.json";
 const SPRITE_IMAGE = "/sprites/regular-sheets-128.jpg";
 
-interface SeriesConfig {
-	id: string;
-	name: string;
-	themeColor: string;
-	url: string;
-	spriteJson: string;
-	spriteImage: string;
-}
-
-/** Eerste serie = primaire serie (waar de UI nog van uitgaat) */
-const SERIES_CONFIG: SeriesConfig[] = [
+const SERIES_CONFIG: HistoricMapSeriesOptions[] = [
 	{
 		id: "wsk",
 		name: "Waterstaatkaarten",
 		themeColor: "#ff44aa",
-		url: "maps-sorted-by-edition.json",
-		spriteJson: SPRITE_JSON,
-		spriteImage: SPRITE_IMAGE,
+		added: true,
+		source: {
+			kind: "georeferenced-maps",
+			url: "maps-sorted-by-edition.json",
+			sprites: { json: SPRITE_JSON, image: SPRITE_IMAGE, size: [3072, 3078] },
+		},
 	},
 	{
-		id: "rk",
-		name: "Rivierkaarten",
-		themeColor: "#44ff44",
-		url: "./second-series.json",
-		spriteJson: SPRITE_JSON,
-		spriteImage: SPRITE_IMAGE,
+		id: "vfd",
+		name: "Von Frijtag Drabbe",
+		themeColor: "#8888ff",
+		source: {
+			kind: "annotation",
+			url: "./von-frijtag-drabbe.json",
+		},
 	},
 ];
 
@@ -49,12 +44,23 @@ export class HistoricMapsContext {
 
 	series = $state<HistoricMapSeries[]>([]);
 
+	readonly info: SheetInfo;
+
 	get primarySeries(): HistoricMapSeries | undefined {
 		return this.series[0];
 	}
 
+	get activeSeries() {
+		return this.series.filter((s) => s.added);
+	}
+
 	get mapsLoaded(): boolean {
-		return this.series.length > 0 && this.series.every((s) => s.mapsLoaded);
+		return this.series.some((s) => s.mapsLoaded);
+	}
+
+	createSeries(): HistoricMapSeries[] {
+		this.series = SERIES_CONFIG.map((config) => new HistoricMapSeries(this, config));
+		return this.series;
 	}
 
 	// ------------------------------------------------------------------
@@ -144,6 +150,7 @@ export class HistoricMapsContext {
 
 	constructor(mapContext: MapContext) {
 		this.mapContext = mapContext;
+		this.info = new SheetInfo(this);
 
 		$effect(() => {
 			if (!this.mapsLoaded) return;
@@ -165,29 +172,11 @@ export class HistoricMapsContext {
 		});
 	}
 
-	// ------------------------------------------------------------------
-	// Initialisatie
-	// ------------------------------------------------------------------
 	async init() {
-		for (const config of SERIES_CONFIG) {
-			const series = new HistoricMapSeries(
-				this,
-				config.id,
-				config.name,
-				config.themeColor,
-				config.url,
-				config.spriteJson,
-				config.spriteImage
-			);
-			this.series.push(series);
-			await this.mapContext.addLayer(series); // eerst mounten, zodat de z-volgorde klopt
-		}
-
-		// wsk.movable = false;
-
 		this.#applyDevDefaults();
 
-		await Promise.all(this.series.map((s) => s.load()));
+		// Series met `added: true` laden zichzelf bij het mounten; hier wachten we alleen op ze
+		await Promise.all(this.activeSeries.map((s) => s.load()));
 
 		this.mapContext.activeMap.on("moveend", () => this.updateViewportMaps());
 		this.updateViewportMaps();
@@ -216,16 +205,16 @@ export class HistoricMapsContext {
 	}
 
 	updateViewportMaps() {
-		this.#mapIdsInViewport = this.series.flatMap((s) => s.getMapIdsInViewport());
+		this.#mapIdsInViewport = this.activeSeries.flatMap((s) => s.getMapIdsInViewport());
 	}
 
 	applyFilter() {
-		this.series.forEach((s) => s.applyFilter());
+		this.activeSeries.forEach((s) => s.applyFilter());
 	}
 
 	setSheetIndexVisibility(visible = !this.mapContext.sheetIndexVisible) {
 		this.mapContext.sheetIndexVisible = visible;
-		this.series.forEach((s) => s.setSheetIndexVisible(visible));
+		this.activeSeries.forEach((s) => s.setSheetIndexVisible(visible));
 		return visible;
 	}
 
@@ -297,8 +286,7 @@ export class HistoricMapsContext {
 		);
 	}
 
-	/** Bij isolatie gaat de opacity naar 1; daarna moet de waarde van de slider terugkomen */
 	#restoreSeriesOpacity() {
-		for (const s of this.series) s.warpedMapLayer.setLayerOptions({ opacity: s.opacity });
+		for (const s of this.activeSeries) s.warpedMapLayer.setLayerOptions({ opacity: s.opacity });
 	}
 }

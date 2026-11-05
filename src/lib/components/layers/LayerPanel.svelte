@@ -2,15 +2,19 @@
 	import { getContext, onDestroy, tick } from "svelte";
 	import { flip } from "svelte/animate";
 	import { fly } from "svelte/transition";
-	import { ArrowLeft, ArrowSquareDownLeft, ArrowSquareLeft, Plus, Stack } from "phosphor-svelte";
+	import { ArrowLeft, Plus, Stack } from "phosphor-svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import type { MapLayer } from "$lib/map/MapLayer.svelte";
 	import LayerRow from "./LayerRow.svelte";
 	import AddLayerButton from "./AddLayerButton.svelte";
+	import AhnLayerSettings from "../map/AhnLayerSettings.svelte";
+	import { AhnMapLayer } from "$lib/map/AhnMapLayer.svelte";
+	import SheetInfoView from "$lib/components/map/SheetInfoView.svelte";
+	import { SheetInfo } from "$lib/map/sheetInfo.svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 
-	type ViewState = "list" | "add" | "settings";
+	type ViewState = "list" | "add" | "settings" | "sheet";
 	let currentView = $state<ViewState>("list");
 	let selectedLayer = $state<MapLayer | null>(null);
 	let contentHeight = $state(0);
@@ -18,6 +22,19 @@
 	// Bovenste laag staat bovenaan in het paneel, dus omgekeerd t.o.v. mapContext.layers
 	const displayLayers = $derived(mapContext.layers.toReversed());
 	const addableLayers = $derived(mapContext.availableLayers.filter((l) => !l.added));
+
+	const sheetInfo = mapContext.historic.info;
+
+	$effect(() => {
+		if (!sheetInfo.infoRequested) return;
+		sheetInfo.infoRequested = false;
+		currentView = "sheet";
+	});
+
+	// Is het blad gesloten, dan terug naar de laaglijst
+	$effect(() => {
+		if (!mapContext.historic.selectedMap && currentView === "sheet") currentView = "list";
+	});
 
 	function openSettings(layer: MapLayer) {
 		selectedLayer = layer;
@@ -134,6 +151,7 @@
 					bind:this={listEl}
 					class="relative mt-1 flex flex-col divide-y divide-white/10"
 					class:select-none={draggingId}
+					in:fly={{ x: -20, duration: 200 }}
 				>
 					{#each displayLayers as layer (layer.id)}
 						<li class="py-1" data-layer-id={layer.id} animate:flip={{ duration: 200 }}>
@@ -147,6 +165,10 @@
 						</li>
 					{/each}
 				</ul>
+			{:else if currentView === "sheet"}
+				<div in:fly={{ x: 20, duration: 200 }}>
+					<SheetInfoView info={sheetInfo} />
+				</div>
 			{:else if currentView === "add"}
 				<div class="flex flex-col gap-1.5 px-1 py-1" in:fly={{ y: 20, duration: 200 }}>
 					<p class="px-1 text-[11px] text-white/70">Kies een laag om toe te voegen aan de kaart:</p>
@@ -167,6 +189,9 @@
 				</div>
 			{:else if currentView === "settings" && selectedLayer}
 				<div class="flex flex-col gap-4 px-1 py-2 text-xs" in:fly={{ x: 20, duration: 200 }}>
+					{#if selectedLayer instanceof AhnMapLayer}
+						<AhnLayerSettings layer={selectedLayer} />
+					{/if}
 					<div class="flex flex-col gap-2">
 						<span class="font-semibold text-white/90">Transparantie / Opaciteit</span>
 						<div class="flex items-center gap-3">

@@ -9,7 +9,7 @@
 
 	const mapContext = getContext<MapContext>("mapContext");
 
-	const cardClass = "flex flex-col gap-1 rounded-xl bg-wtr-blue p-1.5 shadow-lg ring-1 ring-white/10";
+	const cardClass = "flex flex-col gap-1 rounded-lg bg-wtr-blue p-1 shadow-lg ring-1 ring-white/10";
 </script>
 
 {#snippet iconButton(Icon: typeof Info, label: string, onclick: () => void, active = false, compact = false)}
@@ -19,8 +19,8 @@
 		title={label}
 		aria-label={label}
 		class="flex cursor-pointer items-center justify-center rounded-md border transition-all focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/60 active:scale-95 {compact
-			? 'h-7 w-7'
-			: 'h-8 w-8'} {active
+			? 'h-8 w-8'
+			: 'h-9 w-9'} {active
 			? 'text-wtr-pink border-white bg-white'
 			: 'border-white/20 bg-white/10 text-white hover:bg-white/20 active:bg-white/30'}"
 	>
@@ -84,7 +84,7 @@
 </div>
 
 <!-- Rechts: kaartbediening -->
-<nav aria-label="Kaartbediening" class="fixed top-1/2 right-2 z-1000 flex -translate-y-1/2 flex-col gap-2">
+<nav aria-label="Kaartbediening" class="fixed top-1/2 right-2 z-1000 flex -translate-y-1/2 flex-col gap-1">
 	<div class={cardClass}>
 		{@render iconButton(Plus, "Inzoomen", () => mapContext.zoomIn())}
 		{@render iconButton(Minus, "Uitzoomen", () => mapContext.zoomOut())}

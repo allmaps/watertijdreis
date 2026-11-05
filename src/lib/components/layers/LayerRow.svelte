@@ -69,14 +69,18 @@
 	</div>
 
 	{#if layer instanceof HistoricMapSeries}
-		{@const years = Array.from(layer.visibleMaps.values()).map((m) => m.yearEnd)}
-		{@const minYear = Math.min(...years)}
-		{@const maxYear = Math.max(...years)}
-		<div class="rounded-md border border-white/20 bg-white/10 px-1 py-0.5">
-			Hist. <span class="font-mono">{isFinite(minYear) ? minYear : "????"}-{isFinite(maxYear) ? maxYear : "????"}</span>
-		</div>
-	{:else}
-		<div class="rounded-md border border-white/20 bg-white/10 px-1 py-0.5">Actueel</div>
+		{#if !layer.mapsLoaded}
+			<span class="text-white/50">Laden…</span>
+		{:else}
+			{@const years = Array.from(layer.visibleMaps.values(), (m) => m.yearEnd).filter(
+				(y): y is number => y !== undefined
+			)}
+			{#if years.length}
+				<div class="rounded-md border border-white/20 bg-amber-900 px-1 py-0.5">
+					Hist. <span class="font-mono">{Math.min(...years)}-{Math.max(...years)}</span>
+				</div>
+			{/if}
+		{/if}
 	{/if}
 
 	<button

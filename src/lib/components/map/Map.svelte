@@ -94,7 +94,6 @@
 	<div class="flex items-baseline gap-10">
 		<Minimap></Minimap>
 		<PassiveTimeline {distributions}></PassiveTimeline>
-		<HistoricMapInfo></HistoricMapInfo>
 	</div>
 	<MapSeriesSelector></MapSeriesSelector>
 </div>

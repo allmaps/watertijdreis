@@ -8,6 +8,7 @@ export default defineConfig({
 		exclude: ["maplibre-gl"],
 	},
 	plugins: [tailwindcss(), sveltekit()],
+	worker: { format: "es" },
 	define: {
 		global: "globalThis",
 	},
