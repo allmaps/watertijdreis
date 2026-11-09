@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getContext, onDestroy, tick } from "svelte";
+	import { getContext, onDestroy, tick, untrack } from "svelte";
 	import { flip } from "svelte/animate";
-	import { fly } from "svelte/transition";
-	import { ArrowLeft, Plus, Stack } from "phosphor-svelte";
+	import { fly, slide } from "svelte/transition";
+	import { ArrowLeft, CaretRight, Info, Plus, Stack } from "phosphor-svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import type { MapLayer } from "$lib/map/MapLayer.svelte";
 	import LayerRow from "./LayerRow.svelte";
@@ -11,6 +11,8 @@
 	import { AhnMapLayer } from "$lib/map/AhnMapLayer.svelte";
 	import SheetInfoView from "$lib/components/map/SheetInfoView.svelte";
 	import { SheetInfo } from "$lib/map/sheetInfo.svelte";
+	import { HistoricMapSeries } from "$lib/map/HistoricMapSeries.svelte";
+	import EditionPicker from "../map/EditionPicker.svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 
@@ -24,17 +26,19 @@
 	const addableLayers = $derived(mapContext.availableLayers.filter((l) => !l.added));
 
 	const sheetInfo = mapContext.historic.info;
+	const openSheetId = $derived(mapContext.historic.selectedMap?.id ?? null);
 
 	$effect(() => {
-		if (!sheetInfo.infoRequested) return;
-		sheetInfo.infoRequested = false;
-		currentView = "sheet";
+		const id = openSheetId;
+		untrack(() => {
+			if (id) currentView = "sheet";
+			else if (currentView === "sheet") currentView = "list";
+		});
 	});
 
-	// Is het blad gesloten, dan terug naar de laaglijst
-	$effect(() => {
-		if (!mapContext.historic.selectedMap && currentView === "sheet") currentView = "list";
-	});
+	const viewTitle = $derived(
+		currentView === "add" ? "Laag toevoegen" : currentView === "sheet" ? sheetInfo.title : selectedLayer?.name
+	);
 
 	function openSettings(layer: MapLayer) {
 		selectedLayer = layer;
@@ -57,9 +61,6 @@
 		goBack();
 	}
 
-	// ------------------------------------------------------------------
-	// Drag & drop herordenen (pointer events: werkt met muis én touch)
-	// ------------------------------------------------------------------
 	let listEl = $state<HTMLUListElement>();
 	let draggingId = $state<string | null>(null);
 
@@ -67,8 +68,6 @@
 		if (!layer.movable || e.button !== 0) return;
 		e.preventDefault();
 		draggingId = layer.id;
-		// Op window i.p.v. pointer capture: bij herordenen verplaatst Svelte de DOM-nodes,
-		// en dan kan een pointer capture op de greep verloren gaan.
 		window.addEventListener("pointermove", onDragMove);
 		window.addEventListener("pointerup", endDrag);
 		window.addEventListener("pointercancel", endDrag);
@@ -77,8 +76,6 @@
 	function onDragMove(e: PointerEvent) {
 		if (!draggingId || !listEl) return;
 
-		// offsetTop/offsetHeight zijn layout-posities en dus onafhankelijk van de
-		// lopende flip-animaties (anders gaat het element onder je muis heen en weer springen).
 		const y = e.clientY - listEl.getBoundingClientRect().top;
 		const rows = Array.from(listEl.children) as HTMLElement[];
 		if (rows.length === 0) return;
@@ -132,14 +129,24 @@
 					<ArrowLeft size={16} />
 					<span class="font-medium">Terug</span>
 				</button>
-				<span class="truncate text-xs font-semibold tracking-wide text-white/90">
-					{currentView === "add" ? "Laag toevoegen" : selectedLayer?.name}
-				</span>
+				<span class="truncate text-xs font-semibold tracking-wide text-white/90">{viewTitle}</span>
 			</div>
 		{/if}
 
 		<div class="flex flex-col gap-1">
 			{#if currentView === "list"}
+				{#if mapContext.historic.selectedMap}
+					<button
+						type="button"
+						transition:slide={{ duration: 200 }}
+						onclick={() => (currentView = "sheet")}
+						class="group mb-1 flex w-full cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-xs transition-colors hover:bg-white/15"
+					>
+						<Info size="16" class="text-wtr-pink shrink-0" />
+						<span class="min-w-0 flex-1 truncate font-medium">Bladinformatie · {sheetInfo.title}</span>
+						<CaretRight size="12" class="shrink-0 text-white/60 transition-transform group-hover:translate-x-0.5" />
+					</button>
+				{/if}
 				<div class="flex gap-1">
 					<button class="px-1 opacity-50"><Stack size="18" /></button>
 					<button onclick={() => (currentView = "add")} class="w-full text-left">
@@ -192,22 +199,27 @@
 					{#if selectedLayer instanceof AhnMapLayer}
 						<AhnLayerSettings layer={selectedLayer} />
 					{/if}
-					<div class="flex flex-col gap-2">
-						<span class="font-semibold text-white/90">Transparantie / Opaciteit</span>
-						<div class="flex items-center gap-3">
-							<input
-								type="range"
-								min="0"
-								max="1"
-								step="0.05"
-								bind:value={selectedLayer.opacity}
-								class="w-full cursor-pointer accent-white"
-							/>
-							<span class="w-8 text-right font-mono text-[11px]">
-								{Math.round(selectedLayer.opacity * 100)}%
-							</span>
+					{#if selectedLayer instanceof HistoricMapSeries && selectedLayer.hasEditions}
+						<EditionPicker series={selectedLayer}></EditionPicker>
+					{/if}
+					{#if selectedLayer instanceof HistoricMapSeries && selectedLayer.id == "wsk"}{:else}
+						<div class="flex flex-col gap-2">
+							<span class="font-semibold text-white/90">Transparantie / Opaciteit</span>
+							<div class="flex items-center gap-3">
+								<input
+									type="range"
+									min="0"
+									max="1"
+									step="0.05"
+									bind:value={selectedLayer.opacity}
+									class="w-full cursor-pointer accent-white"
+								/>
+								<span class="w-8 text-right font-mono text-[11px]">
+									{Math.round(selectedLayer.opacity * 100)}%
+								</span>
+							</div>
 						</div>
-					</div>
+					{/if}
 
 					<div class="flex items-center justify-between border-t border-white/10 pt-2">
 						<span class="text-white/60">Verwijder uit paneel</span>

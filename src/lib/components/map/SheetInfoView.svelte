@@ -34,7 +34,7 @@
 {/snippet}
 
 {#if info.map}
-	<div bind:this={scroller} class="scrollable flex max-h-[50vh] flex-col gap-4 overflow-y-auto px-1 py-1 text-xs">
+	<div bind:this={scroller} class="scrollable flex max-h-[25vh] flex-col gap-4 overflow-y-auto px-1 py-1 text-xs">
 		<!-- Metadata -->
 		<ul class="space-y-1">
 			{@render row("Bladtitel", info.map.label)}

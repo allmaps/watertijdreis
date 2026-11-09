@@ -7,7 +7,7 @@ import type { HeightScale } from "./dynamic-ahn/terrain";
 export class AhnMapLayer extends MapLayer {
 	stops = $state.raw<readonly GradientStop[]>(defaultStops);
 	/** Historische kaarten onder deze laag zwart-wit tonen */
-	grayscale = $state(false);
+	grayscale = $state(true);
 	scale = $state.raw<HeightScale | null>(null);
 	error = $state<string>();
 

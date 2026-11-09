@@ -3,15 +3,17 @@
 	import * as turf from "@turf/turf";
 	import { draw, fade, fly } from "svelte/transition";
 	import NumberFlow from "@number-flow/svelte";
-	import { CaretRight, Info } from "phosphor-svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import MapThumbnail from "./HistoricMapThumbnail.svelte";
+	import { CaretRight, Info } from "phosphor-svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 	const historicCtx = mapContext.historic;
 	const info = historicCtx.info;
 
 	let activeHistoricMap = $derived(historicCtx.selectedMap || historicCtx.previewMap);
+
+	let expanded = $derived(info.visible && !historicCtx.selectedMap);
 
 	// Scaled down by 0.8 from 160x200 to match your previous size without CSS scale hacks
 	let width: number = $state(128);
@@ -80,11 +82,6 @@
 		return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 	});
 
-	// ------------------------------------------------------------------
-	// Paneel: periode, dat uitgroeit tot een blad-preview
-	// ------------------------------------------------------------------
-
-	/** Aanker in SVG-coördinaten: rechterrand van het kaartvenster, of van het blad als het geopend is */
 	let anchor = $derived.by(() => {
 		if (viewportRect) {
 			return { x: viewportRect.x + viewportRect.width, y: viewportRect.y + viewportRect.height / 2 };
@@ -97,7 +94,6 @@
 		return { x: maxX, y: (minY + maxY) / 2 };
 	});
 
-	// Precise coordinate mapping without CSS transform distortion
 	let panelPosition = $derived.by(() => {
 		if (!anchor || !svgElement) return null;
 
@@ -111,7 +107,6 @@
 		};
 	});
 
-	/** Jaren van de kaarten in beeld; series zonder jaartallen tellen niet mee */
 	let viewportPeriod = $derived.by((): [number, number] | null => {
 		const years = Array.from(historicCtx.visibleMapsInViewport.values(), (m) => m.yearEnd).filter(
 			(y): y is number => y !== undefined
@@ -119,7 +114,6 @@
 		return years.length ? [Math.min(...years), Math.max(...years)] : null;
 	});
 
-	/** Bij een voorvertoning krimpt de periode tot het jaar van dat blad */
 	let period = $derived.by((): [number, number] | null => {
 		const sheetYear = info.visible ? info.map?.yearEnd : undefined;
 		return sheetYear !== undefined ? [sheetYear, sheetYear] : viewportPeriod;
@@ -165,16 +159,15 @@
 	{#if mapContext.maplibreLoaded && panelPosition && (period || info.map)}
 		<div class="absolute z-10000 -translate-y-1/2" style="left: {panelPosition.left}; top: {panelPosition.top};">
 			<div
-				class="bg-wtr-blue flex items-center overflow-hidden rounded-xl whitespace-nowrap text-white shadow-lg ring-1 ring-white/10 {info.visible
+				class="bg-wtr-blue flex items-center overflow-hidden rounded-xl whitespace-nowrap text-white shadow-lg ring-1 ring-white/10 {expanded
 					? 'pointer-events-auto'
 					: ''}"
 				onpointerenter={() => (info.hold = true)}
 				onpointerleave={() => (info.hold = false)}
 			>
-				<!-- Periode -->
 				{#if period}
 					<div class="flex flex-col px-3 py-2">
-						<span class="text-[10px] leading-none font-medium tracking-wider text-white/60 uppercase">
+						<span class="text-[10px] leading-none font-medium text-white/60">
 							{single ? "Jaar" : "Periode"}
 						</span>
 						<span class="mt-1 flex text-base leading-none font-semibold tabular-nums">
@@ -192,12 +185,11 @@
 					</div>
 				{/if}
 
-				<!-- Blad-preview: groeit uit het paneel -->
 				<div
 					class="grid transition-[grid-template-columns,grid-template-rows] duration-400 ease-out"
-					style:grid-template-columns={info.visible ? "1fr" : "0fr"}
-					style:grid-template-rows={info.visible ? "1fr" : "0fr"}
-					inert={!info.visible}
+					style:grid-template-columns={expanded ? "1fr" : "0fr"}
+					style:grid-template-rows={expanded ? "1fr" : "0fr"}
+					inert={!expanded}
 				>
 					<div class="min-h-0 min-w-0 overflow-hidden">
 						{#if info.map}

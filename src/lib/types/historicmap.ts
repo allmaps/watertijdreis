@@ -30,10 +30,6 @@ export type Filter = {
 	type: undefined | "WVE" | "HWP";
 };
 
-// ------------------------------------------------------------------
-// Configuratie van een serie
-// ------------------------------------------------------------------
-
 export type SpriteConfig = {
 	json: string;
 	image: string;
@@ -53,4 +49,11 @@ export type HistoricMapSeriesOptions = {
 	source: SeriesSource;
 	added?: boolean;
 	movable?: boolean;
+};
+
+export type EditionRange = {
+	edition: number;
+	yearStart?: number;
+	yearEnd?: number;
+	count: number;
 };

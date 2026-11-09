@@ -2,12 +2,17 @@
 	import { getContext } from "svelte";
 	import { ui } from "$lib/state/ui.svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
-	import { ShareFat, Info, Drop, Plus, Minus, Crosshair, MagnifyingGlass } from "phosphor-svelte";
+	import { ShareFat, Info, Plus, Minus, Crosshair, MagnifyingGlass } from "phosphor-svelte";
+	import { env } from "$env/dynamic/public";
 	import ShareModal from "./modals/ShareModal.svelte";
 	import AboutModal from "./modals/AboutModal.svelte";
 	import MapSheetToggle from "$lib/components/map/MapSheetToggle.svelte"; // pas het pad aan naar waar hij staat
+	import Geocoder from "./geocoder/Geocoder.svelte";
+	import { GeocodeEarth } from "./geocoder/providers/geocode-earth";
 
 	const mapContext = getContext<MapContext>("mapContext");
+
+	const geocodeEarthApiKey = env.PUBLIC_GEOCODE_EARTH_API_KEY;
 
 	const cardClass = "flex flex-col gap-1 rounded-lg bg-wtr-blue p-1 shadow-lg ring-1 ring-white/10";
 </script>
@@ -30,6 +35,7 @@
 
 <AboutModal bind:visible={ui.aboutModalVisible}></AboutModal>
 <ShareModal bind:visible={ui.shareModalVisible}></ShareModal>
+<Geocoder providers={[new GeocodeEarth(geocodeEarthApiKey)]} bind:visible={ui.searchVisible}></Geocoder>
 
 <!-- Linksboven: titel + weergave-toggle -->
 <div class="fixed top-2 left-2 z-1000 flex flex-col items-start gap-2">
@@ -98,7 +104,7 @@
 			mapContext.userLocationActive
 		)}
 		{@render iconButton(MagnifyingGlass, "Zoeken", () => {
-			// TODO: koppel aan je zoek-UI
+			ui.searchVisible = true;
 		})}
 	</div>
 </nav>

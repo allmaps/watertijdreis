@@ -7,19 +7,14 @@
 	const mapContext = getContext<MapContext>("mapContext");
 	const historic = mapContext.historic;
 
-	// ------------------------------------------------------------------
-	// Afgeleide state
-	// ------------------------------------------------------------------
 	const selectedMap = $derived(historic.selectedMap);
 	const pinnedMap = $derived(historic.pinnedMap);
 	const clickedMap = $derived(historic.clickedHistoricMap);
 
-	/** Rechter segment is actief zodra een blad open staat of de bladindex zichtbaar is */
 	const sheetMode = $derived(!!selectedMap || mapContext.sheetIndexVisible);
 
 	const isSelectedPinned = $derived(!!selectedMap && historic.pinnedMapId === selectedMap.id);
 
-	/** Pin-knop: bij een open blad, of als er een gepind blad in het label staat */
 	const showPin = $derived(!!selectedMap || (!!pinnedMap && !clickedMap));
 	const pinFilled = $derived(selectedMap ? isSelectedPinned : true);
 
@@ -27,9 +22,7 @@
 		selectedMap?.label ?? (pinnedMap && !clickedMap ? pinnedMap.label : (clickedMap?.label ?? "Individueel blad"))
 	);
 
-	// Spatie-hint: de eerste twee seconden zichtbaar
 	let hintVisible = $state(true);
-	// const showShortcutHint = $derived(!showPin && hintVisible);
 	const showShortcutHint = false;
 
 	$effect(() => {
@@ -37,18 +30,12 @@
 		return () => clearTimeout(timer);
 	});
 
-	// ------------------------------------------------------------------
-	// Acties
-	// ------------------------------------------------------------------
-
-	/** Linker knop: terug naar de kaart */
 	function showMap() {
 		if (selectedMap && isSelectedPinned) historic.pinnedMapView = mapContext.saveMapView(false);
 		historic.selectedMapId = null;
 		historic.setSheetIndexVisibility(false);
 	}
 
-	/** Rechter knop: open het aangeklikte of gepinde blad, anders de bladindex aan/uit */
 	function showSheets() {
 		const id = selectedMap ? null : (clickedMap?.id ?? pinnedMap?.id ?? null);
 		if (id) {
@@ -76,7 +63,6 @@
 		}
 
 		if (e.key === " " && !e.repeat) {
-			// Niet kapen als je typt, of als een knop/link de spatie zelf al afhandelt
 			const target = e.target;
 			if (
 				target instanceof HTMLElement &&
@@ -89,9 +75,6 @@
 		}
 	}
 
-	// ------------------------------------------------------------------
-	// Schuivende pil
-	// ------------------------------------------------------------------
 	let leftWidth = $state(0);
 	let rightWidth = $state(0);
 	const measured = $derived(leftWidth > 0 && rightWidth > 0);
@@ -113,7 +96,6 @@
 <div role="group" aria-label="Weergave" class="text-[12px] text-white">
 	<div class="rounded-lg border border-white/20 bg-white/10 p-0.5">
 		<div class="relative flex h-7 items-stretch">
-			<!-- Schuivende pil -->
 			<span
 				aria-hidden="true"
 				class="absolute inset-y-0 left-0 rounded-md bg-white shadow-sm {measured
@@ -123,7 +105,6 @@
 				style:width="{sheetMode ? rightWidth : leftWidth}px"
 			></span>
 
-			<!-- Kaart -->
 			<button
 				type="button"
 				bind:clientWidth={leftWidth}
@@ -137,7 +118,6 @@
 				Kaart
 			</button>
 
-			<!-- Blad / bladindex (+ pin) -->
 			<div
 				bind:clientWidth={rightWidth}
 				class="relative z-10 flex h-full max-w-50 items-center rounded-md transition-colors {sheetMode

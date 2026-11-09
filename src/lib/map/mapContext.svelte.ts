@@ -10,41 +10,30 @@ import { type LayerOptions, type MapView } from "$lib/types/map";
 import { HistoricMapsContext } from "./historicMapsContext.svelte";
 import { applyStateFromURL, syncStateToURL, defaultState } from "./urlStateManager";
 import type { MapLayer } from "./MapLayer.svelte";
+import { HistoricMapSeries } from "./HistoricMapSeries.svelte";
+import { AhnMapLayer } from "./AhnMapLayer.svelte";
 
-/** Maplibre-lagen die geen MapLayer zijn en altijd bovenaan blijven staan */
 const PINNED_TOP_IDS = ["user-location"];
 
 export class MapContext {
-	// ------------------------------------------------------------------
-	// Kaart
-	// ------------------------------------------------------------------
 	map: MaplibreMap | null = $state(null);
 	maplibreLoaded = $state(false);
 	viewportPolygon: Feature | null = $state(null);
 	savedMapViews: MapView[] = $state([]);
 
-	// ------------------------------------------------------------------
-	// Lagen
-	// ------------------------------------------------------------------
 	historic: HistoricMapsContext = new HistoricMapsContext(this);
 
-	/** Catalogus: alles wat toegevoegd kán worden */
 	availableLayers = $state<MapLayer[]>([]);
-	/** Lagen die op de kaart staan, index 0 = onderaan */
 	layers = $state<MapLayer[]>([]);
 
 	#hovered: MapLayer | null = null;
 
-	// ------------------------------------------------------------------
-	// UI-state
-	// ------------------------------------------------------------------
 	sheetIndexVisible = $state(false);
 	toastContent = $state("");
 
 	userLocationActive = $state(false);
 	userLocationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-	/** LEGACY: wordt nog gelezen door urlStateManager. Verdwijnt zodra die naar layers is gemigreerd. */
 	layerOptions = $state<LayerOptions>({
 		baseMap: "none",
 		protoMapsWaterInFront: false,
@@ -68,11 +57,21 @@ export class MapContext {
 		$effect(() => {
 			syncStateToURL(this);
 		});
+
+		$effect(() => {
+			if (!this.maplibreLoaded) return;
+			const layers = this.layers;
+
+			layers.forEach((layer, index) => {
+				if (!(layer instanceof HistoricMapSeries)) return;
+				const covered = layers.some(
+					(other, i) => i > index && other instanceof AhnMapLayer && other.effectiveVisible && other.grayscale
+				);
+				layer.setGrayscale(covered);
+			});
+		});
 	}
 
-	// ------------------------------------------------------------------
-	// Initialisatie
-	// ------------------------------------------------------------------
 	init(containerId: string) {
 		maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
@@ -133,9 +132,6 @@ export class MapContext {
 		}
 	}
 
-	// ------------------------------------------------------------------
-	// Events: één router, de lagen beslissen zelf of ze iets raakten
-	// ------------------------------------------------------------------
 	#initEventRouting(map: MaplibreMap) {
 		map.on("click", (e) => {
 			for (let i = this.layers.length - 1; i >= 0; i--) {
@@ -162,9 +158,6 @@ export class MapContext {
 		map.getCanvas().style.cursor = layer ? "pointer" : "";
 	}
 
-	// ------------------------------------------------------------------
-	// Lagenbeheer
-	// ------------------------------------------------------------------
 	async addLayer(layer: MapLayer, index = this.layers.length) {
 		if (this.layers.includes(layer)) return;
 		if (!this.availableLayers.includes(layer)) this.availableLayers.push(layer);
@@ -200,7 +193,6 @@ export class MapContext {
 		const layer = this.layers[from];
 		if (!layer.movable) return;
 
-		// Een vaste laag werkt als muur: er kan niets overheen, dus hij blijft op zijn plek
 		const [lo, hi] = from < to ? [from + 1, to] : [to, from - 1];
 		if (this.layers.slice(lo, hi + 1).some((l) => !l.movable)) return;
 
@@ -209,7 +201,6 @@ export class MapContext {
 		this.applyOrder();
 	}
 
-	/** Zet alle maplibre-lagen in dezelfde volgorde als `layers` (zonder beforeId = naar de top) */
 	applyOrder() {
 		const map = this.activeMap;
 		for (const layer of this.layers) {
@@ -218,9 +209,6 @@ export class MapContext {
 		for (const id of PINNED_TOP_IDS) if (map.getLayer(id)) map.moveLayer(id);
 	}
 
-	// ------------------------------------------------------------------
-	// Isolatie: één laag tonen, de rest tijdelijk verbergen (bv. bij een geopend kaartblad)
-	// ------------------------------------------------------------------
 	isolate(keep: MapLayer) {
 		for (const layer of this.layers) layer.suppressed = layer !== keep;
 		this.#setPinnedVisibility(false);
@@ -239,9 +227,6 @@ export class MapContext {
 		}
 	}
 
-	// ------------------------------------------------------------------
-	// Viewport & navigatie
-	// ------------------------------------------------------------------
 	saveMapView(push = true) {
 		const view = {
 			center: this.activeMap.getCenter(),
@@ -288,7 +273,7 @@ export class MapContext {
 
 		const opacity = defaultState.historicMapsOpacity / 100;
 		this.historic.series.forEach((s) => (s.opacity = opacity));
-		this.layerOptions.historicMapsOpacity = defaultState.historicMapsOpacity; // LEGACY
+		this.layerOptions.historicMapsOpacity = defaultState.historicMapsOpacity;
 	}
 
 	updateViewport() {
@@ -349,9 +334,6 @@ export class MapContext {
 		this.historic.series.forEach((s) => s.setLabelVisibility(visible));
 	}
 
-	// ------------------------------------------------------------------
-	// Gebruikerslocatie
-	// ------------------------------------------------------------------
 	async flyToUserLocation() {
 		try {
 			const { lat, lng } = await getValidUserLocation();

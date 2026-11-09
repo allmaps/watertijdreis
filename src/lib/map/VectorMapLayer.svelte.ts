@@ -25,6 +25,8 @@ export class VectorMapLayer extends MapLayer {
 
 	readonly #ids: { glow: string; line: string; labels: string };
 
+	opacity = $state(1);
+
 	constructor({ sourceId, data, labelField, minzoom, maxzoom, ...base }: VectorMapLayerOptions) {
 		super({ ...base, type: "vector" });
 		this.sourceId = sourceId;

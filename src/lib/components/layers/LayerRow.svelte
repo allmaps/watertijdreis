@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DotsSixVertical, Eye, EyeSlash } from "phosphor-svelte";
+	import { DotsSixVertical, Eye, EyeSlash, Info } from "phosphor-svelte";
 	import type { MapLayer } from "$lib/map/MapLayer.svelte";
 	import { HistoricMapSeries } from "$lib/map/HistoricMapSeries.svelte";
 
@@ -66,6 +66,7 @@
 		</button>
 
 		<span class="max-w-[130px] truncate font-semibold tracking-wide text-white">{layer.name}</span>
+		<span><Info size="12" class="inline"></Info></span>
 	</div>
 
 	{#if layer instanceof HistoricMapSeries}
@@ -77,7 +78,7 @@
 			)}
 			{#if years.length}
 				<div class="rounded-md border border-white/20 bg-amber-900 px-1 py-0.5">
-					Hist. <span class="font-mono">{Math.min(...years)}-{Math.max(...years)}</span>
+					Hist. <span class="font-mono text-[11px]">{Math.min(...years)}-{Math.max(...years)}</span>
 				</div>
 			{/if}
 		{/if}

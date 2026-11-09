@@ -6,10 +6,6 @@ import { VectorMapLayer } from "./VectorMapLayer.svelte";
 import { AhnMapLayer } from "./AhnMapLayer.svelte";
 import type { MapContext } from "./mapContext.svelte";
 
-/**
- * Retourneert de catalogus van alle beschikbare lagen in de applicatie.
- * Wordt aangeroepen vanuit MapContext zodra de MapLibre map-instantie klaar is.
- */
 export function createAvailableLayers(mapContext: MapContext): MapLayer[] {
 	return [
 		...mapContext.historic.createSeries(),
@@ -35,7 +31,7 @@ export function createAvailableLayers(mapContext: MapContext): MapLayer[] {
 			],
 			minzoom: 6,
 			maxzoom: 20,
-			added: false, // Moet via 'Laag toevoegen' gekozen worden
+			added: false,
 		}),
 		new AhnMapLayer({ id: "ahn", name: "AHN Hoogtekaart", themeColor: "#44a" }),
 	];

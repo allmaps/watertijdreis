@@ -7,7 +7,14 @@ import { transformToIIIFInfoJson } from "$lib/utils/allmaps";
 import { calculateFilteredMapIds } from "./HistoricMapFilter";
 import type { HistoricMapsContext } from "./historicMapsContext.svelte";
 import { MapLayer } from "./MapLayer.svelte";
-import type { Filter, HistoricMap, HistoricMapSeriesOptions, SeriesSource, SpriteConfig } from "$lib/types/historicmap";
+import type {
+	EditionRange,
+	Filter,
+	HistoricMap,
+	HistoricMapSeriesOptions,
+	SeriesSource,
+	SpriteConfig,
+} from "$lib/types/historicmap";
 
 const LABEL_ZOOM_VALUES = [5, 6, 6, 9, 7, 12, 8, 15, 9, 17, 10, 18, 12, 22, 14, 26, 15, 28, 20, 28];
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
@@ -23,6 +30,8 @@ export class HistoricMapSeries extends MapLayer {
 	context: HistoricMapsContext;
 	readonly source: SeriesSource;
 	hasEditions = $state(false);
+
+	opacity = $state(1);
 
 	// Elke serie heeft zijn eigen WarpedMapLayer, zodat de z-volgorde tussen series klopt.
 	warpedMapLayer: WarpedMapLayer;
@@ -54,6 +63,26 @@ export class HistoricMapSeries extends MapLayer {
 			grouped.set(sheet.number, list);
 		}
 		return grouped;
+	});
+
+	editions: EditionRange[] = $derived.by(() => {
+		const byEdition = new Map<number, EditionRange>();
+
+		for (const m of this.mapsById.values()) {
+			if (m.edition === undefined) continue;
+
+			const range = byEdition.get(m.edition) ?? { edition: m.edition, count: 0 };
+			range.count++;
+
+			const start = m.yearStart ?? m.yearEnd;
+			const end = m.yearEnd ?? m.yearStart;
+			if (start !== undefined) range.yearStart = Math.min(range.yearStart ?? start, start);
+			if (end !== undefined) range.yearEnd = Math.max(range.yearEnd ?? end, end);
+
+			byEdition.set(m.edition, range);
+		}
+
+		return Array.from(byEdition.values()).sort((a, b) => a.edition - b.edition);
 	});
 
 	filter: Filter = $state({
@@ -164,6 +193,16 @@ export class HistoricMapSeries extends MapLayer {
 		this.#fillTimers.clear();
 	}
 
+	selectEdition(edition: Filter["edition"]) {
+		this.filter.edition = edition;
+
+		// De jaargrens meeschuiven: anders kunnen bladen van de nieuwe editie door een oude `yearEnd` verborgen blijven
+		const ends = (edition === "All" ? this.editions : this.editions.filter((e) => e.edition === edition))
+			.map((e) => e.yearEnd)
+			.filter((y): y is number => y !== undefined);
+		if (ends.length) this.filter.yearEnd = Math.max(...ends);
+	}
+
 	// ------------------------------------------------------------------
 	// MapLayer-contract
 	// ------------------------------------------------------------------
@@ -175,9 +214,6 @@ export class HistoricMapSeries extends MapLayer {
 
 	readonly #onSpritesLoaded = () => this.applyFilter();
 
-	// De kaartjes zelf (warped maps) worden door de $effect in de constructor aan/uit gezet;
-	// hier gaat het om de outline-lagen van maplibre.
-	// (Wordt aangeroepen vanuit de effect in MapLayer, dus de reads hieronder worden getrackt.)
 	protected applyVisibility(_visible: boolean) {
 		this.#syncOutlineVisibility();
 	}
@@ -191,7 +227,6 @@ export class HistoricMapSeries extends MapLayer {
 		if (!map) return;
 
 		const show = this.effectiveVisible;
-		// Als er een kaart geselecteerd is, zijn de outlines verborgen, tenzij de bladwijzer open staat
 		const showIndex = show && (!this.context.selectedMap || this.context.mapContext.sheetIndexVisible);
 
 		const set = (id: string, visible: boolean) => {
@@ -316,6 +351,10 @@ export class HistoricMapSeries extends MapLayer {
 		if (this.map?.getLayer(this.ids.numbers)) {
 			this.map.setPaintProperty(this.ids.numbers, "text-opacity", visible ? 1 : 0);
 		}
+	}
+
+	setGrayscale(on: boolean) {
+		this.warpedMapLayer.setLayerOptions({ saturation: on ? 0 : 1 });
 	}
 
 	// ------------------------------------------------------------------

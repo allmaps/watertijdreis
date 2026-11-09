@@ -22,7 +22,7 @@ export abstract class MapLayer {
 
 	added = $state(false);
 	visible = $state(true);
-	opacity = $state(1);
+	opacity = $state(0.7);
 	suppressed = $state(false);
 
 	effectiveVisible = $derived(this.added && this.visible && !this.suppressed);

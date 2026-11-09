@@ -6,7 +6,6 @@ import type { MapContext } from "$lib/map/mapContext.svelte";
 
 export const MANIFEST_URL = "https://tu-delft-heritage.github.io/watertijdreis-data/collection.json";
 
-// Minimale typering van de IIIF-onderdelen die we gebruiken
 type LanguageMap = Record<string, string[] | undefined>;
 type IiifMetadata = { label: LanguageMap; value: LanguageMap };
 type IiifCanvas = {
@@ -29,7 +28,6 @@ export type SheetVariant = {
 	imageService: string;
 	isBackside: boolean;
 	isCurrent: boolean;
-	/** Alleen als dit blad al als kaart geregistreerd is (voorkanten wel, achterkanten pas na klikken) */
 	map: HistoricMap | undefined;
 };
 
@@ -40,11 +38,6 @@ export type SheetLinks = {
 
 type Status = "idle" | "loading" | "ready" | "error";
 
-// ------------------------------------------------------------------
-// Hulpfuncties
-// ------------------------------------------------------------------
-
-/** Eén keer ophalen per URL; mislukte requests blijven niet in de cache */
 const jsonCache = new Map<string, Promise<unknown>>();
 function loadJson<T>(url: string): Promise<T> {
 	let promise = jsonCache.get(url);
@@ -76,11 +69,6 @@ export function imageServiceOf(canvas: IiifCanvas | null | undefined) {
 	return body?.service?.[0]?.id ?? body?.id ?? null;
 }
 
-// ------------------------------------------------------------------
-// SheetInfo
-// ------------------------------------------------------------------
-
-/** Maak aan tijdens het initialiseren van een component: de effects hieronder hebben dat nodig */
 export class SheetInfo {
 	readonly #mapContext: MapContext;
 	readonly #historic: HistoricMapsContext;
@@ -99,10 +87,8 @@ export class SheetInfo {
 	editionManifest = $state.raw<IiifManifest | null>(null);
 	status = $state<Status>("idle");
 
-	/** De kaart die nu bekeken of geselecteerd wordt */
 	live = $derived(this.#historic.previewMap ?? this.#historic.selectedMap);
 
-	/** Zoals `live`, maar blijft 600 ms hangen: tijd om van de kaart naar het paneel te bewegen */
 	#shown = $state.raw<HistoricMap | null>(null);
 	get map() {
 		return this.#shown;
@@ -110,7 +96,6 @@ export class SheetInfo {
 
 	isSelected = $derived(this.#historic.selectedMap !== null);
 
-	/** "Editie 2 BIS"; ontbreekt voor series zonder edities */
 	editionLabel = $derived.by(() => {
 		const m = this.map;
 		if (!m || m.edition === undefined) return null;
@@ -142,7 +127,6 @@ export class SheetInfo {
 			.filter((c): c is IiifCanvas => !!c);
 	});
 
-	/** Het hoofdblad (voorkant) waar de bijbladen en de achterkant bij horen */
 	mainSheet = $derived.by(() => {
 		const main = this.#variantCanvases.find((c) => !hasText(c, "Type"));
 		if (!main) return null;
@@ -211,7 +195,6 @@ export class SheetInfo {
 		};
 	});
 
-	/** Positie van het kaartvenster op de thumbnail, in procenten */
 	viewportRect = $derived.by(() => {
 		const bbox = this.map?.geoFullMaskBbox;
 		const viewport = this.#mapContext.viewportPolygon;
@@ -234,14 +217,12 @@ export class SheetInfo {
 		this.#historic = historic;
 		this.#mapContext = historic.mapContext;
 
-		// Collectie één keer ophalen
 		$effect(() => {
 			loadJson<IiifCollection>(MANIFEST_URL)
 				.then((data) => (this.collection = data))
 				.catch(console.error);
 		});
 
-		// Blad laten nahangen
 		$effect(() => {
 			const live = this.live;
 			if (live) {
@@ -249,7 +230,7 @@ export class SheetInfo {
 				this.visible = true;
 				return;
 			}
-			if (this.hold) return; // muis staat op het paneel
+			if (this.hold) return;
 
 			const hide = setTimeout(() => (this.visible = false), 600);
 			const clear = setTimeout(() => (this.#shown = null), 600 + 450);
@@ -259,7 +240,6 @@ export class SheetInfo {
 			};
 		});
 
-		// Editie-manifest laden; `cancelled` voorkomt dat een trage response een nieuwere overschrijft
 		$effect(() => {
 			const url = this.#editionManifestUrl;
 			this.editionManifest = null;
@@ -287,11 +267,6 @@ export class SheetInfo {
 		});
 	}
 
-	// ------------------------------------------------------------------
-	// Acties
-	// ------------------------------------------------------------------
-
-	/** Het getoonde blad openen (alleen als er nog geen blad open staat) */
 	open() {
 		if (this.map && !this.#historic.selectedMap) this.#historic.selectedMapId = this.map.id;
 	}
@@ -302,7 +277,6 @@ export class SheetInfo {
 			return;
 		}
 
-		// Achterkanten zijn nog geen kaart: eerst registreren
 		if (!this.mainSheet) return;
 		const backside = await registerBacksideMap(variant.canvas, this.mainSheet, this.#mapContext);
 		if (backside) this.#historic.selectedMapId = backside.id;
