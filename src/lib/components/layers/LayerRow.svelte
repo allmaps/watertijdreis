@@ -83,7 +83,7 @@
 			>
 				{#if isHistoric}
 					{#if years.length}
-						Hist. <span class="font-mono text-[11px]">{Math.min(...years)}-{Math.max(...years)}</span>
+						Hist. <span class="font-mono text-[10px]">{Math.min(...years)}-{Math.max(...years)}</span>
 					{:else}
 						Historisch
 					{/if}
