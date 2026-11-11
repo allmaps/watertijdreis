@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { defaultStops, elevationAt, maxStops, type GradientStop } from "$lib/map/dynamic-ahn/gradient";
-	import { gradientCss, insertStop } from "./ahnGradientEditor.svelte.ts";
+	import { gradientCss, insertStop } from "./ahnGradientEditor.svelte.js";
 	import type { HeightScale } from "$lib/map/dynamic-ahn/terrain";
 
 	let {

@@ -11,7 +11,7 @@
 		height = 72,
 		sigma = 1.5, // how far a year's "sand" spreads, in years
 		tickEvery = undefined, // force a tick interval; otherwise chosen automatically
-		axisColor = "#333366",
+		axisColor = "#33336666",
 	}: {
 		distributions: Distribution[];
 		width?: number;

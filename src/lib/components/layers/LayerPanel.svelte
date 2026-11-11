@@ -2,17 +2,16 @@
 	import { getContext, onDestroy, tick, untrack } from "svelte";
 	import { flip } from "svelte/animate";
 	import { fly, slide } from "svelte/transition";
-	import { ArrowLeft, CaretRight, Info, Plus, Stack } from "phosphor-svelte";
+	import { ArrowLeft, CaretRight, Info, Plus, Stack, Trash } from "phosphor-svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import type { MapLayer } from "$lib/map/MapLayer.svelte";
 	import LayerRow from "./LayerRow.svelte";
 	import AddLayerButton from "./AddLayerButton.svelte";
-	import AhnLayerSettings from "../map/AhnLayerSettings.svelte";
+	import AhnLayerSettings from "./AhnLayerSettings.svelte";
 	import { AhnMapLayer } from "$lib/map/AhnMapLayer.svelte";
 	import SheetInfoView from "$lib/components/map/SheetInfoView.svelte";
-	import { SheetInfo } from "$lib/map/sheetInfo.svelte";
 	import { HistoricMapSeries } from "$lib/map/HistoricMapSeries.svelte";
-	import EditionPicker from "../map/EditionPicker.svelte";
+	import EditionPicker from "./EditionPicker.svelte";
 
 	const mapContext = getContext<MapContext>("mapContext");
 
@@ -21,7 +20,6 @@
 	let selectedLayer = $state<MapLayer | null>(null);
 	let contentHeight = $state(0);
 
-	// Bovenste laag staat bovenaan in het paneel, dus omgekeerd t.o.v. mapContext.layers
 	const displayLayers = $derived(mapContext.layers.toReversed());
 	const addableLayers = $derived(mapContext.availableLayers.filter((l) => !l.added));
 
@@ -52,7 +50,7 @@
 
 	function addLayer(layer: MapLayer) {
 		layer.visible = true;
-		mapContext.addLayer(layer); // komt bovenaan te staan
+		mapContext.addLayer(layer);
 		currentView = "list";
 	}
 
@@ -104,19 +102,17 @@
 
 	onDestroy(endDrag);
 
-	// Toetsenbord: pijltje omhoog/omlaag op de greep. direction +1 = hoger in de stapel
 	async function nudge(layer: MapLayer, direction: 1 | -1) {
 		const from = mapContext.layers.indexOf(layer);
 		mapContext.moveLayer(from, from + direction);
 
-		// Svelte verplaatst de node, waardoor de focus verloren gaat
 		await tick();
 		listEl?.querySelector<HTMLElement>(`[data-layer-id="${layer.id}"] [data-grip]`)?.focus();
 	}
 </script>
 
 <div
-	class="bg-wtr-blue/95 max-h-[calc(100%-1rem)] w-100 overflow-hidden rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
+	class="bg-wtr-blue/95 pointer-events-auto max-h-[calc(100%-1rem)] w-100 overflow-hidden rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
 	style:height={contentHeight ? `${contentHeight}px` : undefined}
 >
 	<div class="relative p-2" bind:offsetHeight={contentHeight}>
@@ -147,9 +143,9 @@
 						<CaretRight size="12" class="shrink-0 text-white/60 transition-transform group-hover:translate-x-0.5" />
 					</button>
 				{/if}
-				<div class="flex gap-1">
-					<button class="px-1 opacity-50"><Stack size="18" /></button>
-					<button onclick={() => (currentView = "add")} class="w-full text-left">
+				<div class="flex items-center gap-1">
+					<button class="shrink-0 px-1 opacity-50"><Stack size="18" /></button>
+					<button onclick={() => (currentView = "add")} class="min-w-0 flex-1 text-left">
 						<AddLayerButton />
 					</button>
 				</div>
@@ -221,13 +217,13 @@
 						</div>
 					{/if}
 
-					<div class="flex items-center justify-between border-t border-white/10 pt-2">
-						<span class="text-white/60">Verwijder uit paneel</span>
+					<div class="flex items-center justify-center border-t border-white/10 pt-2">
 						<button
 							onclick={() => removeLayer(selectedLayer!)}
-							class="cursor-pointer rounded bg-red-500/20 px-2.5 py-1 text-red-300 transition-colors hover:bg-red-500/30"
+							class="cursor-pointer rounded border-1 border-white/10 bg-red-500/20 px-2.5 py-1 text-red-300 transition-colors hover:bg-red-500/30"
 						>
-							Verwijderen
+							<Trash class="inline"></Trash>
+							Laag verwijderen
 						</button>
 					</div>
 				</div>

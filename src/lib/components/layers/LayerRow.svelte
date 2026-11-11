@@ -35,7 +35,6 @@
 		: ''}"
 >
 	<div class="flex items-center gap-2.5">
-		<!-- Drag handle: touch-none zodat touch niet gaat scrollen i.p.v. slepen -->
 		<button
 			type="button"
 			data-grip
@@ -52,7 +51,6 @@
 			<DotsSixVertical size="18" />
 		</button>
 
-		<!-- Zichtbaarheid (oogje) -->
 		<button
 			onclick={() => (layer.visible = !layer.visible)}
 			class="cursor-pointer rounded-md border border-white/20 bg-white/10 p-1 transition-colors hover:bg-white/20"
@@ -69,35 +67,46 @@
 		<span><Info size="12" class="inline"></Info></span>
 	</div>
 
-	{#if layer instanceof HistoricMapSeries}
-		{#if !layer.mapsLoaded}
+	<div class="flex items-center gap-2">
+		{#if layer instanceof HistoricMapSeries && !layer.mapsLoaded}
 			<span class="text-white/50">Laden…</span>
 		{:else}
-			{@const years = Array.from(layer.visibleMaps.values(), (m) => m.yearEnd).filter(
-				(y): y is number => y !== undefined
-			)}
-			{#if years.length}
-				<div class="rounded-md border border-white/20 bg-amber-900 px-1 py-0.5">
-					Hist. <span class="font-mono text-[11px]">{Math.min(...years)}-{Math.max(...years)}</span>
-				</div>
-			{/if}
+			{@const isHistoric = layer instanceof HistoricMapSeries}
+			{@const years = isHistoric
+				? Array.from(layer.visibleMaps.values(), (m) => m.yearEnd).filter((y): y is number => y !== undefined)
+				: []}
+			<div
+				class="rounded-md border px-1 py-0.5"
+				style:background="color-mix(in srgb, {layer.themeColor} 20%, transparent)"
+				style:border-color="color-mix(in srgb, {layer.themeColor} 50%, transparent)"
+			>
+				{#if isHistoric}
+					{#if years.length}
+						Hist. <span class="font-mono text-[11px]">{Math.min(...years)}-{Math.max(...years)}</span>
+					{:else}
+						Historisch
+					{/if}
+				{:else}
+					Actueel
+				{/if}
+			</div>
 		{/if}
-	{/if}
 
-	<button
-		type="button"
-		onclick={onSettingsClick}
-		class="flex cursor-pointer items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-white/80 transition-all hover:bg-white/15 hover:text-white"
-	>
-		<span class="text-[10px]">Opties</span>
-		<svg
-			class="h-3 w-3 text-white/60 transition-transform group-hover:translate-x-0.5"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke="currentColor"
-			stroke-width="2.5"
+		<button
+			type="button"
+			onclick={onSettingsClick}
+			class="flex cursor-pointer items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-white/80 transition-all hover:bg-white/15 hover:text-white"
 		>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-		</svg>
-	</button>
+			<span class="text-[10px]">Opties</span>
+			<svg
+				class="h-3 w-3 text-white/60 transition-transform group-hover:translate-x-0.5"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				stroke-width="2.5"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+			</svg>
+		</button>
+	</div>
 </div>

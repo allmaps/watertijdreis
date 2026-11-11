@@ -4,15 +4,14 @@ import { MapLayer, type MapLayerOptions } from "./MapLayer.svelte";
 
 export interface VectorMapLayerOptions extends Omit<MapLayerOptions, "type"> {
 	sourceId: string;
-	/** URL naar een GeoJSON-bestand, of het object zelf */
+
 	data: string | GeoJSON;
-	/** Property met de naam voor de labels; weglaten = geen labels */
+
 	labelField?: string;
 	minzoom?: number;
 	maxzoom?: number;
 }
 
-// Basis-opaciteiten; de opacity-slider van de laag schaalt hier overheen
 const GLOW_OPACITY = 0.25;
 const LINE_OPACITY = 0.9;
 
@@ -42,7 +41,6 @@ export class VectorMapLayer extends MapLayer {
 	}
 
 	get mapLayerIds() {
-		// onderste eerst
 		return [this.#ids.glow, this.#ids.line, ...(this.labelField ? [this.#ids.labels] : [])];
 	}
 
@@ -59,7 +57,6 @@ export class VectorMapLayer extends MapLayer {
 			...(this.maxzoom !== undefined && { maxzoom: this.maxzoom }),
 		};
 
-		// Zachte gloed onder de lijn, zodat de grens ook op drukke kaarten opvalt
 		if (!map.getLayer(this.#ids.glow)) {
 			map.addLayer({
 				id: this.#ids.glow,

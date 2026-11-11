@@ -3,14 +3,13 @@ import type { Polygon } from "geojson";
 
 export type HistoricMap = {
 	id: string;
-	/** Altijd aanwezig; series zonder eigen metadata gebruiken de kaart-id */
+
 	label: string;
 	polygon: Polygon;
 	geoFullMaskBbox?: [number, number, number, number];
 	warpedMap?: WarpedMap;
 	manifestId?: string;
 
-	// Metadata die alleen sommige series hebben (Waterstaatskaarten: wel, losse annotaties: niet)
 	edition?: number;
 	bis?: boolean;
 	number?: number;
@@ -37,9 +36,7 @@ export type SpriteConfig = {
 };
 
 export type SeriesSource =
-	/** Array van Allmaps GeoreferencedMaps, met optioneel `_meta` per kaart (edities, bladnummers, ...) */
 	| { kind: "georeferenced-maps"; url: string; sprites?: SpriteConfig }
-	/** IIIF georeferencing AnnotationPage, zonder eigen metadata */
 	| { kind: "annotation"; url: string };
 
 export type HistoricMapSeriesOptions = {

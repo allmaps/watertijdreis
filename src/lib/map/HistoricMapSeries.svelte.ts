@@ -1,4 +1,3 @@
-// src/lib/state/HistoricMapSeries.svelte.ts
 import { SvelteMap } from "svelte/reactivity";
 import { WarpedMapLayer } from "@allmaps/maplibre";
 import * as turf from "@turf/turf";
@@ -20,7 +19,6 @@ const LABEL_ZOOM_VALUES = [5, 6, 6, 9, 7, 12, 8, 15, 9, 17, 10, 18, 12, 22, 14, 
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 const DEFAULT_GRID_CENTER = { lng: 5.63, lat: 52.16 };
 
-/** Label voor in de bladindex: bladnummer als dat er is, anders het label van de kaart */
 function sheetLabel(m: HistoricMap) {
 	if (m.number === undefined) return m.label;
 	return m.position ? `${m.number}.${m.position}` : `${m.number}`;
@@ -33,12 +31,10 @@ export class HistoricMapSeries extends MapLayer {
 
 	opacity = $state(1);
 
-	// Elke serie heeft zijn eigen WarpedMapLayer, zodat de z-volgorde tussen series klopt.
 	warpedMapLayer: WarpedMapLayer;
 
 	#loadPromise: Promise<void> | null = null;
 
-	// Alle maplibre-ids van deze serie, geprefixt met de serie-id
 	readonly ids = {
 		outlinesSource: `${this.id}-outlines`,
 		labelsSource: `${this.id}-labels`,
@@ -138,7 +134,6 @@ export class HistoricMapSeries extends MapLayer {
 		this.#addOutlineLayers(map);
 		map.on("maptilesloadedfromsprites", this.#onSpritesLoaded);
 
-		// Data pas ophalen zodra de laag echt op de kaart komt
 		void this.load();
 	}
 
@@ -156,12 +151,10 @@ export class HistoricMapSeries extends MapLayer {
 		}
 		this.map = null;
 
-		// Een geopend blad uit deze serie mag niet blijven staan (en bij opnieuw toevoegen weer opengaan)
 		const { selectedMapId, pinnedMapId } = this.context;
 		if (selectedMapId && this.mapsById.has(selectedMapId)) this.context.selectedMapId = null;
 		if (pinnedMapId && this.mapsById.has(pinnedMapId)) this.context.pinnedMapId = null;
 
-		// Alles terug naar de beginstand
 		this.#clearTimers();
 		this.hoveredHistoricMap = null;
 		this.clickedHistoricMap = null;
@@ -175,7 +168,6 @@ export class HistoricMapSeries extends MapLayer {
 		this.hasEditions = false;
 		this.#loadPromise = null;
 
-		// Verse instantie; een oude kan na verwijderen niet meer betrouwbaar worden hergebruikt
 		this.warpedMapLayer = this.#createWarpedMapLayer();
 		this.context.updateViewportMaps();
 	}
@@ -196,19 +188,13 @@ export class HistoricMapSeries extends MapLayer {
 	selectEdition(edition: Filter["edition"]) {
 		this.filter.edition = edition;
 
-		// De jaargrens meeschuiven: anders kunnen bladen van de nieuwe editie door een oude `yearEnd` verborgen blijven
 		const ends = (edition === "All" ? this.editions : this.editions.filter((e) => e.edition === edition))
 			.map((e) => e.yearEnd)
 			.filter((y): y is number => y !== undefined);
 		if (ends.length) this.filter.yearEnd = Math.max(...ends);
 	}
 
-	// ------------------------------------------------------------------
-	// MapLayer-contract
-	// ------------------------------------------------------------------
-
 	get mapLayerIds() {
-		// onderste eerst
 		return [this.warpedMapLayer.id, this.ids.labels, this.ids.numbers, this.ids.fill, this.ids.stroke];
 	}
 
@@ -237,10 +223,6 @@ export class HistoricMapSeries extends MapLayer {
 		set(this.ids.fill, showIndex);
 		set(this.ids.stroke, showIndex);
 	}
-
-	// ------------------------------------------------------------------
-	// Outlines
-	// ------------------------------------------------------------------
 
 	#addOutlineLayers(map: MaplibreMap) {
 		map.addSource(this.ids.outlinesSource, { type: "geojson", data: EMPTY });
@@ -349,17 +331,13 @@ export class HistoricMapSeries extends MapLayer {
 	setSheetIndexVisible(visible: boolean) {
 		this.setGridVisibility(visible, DEFAULT_GRID_CENTER, 100, 150);
 		if (this.map?.getLayer(this.ids.numbers)) {
-			this.map.setPaintProperty(this.ids.numbers, "text-opacity", visible ? 1 : 0);
+			this.map.setPaintProperty(this.ids.labels, "text-opacity", visible ? 1 : 0);
 		}
 	}
 
 	setGrayscale(on: boolean) {
 		this.warpedMapLayer.setLayerOptions({ saturation: on ? 0 : 1 });
 	}
-
-	// ------------------------------------------------------------------
-	// Laden & filteren
-	// ------------------------------------------------------------------
 
 	load(): Promise<void> {
 		return (this.#loadPromise ??= this.#load());
@@ -377,16 +355,14 @@ export class HistoricMapSeries extends MapLayer {
 			if (source.kind === "annotation") await this.#loadAnnotation(layer, source.url);
 			else await this.#loadGeoreferencedMaps(layer, source.url, source.sprites);
 
-			// Ondertussen verwijderd: deze resultaten zijn verouderd
 			if (layer !== this.warpedMapLayer) return;
 
 			this.hasEditions = Array.from(this.mapsById.values()).some((m) => m.edition !== undefined);
 			this.mapsLoaded = true;
 
-			// De renderer weet pas na een frame welke kaarten in beeld zijn
 			this.map?.once("idle", () => this.context.updateViewportMaps());
 		} catch (error) {
-			this.#loadPromise = null; // een volgende poging mag opnieuw proberen
+			this.#loadPromise = null;
 			console.error(`HistoricMapSeries (${this.name}): Fout tijdens het laden:`, error);
 		}
 	}
@@ -501,10 +477,6 @@ export class HistoricMapSeries extends MapLayer {
 		this.#clickedFeatureId = null;
 	}
 
-	// ------------------------------------------------------------------
-	// Events: de MapContext-router roept deze aan, van bovenste laag naar onderste
-	// ------------------------------------------------------------------
-
 	#featureAt(e: MapMouseEvent): MapGeoJSONFeature | undefined {
 		const map = this.map;
 		if (!map?.getLayer(this.ids.fill)) return undefined;
@@ -573,10 +545,6 @@ export class HistoricMapSeries extends MapLayer {
 		if (this.context.mapContext.sheetIndexVisible) return true;
 		return this.clickedHistoricMap?.id === historicMap.id;
 	}
-
-	// ------------------------------------------------------------------
-	// Grid / ripple / animaties
-	// ------------------------------------------------------------------
 
 	setGridVisibility(isVisible: boolean, centerLngLat = DEFAULT_GRID_CENTER, rippleScale = 3, speed = 300) {
 		const map = this.map;

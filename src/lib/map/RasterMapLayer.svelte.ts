@@ -1,9 +1,8 @@
-// RasterMapLayer.svelte.ts
 import type { Map as MaplibreMap } from "maplibre-gl";
 import { MapLayer, type MapLayerOptions } from "./MapLayer.svelte";
 
 export interface RasterMapLayerOptions extends Omit<MapLayerOptions, "type"> {
-	type?: MapLayerOptions["type"]; // default "pdok-wms"
+	type?: MapLayerOptions["type"];
 	sourceId: string;
 	layerId: string;
 	tiles: string[];

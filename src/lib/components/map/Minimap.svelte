@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import * as turf from "@turf/turf";
-	import { draw, fade, fly } from "svelte/transition";
+	import { draw, fade, fly, slide } from "svelte/transition";
 	import NumberFlow from "@number-flow/svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 	import MapThumbnail from "./HistoricMapThumbnail.svelte";
@@ -159,100 +159,100 @@
 	{#if mapContext.maplibreLoaded && panelPosition && (period || info.map)}
 		<div class="absolute z-10000 -translate-y-1/2" style="left: {panelPosition.left}; top: {panelPosition.top};">
 			<div
-				class="bg-wtr-blue flex items-center overflow-hidden rounded-xl whitespace-nowrap text-white shadow-lg ring-1 ring-white/10 {expanded
+				class="bg-wtr-blue flex flex-col overflow-hidden rounded-xl text-white shadow-lg ring-1 ring-white/10 {expanded
 					? 'pointer-events-auto'
 					: ''}"
 				onpointerenter={() => (info.hold = true)}
 				onpointerleave={() => (info.hold = false)}
 			>
-				{#if period}
-					<div class="flex flex-col px-3 py-2">
-						<span class="text-[10px] leading-none font-medium text-white/60">
-							{single ? "Jaar" : "Periode"}
-						</span>
-						<span class="mt-1 flex text-base leading-none font-semibold tabular-nums">
-							<NumberFlow format={{ useGrouping: false }} value={period[0]} spinTiming={{ duration: 200 }} />
-							<!-- Tweede jaartal klapt dicht zodra begin en eind gelijk zijn -->
-							<span
-								class="grid transition-[grid-template-columns] duration-300 ease-out"
-								style:grid-template-columns={single ? "0fr" : "1fr"}
-							>
-								<span class="flex overflow-hidden">
-									–<NumberFlow format={{ useGrouping: false }} value={period[1]} />
+				<!-- Bovenste rij: Periode en Thumbnail -->
+				<div class="flex items-center text-center whitespace-nowrap">
+					{#if period}
+						<div class="flex flex-col px-3 py-2">
+							<span class="text-[10px] leading-none font-[600] text-white/60">
+								{single ? "Jaar" : "Periode"}
+							</span>
+							<span class="mt-1 flex font-mono text-base leading-none font-semibold">
+								<NumberFlow
+									format={{ useGrouping: false }}
+									value={period[0]}
+									spinTiming={{ duration: 300, easing: "ease-out" }}
+								/>
+								<span
+									class="grid transition-[grid-template-columns] duration-300 ease-out"
+									style:grid-template-columns={single ? "0fr" : "1fr"}
+								>
+									<span class="flex overflow-hidden">
+										<span class="p-0.5 opacity-50">-</span>
+										<NumberFlow
+											format={{ useGrouping: false }}
+											value={period[1]}
+											spinTiming={{ duration: 300, easing: "ease-out" }}
+										/>
+									</span>
 								</span>
 							</span>
-						</span>
-					</div>
-				{/if}
+						</div>
+					{/if}
 
-				<div
-					class="grid transition-[grid-template-columns,grid-template-rows] duration-400 ease-out"
-					style:grid-template-columns={expanded ? "1fr" : "0fr"}
-					style:grid-template-rows={expanded ? "1fr" : "0fr"}
-					inert={!expanded}
-				>
-					<div class="min-h-0 min-w-0 overflow-hidden">
-						{#if info.map}
-							{@const map = info.map}
-							<div class="flex items-center gap-3 py-2 pr-3 pl-3 {period ? 'border-l border-white/10' : ''}">
+					<div
+						class="grid transition-[grid-template-columns,grid-template-rows] duration-200 ease-out"
+						style:grid-template-columns={expanded ? "1fr" : "0fr"}
+						style:grid-template-rows={expanded ? "1fr" : "0fr"}
+						inert={!expanded}
+					>
+						<div class="min-h-0 min-w-0 overflow-hidden">
+							{#if info.map}
+								{@const map = info.map}
+								<div class="flex items-center py-1.5 pr-3 pl-3">
+									<button
+										type="button"
+										onclick={() => info.open()}
+										disabled={info.isSelected}
+										aria-label="Blad openen"
+										class="relative block h-[70px] shrink-0 overflow-hidden rounded-sm shadow-md enabled:cursor-pointer"
+									>
+										{#if info.currentIsBackside && info.canvasImage}
+											<img
+												alt=""
+												class="block h-full w-auto object-cover"
+												src="{info.canvasImage}/full/,256/0/default.jpg"
+											/>
+										{:else}
+											<MapThumbnail id={map.id} height={70} />
+										{/if}
+
+										{#if info.viewportRect}
+											{@const r = info.viewportRect}
+											<div
+												class="border-wtr-blue pointer-events-none absolute rounded-sm border-[3px]"
+												style="left: {r.left}%; top: {r.top}%; width: {r.width}%; height: {r.height}%;"
+											></div>
+										{/if}
+									</button>
+								</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+				{#if expanded && info.map}
+					{@const map = info.map}
+					<div class="w-full bg-white/10">
+						{#key map.id}
+							<div in:slide={{ duration: 200 }} class="w-full">
 								<button
 									type="button"
 									onclick={() => info.open()}
 									disabled={info.isSelected}
-									aria-label="Blad openen"
-									class="relative block h-[72px] shrink-0 overflow-hidden rounded-sm shadow-md enabled:cursor-pointer"
+									class="flex w-full items-center justify-center py-1 text-center text-[12px] leading-tight font-[600] text-white enabled:cursor-pointer enabled:hover:underline"
 								>
-									{#if info.currentIsBackside && info.canvasImage}
-										<img
-											alt=""
-											class="block h-full w-auto object-cover"
-											src="{info.canvasImage}/full/,256/0/default.jpg"
-										/>
-									{:else}
-										<MapThumbnail id={map.id} height={72} />
-									{/if}
-
-									{#if info.viewportRect}
-										{@const r = info.viewportRect}
-										<div
-											class="border-wtr-blue/50 pointer-events-none absolute rounded-sm border-[3px]"
-											style="left: {r.left}%; top: {r.top}%; width: {r.width}%; height: {r.height}%;"
-										></div>
-									{/if}
+									<span class="truncate">{info.title}</span>
 								</button>
-
-								{#key map.id}
-									<div class="flex min-w-0 flex-col items-start gap-0.5" in:fly={{ x: -10, duration: 200 }}>
-										<button
-											type="button"
-											onclick={() => info.open()}
-											disabled={info.isSelected}
-											class="max-w-44 truncate text-left text-sm font-bold text-white enabled:cursor-pointer enabled:hover:underline"
-										>
-											{info.title}
-										</button>
-
-										{#if info.detail}
-											<p class="max-w-44 truncate text-xs text-white/70">{info.detail}</p>
-										{/if}
-
-										{#if info.isSelected}
-											<button
-												type="button"
-												onclick={() => info.requestInfo()}
-												class="group mt-1 flex cursor-pointer items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-xs text-white/90 transition-colors hover:bg-white/20 hover:text-white"
-											>
-												<Info size="14" />
-												Info
-												<CaretRight size="10" class="text-white/60 transition-transform group-hover:translate-x-0.5" />
-											</button>
-										{/if}
-									</div>
-								{/key}
 							</div>
-						{/if}
+						{/key}
 					</div>
-				</div>
+				{/if}
 			</div>
 		</div>
 	{/if}

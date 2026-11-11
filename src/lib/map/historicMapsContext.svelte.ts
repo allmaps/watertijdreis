@@ -23,7 +23,7 @@ const SERIES_CONFIG: HistoricMapSeriesOptions[] = [
 	{
 		id: "vfd",
 		name: "Von Frijtag Drabbe",
-		themeColor: "#8888ff",
+		themeColor: "#44aa44",
 		source: {
 			kind: "annotation",
 			url: "./von-frijtag-drabbe.json",
@@ -63,9 +63,6 @@ export class HistoricMapsContext {
 		return this.series;
 	}
 
-	// ------------------------------------------------------------------
-	// Interactie-state: doorgeefluik naar de series
-	// ------------------------------------------------------------------
 	get hoveredHistoricMap() {
 		return this.series.find((s) => s.hoveredHistoricMap)?.hoveredHistoricMap ?? null;
 	}
@@ -78,16 +75,10 @@ export class HistoricMapsContext {
 		return this.series.some((s) => s.gridVisible);
 	}
 
-	// ------------------------------------------------------------------
-	// Backwards compatibility voor een UI die nog niet met series werkt.
-	// `filter` en `mapsByNumber` komen van de primaire serie; `mapsById` en
-	// `visibleMaps` zijn geaggregeerd over alle series (kaart-ids zijn unieke hashes).
-	// ------------------------------------------------------------------
 	get filter(): Filter {
 		return this.primarySeries?.filter ?? DEFAULT_FILTER;
 	}
 
-	/** Bladnummers botsen tussen series, daarom alleen de primaire serie */
 	get mapsByNumber(): Map<number, HistoricMap[]> {
 		return this.primarySeries?.mapsByNumber ?? new Map();
 	}
@@ -104,9 +95,6 @@ export class HistoricMapsContext {
 		return aggregated;
 	});
 
-	// ------------------------------------------------------------------
-	// Viewport
-	// ------------------------------------------------------------------
 	#mapIdsInViewport = $state<string[]>([]);
 
 	mapsInViewport = $derived.by(() => {
@@ -128,10 +116,6 @@ export class HistoricMapsContext {
 		return maps;
 	});
 
-	// ------------------------------------------------------------------
-	// Selectie. Eén bron van waarheid: de ID's. selectedMap/pinnedMap zijn daarvan afgeleid
-	// en de $effect in de constructor roept setHistoricMapView aan.
-	// ------------------------------------------------------------------
 	selectedMapId: string | null = $state(null);
 	previousSelectedMapId: string | null = null;
 	pinnedMapId: string | null = $state(null);
@@ -154,10 +138,8 @@ export class HistoricMapsContext {
 
 		$effect(() => {
 			if (!this.mapsLoaded) return;
-			const selectedMap = this.selectedMap; // de enige echte dependency naast mapsLoaded
+			const selectedMap = this.selectedMap;
 
-			// Alles hieronder leest en schrijft veel state (savedMapViews, filters, ...).
-			// Zonder untrack wordt dat allemaal een dependency en kan de effect zichzelf opnieuw triggeren.
 			untrack(() => {
 				if (selectedMap) {
 					const view = selectedMap.id === this.pinnedMapId ? this.pinnedMapView : null;
@@ -175,14 +157,12 @@ export class HistoricMapsContext {
 	async init() {
 		this.#applyDevDefaults();
 
-		// Series met `added: true` laden zichzelf bij het mounten; hier wachten we alleen op ze
 		await Promise.all(this.activeSeries.map((s) => s.load()));
 
 		this.mapContext.activeMap.on("moveend", () => this.updateViewportMaps());
 		this.updateViewportMaps();
 	}
 
-	/** TIJDELIJK: test-instellingen, weghalen zodra de UI dit zelf regelt */
 	#applyDevDefaults() {
 		const wsk = this.series.find((s) => s.id === "wsk");
 		const rk = this.series.find((s) => s.id === "rk");
@@ -197,9 +177,6 @@ export class HistoricMapsContext {
 		}, 1000);
 	}
 
-	// ------------------------------------------------------------------
-	// Series
-	// ------------------------------------------------------------------
 	seriesOf(mapId: string | null): HistoricMapSeries | undefined {
 		return mapId ? this.series.find((s) => s.mapsById.has(mapId)) : undefined;
 	}
@@ -218,9 +195,6 @@ export class HistoricMapsContext {
 		return visible;
 	}
 
-	// ------------------------------------------------------------------
-	// Kaartblad openen
-	// ------------------------------------------------------------------
 	setHistoricMapView(historicMap: HistoricMap, view?: MapView | null) {
 		if (!this.mapsLoaded) return;
 
@@ -236,13 +210,11 @@ export class HistoricMapsContext {
 	}
 
 	#isolateHistoricMapLayer(series: HistoricMapSeries, selectedId: string) {
-		// Alle andere lagen (en de gebruikerslocatie) tijdelijk verbergen
 		this.mapContext.isolate(series);
 		series.warpedMapLayer.setLayerOptions({ opacity: 1 });
 
 		const mapsToHide = Array.from(series.visibleMaps.keys()).filter((id) => id !== selectedId);
 
-		// Het vorige blad kan uit een andere serie komen
 		const prevId = this.previousSelectedMapId;
 		if (prevId && prevId !== selectedId) {
 			const prevSeries = this.seriesOf(prevId);
@@ -254,8 +226,6 @@ export class HistoricMapsContext {
 
 		series.warpedMapLayer.setMapsOptions(mapsToHide, { visible: false });
 
-		// Het gekozen blad: ongemaskeerd en zonder vervorming, ook als het door het filter
-		// verborgen of ontkleurd was
 		series.warpedMapLayer.setMapOptions(selectedId, {
 			visible: true,
 			transformationType: "straight",

@@ -1,4 +1,3 @@
-// src/lib/map/mapLayers.svelte.ts
 import type { Map as MaplibreMap } from "maplibre-gl";
 import type { MapLayer } from "./MapLayer.svelte";
 import { RasterMapLayer } from "./RasterMapLayer.svelte";
@@ -21,7 +20,7 @@ export function createAvailableLayers(mapContext: MapContext): MapLayer[] {
 		}),
 		new RasterMapLayer({
 			id: "satelliet",
-			name: "Actuele Satelliet / Ortho",
+			name: "Luchtfoto Actueel Ortho 25cm RGB",
 			themeColor: "#4a4",
 			type: "pdok-wms",
 			sourceId: "satelliet",
@@ -33,11 +32,9 @@ export function createAvailableLayers(mapContext: MapContext): MapLayer[] {
 			maxzoom: 20,
 			added: false,
 		}),
-		new AhnMapLayer({ id: "ahn", name: "AHN Hoogtekaart", themeColor: "#44a" }),
+		new AhnMapLayer({ id: "ahn", name: "Dynamische Hoogtekaart", themeColor: "#fa4" }),
 	];
 }
-
-// --- Systeem- en Vectorlagen (blijven onveranderd) ---
 
 export function addUserLocationCircle(map: MaplibreMap) {
 	if (map.getSource("user-location")) return;

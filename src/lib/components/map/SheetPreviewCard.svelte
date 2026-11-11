@@ -7,7 +7,6 @@
 
 	let { info, onOpenInfo }: { info: SheetInfo; onOpenInfo: () => void } = $props();
 
-	/** De thumbnail "klapt" omhoog: schuin gekanteld en klein naar vlak en op ware grootte */
 	function thumbPop(_node: Element, { duration = 400 } = {}) {
 		return {
 			duration,

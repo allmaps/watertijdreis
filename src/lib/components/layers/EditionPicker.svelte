@@ -4,7 +4,6 @@
 
 	let { series }: { series: HistoricMapSeries } = $props();
 
-	/** Totale tijdspanne, voor de schaal van de tijdlijn */
 	const span = $derived.by(() => {
 		const years = series.editions.flatMap((e) => [e.yearStart, e.yearEnd]).filter((y): y is number => y !== undefined);
 		return years.length ? { min: Math.min(...years), max: Math.max(...years) } : null;
@@ -13,11 +12,10 @@
 	const totalCount = $derived(series.editions.reduce((sum, e) => sum + e.count, 0));
 
 	const options = $derived([
-		{ value: "All" as Filter["edition"], label: "Alle" },
+		// { value: "All" as Filter["edition"], label: "Alle" },
 		...series.editions.map((e) => ({ value: e.edition as Filter["edition"], label: String(e.edition) })),
 	]);
 
-	/** De gekozen optie: titel, bereik en aantal bladen */
 	const active = $derived.by(() => {
 		const value = series.filter.edition;
 		if (value === "All") return { title: "Alle edities", start: span?.min, end: span?.max, count: totalCount };
@@ -32,7 +30,6 @@
 		return start === end ? `${start}` : `${start} – ${end}`;
 	});
 
-	/** Positie van het gekozen bereik op de tijdlijn, in procenten */
 	const bar = $derived.by(() => {
 		if (!span || active.start === undefined || active.end === undefined) return null;
 		const total = span.max - span.min || 1;
@@ -42,7 +39,16 @@
 		};
 	});
 
-	const bisCount = $derived(Array.from(series.mapsById.values()).filter((m) => m.bis).length);
+	const bisCount = $derived.by(() => {
+		const value = series.filter.edition;
+		const maps = Array.from(series.mapsById.values());
+
+		if (value === "All") {
+			return maps.filter((m) => m.bis).length;
+		}
+
+		return maps.filter((m) => m.edition === value && m.bis).length;
+	});
 </script>
 
 <section class="flex flex-col gap-1.5">
@@ -53,7 +59,6 @@
 		</span>
 	</div>
 
-	<!-- Radio's: pijltjestoetsen en schermlezers werken zo vanzelf -->
 	<div role="radiogroup" aria-label="Editie" class="flex gap-0.5 rounded-lg border border-white/20 bg-white/10 p-0.5">
 		{#each options as option (option.value)}
 			{@const checked = series.filter.edition === option.value}

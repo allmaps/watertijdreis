@@ -1,4 +1,3 @@
-// MapLayer.svelte.ts
 import type { Map as MaplibreMap, MapMouseEvent } from "maplibre-gl";
 
 export type MapLayerType = "pdok-wms" | "historic-series" | "ahn";
