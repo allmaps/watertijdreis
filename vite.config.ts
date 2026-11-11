@@ -4,9 +4,9 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-	optimizeDeps: {
-		exclude: ["maplibre-gl"],
-	},
+	// optimizeDeps: {
+	// 	exclude: ["maplibre-gl"],
+	// },
 	plugins: [tailwindcss(), sveltekit()],
 	worker: { format: "es" },
 	define: {

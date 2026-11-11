@@ -1,4 +1,10 @@
 import * as maplibregl from "maplibre-gl";
+import { setWorkerUrl } from "maplibre-gl";
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+if (typeof window !== "undefined") {
+	setWorkerUrl(workerUrl);
+}
+
 import type { GeoJSONSource, Map as MaplibreMap, MapMouseEvent } from "maplibre-gl";
 import * as pmtiles from "pmtiles";
 import type { Feature } from "geojson";
