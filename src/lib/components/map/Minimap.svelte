@@ -15,9 +15,8 @@
 
 	let expanded = $derived(info.visible && !historicCtx.selectedMap);
 
-	// Scaled down by 0.8 from 160x200 to match your previous size without CSS scale hacks
-	let width: number = $state(158);
-	let height: number = $state(160);
+	let width: number = $state(128 * 0.9);
+	let height: number = $state(160 * 0.9);
 	let svgElement: SVGSVGElement | null = $state(null);
 
 	let polygons = $derived.by(() => {
@@ -130,7 +129,7 @@
 		const x1 = centerPoint[0];
 		const y1 = centerPoint[1];
 
-		const x2 = anchor.x + 64000;
+		const x2 = anchor.x + 24000;
 		const y2 = anchor.y;
 
 		const strokeWidth = scaleFactor * 2;
