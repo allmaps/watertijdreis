@@ -198,7 +198,7 @@
 				</div>
 			{:else if currentView === "settings" && selectedLayer}
 				<div
-					class="flex max-h-[calc(100vh-12rem)] flex-col gap-4 overflow-x-hidden overflow-y-auto px-1 py-2 text-xs"
+					class="flex max-h-[calc(100vh-12rem)] flex-col gap-4 overflow-x-hidden overflow-y-auto px-2 py-2 text-xs"
 					in:fly={{ x: 20, duration: 200 }}
 				>
 					{#if selectedLayer instanceof AhnMapLayer}
@@ -240,3 +240,29 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	/* Voor Firefox */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.1); /* thumb track */
+	}
+
+	::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.1);
+		border-radius: 3px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 3px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.4);
+	}
+</style>
