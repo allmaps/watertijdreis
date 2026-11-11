@@ -116,7 +116,7 @@
 <div
 	role="region"
 	aria-label="Kaartlagen"
-	class="bg-wtr-blue/95 @container pointer-events-auto relative z-[1001] max-h-[calc(100%-1rem)] w-100 max-w-[calc(100vw-1rem)] min-w-0 overflow-hidden overflow-y-auto rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
+	class="bg-wtr-blue/95 @container pointer-events-auto relative z-[1001] w-100 max-w-[calc(100vw-1rem)] min-w-0 overflow-hidden rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
 	style:height={contentHeight ? `${contentHeight}px` : undefined}
 >
 	<div class="relative p-2" bind:offsetHeight={contentHeight}>
@@ -197,7 +197,10 @@
 					{/each}
 				</div>
 			{:else if currentView === "settings" && selectedLayer}
-				<div class="flex flex-col gap-4 px-1 py-2 text-xs" in:fly={{ x: 20, duration: 200 }}>
+				<div
+					class="flex max-h-[calc(100vh-12rem)] flex-col gap-4 overflow-y-auto px-1 py-2 text-xs"
+					in:fly={{ x: 20, duration: 200 }}
+				>
 					{#if selectedLayer instanceof AhnMapLayer}
 						<AhnLayerSettings layer={selectedLayer} />
 					{/if}
