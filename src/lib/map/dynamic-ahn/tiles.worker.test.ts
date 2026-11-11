@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { mercator, size, type Result, type View } from "./terrain";
 import { readTile } from "./pdok";
-import { defaults } from "./options";
+import { defaults as defaultOptions, withOptions } from "./options";
+
+const defaults = { ...defaultOptions, mappingMode: "mean", scaleMode: "trim" } as const;
 
 vi.mock("./pdok", () => ({ readTile: vi.fn() }));
 beforeEach(() => {
@@ -27,12 +29,12 @@ it("toggles gap estimates on resident tiles without including them in scale stat
 		if (y > 105 && y < 139) raw.fill(NaN, y * size + 106, y * size + 139);
 	}
 	vi.mocked(readTile).mockResolvedValue(raw);
-	worker.onmessage({ data: { id: 1, zoom: 13, rect } });
+	worker.onmessage({ data: { id: 1, zoom: 13, rect, options: defaults } });
 	const middle = 120 * size + 120;
 	await vi.waitFor(() => expect(replies.at(-1)?.atlas?.heights[middle]).toBe(100));
 	const first = replies.at(-1)!;
-	expect(first.scale!.mean).toBeGreaterThan(0);
-	expect(first.scale!.mean).toBeLessThan(2); // much of the 100 m plateau is estimated
+	expect(first.scale!.center).toBeGreaterThan(0);
+	expect(first.scale!.center).toBeLessThan(2); // much of the 100 m plateau is estimated
 	worker.onmessage({
 		data: {
 			id: 2,
@@ -46,6 +48,9 @@ it("toggles gap estimates on resident tiles without including them in scale stat
 	const unfilled = replies.at(-1)!;
 	expect(unfilled.atlas!.heights[middle]).toBeNaN();
 	expect(unfilled.scale).toEqual(first.scale);
+	expect(unfilled.statistics).toEqual(first.statistics);
+	expect(first.statistics!.count).toBeLessThan(first.statistics!.total);
+	expect(first.statistics!.histogram.reduce((a, b) => a + b)).toBe(first.statistics!.count);
 	worker.onmessage({
 		data: {
 			id: 3,
@@ -58,6 +63,45 @@ it("toggles gap estimates on resident tiles without including them in scale stat
 	});
 	expect(replies.at(-1)!.atlas).toBeUndefined();
 	expect(replies.at(-1)!.scale!.high).toBeLessThan(first.scale!.high);
+	worker.onmessage({
+		data: {
+			id: 4,
+			zoom: 13,
+			rect,
+			preview: true,
+			shownKey: unfilled.atlas!.key,
+			options: withOptions(defaults, { fillGaps: false, mappingMode: "linear" }),
+		},
+	});
+	expect(replies.at(-1)!.scale!.center).toBe(50);
+	expect(replies.at(-1)!.atlas).toBeUndefined();
+	worker.onmessage({
+		data: {
+			id: 5,
+			zoom: 13,
+			rect,
+			preview: true,
+			shownKey: unfilled.atlas!.key,
+			options: withOptions(defaults, { fillGaps: false, mappingMode: "equalized" }),
+		},
+	});
+	const distribution = replies.at(-1)!.scale;
+	expect(distribution!.knots).toHaveLength(131);
+	expect(distribution!.center).toBe(0);
+	expect(replies.at(-1)!.atlas).toBeUndefined();
+	worker.onmessage({
+		data: {
+			id: 6,
+			zoom: 13,
+			rect,
+			preview: true,
+			shownKey: unfilled.atlas!.key,
+			options: withOptions(defaults, { fillGaps: true, mappingMode: "equalized" }),
+		},
+	});
+	expect(replies.at(-1)!.atlas!.heights[middle]).toBe(100);
+	expect(replies.at(-1)!.scale).toEqual(distribution);
+	expect(replies.at(-1)!.statistics).toEqual(first.statistics);
 	expect(readTile).toHaveBeenCalledTimes(1);
 });
 
@@ -86,13 +130,13 @@ it("shares in-flight tiles, resamples a resident atlas and reuses previously vis
 	visit(2);
 	expect(readTile).toHaveBeenCalledTimes(1);
 	finish(heights);
-	await vi.waitFor(() => expect(replies.at(-1)).toMatchObject({ id: 2, scale: { mean: -2 } }));
+	await vi.waitFor(() => expect(replies.at(-1)).toMatchObject({ id: 2, scale: { center: -2 } }));
 	visit(3, 0, replies.at(-1)!.atlas!.key);
 	expect(replies.at(-1)?.atlas).toBeUndefined();
 	visit(4, 1);
-	await vi.waitFor(() => expect(replies.at(-1)).toMatchObject({ id: 4, scale: { mean: -2 } }));
+	await vi.waitFor(() => expect(replies.at(-1)).toMatchObject({ id: 4, scale: { center: -2 } }));
 	visit(5);
-	expect(replies.at(-1)).toMatchObject({ id: 5, scale: { mean: -2 } });
+	expect(replies.at(-1)).toMatchObject({ id: 5, scale: { center: -2 } });
 	expect(readTile).toHaveBeenCalledTimes(2);
 });
 
@@ -128,23 +172,23 @@ it("shows cached parents during a gesture and replaces only the children that ha
 	const visit = (id: number, zoom: number, preview = false) =>
 		worker.onmessage({ data: { id, zoom, rect, preview, shownKey: latest?.atlas?.key } });
 	visit(1, 12);
-	await vi.waitFor(() => expect(latest?.scale?.mean).toBe(10));
+	await vi.waitFor(() => expect(latest?.scale?.center).toBe(10));
 	visit(2, 13, true);
-	expect(latest?.scale?.mean).toBe(10);
+	expect(latest?.scale?.center).toBe(10);
 	expect(readTile).toHaveBeenCalledTimes(1);
 	visit(3, 13);
-	expect(latest?.scale?.mean).toBe(10);
+	expect(latest?.scale?.center).toBe(10);
 	expect(readTile).toHaveBeenCalledTimes(3);
 	const child = field(30);
 	child[0] = NaN;
 	resolveLeft(child);
-	await vi.waitFor(() => expect(latest?.scale?.mean).toBe(20));
+	await vi.waitFor(() => expect(latest?.scale?.center).toBe(20));
 	expect(latest!.atlas!.heights[0]).toBeNaN();
 	expect(latest!.atlas!.heights[size]).toBe(10);
 	rejectRight(new Error("PDOK timeout"));
 	await vi.waitFor(() => expect(latest?.error).toBe("PDOK timeout"));
-	expect(latest?.scale?.mean).toBe(20);
+	expect(latest?.scale?.center).toBe(20);
 	visit(4, 12);
-	expect(latest?.scale?.mean).toBe(20);
+	expect(latest?.scale?.center).toBe(20);
 	expect(readTile).toHaveBeenCalledTimes(3);
 });

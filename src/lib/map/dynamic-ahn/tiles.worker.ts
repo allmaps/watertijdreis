@@ -2,7 +2,17 @@ import { GapFiller } from "./fill-gaps";
 import { defaults } from "./options";
 import { readTile } from "./pdok";
 import { composeHeights, tilesInGrid, tileKey, trimCache, type HeightTile } from "./tile-cache";
-import { gridKey, localRect, plan, size, viewportScale, type Grid, type Result, type Tile, type View } from "./terrain";
+import {
+	gridKey,
+	localRect,
+	plan,
+	size,
+	analyzeViewport,
+	type Grid,
+	type Result,
+	type Tile,
+	type View,
+} from "./terrain";
 
 const memory = new Map<string, HeightTile>();
 const filler = new GapFiller(memory);
@@ -24,7 +34,7 @@ function publish() {
 	timer = undefined;
 	if (!grid) {
 		atlas = undefined;
-		self.postMessage({ id: view.id, atlas: null, scale: null } satisfies Result);
+		self.postMessage({ id: view.id, atlas: null, scale: null, statistics: null } satisfies Result);
 		return;
 	}
 	const key = gridKey(grid);
@@ -48,7 +58,9 @@ function publish() {
 		height = grid.rows * size;
 	const result: Result = {
 		id: view.id,
-		scale: atlas.measured && viewportScale(atlas.measured, width, height, localRect(view.rect, grid), settings),
+		...(atlas.measured
+			? analyzeViewport(atlas.measured, width, height, localRect(view.rect, grid), settings)
+			: { scale: null, statistics: null }),
 		error,
 	};
 	if (!heights) result.atlas = null;
