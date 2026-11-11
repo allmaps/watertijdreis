@@ -36,12 +36,12 @@ export function applyStateFromURL(ctx: MapContext) {
 	const zoom = parseFloat(q.get("zoom") ?? "") || defaultState.zoom;
 	ctx.activeMap.jumpTo({ center: [lng, lat], zoom });
 
-	const yearParam = q.get("period");
-	if (yearParam) {
-		const [ys, ye] = yearParam.split("_");
-		ctx.historic.filter.yearStart = parseInt(ys) || defaultState.yearStart;
-		ctx.historic.filter.yearEnd = parseInt(ye) || defaultState.yearEnd;
-	}
+	// const yearParam = q.get("period");
+	// if (yearParam) {
+	// 	const [ys, ye] = yearParam.split("_");
+	// 	ctx.historic.filter.yearStart = parseInt(ys) || defaultState.yearStart;
+	// 	ctx.historic.filter.yearEnd = parseInt(ye) || defaultState.yearEnd;
+	// }
 
 	const ed = q.get("editie");
 	if (ed === "All" || ed === null) {
@@ -100,12 +100,12 @@ export function syncStateToURL(ctx: MapContext) {
 	}
 	setIfChanged("zoom", zoom.toFixed(2), defaultState.zoom.toFixed(2));
 
-	if (
-		ctx.historic.filter.yearStart !== defaultState.yearStart ||
-		Math.round(ctx.historic.filter.yearEnd) !== defaultState.yearEnd
-	) {
-		params.set("period", `${ctx.historic.filter.yearStart}_${Math.round(ctx.historic.filter.yearEnd)}`);
-	}
+	// if (
+	// 	ctx.historic.filter.yearStart !== defaultState.yearStart ||
+	// 	Math.round(ctx.historic.filter.yearEnd) !== defaultState.yearEnd
+	// ) {
+	// 	params.set("period", `${ctx.historic.filter.yearStart}_${Math.round(ctx.historic.filter.yearEnd)}`);
+	// }
 	setIfChanged("editie", ctx.historic.filter.edition, defaultState.edition);
 	setIfChanged("bis", ctx.historic.filter.bis ? "1" : "0", defaultState.bis ? "1" : "0");
 	if (ctx.historic.filter.type) params.set("type", ctx.historic.filter.type);
