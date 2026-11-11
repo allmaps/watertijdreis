@@ -74,7 +74,7 @@ export function applyStateFromURL(ctx: MapContext) {
 	ctx.layerOptions.protoMapsLabelsInFront = q.get("plf") === "1";
 	ctx.layerOptions.historicMapsOpacity = parseInt(q.get("opacity") ?? "") || defaultState.historicMapsOpacity;
 
-	ctx.historic.selectedMapId = q.get("blad");
+	// ctx.historic.selectedMapId = q.get("blad");
 	ctx.historic.pinnedMapId = q.get("pinned");
 }
 
