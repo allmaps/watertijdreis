@@ -2,10 +2,6 @@
 	import { onMount, setContext } from "svelte";
 
 	import AppHeader from "../AppHeader.svelte";
-	import Timeline from "../timeline/Timeline.svelte";
-	import Toast from "../ui/Toast.svelte";
-	import HistoricMapInfo from "./HistoricMapInfo.svelte";
-	import MapControls from "./MapControls.svelte";
 	import MapSheetToggle from "./MapSheetToggle.svelte";
 	import Minimap from "./Minimap.svelte";
 
@@ -14,6 +10,9 @@
 	import { updateMousePosition } from "../../state/mousePosition.svelte";
 	import { spriteStore } from "../../utils/spriteSheet.svelte";
 
+	import LayerPanel from "../layers/LayerPanel.svelte";
+	import PassiveTimeline from "./PassiveTimeline.svelte";
+
 	const containerId = "map-container";
 	const mapContext = new MapContext();
 
@@ -21,7 +20,6 @@
 
 	onMount(() => {
 		if (!mapContext.map) mapContext.init(containerId);
-
 		spriteStore.init();
 	});
 
@@ -54,6 +52,14 @@
 		const q = new URLSearchParams(window.location.search);
 		mapContext.historic.selectedMapId = q.get("blad") ?? null;
 	}
+
+	let distributions = $derived(
+		mapContext.historic.series.map((s) => {
+			const years: Record<number, number> = {};
+			for (const [, map] of s.visibleMaps) years[map.yearEnd] = (years[map.yearEnd] ?? 0) + 1;
+			return { name: s.id, color: s.id === "wsk" ? "#ff44aa" : "#44aa44", years };
+		})
+	);
 </script>
 
 <div
@@ -61,26 +67,31 @@
 	class="polka fixed inset-0 h-full w-full bg-[length:25px_25px]"
 	style:touch-action="auto"
 	style:background-color={mapContext.historic.selectedMap ? "#fffaff" : "#fafaff"}
-	style:background-image={`radial-gradient(${mapContext.historic.selectedMap ? "#fef" : "#eef"} 2.5px, transparent 2.5px)`}
+	style:background-image={`radial-gradient(${mapContext.historic.selectedMap ? "#fef" : "#eef"} 2.5px, transParent 2.5px)`}
 ></div>
 
-{#if !mapContext.historic.selectedMap}
+<!-- {#if !mapContext.historic.selectedMap}
 	<Toast content={mapContext.toastContent}></Toast>
-{/if}
+{/if} -->
 
 <MapSheetToggle></MapSheetToggle>
-
+<!-- 
 {#if mapContext.maplibreLoaded}
 	<MapControls />
-{/if}
+{/if} -->
 
 <AppHeader />
 
-<Timeline visible={mapContext.maplibreLoaded && mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}
-></Timeline>
+<!-- <Timeline visible={mapContext.maplibreLoaded && mapContext.historic.mapsLoaded && !mapContext.historic.selectedMap}
+></Timeline> -->
 
-<Minimap></Minimap>
-<HistoricMapInfo></HistoricMapInfo>
+<div class="pointer-events-none absolute bottom-0 left-0 flex-col p-2">
+	<div class="flex items-baseline gap-10">
+		<Minimap></Minimap>
+		<!-- <PassiveTimeline {distributions}></PassiveTimeline> -->
+	</div>
+	<LayerPanel></LayerPanel>
+</div>
 
 <svelte:window onpointermove={updateMousePosition} onkeydown={handleKeyDown} onpopstate={handlePopState} />
 

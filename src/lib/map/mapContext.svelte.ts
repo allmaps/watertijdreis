@@ -1,32 +1,38 @@
-import maplibregl from "maplibre-gl";
-import type { Map as MaplibreMap } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { GeoJSONSource, Map as MaplibreMap, MapMouseEvent } from "maplibre-gl";
 import * as pmtiles from "pmtiles";
-import { addBackgroundLayers, addUserLocationCircle } from "./mapLayers.svelte";
-import { basemapStyle, LABELS_LAYERS } from "$lib/map/basemap";
-import { HistoricMapsContext } from "./historicMapsContext.svelte";
-import { getValidUserLocation } from "$lib/utils/userLocation";
-import { addGemeentegrenzenLayer, addWaterschapsgrenzenLayer } from "$lib/map/mapLayers.svelte";
-
-import { type LayerOptions, type MapView } from "$lib/types/map";
 import type { Feature } from "geojson";
+
+import { createAvailableLayers, addUserLocationCircle } from "$lib/map/mapLayers.svelte";
+import { basemapStyle } from "$lib/map/basemap";
+import { getValidUserLocation } from "$lib/utils/userLocation";
+import { type LayerOptions, type MapView } from "$lib/types/map";
+import { HistoricMapsContext } from "./historicMapsContext.svelte";
 import { applyStateFromURL, syncStateToURL, defaultState } from "./urlStateManager";
+import type { MapLayer } from "./MapLayer.svelte";
+import { HistoricMapSeries } from "./HistoricMapSeries.svelte";
+import { AhnMapLayer } from "./AhnMapLayer.svelte";
+
+const PINNED_TOP_IDS = ["user-location"];
 
 export class MapContext {
 	map: MaplibreMap | null = $state(null);
-	maplibreLoaded: boolean = $state(false);
+	maplibreLoaded = $state(false);
+	viewportPolygon: Feature | null = $state(null);
+	savedMapViews: MapView[] = $state([]);
 
 	historic: HistoricMapsContext = new HistoricMapsContext(this);
 
-	viewportPolygon: Feature | null = $state(null);
+	availableLayers = $state<MapLayer[]>([]);
+	layers = $state<MapLayer[]>([]);
 
-	savedMapViews: MapView[] = $state([]);
-	savedLayerVisibility: Record<string, "visible" | "none"> | null = null;
+	#hovered: MapLayer | null = null;
 
-	userLocationActive: boolean = $state(false);
+	sheetIndexVisible = $state(false);
+	toastContent = $state("");
+
+	userLocationActive = $state(false);
 	userLocationTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	gridVisible: boolean = $state(false);
-	sheetIndexVisible: boolean = $state(false);
 
 	layerOptions = $state<LayerOptions>({
 		baseMap: "none",
@@ -36,47 +42,38 @@ export class MapContext {
 		overlay: "none",
 	});
 
-	toastContent: string = $state("");
+	get gridVisible() {
+		return this.historic.gridVisible;
+	}
+
+	get activeMap(): MaplibreMap {
+		if (!this.map) {
+			throw new Error("MapContext: Maplibre is not initialized yet. Call init() first.");
+		}
+		return this.map;
+	}
 
 	constructor() {
-		// URL sync
 		$effect(() => {
 			syncStateToURL(this);
 		});
 
-		// Overlays sync
 		$effect(() => {
-			if (!this.maplibreLoaded || !this.map) return;
+			if (!this.maplibreLoaded) return;
+			const layers = this.layers;
 
-			this.updateOverlays(this.layerOptions.overlay);
-		});
-
-		// Basemap & opacity sync
-		$effect(() => {
-			if (!this.maplibreLoaded || this.historic.selectedMap) return;
-
-			const isProtomaps = this.layerOptions.baseMap === "protomaps";
-
-			this.setProtomapsVisiblity(isProtomaps);
-			if (isProtomaps) {
-				this.setProtomapsWaterInFront(this.layerOptions.protoMapsWaterInFront);
-				this.setProtoMapsLabelsInFront(this.layerOptions.protoMapsLabelsInFront);
-			}
-
-			this.setAHNVisibility(this.layerOptions.baseMap === "ahn");
-			this.setSatellietVisibility(this.layerOptions.baseMap === "satelliet");
-
-			if (this.historic.warpedMapLayer) {
-				this.historic.warpedMapLayer.setLayerOptions({
-					opacity: this.layerOptions.historicMapsOpacity / 100,
-				});
-			}
+			layers.forEach((layer, index) => {
+				if (!(layer instanceof HistoricMapSeries)) return;
+				const covered = layers.some(
+					(other, i) => i > index && other instanceof AhnMapLayer && other.effectiveVisible && other.grayscale
+				);
+				layer.setGrayscale(covered);
+			});
 		});
 	}
 
 	init(containerId: string) {
-		const protocol = new pmtiles.Protocol();
-		maplibregl.addProtocol("pmtiles", protocol.tile);
+		maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
 
 		const protoStyle = basemapStyle("nl");
 
@@ -104,14 +101,17 @@ export class MapContext {
 			touchPitch: false,
 			attributionControl: false,
 		});
+
 		this.map.dragRotate.disable();
 		this.map.keyboard.disable();
 		this.map.touchZoomRotate.disableRotation();
 		this.map.doubleClickZoom.disable();
 
-		this.map.on("load", async () => {
-			addBackgroundLayers(this.activeMap);
+		this.#initEventRouting(this.map);
 
+		this.map.on("load", async () => {
+			this.availableLayers = createAvailableLayers(this);
+			await this.#mountDefaultLayers();
 			await this.historic.init();
 
 			addUserLocationCircle(this.activeMap);
@@ -126,168 +126,105 @@ export class MapContext {
 		});
 	}
 
-	get activeMap(): maplibregl.Map {
-		if (!this.map) {
-			throw new Error("MapContext: Maplibre is not initialized yet. Call init() first.");
-		}
-		return this.map;
-	}
-
-	resetState() {
-		if (!this.maplibreLoaded || !this.historic.mapsLoaded) return;
-		this.historic.selectedMapId = null;
-		this.restoreView();
-
-		this.activeMap.easeTo({
-			center: [defaultState.lng, defaultState.lat],
-			zoom: defaultState.zoom,
-			pitch: 0,
-			bearing: 0,
-		});
-
-		this.layerOptions.historicMapsOpacity = defaultState.historicMapsOpacity;
-	}
-
-	zoomIn() {
-		if (!this.activeMap) return;
-		this.activeMap.zoomIn({ duration: 250 });
-	}
-
-	zoomOut() {
-		if (!this.activeMap) return;
-		this.activeMap.zoomOut({ duration: 250 });
-	}
-
-	flyToFeature(feature: Feature) {
-		const { geometry, bbox } = feature;
-		if (bbox) {
-			const [minLng, minLat, maxLng, maxLat] = bbox;
-			this.activeMap.fitBounds(
-				[
-					[minLng, minLat],
-					[maxLng, maxLat],
-				],
-				{ padding: 40, maxZoom: 12, duration: 250 }
-			);
-		} else if (geometry?.type === "Point") {
-			const [lng, lat] = geometry.coordinates;
-
-			this.activeMap.flyTo({
-				center: [lng, lat],
-				zoom: 12,
-				speed: 0.8,
-				curve: 1.4,
-				essential: true,
-				duration: 250,
-			});
+	async #mountDefaultLayers() {
+		for (const layer of [...this.availableLayers]) {
+			if (layer.added) await this.addLayer(layer);
 		}
 	}
 
-	updateOverlays(overlay: "none" | "waterschapsgrenzen" | "gemeentegrenzen") {
-		if (!this.map) return;
-
-		if (overlay !== "waterschapsgrenzen") {
-			if (this.map.getLayer("overlay-waterschapsgrenzen")) {
-				this.map.removeLayer("overlay-waterschapsgrenzen");
-			}
-			if (this.map.getSource("pdok-waterschapsgrenzen")) {
-				this.map.removeSource("pdok-waterschapsgrenzen");
-			}
-		}
-
-		if (overlay !== "gemeentegrenzen") {
-			if (this.map.getLayer("overlay-gemeentegrenzen")) {
-				this.map.removeLayer("overlay-gemeentegrenzen");
-			}
-			if (this.map.getSource("pdok-gemeentegrenzen")) {
-				this.map.removeSource("pdok-gemeentegrenzen");
-			}
-		}
-
-		if (overlay === "waterschapsgrenzen" && !this.map.getSource("pdok-waterschapsgrenzen")) {
-			addWaterschapsgrenzenLayer(this.map);
-		}
-		if (overlay === "gemeentegrenzen" && !this.map.getSource("pdok-gemeentegrenzen")) {
-			addGemeentegrenzenLayer(this.map);
-		}
-	}
-
-	setAHNVisibility(visible: boolean) {
-		if (!this.maplibreLoaded) return;
-		if (!this.activeMap.getLayer("dsm-05-layer")) return;
-		this.activeMap.setLayoutProperty("dsm-05-layer", "visibility", visible ? "visible" : "none");
-	}
-
-	setSatellietVisibility(visible: boolean) {
-		if (!this.maplibreLoaded) return;
-		if (!this.activeMap.getLayer("satelliet-layer")) return;
-		this.activeMap.setLayoutProperty("satelliet-layer", "visibility", visible ? "visible" : "none");
-	}
-
-	private protomapsLoaded = false;
-
-	setProtomapsVisiblity(visible: boolean) {
-		if (!this.maplibreLoaded) return;
-
-		if (visible && !this.protomapsLoaded) {
-			this.loadProtomaps();
-			this.protomapsLoaded = true;
-			return;
-		}
-
-		if (this.protomapsLoaded) {
-			const layers = this.activeMap.getStyle().layers || [];
-			layers.forEach((layer) => {
-				if (layer.source === "protomaps" || layer.id.startsWith("protomaps-")) {
-					this.activeMap.setLayoutProperty(layer.id, "visibility", visible ? "visible" : "none");
-				}
-			});
-		}
-	}
-
-	private loadProtomaps() {
-		const style = basemapStyle("nl");
-
-		if (style.glyphs && !this.activeMap.getStyle().glyphs) {
-			this.activeMap.setGlyphs(style.glyphs);
-		}
-
-		Object.entries(style.sources).forEach(([sourceId, sourceConfig]) => {
-			if (!this.activeMap.getSource(sourceId)) {
-				this.activeMap.addSource(sourceId, sourceConfig as maplibregl.SourceSpecification);
+	#initEventRouting(map: MaplibreMap) {
+		map.on("click", (e) => {
+			for (let i = this.layers.length - 1; i >= 0; i--) {
+				const layer = this.layers[i];
+				if (layer.effectiveVisible && layer.onClick(e)) return;
 			}
 		});
 
-		const existingLayers = this.activeMap.getStyle().layers || [];
-		const firstExistingLayerId = existingLayers.length > 0 ? existingLayers[0].id : undefined;
-
-		style.layers.forEach((layer) => {
-			if (!this.activeMap.getLayer(layer.id)) {
-				this.activeMap.addLayer(layer as maplibregl.LayerSpecification, firstExistingLayerId);
-			}
-		});
+		map.on("mousemove", (e) => this.#setHovered(this.#findHoverTarget(e), map));
+		map.on("mouseleave", () => this.#setHovered(null, map));
 	}
 
-	setProtomapsWaterInFront(visible: boolean) {
-		if (!this.maplibreLoaded) return;
-
-		const waterLayers = ["water", "water_stream", "water_river"];
-
-		waterLayers.forEach((layerId) => {
-			if (this.activeMap.getLayer(layerId)) {
-				this.activeMap.moveLayer(layerId, visible ? "map-outlines-labels" : "landuse_pedestrian");
-			}
-		});
+	#findHoverTarget(e: MapMouseEvent): MapLayer | null {
+		for (let i = this.layers.length - 1; i >= 0; i--) {
+			const layer = this.layers[i];
+			if (layer.effectiveVisible && layer.onPointerMove(e)) return layer;
+		}
+		return null;
 	}
 
-	setProtoMapsLabelsInFront(visible: boolean) {
-		if (!this.maplibreLoaded) return;
+	#setHovered(layer: MapLayer | null, map: MaplibreMap) {
+		if (layer !== this.#hovered) this.#hovered?.onPointerLeave();
+		this.#hovered = layer;
+		map.getCanvas().style.cursor = layer ? "pointer" : "";
+	}
 
-		LABELS_LAYERS.forEach((layerId) => {
-			if (this.activeMap.getLayer(layerId)) {
-				this.activeMap.moveLayer(layerId, visible ? "map-outlines-labels" : "satelliet-layer");
+	async addLayer(layer: MapLayer, index = this.layers.length) {
+		if (this.layers.includes(layer)) return;
+		if (!this.availableLayers.includes(layer)) this.availableLayers.push(layer);
+
+		layer.added = true;
+		this.layers.splice(index, 0, layer);
+
+		try {
+			await layer.mount(this.activeMap);
+		} catch (err) {
+			layer.added = false;
+			this.layers.splice(this.layers.indexOf(layer), 1);
+			throw err;
+		}
+
+		this.applyOrder();
+	}
+
+	removeLayer(layer: MapLayer) {
+		const i = this.layers.indexOf(layer);
+		if (i === -1) return;
+
+		if (this.#hovered === layer) this.#setHovered(null, this.activeMap);
+
+		layer.unmount();
+		layer.added = false;
+		this.layers.splice(i, 1);
+	}
+
+	moveLayer(from: number, to: number) {
+		if (from === to || from < 0 || to < 0 || from >= this.layers.length || to >= this.layers.length) return;
+
+		const layer = this.layers[from];
+		if (!layer.movable) return;
+
+		const [lo, hi] = from < to ? [from + 1, to] : [to, from - 1];
+		if (this.layers.slice(lo, hi + 1).some((l) => !l.movable)) return;
+
+		this.layers.splice(from, 1);
+		this.layers.splice(to, 0, layer);
+		this.applyOrder();
+	}
+
+	applyOrder() {
+		const map = this.activeMap;
+		for (const layer of this.layers) {
+			for (const id of layer.mapLayerIds) if (map.getLayer(id)) map.moveLayer(id);
+		}
+		for (const id of PINNED_TOP_IDS) if (map.getLayer(id)) map.moveLayer(id);
+	}
+
+	isolate(keep: MapLayer) {
+		for (const layer of this.layers) layer.suppressed = layer !== keep;
+		this.#setPinnedVisibility(false);
+	}
+
+	releaseIsolation() {
+		for (const layer of this.layers) layer.suppressed = false;
+		this.#setPinnedVisibility(true);
+	}
+
+	#setPinnedVisibility(visible: boolean) {
+		for (const id of PINNED_TOP_IDS) {
+			if (this.activeMap.getLayer(id)) {
+				this.activeMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
 			}
-		});
+		}
 	}
 
 	saveMapView(push = true) {
@@ -302,39 +239,41 @@ export class MapContext {
 	}
 
 	restoreView(view = this.savedMapViews.pop(), options = { duration: 500 }) {
-		if (!this.activeMap || !view || !this.historic.warpedMapLayer) return;
+		if (!view || !this.historic.mapsLoaded) return;
+
 		const { center, zoom, bearing, pitch } = view;
 		this.activeMap.easeTo({ center, zoom, bearing, pitch, ...options });
 
-		if (this.savedLayerVisibility) {
-			for (const layerId in this.savedLayerVisibility) {
-				this.activeMap.setLayoutProperty(layerId, "visibility", this.savedLayerVisibility[layerId]);
-			}
-			this.savedLayerVisibility = null;
-		}
-
+		this.releaseIsolation();
 		this.historic.setSheetIndexVisibility(false);
 
-		if (this.historic.previousSelectedMapId) {
-			this.historic.warpedMapLayer?.setMapOptions(this.historic.previousSelectedMapId, {
+		const prevId = this.historic.previousSelectedMapId;
+		if (prevId) {
+			this.historic.seriesOf(prevId)?.warpedMapLayer.setMapOptions(prevId, {
 				visible: false,
 				transformationType: "thinPlateSpline",
 				applyMask: true,
 			});
 		}
-
-		this.historic.applyFilter(this.historic.filter);
+		this.historic.applyFilter();
 	}
 
-	setLabelVisibility(visible = true) {
-		if (!this.maplibreLoaded) return;
+	resetState() {
+		if (!this.maplibreLoaded || !this.historic.mapsLoaded) return;
 
-		this.activeMap.setPaintProperty("map-outlines-numbers", "text-opacity", !visible ? +this.sheetIndexVisible : 0);
+		this.historic.selectedMapId = null;
+		this.restoreView();
 
-		this.activeMap.setPaintProperty("map-outlines-labels", "text-opacity-transition", {
-			duration: 300,
+		this.activeMap.easeTo({
+			center: [defaultState.lng, defaultState.lat],
+			zoom: defaultState.zoom,
+			pitch: 0,
+			bearing: 0,
 		});
-		this.activeMap.setPaintProperty("map-outlines-labels", "text-opacity", visible ? 1 : 0);
+
+		const opacity = defaultState.historicMapsOpacity / 100;
+		this.historic.series.forEach((s) => (s.opacity = opacity));
+		this.layerOptions.historicMapsOpacity = defaultState.historicMapsOpacity;
 	}
 
 	updateViewport() {
@@ -357,32 +296,42 @@ export class MapContext {
 		};
 	}
 
-	animateFeatureOpacity(
-		featureId: number | string,
-		stateKey: string,
-		targetOpacity: number,
-		duration: number,
-		callback?: () => void
-	) {
-		if (!this.map) return;
+	zoomIn() {
+		this.activeMap.zoomIn({ duration: 250 });
+	}
 
-		const startOpacity = (this.map.getFeatureState({ source: "map-outlines", id: featureId })[stateKey] as number) || 0;
-		const startTime = performance.now();
+	zoomOut() {
+		this.activeMap.zoomOut({ duration: 250 });
+	}
 
-		const animate = (now: number) => {
-			const progress = Math.min((now - startTime) / duration, 1);
-			const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress;
+	flyToFeature(feature: Feature) {
+		const { geometry, bbox } = feature;
 
-			this.map?.setFeatureState({ source: "map-outlines", id: featureId }, { [stateKey]: currentOpacity });
+		if (bbox) {
+			const [minLng, minLat, maxLng, maxLat] = bbox;
+			this.activeMap.fitBounds(
+				[
+					[minLng, minLat],
+					[maxLng, maxLat],
+				],
+				{ padding: 40, maxZoom: 12, duration: 250 }
+			);
+		} else if (geometry?.type === "Point") {
+			const [lng, lat] = geometry.coordinates;
+			this.activeMap.flyTo({
+				center: [lng, lat],
+				zoom: 12,
+				speed: 0.8,
+				curve: 1.4,
+				essential: true,
+				duration: 250,
+			});
+		}
+	}
 
-			if (progress < 1) {
-				requestAnimationFrame(animate);
-			} else if (callback) {
-				callback();
-			}
-		};
-
-		requestAnimationFrame(animate);
+	setLabelVisibility(visible = true) {
+		if (!this.maplibreLoaded) return;
+		this.historic.series.forEach((s) => s.setLabelVisibility(visible));
 	}
 
 	async flyToUserLocation() {
@@ -420,32 +369,25 @@ export class MapContext {
 	}
 
 	#setUserLocationMarker(lat: number, lng: number) {
-		const source = this.activeMap?.getSource("user-location") as maplibregl.GeoJSONSource;
+		const source = this.activeMap.getSource("user-location") as GeoJSONSource | undefined;
 		if (!source) return;
 
 		source.setData({
 			type: "FeatureCollection",
-			features: [
-				{
-					type: "Feature",
-					geometry: { type: "Point", coordinates: [lng, lat] },
-					properties: {},
-				},
-			],
+			features: [{ type: "Feature", geometry: { type: "Point", coordinates: [lng, lat] }, properties: {} }],
 		});
 
 		this.#animateUserLocationMarker(1, 10);
 	}
 
 	#animateUserLocationMarker(opacity: number, radius: number) {
-		if (!this.activeMap) return;
 		this.activeMap.setPaintProperty("user-location", "circle-opacity", opacity);
 		this.activeMap.setPaintProperty("user-location", "circle-stroke-opacity", opacity);
 		this.activeMap.setPaintProperty("user-location", "circle-radius", radius);
 	}
 
 	#clearUserLocationMarker() {
-		const source = this.activeMap?.getSource("user-location") as maplibregl.GeoJSONSource;
+		const source = this.activeMap.getSource("user-location") as GeoJSONSource | undefined;
 		source?.setData({ type: "FeatureCollection", features: [] });
 	}
 }

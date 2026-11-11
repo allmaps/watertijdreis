@@ -1,0 +1,138 @@
+[
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "bccf023752ff6f99",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/48/94/23/48942319456802790896899031170210657734.jp2",
+			"width": 8221,
+			"height": 6546,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-389916/canvas/p88",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-389916",
+							"type": "Manifest"
+						}
+					]
+				}
+			],
+			"tiles": [
+				{
+					"width": 256,
+					"height": 256,
+					"scaleFactors": [1, 2, 4, 8, 16, 32]
+				}
+			]
+		},
+		"gcps": [
+			{
+				"resource": [0, 4694],
+				"geo": [4.590586, 52.2631951]
+			},
+			{
+				"resource": [6466, 5300],
+				"geo": [5.3835346, 51.863551]
+			},
+			{
+				"resource": [6465, 0],
+				"geo": [5.3835383, 52.1758918]
+			},
+			{
+				"resource": [0, 1726],
+				"geo": [4.589847, 52.3755349]
+			}
+		],
+		"resourceMask": [
+			[1743, 4694],
+			[6466, 4696],
+			[6465, 1737],
+			[1740, 1726]
+		],
+		"transformation": {
+			"type": "thinPlateSpline"
+		},
+		"_meta": {
+			"edition": 1,
+			"bis": true,
+			"number": 25,
+			"position": "SW",
+			"x": -1,
+			"y": -1,
+			"yearStart": 1865,
+			"yearEnd": 1865,
+			"label": "Amsterdam Zuidwest"
+		}
+	},
+	{
+		"@context": "https://schemas.allmaps.org/map/2/context.json",
+		"type": "GeoreferencedMap",
+		"id": "fb8c7f459549c582",
+		"resource": {
+			"id": "https://objects.library.uu.nl/fcgi-bin/iipsrv.fcgi?IIIF=/manifestation/viewer/14/41/83/144183346394842382028691080006289338179.jp2",
+			"width": 8271,
+			"height": 6542,
+			"type": "ImageService2",
+			"partOf": [
+				{
+					"id": "https://objects.library.uu.nl/iiif_manifest/1874-389916/canvas/p89",
+					"type": "Canvas",
+					"partOf": [
+						{
+							"id": "https://objects.library.uu.nl/manifest/iiif/v3/1874-389916",
+							"type": "Manifest"
+						}
+					]
+				}
+			],
+			"tiles": [
+				{
+					"width": 256,
+					"height": 256,
+					"scaleFactors": [1, 2, 4, 8, 16, 32, 64]
+				}
+			]
+		},
+		"gcps": [
+			{
+				"resource": [1812, 4651],
+				"geo": [4.8835346, 52.263551]
+			},
+			{
+				"resource": [6537, 4658],
+				"geo": [5.976483, 52.2631878]
+			},
+			{
+				"resource": [6547, 1702],
+				"geo": [5.9772295, 52.3755277]
+			},
+			{
+				"resource": [1821, 1702],
+				"geo": [4.8835383, 52.3758918]
+			}
+		],
+		"resourceMask": [
+			[1812, 4651],
+			[6537, 4658],
+			[6547, 1702],
+			[1821, 1702]
+		],
+		"transformation": {
+			"type": "thinPlateSpline"
+		},
+		"_meta": {
+			"edition": 1,
+			"bis": false,
+			"number": 25,
+			"position": "SE",
+			"x": 1,
+			"y": -1,
+			"yearStart": 1865,
+			"yearEnd": 1865,
+			"label": "Amsterdam Zuidoost"
+		}
+	}
+]

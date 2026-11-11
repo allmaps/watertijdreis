@@ -69,52 +69,21 @@
 
 <LayersModal bind:visible={ui.layersModalVisible}></LayersModal>
 
-<div
-	class="
-	fixed right-2 flex flex-col items-end gap-2 transition-all duration-300
-	{mapContext.historic.selectedMap ? 'bottom-36 sm:bottom-2' : 'bottom-36'}
-	"
->
-	{#if !mapContext.historic.selectedMap}
-		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button
-				tabindex={5}
-				Icon={MagnifyingGlass}
-				kbd="⌘K"
-				onclick={(e) => {
-					e?.stopPropagation();
-					ui.openSearch();
-				}}>Zoek plaats ...</Button
-			>
-		</div>
-
-		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex={6} Icon={NavigationArrow} onclick={() => mapContext.flyToUserLocation()}
-				>Mijn locatie tonen</Button
-			>
-		</div>
-
-		<div transition:fly={{ x: 100, duration: 250 }}>
-			<Button tabindex={7} Icon={Stack} kbd="L" onclick={() => ui.toggleLayers()}>Lagen</Button>
-		</div>
-	{/if}
-
-	<div
-		class={`
-			flex w-fit flex-col items-end
-			justify-center overflow-hidden rounded-lg
-		`}
-	>
-		<Button Icon={MagnifyingGlassPlus} onclick={() => mapContext.zoomIn()} kbd="+">Inzoomen</Button>
-		<div class="relative -top-[2px]">
-			<Button Icon={MagnifyingGlassMinus} onclick={() => mapContext.zoomOut()} kbd="-">Uitzoomen</Button>
-		</div>
+<nav aria-label="Kaartbediening" class="fixed top-1/2 right-2 z-1000 flex -translate-y-1/2 flex-col gap-1">
+	<div class={cardClass}>
+		{@render iconButton(Plus, "Inzoomen", () => mapContext.zoomIn())}
+		{@render iconButton(Minus, "Uitzoomen", () => mapContext.zoomOut())}
 	</div>
 
-	<div
-		style:width={scaleWidth + "px"}
-		class="border-wtr-blue/66 mt-4 h-2 rounded-b-[4px] border-2 border-t-0 text-right shadow-[1px_1px_0_#eef] transition-all duration-250 text-shadow-[1px_1px_0_#eef]"
-	>
-		<span class="text-wtr-blue relative -top-4 p-2 text-[12px] font-[600]">{scaleText}</span>
+	<div class={cardClass}>
+		{@render iconButton(
+			Crosshair,
+			"Naar mijn locatie",
+			() => mapContext.flyToUserLocation(),
+			mapContext.userLocationActive
+		)}
+		{@render iconButton(MagnifyingGlass, "Zoeken", () => {
+			ui.searchVisible = true;
+		})}
 	</div>
-</div>
+</nav>

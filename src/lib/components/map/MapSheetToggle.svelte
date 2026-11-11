@@ -1,182 +1,167 @@
 <script lang="ts">
 	import { getContext } from "svelte";
+	import { fade, slide, type FadeParams, type SlideParams } from "svelte/transition";
+	import { MapTrifold, FileText, PushPin } from "phosphor-svelte";
 	import type { MapContext } from "$lib/map/mapContext.svelte";
 
-	import { fade, slide } from "svelte/transition";
-	import { MapTrifold, FileText, PushPin } from "phosphor-svelte";
-	import Toast from "../ui/Toast.svelte";
-
 	const mapContext = getContext<MapContext>("mapContext");
+	const historic = mapContext.historic;
 
-	let rightBtnSelected = $state(false);
-	let leftBtnWidth = $state(86);
-	let rightBtnWidth = $state(0);
+	const selectedMap = $derived(historic.selectedMap);
+	const pinnedMap = $derived(historic.pinnedMap);
+	const clickedMap = $derived(historic.clickedHistoricMap);
 
-	function leftBtnClick() {
-		rightBtnSelected = false;
-		if (
-			mapContext.historic.pinnedMapId &&
-			mapContext.historic.selectedMapId &&
-			mapContext.historic.pinnedMapId == mapContext.historic.selectedMapId
-		)
-			mapContext.historic.pinnedMapView = mapContext.saveMapView(false);
-		mapContext.historic.selectedMapId = null;
-		mapContext.historic.setSheetIndexVisibility(false);
+	const sheetMode = $derived(!!selectedMap || mapContext.sheetIndexVisible);
+
+	const isSelectedPinned = $derived(!!selectedMap && historic.pinnedMapId === selectedMap.id);
+
+	const showPin = $derived(!!selectedMap || (!!pinnedMap && !clickedMap));
+	const pinFilled = $derived(selectedMap ? isSelectedPinned : true);
+
+	const rightLabel = $derived(
+		selectedMap?.label ?? (pinnedMap && !clickedMap ? pinnedMap.label : (clickedMap?.label ?? "Individueel blad"))
+	);
+
+	let hintVisible = $state(true);
+	const showShortcutHint = false;
+
+	$effect(() => {
+		const timer = setTimeout(() => (hintVisible = false), 2000);
+		return () => clearTimeout(timer);
+	});
+
+	function showMap() {
+		if (selectedMap && isSelectedPinned) historic.pinnedMapView = mapContext.saveMapView(false);
+		historic.selectedMapId = null;
+		historic.setSheetIndexVisibility(false);
 	}
 
-	function rightBtnClick() {
-		rightBtnSelected = true;
+	function showSheets() {
+		const id = selectedMap ? null : (clickedMap?.id ?? pinnedMap?.id ?? null);
+		if (id) {
+			historic.selectedMapId = id;
+			return;
+		}
+		if (!historic.setSheetIndexVisibility()) showMap();
+	}
 
-		if (mapContext.historic.clickedHistoricMap && !mapContext.historic.selectedMap) {
-			mapContext.historic.extendClickedMapTimeout();
-			mapContext.historic.selectedMapId = mapContext.historic.clickedHistoricMap.id;
-		} else if (mapContext.historic.pinnedMap && !mapContext.historic.selectedMap) {
-			mapContext.historic.extendClickedMapTimeout();
-			mapContext.historic.selectedMapId = mapContext.historic.pinnedMapId;
+	function togglePin() {
+		if (selectedMap && !isSelectedPinned) {
+			historic.pinnedMapView = mapContext.saveMapView(false);
+			historic.pinnedMapId = selectedMap.id;
 		} else {
-			if (!mapContext.historic.setSheetIndexVisibility()) leftBtnClick();
+			historic.pinnedMapId = null;
 		}
 	}
 
-	$effect(() => {
-		if (mapContext.historic.selectedMap) rightBtnSelected = true;
-		else rightBtnSelected = false;
-	});
+	function onKeydown(e: KeyboardEvent) {
+		if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
 
-	let toastMessage = $state("");
+		if (e.key === "Escape") {
+			showMap();
+			return;
+		}
 
-	let spaceKeyDown = $state(false);
-	let keyboardShortcutVisible = $state(true);
+		if (e.key === " " && !e.repeat) {
+			const target = e.target;
+			if (
+				target instanceof HTMLElement &&
+				target.closest("input, textarea, select, button, a, [contenteditable='true']")
+			)
+				return;
 
-	setTimeout(() => {
-		keyboardShortcutVisible = false;
-	}, 2000);
+			e.preventDefault();
+			showSheets();
+		}
+	}
 
-	function slideFade(node, params) {
+	let leftWidth = $state(0);
+	let rightWidth = $state(0);
+	const measured = $derived(leftWidth > 0 && rightWidth > 0);
+
+	function slideFade(node: Element, params: SlideParams & FadeParams = {}) {
 		const s = slide(node, params);
 		const f = fade(node, params);
 
 		return {
-			duration: Math.max(s.duration, f.duration),
-			delay: Math.min(s.delay, f.delay),
-			css: (t) => `
-				${s.css ? s.css(t) + ";" : ""}
-				${f.css ? f.css(t) + ";" : ""}
-			`,
+			delay: Math.min(s.delay ?? 0, f.delay ?? 0),
+			duration: Math.max(s.duration ?? 300, f.duration ?? 300),
+			css: (t: number, u: number) => `${s.css?.(t, u) ?? ""};${f.css?.(t, u) ?? ""}`,
 		};
 	}
 </script>
 
-<svelte:document
-	onkeydown={(e) => {
-		if (e.key == " " && !spaceKeyDown) {
-			spaceKeyDown = true;
-			rightBtnClick();
-		}
-		if (e.key == "Escape") {
-			leftBtnClick();
-		}
-	}}
-	onkeyup={(e) => {
-		if (e.key == " ") {
-			spaceKeyDown = false;
-			// if (!mapContext.historic.selectedMap) leftBtnClick();
-		}
-	}}
-/>
+<svelte:document onkeydown={onKeydown} />
 
-<div
-	class="
-        group text-wtr-blue border-wtr-blue/7 bg-wtr-blue/7 fixed top-21 left-2 z-1000 my-3 flex flex-shrink-0
-        cursor-pointer items-center justify-center rounded-[9px] border-2
-        font-[500] shadow-[0_2px_2px_rgba(0,0,0,0.05)]
-        backdrop-blur-md duration-500
-        sm:top-24 sm:left-5
-    "
->
-	<span
-		class="absolute left-0 h-full w-1/2 rounded-[8px] bg-white shadow-md transition-[left,width] duration-300 ease-out"
-		style:left={(!rightBtnSelected ? 0 : leftBtnWidth) + "px"}
-		style:width={(!rightBtnSelected ? leftBtnWidth : rightBtnWidth) + "px"}
-	></span>
-	<button
-		bind:clientWidth={leftBtnWidth}
-		class="z-2 flex cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
-		onclick={leftBtnClick}
-		tabindex="3"
-	>
-		<MapTrifold
-			size="18"
-			color={!rightBtnSelected ? "var(--color-wtr-pink)" : "var(--color-wtr-blue)"}
-			class="shrink-0 transition-[fill] duration-500"
-		/>
-		Kaart
-	</button>
-	<button
-		bind:clientWidth={rightBtnWidth}
-		class="z-2 flex max-w-50 cursor-pointer items-center gap-1 rounded-[7px] px-3 py-1.5 transition-[background] duration-300"
-		onclick={rightBtnClick}
-		tabindex="4"
-	>
-		<FileText
-			size="18"
-			color={rightBtnSelected ? "var(--color-wtr-pink)" : "var(--color-wtr-blue)"}
-			class="shrink-0 transition-[fill] duration-500"
-		/>
-
-		{#if mapContext.historic.selectedMap}
-			<span class="truncate">{mapContext.historic.selectedMap.label}</span>
+<div role="group" aria-label="Weergave" class="text-[12px] text-white">
+	<div class="rounded-lg border border-white/20 bg-white/10 p-0.5">
+		<div class="relative flex h-7 items-stretch">
 			<span
-				role="button"
-				tabindex="0"
-				class="cursor-pointer"
-				onclick={(e) => {
-					e.stopPropagation();
-					if (mapContext.historic.pinnedMapId) mapContext.historic.pinnedMapId = null;
-					else {
-						mapContext.historic.pinnedMapView = mapContext.saveMapView(false);
-						mapContext.historic.pinnedMapId = mapContext.historic.selectedMapId;
-					}
-				}}
-			>
-				{#if mapContext.historic.pinnedMap && mapContext.historic.pinnedMapId == mapContext.historic.selectedMapId}
-					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
-				{:else}
-					<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="regular"></PushPin>
-				{/if}
-			</span>
-		{:else if mapContext.historic.pinnedMap && !mapContext.historic.clickedHistoricMap}
-			<span class="truncate">{mapContext.historic.pinnedMap.label}</span>
-			<span
-				role="button"
-				tabindex="0"
-				class="cursor-pointer"
-				onclick={(e) => {
-					e.stopPropagation();
-					mapContext.historic.pinnedMapId = null;
-				}}
-			>
-				<PushPin size="18" class="relative -top-[2px] ml-1 inline" weight="fill"></PushPin>
-			</span>
-		{:else}
-			<span class="truncate">
-				{mapContext.historic.clickedHistoricMap ? mapContext.historic.clickedHistoricMap.label : "Bladindex"}
-			</span>
+				aria-hidden="true"
+				class="absolute inset-y-0 left-0 rounded-md bg-white shadow-sm {measured
+					? 'transition-[transform,width] duration-200 ease-in-out'
+					: 'opacity-0'}"
+				style:transform="translateX({sheetMode ? leftWidth : 0}px)"
+				style:width="{sheetMode ? rightWidth : leftWidth}px"
+			></span>
 
-			{#if keyboardShortcutVisible}
-				<kbd
-					class="
-					border-wtr-subtle-blue ml-1 flex inline items-center rounded-[4px] border bg-white
-					px-1 font-sans text-[12px] text-[#cce]
-					shadow-[0px_2px_0px_0px_#cce] select-none
-					"
-					transition:slideFade={{ axis: "x", duration: 300 }}
+			<button
+				type="button"
+				bind:clientWidth={leftWidth}
+				onclick={showMap}
+				aria-pressed={!sheetMode}
+				class="relative z-10 flex h-full cursor-pointer items-center gap-1.5 rounded-md px-3 font-medium transition-colors {sheetMode
+					? 'text-white/70 hover:text-white'
+					: 'text-wtr-blue'}"
+			>
+				<MapTrifold size="18" class="shrink-0 transition-colors {sheetMode ? '' : 'text-wtr-blue'}" />
+				Kaart
+			</button>
+
+			<div
+				bind:clientWidth={rightWidth}
+				class="relative z-10 flex h-full max-w-50 items-center rounded-md transition-colors {sheetMode
+					? 'text-wtr-blue'
+					: 'text-white/70 hover:text-white'}"
+			>
+				<button
+					type="button"
+					onclick={showSheets}
+					aria-pressed={sheetMode}
+					class="flex h-full min-w-0 cursor-pointer items-center gap-1.5 rounded-md pl-3 font-medium {showPin
+						? 'pr-1'
+						: 'pr-3'}"
 				>
-					<span>Spatie</span>
-				</kbd>
-			{/if}
-		{/if}
-	</button>
-</div>
+					<FileText size="18" class="shrink-0 transition-colors {sheetMode ? 'text-wtr-blue' : ''}" />
+					<span class="truncate">{rightLabel}</span>
 
-<Toast content={toastMessage}></Toast>
+					{#if showShortcutHint}
+						<kbd
+							transition:slideFade={{ axis: "x", duration: 300 }}
+							class="ml-0.5 shrink-0 rounded border px-1.5 font-sans text-[11px] leading-4 select-none {sheetMode
+								? 'border-wtr-blue/20 bg-wtr-blue/5 text-wtr-blue/60'
+								: 'border-white/25 bg-white/10 text-white/80'}"
+						>
+							Spatie
+						</kbd>
+					{/if}
+				</button>
+
+				{#if showPin}
+					<button
+						type="button"
+						onclick={togglePin}
+						aria-pressed={pinFilled}
+						aria-label={pinFilled ? "Blad losmaken" : "Blad vastpinnen"}
+						title={pinFilled ? "Blad losmaken" : "Blad vastpinnen"}
+						class="mr-1.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded transition-colors {sheetMode
+							? 'hover:bg-wtr-blue/10'
+							: 'hover:bg-white/15'}"
+					>
+						<PushPin size="16" weight={pinFilled ? "fill" : "regular"} />
+					</button>
+				{/if}
+			</div>
+		</div>
+	</div>
+</div>

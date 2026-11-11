@@ -13,9 +13,6 @@ export function getUserLocation(): Promise<{ lat: number; lng: number }> {
 	});
 }
 
-/**
- * Fallback via IP-adres als GPS faalt
- */
 export async function getFallbackIPLocation(): Promise<{ lat: number; lng: number }> {
 	const res = await fetch("https://ipapi.co/json/");
 	if (!res.ok) throw new Error("IP location failed");
@@ -23,10 +20,6 @@ export async function getFallbackIPLocation(): Promise<{ lat: number; lng: numbe
 	return { lat: data.latitude, lng: data.longitude };
 }
 
-/**
- * Centraal startpunt: probeert GPS, dan IP.
- * Gooit een foutmelding als de locatie buiten NL ligt.
- */
 export async function getValidUserLocation(): Promise<{ lat: number; lng: number }> {
 	let loc: { lat: number; lng: number };
 
