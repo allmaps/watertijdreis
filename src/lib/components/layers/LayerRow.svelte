@@ -79,6 +79,7 @@
 				class="rounded-md border px-1 py-0.5"
 				style:background="color-mix(in srgb, {layer.themeColor} 20%, transparent)"
 				style:border-color="color-mix(in srgb, {layer.themeColor} 50%, transparent)"
+				style:color="color-mix(in srgb, {layer.themeColor} 50%, #ffffff)"
 			>
 				{#if isHistoric}
 					{#if years.length}
