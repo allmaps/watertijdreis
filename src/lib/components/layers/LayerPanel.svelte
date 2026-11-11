@@ -198,7 +198,7 @@
 				</div>
 			{:else if currentView === "settings" && selectedLayer}
 				<div
-					class="flex max-h-[calc(100vh-12rem)] flex-col gap-4 overflow-y-auto px-1 py-2 text-xs"
+					class="flex max-h-[calc(100vh-12rem)] flex-col gap-4 overflow-x-hidden overflow-y-auto px-1 py-2 text-xs"
 					in:fly={{ x: 20, duration: 200 }}
 				>
 					{#if selectedLayer instanceof AhnMapLayer}
