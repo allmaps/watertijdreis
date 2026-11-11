@@ -34,7 +34,7 @@
 		? 'bg-white/10 ring-1 ring-white/25'
 		: ''}"
 >
-	<div class="flex items-center gap-2.5">
+	<div class="flex min-w-0 flex-1 items-center gap-2.5">
 		<button
 			type="button"
 			data-grip
@@ -44,7 +44,7 @@
 				: "Deze laag staat vast"}
 			onpointerdown={onGripDown}
 			onkeydown={onGripKeydown}
-			class="touch-none text-white/40 transition-colors {layer.movable
+			class="shrink-0 touch-none text-white/40 transition-colors {layer.movable
 				? 'cursor-grab hover:text-white active:cursor-grabbing'
 				: 'cursor-not-allowed opacity-30'}"
 		>
@@ -53,7 +53,7 @@
 
 		<button
 			onclick={() => (layer.visible = !layer.visible)}
-			class="cursor-pointer rounded-md border border-white/20 bg-white/10 p-1 transition-colors hover:bg-white/20"
+			class="shrink-0 cursor-pointer rounded-md border border-white/20 bg-white/10 p-1 transition-colors hover:bg-white/20"
 			aria-label="Zichtbaarheid wisselen"
 		>
 			{#if layer.visible}
@@ -63,20 +63,20 @@
 			{/if}
 		</button>
 
-		<span class="max-w-[130px] truncate font-semibold tracking-wide text-white">{layer.name}</span>
-		<span><Info size="12" class="inline"></Info></span>
+		<span class="max-w-[130px] min-w-0 truncate font-semibold tracking-wide text-white">{layer.name}</span>
+		<span class="shrink-0"><Info size="12" class="inline"></Info></span>
 	</div>
 
-	<div class="flex items-center gap-2">
+	<div class="flex shrink-0 items-center gap-2">
 		{#if layer instanceof HistoricMapSeries && !layer.mapsLoaded}
-			<span class="text-white/50">Laden…</span>
+			<span class="whitespace-nowrap text-white/50">Laden…</span>
 		{:else}
 			{@const isHistoric = layer instanceof HistoricMapSeries}
 			{@const years = isHistoric
 				? Array.from(layer.visibleMaps.values(), (m) => m.yearEnd).filter((y): y is number => y !== undefined)
 				: []}
 			<div
-				class="rounded-md border px-1 py-0.5"
+				class="shrink-0 rounded-md border px-1 py-0.5 whitespace-nowrap"
 				style:background="color-mix(in srgb, {layer.themeColor} 20%, transparent)"
 				style:border-color="color-mix(in srgb, {layer.themeColor} 50%, transparent)"
 				style:color="color-mix(in srgb, {layer.themeColor} 50%, #ffffff)"
@@ -96,9 +96,9 @@
 		<button
 			type="button"
 			onclick={onSettingsClick}
-			class="flex cursor-pointer items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-white/80 transition-all hover:bg-white/15 hover:text-white"
+			class="flex shrink-0 cursor-pointer items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-white/80 transition-all hover:bg-white/15 hover:text-white"
 		>
-			<span class="text-[10px]">Opties</span>
+			<span class="text-[10px] @max-[22rem]:sr-only">Opties</span>
 			<svg
 				class="h-3 w-3 text-white/60 transition-transform group-hover:translate-x-0.5"
 				fill="none"

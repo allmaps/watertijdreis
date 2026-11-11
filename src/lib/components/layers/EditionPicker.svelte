@@ -53,8 +53,8 @@
 
 <section class="flex flex-col gap-1.5">
 	<div class="flex items-baseline justify-between gap-2">
-		<span class="font-semibold text-white/90">{active.title}</span>
-		<span class="truncate font-mono text-[11px] text-white/70 tabular-nums">
+		<span class="shrink-0 font-semibold whitespace-nowrap text-white/90">{active.title}</span>
+		<span class="min-w-0 truncate font-mono text-[11px] text-white/70 tabular-nums">
 			{years}{years ? " · " : ""}{active.count} bladen
 		</span>
 	</div>

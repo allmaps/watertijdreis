@@ -116,7 +116,7 @@
 <div
 	role="region"
 	aria-label="Kaartlagen"
-	class="bg-wtr-blue/95 pointer-events-auto relative z-[1001] max-h-[calc(100dvh-12rem)] w-100 max-w-[calc(100vw-1rem)] overflow-x-hidden overflow-y-auto rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
+	class="bg-wtr-blue/95 @container pointer-events-auto relative z-[1001] max-h-[calc(100%-1rem)] w-100 max-w-[calc(100vw-1rem)] min-w-0 overflow-hidden overflow-y-auto rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
 	style:height={contentHeight ? `${contentHeight}px` : undefined}
 >
 	<div class="relative p-2" bind:offsetHeight={contentHeight}>
@@ -124,12 +124,12 @@
 			<div class="mb-2 flex items-center gap-2 border-b border-white/10 px-1 pb-2">
 				<button
 					onclick={goBack}
-					class="flex cursor-pointer items-center gap-1.5 rounded-md p-1 text-xs text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+					class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md p-1 text-xs text-white/80 transition-colors hover:bg-white/10 hover:text-white"
 				>
 					<ArrowLeft size={16} />
 					<span class="font-medium">Terug</span>
 				</button>
-				<span class="truncate text-xs font-semibold tracking-wide text-white/90">{viewTitle}</span>
+				<span class="min-w-0 truncate text-xs font-semibold tracking-wide text-white/90">{viewTitle}</span>
 			</div>
 		{/if}
 
@@ -184,8 +184,10 @@
 							onclick={() => addLayer(layer)}
 							class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium transition-colors hover:bg-white/15"
 						>
-							<span class="truncate">{layer.name}</span>
-							<span class="ml-auto shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60">
+							<span class="min-w-0 truncate">{layer.name}</span>
+							<span
+								class="ml-auto shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[10px] whitespace-nowrap text-white/60"
+							>
 								{layer.type === "historic-series" ? "Historisch" : "Actueel"}
 							</span>
 							<Plus size={16} class="shrink-0 text-white/70" />
