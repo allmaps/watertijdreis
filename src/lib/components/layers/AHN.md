@@ -1,0 +1,15 @@
+# AHN layer settings
+
+`AhnLayerSettings.svelte` connects the layer panel to `AhnMapLayer`, the app wrapper around the portable [Dynamic AHN layer](../../map/dynamic-ahn/README.md). UI state, DOM cursor labels and histogram presentation stay outside the custom layer so its folder can be reused independently.
+
+The main panel shows visibility, grayscale, palette/reverse, cursor height and the PDOK source link. The histogram/range controls, lock icon, mapping, outliers and blending live in a collapsed advanced section. Defaults are cyan–transparent–magenta, adaptive contrast, multiply blending and 75% opacity. Presets and reversing change colors without unlocking or rescaling heights.
+
+Switching to linear or mean starts with 2% clipping per side. The clipping control can then select none or 0.5%, 1%, 2%, 5% or 10%. Adaptive contrast uses full extent without additional outlier controls because rare heights already occupy little palette space. Mapping and outlier controls are disabled while locked; the measured histogram remains live.
+
+`AhnRangeLegend.svelte` aligns the full-width histogram and gradient on the displayed color scale's metre bounds. Automatically chosen end handles stay at 0% and 100% while panning or interpolating; independently arriving measured extrema cannot move them. Histogram bins outside these bounds are clipped. Counts use a linear vertical scale with gridlines, a peak percentage and metre labels.
+
+Low/center/high triangle handles and precise metre entry use centimetres (two decimals); automatic sampling retains full precision. Moving an endpoint rescales the existing mapping. Moving the center keeps the endpoints and stretches each half, including the percentile curve. Either change locks the scale. The handles support pointer dragging, arrow keys (Shift for larger steps), Home/End, and clicking for numeric entry.
+
+Manual changes retain the original plotting axis in `AhnMapLayer.legendAxis` until the scale is unlocked, including after releasing a handle, closing an input or reopening settings. Handles can move within that axis and excluded bins are dimmed; typed values outside its bounds expand the axis to include them. Pointer drags capture the mapping at the start and apply immediately. Opening a numeric editor snapshots the displayed mapping so arriving tiles cannot change unfinished typing. Dragging or using arrow keys keeps the editor open and updates its value and triangle together. Apply commits pending typed text; Cancel discards that text without reverting already-applied handle movements. Unlocking restores the selected automatic mapping and plotting axis.
+
+The optional “Hoogte bij cursor” readout follows the pointer, updates as tiles or the camera change, and uses ≈ to indicate the displayed, resampled terrain in metres NAP. It hides over controls, outside the map or when the layer is hidden/removed; “Geen AHN-hoogte” replaces missing data. `ahnCursor.ts` owns the DOM label and uses `getHeight(lng, lat)` without fetching additional tiles.

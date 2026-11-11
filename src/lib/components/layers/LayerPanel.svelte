@@ -114,7 +114,9 @@
 </script>
 
 <div
-	class="bg-wtr-blue/95 pointer-events-auto max-h-[calc(100%-1rem)] w-100 overflow-hidden rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
+	role="region"
+	aria-label="Kaartlagen"
+	class="bg-wtr-blue/95 pointer-events-auto relative z-[1001] max-h-[calc(100dvh-12rem)] w-100 max-w-[calc(100vw-1rem)] overflow-x-hidden overflow-y-auto rounded-xl text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-md transition-[height] duration-200 ease-out motion-reduce:transition-none"
 	style:height={contentHeight ? `${contentHeight}px` : undefined}
 >
 	<div class="relative p-2" bind:offsetHeight={contentHeight}>
@@ -200,7 +202,7 @@
 					{#if selectedLayer instanceof HistoricMapSeries && selectedLayer.hasEditions}
 						<EditionPicker series={selectedLayer}></EditionPicker>
 					{/if}
-					{#if selectedLayer instanceof HistoricMapSeries && selectedLayer.id == "wsk"}{:else}
+					{#if !(selectedLayer instanceof AhnMapLayer) && !(selectedLayer instanceof HistoricMapSeries && selectedLayer.id === "wsk")}
 						<div class="flex flex-col gap-2">
 							<span class="font-semibold text-white/90">Transparantie / Opaciteit</span>
 							<div class="flex items-center gap-3">
