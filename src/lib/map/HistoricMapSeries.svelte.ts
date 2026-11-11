@@ -241,7 +241,7 @@ export class HistoricMapSeries extends MapLayer {
 				"text-allow-overlap": true,
 			},
 			paint: {
-				"text-color": "#65e",
+				"text-color": "#f4a",
 				"text-halo-color": "#eeeeff",
 				"text-halo-width": 1,
 				"text-opacity": 0,

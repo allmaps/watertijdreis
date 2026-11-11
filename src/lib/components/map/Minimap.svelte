@@ -16,7 +16,7 @@
 	let expanded = $derived(info.visible && !historicCtx.selectedMap);
 
 	// Scaled down by 0.8 from 160x200 to match your previous size without CSS scale hacks
-	let width: number = $state(128);
+	let width: number = $state(158);
 	let height: number = $state(160);
 	let svgElement: SVGSVGElement | null = $state(null);
 
@@ -130,7 +130,7 @@
 		const x1 = centerPoint[0];
 		const y1 = centerPoint[1];
 
-		const x2 = anchor.x + 20000;
+		const x2 = anchor.x + 64000;
 		const y2 = anchor.y;
 
 		const strokeWidth = scaleFactor * 2;
@@ -155,166 +155,168 @@
 	}
 </script>
 
-<div class="pointer-events-none z-[999] block touch-none">
-	{#if mapContext.maplibreLoaded && panelPosition && (period || info.map)}
-		<div class="absolute z-10000 -translate-y-1/2" style="left: {panelPosition.left}; top: {panelPosition.top};">
-			<div
-				class="bg-wtr-blue flex flex-col overflow-hidden rounded-xl text-white shadow-lg ring-1 ring-white/10 {expanded
-					? 'pointer-events-auto'
-					: ''}"
-				onpointerenter={() => (info.hold = true)}
-				onpointerleave={() => (info.hold = false)}
-			>
-				<!-- Bovenste rij: Periode en Thumbnail -->
-				<div class="flex items-center text-center whitespace-nowrap">
-					{#if period}
-						<div class="flex flex-col px-3 py-2">
-							<span class="text-[10px] leading-none font-[600] text-white/60">
-								{single ? "Jaar" : "Periode"}
-							</span>
-							<span class="mt-1 flex font-mono text-base leading-none font-semibold">
-								<NumberFlow
-									format={{ useGrouping: false }}
-									value={period[0]}
-									spinTiming={{ duration: 300, easing: "ease-out" }}
-								/>
-								<span
-									class="grid transition-[grid-template-columns] duration-300 ease-out"
-									style:grid-template-columns={single ? "0fr" : "1fr"}
-								>
-									<span class="flex overflow-hidden">
-										<span class="p-0.5 opacity-50">-</span>
-										<NumberFlow
-											format={{ useGrouping: false }}
-											value={period[1]}
-											spinTiming={{ duration: 300, easing: "ease-out" }}
-										/>
+{#if !mapContext.historic.selectedMap}
+	<div class="pointer-events-none z-[999] block touch-none">
+		{#if mapContext.maplibreLoaded && panelPosition && (period || info.map)}
+			<div class="absolute z-10000 -translate-y-1/2" style="left: {panelPosition.left}; top: {panelPosition.top};">
+				<div
+					class="bg-wtr-blue flex flex-col overflow-hidden rounded-xl text-white shadow-lg ring-1 ring-white/10 {expanded
+						? 'pointer-events-auto'
+						: ''}"
+					onpointerenter={() => (info.hold = true)}
+					onpointerleave={() => (info.hold = false)}
+				>
+					<!-- Bovenste rij: Periode en Thumbnail -->
+					<div class="flex items-center text-center whitespace-nowrap">
+						{#if period}
+							<div class="flex flex-col px-3 py-2">
+								<span class="text-[10px] leading-none font-[600] text-white/60">
+									{single ? "Jaar" : "Periode"}
+								</span>
+								<span class="mt-1 flex font-mono text-base leading-none font-semibold">
+									<NumberFlow
+										format={{ useGrouping: false }}
+										value={period[0]}
+										spinTiming={{ duration: 300, easing: "ease-out" }}
+									/>
+									<span
+										class="grid transition-[grid-template-columns] duration-300 ease-out"
+										style:grid-template-columns={single ? "0fr" : "1fr"}
+									>
+										<span class="flex overflow-hidden">
+											<span class="p-0.5 opacity-50">-</span>
+											<NumberFlow
+												format={{ useGrouping: false }}
+												value={period[1]}
+												spinTiming={{ duration: 300, easing: "ease-out" }}
+											/>
+										</span>
 									</span>
 								</span>
-							</span>
-						</div>
-					{/if}
+							</div>
+						{/if}
 
-					<div
-						class="grid transition-[grid-template-columns,grid-template-rows] duration-200 ease-out"
-						style:grid-template-columns={expanded ? "1fr" : "0fr"}
-						style:grid-template-rows={expanded ? "1fr" : "0fr"}
-						inert={!expanded}
-					>
-						<div class="min-h-0 min-w-0 overflow-hidden">
-							{#if info.map}
-								{@const map = info.map}
-								<div class="flex items-center py-1.5 pr-3 pl-3">
+						<div
+							class="grid transition-[grid-template-columns,grid-template-rows] duration-200 ease-out"
+							style:grid-template-columns={expanded ? "1fr" : "0fr"}
+							style:grid-template-rows={expanded ? "1fr" : "0fr"}
+							inert={!expanded}
+						>
+							<div class="min-h-0 min-w-0 overflow-hidden">
+								{#if info.map}
+									{@const map = info.map}
+									<div class="flex items-center py-1.5 pr-3 pl-3">
+										<button
+											type="button"
+											onclick={() => info.open()}
+											disabled={info.isSelected}
+											aria-label="Blad openen"
+											class="relative block h-[70px] shrink-0 overflow-hidden rounded-sm shadow-md enabled:cursor-pointer"
+										>
+											{#if info.currentIsBackside && info.canvasImage}
+												<img
+													alt=""
+													class="block h-full w-auto object-cover"
+													src="{info.canvasImage}/full/,256/0/default.jpg"
+												/>
+											{:else}
+												<MapThumbnail id={map.id} height={70} />
+											{/if}
+
+											{#if info.viewportRect}
+												{@const r = info.viewportRect}
+												<div
+													class="border-wtr-blue pointer-events-none absolute rounded-sm border-[3px]"
+													style="left: {r.left}%; top: {r.top}%; width: {r.width}%; height: {r.height}%;"
+												></div>
+											{/if}
+										</button>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					{#if expanded && info.map}
+						{@const map = info.map}
+						<div class="w-full bg-white/10">
+							{#key map.id}
+								<div in:slide={{ duration: 200 }} class="w-full">
 									<button
 										type="button"
 										onclick={() => info.open()}
 										disabled={info.isSelected}
-										aria-label="Blad openen"
-										class="relative block h-[70px] shrink-0 overflow-hidden rounded-sm shadow-md enabled:cursor-pointer"
+										class="flex w-full items-center justify-center py-1 text-center text-[12px] leading-tight font-[600] text-white enabled:cursor-pointer enabled:hover:underline"
 									>
-										{#if info.currentIsBackside && info.canvasImage}
-											<img
-												alt=""
-												class="block h-full w-auto object-cover"
-												src="{info.canvasImage}/full/,256/0/default.jpg"
-											/>
-										{:else}
-											<MapThumbnail id={map.id} height={70} />
-										{/if}
-
-										{#if info.viewportRect}
-											{@const r = info.viewportRect}
-											<div
-												class="border-wtr-blue pointer-events-none absolute rounded-sm border-[3px]"
-												style="left: {r.left}%; top: {r.top}%; width: {r.width}%; height: {r.height}%;"
-											></div>
-										{/if}
+										<span class="truncate">{info.title}</span>
 									</button>
 								</div>
-							{/if}
+							{/key}
 						</div>
-					</div>
+					{/if}
 				</div>
-
-				{#if expanded && info.map}
-					{@const map = info.map}
-					<div class="w-full bg-white/10">
-						{#key map.id}
-							<div in:slide={{ duration: 200 }} class="w-full">
-								<button
-									type="button"
-									onclick={() => info.open()}
-									disabled={info.isSelected}
-									class="flex w-full items-center justify-center py-1 text-center text-[12px] leading-tight font-[600] text-white enabled:cursor-pointer enabled:hover:underline"
-								>
-									<span class="truncate">{info.title}</span>
-								</button>
-							</div>
-						{/key}
-					</div>
-				{/if}
 			</div>
-		</div>
-	{/if}
+		{/if}
 
-	{#if historicCtx.visibleMaps && historicCtx.visibleMaps.size}
-		<svg
-			bind:this={svgElement}
-			{width}
-			{height}
-			viewBox={viewBox.join(" ")}
-			class="drop-shadow-wtr-blue/50 pointer-events-none drop-shadow-[1px_1px_0px]"
-		>
-			<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
-				<!-- POLYGONS -->
-				{#each polygons as poly (poly.id)}
-					<polygon
-						points={getProjectedPoints(poly.geometry.coordinates[0])}
-						fill={poly.color}
-						fill-opacity={fillOpacity(poly.id)}
-						stroke={poly.color}
-						stroke-width={scaleFactor * 1.33}
-						class="transition-[fill-opacity] duration-250"
-					/>
-				{/each}
+		{#if historicCtx.visibleMaps && historicCtx.visibleMaps.size}
+			<svg
+				bind:this={svgElement}
+				{width}
+				{height}
+				viewBox={viewBox.join(" ")}
+				class="drop-shadow-wtr-blue/50 pointer-events-none drop-shadow-[1px_1px_0px]"
+			>
+				<g transform="scale(1, -1) translate(0, -{viewBox[1] * 2 + viewBox[3]})">
+					<!-- POLYGONS -->
+					{#each polygons as poly (poly.id)}
+						<polygon
+							points={getProjectedPoints(poly.geometry.coordinates[0])}
+							fill={poly.color}
+							fill-opacity={fillOpacity(poly.id)}
+							stroke={poly.color}
+							stroke-width={scaleFactor * 1.33}
+							class="transition-[fill-opacity] duration-250"
+						/>
+					{/each}
 
-				<!-- VIEWPORT RECTANGLE -->
-				{#if viewportRect}
-					<rect
-						x={viewportRect.x}
-						y={viewportRect.y}
-						width={viewportRect.width}
-						height={viewportRect.height}
-						fill="none"
-						class="stroke-wtr-blue"
-						stroke-width={scaleFactor * 4}
-						rx={scaleFactor * 2}
-						ry={scaleFactor * 2}
-					/>
-				{/if}
+					<!-- VIEWPORT RECTANGLE -->
+					{#if viewportRect}
+						<rect
+							x={viewportRect.x}
+							y={viewportRect.y}
+							width={viewportRect.width}
+							height={viewportRect.height}
+							fill="none"
+							class="stroke-wtr-blue"
+							stroke-width={scaleFactor * 4}
+							rx={scaleFactor * 2}
+							ry={scaleFactor * 2}
+						/>
+					{/if}
 
-				<!-- ARROW POINTING TO ACTIVE MAP -->
-				{#if arrowPaths}
-					<g out:fade={{ duration: 250 }}>
-						{#key activeHistoricMap?.id}
-							<path
-								in:draw={{ duration: 250 }}
-								fill="none"
-								stroke="#fff"
-								stroke-width={arrowPaths.strokeWidth * 1}
-								d={arrowPaths.leftArm}
-							/>
-							<path
-								in:draw={{ duration: 250 }}
-								fill="none"
-								stroke="#fff"
-								stroke-width={arrowPaths.strokeWidth * 1}
-								d={arrowPaths.rightArm}
-							/>
-						{/key}
-					</g>
-				{/if}
-			</g>
-		</svg>
-	{/if}
-</div>
+					<!-- ARROW POINTING TO ACTIVE MAP -->
+					{#if arrowPaths}
+						<g out:fade={{ duration: 250 }}>
+							{#key activeHistoricMap?.id}
+								<path
+									in:draw={{ duration: 250 }}
+									fill="none"
+									stroke="#fff"
+									stroke-width={arrowPaths.strokeWidth * 1}
+									d={arrowPaths.leftArm}
+								/>
+								<path
+									in:draw={{ duration: 250 }}
+									fill="none"
+									stroke="#fff"
+									stroke-width={arrowPaths.strokeWidth * 1}
+									d={arrowPaths.rightArm}
+								/>
+							{/key}
+						</g>
+					{/if}
+				</g>
+			</svg>
+		{/if}
+	</div>
+{/if}

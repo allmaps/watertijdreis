@@ -44,6 +44,8 @@
 	}
 
 	function goBack() {
+		mapContext.historic.selectedMap = null;
+		mapContext.historic.setSheetIndexVisibility(false);
 		currentView = "list";
 		selectedLayer = null;
 	}

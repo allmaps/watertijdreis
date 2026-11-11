@@ -75,8 +75,8 @@
 		}
 	}
 
-	let leftWidth = $state(0);
-	let rightWidth = $state(0);
+	let leftWidth = $state(79);
+	let rightWidth = $state(130);
 	const measured = $derived(leftWidth > 0 && rightWidth > 0);
 
 	function slideFade(node: Element, params: SlideParams & FadeParams = {}) {
