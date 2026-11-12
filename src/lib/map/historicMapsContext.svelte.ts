@@ -29,6 +29,15 @@ const SERIES_CONFIG: HistoricMapSeriesOptions[] = [
 			url: "./von-frijtag-drabbe.json",
 		},
 	},
+	{
+		id: "rk",
+		name: "Rivierkaart",
+		themeColor: "#44aaff",
+		source: {
+			kind: "annotation",
+			url: "./rivierkaart-tweede-herziening.json",
+		},
+	},
 ];
 
 const DEFAULT_FILTER: Filter = {
@@ -165,11 +174,8 @@ export class HistoricMapsContext {
 
 	#applyDevDefaults() {
 		const wsk = this.series.find((s) => s.id === "wsk");
-		const rk = this.series.find((s) => s.id === "rk");
 
 		setTimeout(() => {
-			rk?.warpedMapLayer.setMapOptions("bccf023752ff6f99", { colorize: true, colorizeColor: "#00ff44" });
-			rk?.warpedMapLayer.setMapOptions("fb8c7f459549c582", { colorize: true, colorizeColor: "#00ff44" });
 			if (wsk) {
 				wsk.filter.edition = 5;
 				wsk.filter.yearEnd = 2000;
