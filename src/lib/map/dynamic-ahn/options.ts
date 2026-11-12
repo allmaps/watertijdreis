@@ -1,6 +1,6 @@
 export const blendModes = ["normal", "multiply", "screen", "plus-lighter"] as const;
 export type BlendMode = (typeof blendModes)[number];
-export const mappingModes = ["linear", "mean", "equalized"] as const;
+export const mappingModes = ["linear", "mean", "equalized", "extremes"] as const;
 export type MappingMode = (typeof mappingModes)[number];
 
 export interface AhnOptions {

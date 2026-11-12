@@ -8,7 +8,7 @@ export type HeightScale = {
 	knots?: ScaleKnot[];
 };
 
-// Shared percentile positions preserve monotonicity during view/mode transitions.
+// Shared palette positions preserve monotonicity during view/mode transitions.
 // Include the old tail anchors so legacy mappings remain exact.
 export const scalePositions = [...Array.from({ length: 129 }, (_, i) => (100 * i) / 128), 5, 95].sort((a, b) => a - b);
 export const maxScaleKnots = scalePositions.length;
@@ -49,7 +49,7 @@ export function heightAtPosition(position: number, scale: HeightScale): number {
 	return scale.high;
 }
 
-/** Invert the quantile curve; equal heights share a color, with the median at 50. */
+/** Invert the distribution curve; equal heights share a color, with the center at 50. */
 export function positionAtHeight(height: number, scale: HeightScale): number {
 	if (height === scale.center) return 50;
 	const knots = scaleKnots(scale);

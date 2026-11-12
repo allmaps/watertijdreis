@@ -33,34 +33,71 @@ it("distinguishes numerical midpoint, arithmetic mean and distribution median", 
 	expect(() => validateScale(equalized)).not.toThrow();
 });
 
-it("keeps flat and repeated heights finite and deterministic, without treating missing samples as zero", () => {
-	for (const data of [
-		new Float32Array(100).fill(-3),
-		Float32Array.from({ length: 100 }, (_, i) => (i < 80 ? 0 : i < 90 ? -5 : 20)),
-	]) {
-		const scale = measure(data, "equalized");
-		expect(positionAtHeight(scale.center, scale)).toBe(50);
-		expect(() => validateScale(scale)).not.toThrow();
-		let previous = -Infinity;
-		for (let i = 0; i <= 200; i++) {
-			const p = positionAtHeight(scale.low + ((scale.high - scale.low) * i) / 200, scale);
-			expect(Number.isFinite(p)).toBe(true);
-			expect(p).toBeGreaterThanOrEqual(previous);
-			previous = p;
-		}
-	}
-	expect(
-		measure(
-			Float32Array.from({ length: 100 }, (_, i) => (i < 50 ? NaN : 8)),
-			"equalized"
-		).center
-	).toBe(8);
-	expect(measure(new Float32Array(100).fill(NaN), "equalized")).toBeNull();
+it("concentrates contrast in the tails while keeping the median and endpoints", () => {
+	const equalized = measure(values, "equalized"),
+		extremes = measure(values, "extremes");
+	expect([extremes.low, extremes.center, extremes.high]).toEqual([equalized.low, equalized.center, equalized.high]);
+	// The middle half of measurements uses only 12.5% of the palette, close to neutral.
+	const lower = heightAtPosition(25, equalized),
+		upper = heightAtPosition(75, equalized);
+	expect(positionAtHeight(lower, extremes)).toBeCloseTo(43.75);
+	expect(positionAtHeight(upper, extremes)).toBeCloseTo(56.25);
+	expect(positionAtHeight(heightAtPosition(10, equalized), extremes)).toBeGreaterThan(20);
+	expect(100 - positionAtHeight(heightAtPosition(90, equalized), extremes)).toBeGreaterThan(20);
+	expect(positionAtHeight(extremes.center, extremes)).toBe(50);
+	expect(() => validateScale(extremes)).not.toThrow();
 });
 
-it("preserves monotone mappings and the median while animating across modes and distributions", () => {
-	const a = measure(values, "linear"),
-		b = measure(values, "equalized");
+it("supports explicit percentile clipping in extremes mode without moving the median", () => {
+	const clipped = viewportScale(values, 10, 10, [0, 0, 1, 1], {
+		...defaults,
+		mappingMode: "extremes",
+		scaleMode: "percentile",
+	})!;
+	const full = measure(values, "extremes");
+	expect(clipped.low).toBeGreaterThan(full.low);
+	expect(clipped.high).toBeLessThan(full.high);
+	expect(clipped.center).toBe(full.center);
+	expect(() => validateScale(clipped)).not.toThrow();
+});
+
+it.each(["equalized", "extremes"] as const)(
+	"keeps %s finite with flat/repeated heights and missing samples",
+	(mode) => {
+		for (const data of [
+			new Float32Array(100).fill(-3),
+			Float32Array.from({ length: 100 }, (_, i) => (i < 80 ? 0 : i < 90 ? -5 : 20)),
+		]) {
+			const scale = measure(data, mode);
+			expect(positionAtHeight(scale.center, scale)).toBe(50);
+			expect(() => validateScale(scale)).not.toThrow();
+			let previous = -Infinity;
+			for (let i = 0; i <= 200; i++) {
+				const p = positionAtHeight(scale.low + ((scale.high - scale.low) * i) / 200, scale);
+				expect(Number.isFinite(p)).toBe(true);
+				expect(p).toBeGreaterThanOrEqual(previous);
+				previous = p;
+			}
+		}
+		expect(
+			measure(
+				Float32Array.from({ length: 100 }, (_, i) => (i < 50 ? NaN : 8)),
+				mode
+			).center
+		).toBe(8);
+		expect(measure(new Float32Array(100).fill(NaN), mode)).toBeNull();
+	}
+);
+
+it.each([
+	["linear", "equalized"],
+	["linear", "extremes"],
+	["mean", "extremes"],
+	["equalized", "extremes"],
+	["extremes", "equalized"],
+] as const)("preserves monotone mappings while animating from %s to %s", (from, to) => {
+	const a = measure(values, from),
+		b = measure(values, to);
 	for (const t of [0, 0.1, 0.5, 0.9, 1]) {
 		const scale = interpolateScale(a, b, t);
 		expect(() => validateScale(scale)).not.toThrow();
@@ -73,8 +110,8 @@ it("preserves monotone mappings and the median while animating across modes and 
 	expect(interpolateScale(b, a, 1)).toEqual(a);
 });
 
-it("stretches every percentile to manual endpoints and deep-copies curve snapshots", () => {
-	const original = measure(values, "equalized"),
+it.each(["equalized", "extremes"] as const)("stretches %s to manual endpoints and deep-copies snapshots", (mode) => {
+	const original = measure(values, mode),
 		scale = rescaleRange(original, -10, 90);
 	for (const p of [0, 10, 50, 90, 100])
 		expect(heightAtPosition(p, scale)).toBeCloseTo(-10 + (100 * heightAtPosition(p, original)) / original.high);
@@ -88,6 +125,7 @@ it("stretches every percentile to manual endpoints and deep-copies curve snapsho
 it("defaults to adaptive contrast and validates explicit mapping modes", () => {
 	expect(defaults.mappingMode).toBe("equalized");
 	expect(withOptions(defaults, { mappingMode: "linear" }).mappingMode).toBe("linear");
+	expect(withOptions(defaults, { mappingMode: "extremes" }).mappingMode).toBe("extremes");
 	expect(() => withOptions(defaults, { mappingMode: "invalid" as MappingMode })).toThrow(RangeError);
 });
 

@@ -252,37 +252,40 @@ it("freezes the full distribution and detects changes even when the low/center/h
 	layer.onRemove();
 });
 
-it("locks midway through an equalized transition and resumes without losing the curve", () => {
-	let now = 0;
-	vi.spyOn(performance, "now").mockImplementation(() => now);
-	const { layer, reply, render } = mount({ mappingMode: "equalized" });
-	vi.stubGlobal("matchMedia", () => ({ matches: false }));
-	const make = (power: number) =>
-		viewportScale(
-			Float32Array.from({ length: 100 }, (_, i) => i ** power),
-			10,
-			10,
-			[0, 0, 1, 1],
-			{ ...defaults, mappingMode: "equalized" }
-		)!;
-	reply({ scale: make(1) });
-	const target = make(2);
-	reply({ scale: target, atlas: undefined });
-	now = 325;
-	render();
-	const midway = layer.getScale();
-	layer.lockScale();
-	now = 1000;
-	render();
-	expect(layer.getScale()).toEqual(midway);
-	layer.unlockScale();
-	render();
-	expect(layer.getScale()).toEqual(midway);
-	now = 1650;
-	render();
-	expect(layer.getScale()).toEqual(target);
-	layer.onRemove();
-});
+it.each(["equalized", "extremes"] as const)(
+	"locks midway through a %s transition and resumes its curve",
+	(mappingMode) => {
+		let now = 0;
+		vi.spyOn(performance, "now").mockImplementation(() => now);
+		const { layer, reply, render } = mount({ mappingMode });
+		vi.stubGlobal("matchMedia", () => ({ matches: false }));
+		const make = (power: number) =>
+			viewportScale(
+				Float32Array.from({ length: 100 }, (_, i) => i ** power),
+				10,
+				10,
+				[0, 0, 1, 1],
+				{ ...defaults, mappingMode }
+			)!;
+		reply({ scale: make(1) });
+		const target = make(2);
+		reply({ scale: target, atlas: undefined });
+		now = 325;
+		render();
+		const midway = layer.getScale();
+		layer.lockScale();
+		now = 1000;
+		render();
+		expect(layer.getScale()).toEqual(midway);
+		layer.unlockScale();
+		render();
+		expect(layer.getScale()).toEqual(midway);
+		now = 1650;
+		render();
+		expect(layer.getScale()).toEqual(target);
+		layer.onRemove();
+	}
+);
 
 it("publishes detached live statistics while the scale is locked, ignoring stale results and clearing on NoData", () => {
 	const onStatistics = vi.fn();

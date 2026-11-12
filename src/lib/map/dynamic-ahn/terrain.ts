@@ -95,17 +95,19 @@ export function analyzeViewport(
 		const retained = values.filter((h) => h >= lo && h <= hi);
 		mean = retained.length ? retained.reduce((sum, h) => sum + h, 0) / retained.length : (lo + hi) / 2;
 	}
-	const center = mapping === "linear" ? (lo + hi) / 2 : mapping === "equalized" ? p(0.5) : mean;
+	const center = mapping === "linear" ? (lo + hi) / 2 : mapping === "mean" ? mean : p(0.5);
 	const scale: HeightScale = { low: Math.min(lo, center - 0.05), center, high: Math.max(hi, center + 0.05) };
-	if (mapping === "equalized") {
-		// Sample the inverse CDF at fixed percentiles. Retain repeated heights:
+	if (mapping === "equalized" || mapping === "extremes") {
+		// Sample the inverse CDF at shared palette positions. Retain repeated heights:
 		// flat terrain must not acquire fabricated variation or divide by zero.
 		const from = options.scaleMode === "percentile" ? q : 0;
 		const to = options.scaleMode === "percentile" ? 1 - q : 1;
-		scale.knots = scalePositions.map((position) => [
-			position === 0 ? scale.low : position === 100 ? scale.high : p(from + (position / 100) * (to - from)),
-			position,
-		]);
+		scale.knots = scalePositions.map((position) => {
+			// Extremes maps rank r to 50 + 50*(2*r - 1)^3: flatten the middle,
+			// expand both tails. Invert that curve to find the height at each color.
+			const rank = mapping === "extremes" ? (1 + Math.cbrt(position / 50 - 1)) / 2 : position / 100;
+			return [position === 0 ? scale.low : position === 100 ? scale.high : p(from + rank * (to - from)), position];
+		});
 	} else if (mapping === "mean" && options.scaleMode === "trim") {
 		const lower = p(q),
 			upper = p(1 - q);

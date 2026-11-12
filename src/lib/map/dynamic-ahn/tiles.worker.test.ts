@@ -102,6 +102,21 @@ it("toggles gap estimates on resident tiles without including them in scale stat
 	expect(replies.at(-1)!.atlas!.heights[middle]).toBe(100);
 	expect(replies.at(-1)!.scale).toEqual(distribution);
 	expect(replies.at(-1)!.statistics).toEqual(first.statistics);
+	worker.onmessage({
+		data: {
+			id: 7,
+			zoom: 13,
+			rect,
+			preview: true,
+			shownKey: replies.at(-1)!.atlas!.key,
+			options: withOptions(defaults, { fillGaps: true, mappingMode: "extremes" }),
+		},
+	});
+	expect(replies.at(-1)!.scale!.knots).toHaveLength(131);
+	expect(replies.at(-1)!.scale!.center).toBe(distribution!.center);
+	expect(replies.at(-1)!.scale!.knots).not.toEqual(distribution!.knots);
+	expect(replies.at(-1)!.statistics).toEqual(first.statistics);
+	expect(replies.at(-1)!.atlas).toBeUndefined();
 	expect(readTile).toHaveBeenCalledTimes(1);
 });
 
