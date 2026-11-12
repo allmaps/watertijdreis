@@ -129,7 +129,6 @@ export class HistoricMapSeries extends MapLayer {
 
 		map.addLayer(this.warpedMapLayer);
 		this.warpedMapLayer.setLayerOptions({ visible: false });
-		this.warpedMapLayer.getWarpedMapList().options.animatedOptions.push("opacity");
 
 		this.#addOutlineLayers(map);
 		map.on("maptilesloadedfromsprites", this.#onSpritesLoaded);
@@ -205,7 +204,8 @@ export class HistoricMapSeries extends MapLayer {
 	}
 
 	protected applyOpacity(opacity: number) {
-		this.warpedMapLayer.setLayerOptions({ opacity });
+		// Bypass Allmaps' opacity animation path so slider changes trigger a redraw.
+		this.warpedMapLayer.setLayerOptions({ opacity }, { animate: false });
 	}
 
 	#syncOutlineVisibility() {
