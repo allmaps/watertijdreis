@@ -141,6 +141,13 @@ it("simplifies outliers to one clipping setting for linear and mean, with no ine
 	expect(screen.getByRole("combobox", { name: "Uitschieters" })).toHaveValue("2");
 	await fireEvent.change(mapping, { target: { value: "equalized" } });
 	expect(screen.queryByRole("combobox", { name: "Uitschieters" })).not.toBeInTheDocument();
+	await fireEvent.change(mapping, { target: { value: "extremes" } });
+	expect(layer.mappingMode).toBe("extremes");
+	expect(screen.getByRole("option", { name: "Extremen benadrukken" })).toBeInTheDocument();
+	expect(screen.queryByRole("combobox", { name: "Uitschieters" })).not.toBeInTheDocument();
+	expect(screen.getByText(/blijven behouden om de uitersten zichtbaar/)).toBeInTheDocument();
+	await fireEvent.change(mapping, { target: { value: "mean" } });
+	expect(screen.getByRole("combobox", { name: "Uitschieters" })).toHaveValue("2");
 });
 
 it("rounds editable values to centimetres, places the input before the description, and edits the center", async () => {

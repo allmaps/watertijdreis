@@ -4,7 +4,7 @@
 
 The main panel shows visibility, grayscale, palette/reverse, cursor height and the PDOK source link. The histogram/range controls, lock icon, mapping, outliers and blending live in a collapsed advanced section. Defaults are cyan–transparent–magenta, adaptive contrast, multiply blending and 75% opacity. Presets and reversing change colors without unlocking or rescaling heights.
 
-Switching to linear or mean starts with 2% clipping per side. The clipping control can then select none or 0.5%, 1%, 2%, 5% or 10%. Adaptive contrast uses full extent without additional outlier controls because rare heights already occupy little palette space. Mapping and outlier controls are disabled while locked; the measured histogram remains live.
+Switching to linear or mean starts with 2% clipping per side. The clipping control can then select none or 0.5%, 1%, 2%, 5% or 10%. Adaptive contrast uses full extent without additional outlier controls because rare heights already occupy little palette space. “Extremen benadrukken” also retains the full extent, concentrating contrast in the low/high tails while keeping the middle half of measured heights close to the middle color. Its midpoint follows the median, so transparent-center palettes suppress common elevations. Mapping and outlier controls are disabled while locked; the measured histogram remains live.
 
 `AhnRangeLegend.svelte` aligns the full-width histogram and gradient on the displayed color scale's metre bounds. Automatically chosen end handles stay at 0% and 100% while panning or interpolating; independently arriving measured extrema cannot move them. Histogram bins outside these bounds are clipped. Counts use a linear vertical scale with gridlines, a peak percentage and metre labels.
 

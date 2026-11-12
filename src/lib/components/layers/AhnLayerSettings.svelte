@@ -8,7 +8,7 @@
 	let advanced = $state(false);
 	function setMapping(mode: MappingMode) {
 		layer.mappingMode = mode;
-		if (mode !== "equalized") {
+		if (mode === "linear" || mode === "mean") {
 			layer.scaleMode = "percentile";
 			layer.outlierPercentile = 2;
 		}
@@ -80,6 +80,7 @@
 							<option value="linear">Lineair</option><option value="mean">Rond het gemiddelde</option><option
 								value="equalized">Adaptief contrast</option
 							>
+							<option value="extremes">Extremen benadrukken</option>
 						</select>
 					</label>
 					<p class="text-[11px] text-white/65">
@@ -88,6 +89,8 @@
 						{:else if layer.mappingMode === "linear"}Gelijke hoogteverschillen krijgen evenveel kleurruimte.
 						{:else if layer.mappingMode === "mean"}Elke kant van de gemiddelde hoogte krijgt de helft van het
 							kleurverloop.
+						{:else if layer.mappingMode === "extremes"}Hoogtes rond de mediaan blijven dicht bij de middenkleur. Lage en
+							hoge uitersten krijgen meer contrast.
 						{:else}Veelvoorkomende hoogtes krijgen meer kleurverschil. De middenkleur volgt de mediaan.{/if}
 					</p>
 				</div>
@@ -96,6 +99,11 @@
 						<p class="text-[11px] text-white/65">
 							<span class="font-semibold text-white/90">Uitschieters</span> krijgen bij adaptief contrast vanzelf weinig
 							kleurruimte.
+						</p>
+					{:else if layer.mappingMode === "extremes"}
+						<p class="text-[11px] text-white/65">
+							<span class="font-semibold text-white/90">Uitschieters</span> blijven behouden om de uitersten zichtbaar te
+							maken.
 						</p>
 					{:else}
 						<label class="flex items-center justify-between gap-3"

@@ -56,7 +56,7 @@ export class AhnMapLayer extends MapLayer {
 				this.#ahn.setOptions({
 					blendMode: this.blendMode,
 					mappingMode: this.mappingMode,
-					scaleMode: this.mappingMode === "equalized" ? "extent" : this.scaleMode,
+					scaleMode: ["equalized", "extremes"].includes(this.mappingMode) ? "extent" : this.scaleMode,
 					outlierPercentile: this.outlierPercentile,
 				});
 			});
